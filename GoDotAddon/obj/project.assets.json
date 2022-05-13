@@ -1,0 +1,148 @@
+{
+  "version": 3,
+  "targets": {
+    "net6.0": {
+      "CliFx/2.2.5": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/CliFx.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.1/CliFx.dll": {}
+        }
+      },
+      "System.IO.Abstractions/17.0.10": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/System.IO.Abstractions.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0/System.IO.Abstractions.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "CliFx/2.2.5": {
+      "sha512": "OzdNKf2bOVV1JiyYAzgYeLTJ5tChlFymie71BdNkOLP1Y3BpARCZkO6TAN2wie4LI+UIFx3k55Il/2L8XiBpug==",
+      "type": "package",
+      "path": "clifx/2.2.5",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Readme.md",
+        "analyzers/dotnet/cs/CliFx.Analyzers.dll",
+        "analyzers/dotnet/cs/System.Buffers.dll",
+        "analyzers/dotnet/cs/System.Collections.Immutable.dll",
+        "analyzers/dotnet/cs/System.Memory.dll",
+        "analyzers/dotnet/cs/System.Numerics.Vectors.dll",
+        "analyzers/dotnet/cs/System.Reflection.Metadata.dll",
+        "analyzers/dotnet/cs/System.Runtime.CompilerServices.Unsafe.dll",
+        "analyzers/dotnet/cs/System.Text.Encoding.CodePages.dll",
+        "analyzers/dotnet/cs/System.Threading.Tasks.Extensions.dll",
+        "clifx.2.2.5.nupkg.sha512",
+        "clifx.nuspec",
+        "favicon.png",
+        "lib/netstandard2.0/CliFx.dll",
+        "lib/netstandard2.0/CliFx.xml",
+        "lib/netstandard2.1/CliFx.dll",
+        "lib/netstandard2.1/CliFx.xml"
+      ]
+    },
+    "System.IO.Abstractions/17.0.10": {
+      "sha512": "pXhKp+rE17muzrBy1MfL2Y4gPskkmiHN0VHy67gcdH3xxa8dbbiVIQkpHGh6dbtcmh7C0FsnHjww4N+Y29yNJg==",
+      "type": "package",
+      "path": "system.io.abstractions/17.0.10",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon_256x256.png",
+        "lib/net461/System.IO.Abstractions.dll",
+        "lib/net461/System.IO.Abstractions.xml",
+        "lib/net5.0/System.IO.Abstractions.dll",
+        "lib/net5.0/System.IO.Abstractions.xml",
+        "lib/net6.0/System.IO.Abstractions.dll",
+        "lib/net6.0/System.IO.Abstractions.xml",
+        "lib/netstandard2.0/System.IO.Abstractions.dll",
+        "lib/netstandard2.0/System.IO.Abstractions.xml",
+        "lib/netstandard2.1/System.IO.Abstractions.dll",
+        "lib/netstandard2.1/System.IO.Abstractions.xml",
+        "system.io.abstractions.17.0.10.nupkg.sha512",
+        "system.io.abstractions.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net6.0": [
+      "CliFx >= 2.2.5",
+      "System.IO.Abstractions >= 17.0.10"
+    ]
+  },
+  "packageFolders": {
+    "/Users/joanna/.nuget/packages/": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/Chickensoft.GoDotAddon.csproj",
+      "projectName": "Chickensoft.GoDotAddon",
+      "projectPath": "/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/Chickensoft.GoDotAddon.csproj",
+      "packagesPath": "/Users/joanna/.nuget/packages/",
+      "outputPath": "/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/",
+      "projectStyle": "PackageReference",
+      "crossTargeting": true,
+      "configFilePaths": [
+        "/Users/joanna/.nuget/NuGet/NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net6.0"
+      ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "net6.0": {
+        "targetAlias": "net6.0",
+        "dependencies": {
+          "CliFx": {
+            "target": "Package",
+            "version": "[2.2.5, )"
+          },
+          "System.IO.Abstractions": {
+            "target": "Package",
+            "version": "[17.0.10, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.202/RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

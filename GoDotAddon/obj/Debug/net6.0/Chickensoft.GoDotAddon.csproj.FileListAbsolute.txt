@@ -1,0 +1,17 @@
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/bin/Debug/net6.0/Chickensoft.GoDotAddon
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/bin/Debug/net6.0/Chickensoft.GoDotAddon.deps.json
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/bin/Debug/net6.0/Chickensoft.GoDotAddon.runtimeconfig.json
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/bin/Debug/net6.0/Chickensoft.GoDotAddon.dll
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/bin/Debug/net6.0/Chickensoft.GoDotAddon.pdb
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net6.0/Chickensoft.GoDotAddon.csproj.AssemblyReference.cache
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net6.0/Chickensoft.GoDotAddon.GeneratedMSBuildEditorConfig.editorconfig
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net6.0/Chickensoft.GoDotAddon.AssemblyInfoInputs.cache
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net6.0/Chickensoft.GoDotAddon.AssemblyInfo.cs
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net6.0/Chickensoft.GoDotAddon.csproj.CoreCompileInputs.cache
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net6.0/Chickensoft.GoDotAddon.csproj.CopyComplete
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net6.0/Chickensoft.GoDotAddon.dll
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net6.0/refint/Chickensoft.GoDotAddon.dll
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net6.0/Chickensoft.GoDotAddon.pdb
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net6.0/Chickensoft.GoDotAddon.genruntimeconfig.cache
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net6.0/ref/Chickensoft.GoDotAddon.dll
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/bin/Debug/net6.0/CliFx.dll

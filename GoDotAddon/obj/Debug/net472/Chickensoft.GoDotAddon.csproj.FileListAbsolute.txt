@@ -1,0 +1,6 @@
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net472/Chickensoft.GoDotAddon.csproj.AssemblyReference.cache
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net472/Chickensoft.GoDotAddon.csproj.SuggestedBindingRedirects.cache
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net472/Chickensoft.GoDotAddon.GeneratedMSBuildEditorConfig.editorconfig
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net472/Chickensoft.GoDotAddon.AssemblyInfoInputs.cache
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net472/Chickensoft.GoDotAddon.AssemblyInfo.cs
+/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/obj/Debug/net472/Chickensoft.GoDotAddon.csproj.CoreCompileInputs.cache

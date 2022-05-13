@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <LanguageVersion>latest</LanguageVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CliFx" Version="2.2.5" />
+    <PackageReference Include="System.IO.Abstractions" Version="17.0.10" />
+  </ItemGroup>
+</Project>

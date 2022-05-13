@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug GoDotAddon CLI",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/GoDotAddon/bin/Debug/net6.0/Chickensoft.GoDotAddon.dll",
+      "args": [
+        "${input:args}"
+      ],
+      "cwd": "${workspaceFolder}/GoDotAddon",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": ".NET Core Attach",
+      "type": "coreclr",
+      "request": "attach"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "args",
+      "description": "Command line args for CLI program",
+      "default": "",
+      "type": "promptString"
+    }
+  ]
+}

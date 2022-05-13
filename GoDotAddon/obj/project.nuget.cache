@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "ZHcjjn3OY3pRscOepTgix9mQx4oBYxXCGD7aJGNhDa3vP9mcPg3Onnr5YOphp+bynp3hCpj/Ku0uWXCKsZr0XA==",
+  "success": true,
+  "projectFilePath": "/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/Chickensoft.GoDotAddon.csproj",
+  "expectedPackageFiles": [
+    "/Users/joanna/.nuget/packages/clifx/2.2.5/clifx.2.2.5.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/system.io.abstractions/17.0.10/system.io.abstractions.17.0.10.nupkg.sha512"
+  ],
+  "logs": []
+}
