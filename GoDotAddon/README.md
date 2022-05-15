@@ -1,6 +1,8 @@
 # GoDotAddon
 
-Addon manager for Godot, written in C#. Uses a flat dependency graph, like the [tools of old][bower]. Provided as a `dotnet` tool for .NET 5 or 6 that can be run from the command line. Relies on a local installation of git.
+Command-line addon manager for Godot, written in C# and supplied as a dotnet tool for .NET 5 or 6. Uses a flat dependency graph and the system git installation to download and install dependencies from git url's.
+
+Inspired by the [tools of old][bower].
 
 ## Installation
 
