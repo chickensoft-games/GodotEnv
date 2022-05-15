@@ -1,11 +1,20 @@
 {
   "version": 2,
-  "dgSpecHash": "ZHcjjn3OY3pRscOepTgix9mQx4oBYxXCGD7aJGNhDa3vP9mcPg3Onnr5YOphp+bynp3hCpj/Ku0uWXCKsZr0XA==",
+  "dgSpecHash": "chWXcfw/uIclw/buFkkL6C8+BnS9b6AftsgDLZ1fdUe8LKDotsPlHfIvEPhSp00fHHeaTO9ZkYrfQkdALH//kw==",
   "success": true,
   "projectFilePath": "/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon/Chickensoft.GoDotAddon.csproj",
   "expectedPackageFiles": [
     "/Users/joanna/.nuget/packages/clifx/2.2.5/clifx.2.2.5.nupkg.sha512",
-    "/Users/joanna/.nuget/packages/system.io.abstractions/17.0.10/system.io.abstractions.17.0.10.nupkg.sha512"
+    "/Users/joanna/.nuget/packages/medallionshell/1.6.2/medallionshell.1.6.2.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/microsoft.netcore.platforms/5.0.0/microsoft.netcore.platforms.5.0.0.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/newtonsoft.json/13.0.1/newtonsoft.json.13.0.1.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/system.io.abstractions/17.0.10/system.io.abstractions.17.0.10.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/system.io.filesystem.accesscontrol/5.0.0/system.io.filesystem.accesscontrol.5.0.0.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/system.security.accesscontrol/5.0.0/system.security.accesscontrol.5.0.0.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/system.security.principal.windows/5.0.0/system.security.principal.windows.5.0.0.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/microsoft.netcore.app.ref/5.0.0/microsoft.netcore.app.ref.5.0.0.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/microsoft.aspnetcore.app.ref/5.0.0/microsoft.aspnetcore.app.ref.5.0.0.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/microsoft.netcore.app.host.osx-x64/5.0.16/microsoft.netcore.app.host.osx-x64.5.0.16.nupkg.sha512"
   ],
   "logs": []
 }

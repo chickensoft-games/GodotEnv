@@ -18,12 +18,17 @@
           "/Users/joanna/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
+          "net5.0",
           "net6.0"
         ],
         "sources": {
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          },
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {}
@@ -36,12 +41,71 @@
         }
       },
       "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "CliFx": {
+              "target": "Package",
+              "version": "[2.2.5, )"
+            },
+            "MedallionShell": {
+              "target": "Package",
+              "version": "[1.6.2, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "System.IO.Abstractions": {
+              "target": "Package",
+              "version": "[17.0.10, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[5.0.0, 5.0.0]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.osx-x64",
+              "version": "[5.0.16, 5.0.16]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[5.0.0, 5.0.0]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.202/RuntimeIdentifierGraph.json"
+        },
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
             "CliFx": {
               "target": "Package",
               "version": "[2.2.5, )"
+            },
+            "MedallionShell": {
+              "target": "Package",
+              "version": "[1.6.2, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
             },
             "System.IO.Abstractions": {
               "target": "Package",
