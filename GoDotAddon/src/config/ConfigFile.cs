@@ -4,50 +4,29 @@ namespace GoDotAddon {
   /// <summary>
   /// Represents an addons.json file.
   /// </summary>
-  public class ConfigFile {
+  public record ConfigFile {
     [JsonProperty("addons")]
     public Dictionary<string, AddonConfig> Addons { get; init; }
     [JsonProperty("cache")]
-    public string CacheDir { get; init; }
+    public string CachePath { get; init; }
     [JsonProperty("path")]
-    public string Path { get; init; }
+    public string AddonsPath { get; init; }
 
     [JsonConstructor]
     public ConfigFile(
       Dictionary<string, AddonConfig>? addons,
-      string? cacheDir,
-      string? path
+      string? cachePath,
+      string? addonsPath
     ) {
       Addons = addons ?? new();
-      CacheDir = cacheDir ?? IApp.DEFAULT_CACHE_DIR;
-      Path = path ?? IApp.DEFAULT_PATH_DIR;
+      CachePath = cachePath ?? IApp.DEFAULT_CACHE_DIR;
+      AddonsPath = addonsPath ?? IApp.DEFAULT_PATH_DIR;
     }
 
-    public Config ToConfig() => new(
-      WorkingDir: Info.App.WorkingDir, CacheDir: CacheDir, Path: Path
+    public Config ToConfig(string workingDir) => new(
+      WorkingDir: workingDir,
+      CachePath: Path.Combine(workingDir, CachePath),
+      AddonsPath: Path.Combine(workingDir, AddonsPath)
     );
-  }
-
-  public record AddonConfig {
-    [JsonProperty("url")]
-    public string? Url { get; init; }
-    [JsonProperty("subfolder")]
-    public string Subfolder { get; init; } = IApp.DEFAULT_SUBFOLDER;
-    [JsonProperty("checkout")]
-    public string Checkout { get; init; } = IApp.DEFAULT_CHECKOUT;
-
-    [JsonConstructor]
-    public AddonConfig(
-      string? url,
-      string? subfolder,
-      string? checkout
-    ) {
-      Url = url;
-      Subfolder = subfolder ?? IApp.DEFAULT_SUBFOLDER;
-      Checkout = checkout ?? IApp.DEFAULT_CHECKOUT;
-    }
-
-    [JsonIgnore]
-    public bool IsValid => Url != null;
   }
 }

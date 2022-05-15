@@ -2,32 +2,32 @@ namespace GoDotAddon {
   using System.IO.Abstractions;
   using CliFx.Exceptions;
 
-  public interface IProvisionRepo {
+  public interface IAddonRepo {
     Task InstallAddon(RequiredAddon addon, Config config, bool force);
   }
 
-  public class ProvisionRepo : IProvisionRepo {
+  public class AddonRepo : IAddonRepo {
     private readonly IApp _app;
     private readonly FileSystem _fs;
 
-    public ProvisionRepo(IApp app) {
+    public AddonRepo(IApp app) {
       _app = app;
       _fs = app.FS;
     }
 
     private async Task CacheAddon(
-      RequiredAddon addon, string cacheDir
+      RequiredAddon addon, string cachePath
     ) {
       // makes sure we have a clone of the addon in the .addons cache directory.
-      var cachedAddonDir = Path.Combine(addon.Name, cacheDir);
+      var cachedAddonDir = Path.Combine(addon.Name, cachePath);
       if (!_fs.Directory.Exists(cachedAddonDir)) {
         await _app.CreateShell(
-          cacheDir
+          cachePath
         ).Run("git", "clone", "--recurse-submodule", addon.Url, addon.Name);
       }
       // Folder for addon already exists. Make sure we checkout the
       // appropriate ref and make sure it's up to date.
-      await _app.CreateShell(cacheDir).Run("git", "checkout", addon.Checkout);
+      await _app.CreateShell(cachePath).Run("git", "checkout", addon.Checkout);
       // If we're on a tag or something that isn't a branch, this will fail.
       // We don't care in that situation, so ignore the error.
       // If we did specify a branch, this will make sure the branch is
@@ -65,12 +65,9 @@ namespace GoDotAddon {
     }
 
     // installs the addon from the
-    private async Task InstallRequiredAddon(
-      RequiredAddon addon, string cacheDir, string workingDir, string addonDir
+    private async Task CopyAddonFromCacheToDestination(
+      string workingDir, string cachedAddonDir, string addonDir
     ) {
-      var cachedAddonDir = Path.Combine(
-        cacheDir, addon.Name, addon.Subfolder
-      );
       // copy addon from cache to installation location
       var addonShell = _app.CreateShell(workingDir);
       await addonShell.Run(
@@ -94,18 +91,18 @@ namespace GoDotAddon {
     public async Task InstallAddon(
       RequiredAddon addon, Config config, bool force
     ) {
-      var addonsPath = Path.Combine(config.WorkingDir, config.Path);
-      var cacheDir = Path.Combine(config.WorkingDir, config.CacheDir);
-      var addonDir = Path.Combine(addonsPath, addon.Name);
-
-      await CacheAddon(addon: addon, cacheDir: cacheDir);
-      await DeleteExistingInstalledAddon(
-        addon: addon, addonsPath: addonsPath, force: force
+      var cachedAddonDir = Path.Combine(
+        config.CachePath, addon.Name, addon.Subfolder
       );
-      await InstallRequiredAddon(
-        addon: addon,
-        cacheDir: cacheDir,
+      var addonDir = Path.Combine(config.AddonsPath, addon.Name);
+
+      await CacheAddon(addon: addon, cachePath: config.CachePath);
+      await DeleteExistingInstalledAddon(
+        addon: addon, addonsPath: config.AddonsPath, force: force
+      );
+      await CopyAddonFromCacheToDestination(
         workingDir: config.WorkingDir,
+        cachedAddonDir: cachedAddonDir,
         addonDir: addonDir
       );
     }
