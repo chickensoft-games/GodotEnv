@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "JC5rV0Vx0wVcqqNb/2Z9K4rnLXuvyIIEH6/yfuIz4UsG0YMf9NzQVuRRGfyT6LDeMHGLDpBvxvbqXkWtWWk+bQ==",
+  "dgSpecHash": "FslRwJk3lScLxCLiyQCiTqyQdtTQaJJji+yfmResMuGnUqpNv0OHoFwp4B7WRkXIfiOV5jpfU9Ur53cr3Bl1oQ==",
   "success": true,
   "projectFilePath": "/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon.Tests/Chickensoft.GoDotAddon.Tests.csproj",
   "expectedPackageFiles": [
@@ -80,7 +80,8 @@
     "/Users/joanna/.nuget/packages/system.globalization.calendars/4.3.0/system.globalization.calendars.4.3.0.nupkg.sha512",
     "/Users/joanna/.nuget/packages/system.globalization.extensions/4.3.0/system.globalization.extensions.4.3.0.nupkg.sha512",
     "/Users/joanna/.nuget/packages/system.io/4.3.0/system.io.4.3.0.nupkg.sha512",
-    "/Users/joanna/.nuget/packages/system.io.abstractions/17.0.10/system.io.abstractions.17.0.10.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/system.io.abstractions/17.0.12/system.io.abstractions.17.0.12.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/system.io.abstractions.testinghelpers/17.0.12/system.io.abstractions.testinghelpers.17.0.12.nupkg.sha512",
     "/Users/joanna/.nuget/packages/system.io.compression/4.3.0/system.io.compression.4.3.0.nupkg.sha512",
     "/Users/joanna/.nuget/packages/system.io.compression.zipfile/4.3.0/system.io.compression.zipfile.4.3.0.nupkg.sha512",
     "/Users/joanna/.nuget/packages/system.io.filesystem/4.3.0/system.io.filesystem.4.3.0.nupkg.sha512",

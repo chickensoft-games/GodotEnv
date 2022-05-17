@@ -1293,13 +1293,25 @@
           "ref/netstandard1.5/System.IO.dll": {}
         }
       },
-      "System.IO.Abstractions/17.0.10": {
+      "System.IO.Abstractions/17.0.12": {
         "type": "package",
         "compile": {
           "lib/net6.0/System.IO.Abstractions.dll": {}
         },
         "runtime": {
           "lib/net6.0/System.IO.Abstractions.dll": {}
+        }
+      },
+      "System.IO.Abstractions.TestingHelpers/17.0.12": {
+        "type": "package",
+        "dependencies": {
+          "System.IO.Abstractions": "17.0.12"
+        },
+        "compile": {
+          "lib/net6.0/System.IO.Abstractions.TestingHelpers.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0/System.IO.Abstractions.TestingHelpers.dll": {}
         }
       },
       "System.IO.Compression/4.3.0": {
@@ -5226,10 +5238,10 @@
         "system.io.nuspec"
       ]
     },
-    "System.IO.Abstractions/17.0.10": {
-      "sha512": "pXhKp+rE17muzrBy1MfL2Y4gPskkmiHN0VHy67gcdH3xxa8dbbiVIQkpHGh6dbtcmh7C0FsnHjww4N+Y29yNJg==",
+    "System.IO.Abstractions/17.0.12": {
+      "sha512": "HgkivvhQIqBv4nXEhxQJEdbmace4E/j8c7SbKYcxFWaaA6P6QN0ge0XtLNZOHXsT7aiqesaT4Ud3AFVCZd+BLg==",
       "type": "package",
-      "path": "system.io.abstractions/17.0.10",
+      "path": "system.io.abstractions/17.0.12",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -5245,8 +5257,31 @@
         "lib/netstandard2.0/System.IO.Abstractions.xml",
         "lib/netstandard2.1/System.IO.Abstractions.dll",
         "lib/netstandard2.1/System.IO.Abstractions.xml",
-        "system.io.abstractions.17.0.10.nupkg.sha512",
+        "system.io.abstractions.17.0.12.nupkg.sha512",
         "system.io.abstractions.nuspec"
+      ]
+    },
+    "System.IO.Abstractions.TestingHelpers/17.0.12": {
+      "sha512": "+GiDZkdip47ab/T4AJIO+/XoaYk2ULkgHrDPxDfBzjfmBqyqzo8+5wWZzonCGkF275+L2Nrh87QlqGOvlc6xZg==",
+      "type": "package",
+      "path": "system.io.abstractions.testinghelpers/17.0.12",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon_256x256.png",
+        "lib/net461/System.IO.Abstractions.TestingHelpers.dll",
+        "lib/net461/System.IO.Abstractions.TestingHelpers.xml",
+        "lib/net5.0/System.IO.Abstractions.TestingHelpers.dll",
+        "lib/net5.0/System.IO.Abstractions.TestingHelpers.xml",
+        "lib/net6.0/System.IO.Abstractions.TestingHelpers.dll",
+        "lib/net6.0/System.IO.Abstractions.TestingHelpers.xml",
+        "lib/netstandard2.0/System.IO.Abstractions.TestingHelpers.dll",
+        "lib/netstandard2.0/System.IO.Abstractions.TestingHelpers.xml",
+        "lib/netstandard2.1/System.IO.Abstractions.TestingHelpers.dll",
+        "lib/netstandard2.1/System.IO.Abstractions.TestingHelpers.xml",
+        "system.io.abstractions.testinghelpers.17.0.12.nupkg.sha512",
+        "system.io.abstractions.testinghelpers.nuspec"
       ]
     },
     "System.IO.Compression/4.3.0": {
@@ -8786,6 +8821,7 @@
       "Microsoft.NET.Test.Sdk >= 16.11.0",
       "Moq >= 4.18.0",
       "Shouldly >= 4.0.3",
+      "System.IO.Abstractions.TestingHelpers >= 17.0.12",
       "coverlet.collector >= 3.1.0",
       "xunit >= 2.4.1",
       "xunit.runner.visualstudio >= 2.4.3"
@@ -8843,6 +8879,10 @@
           "Shouldly": {
             "target": "Package",
             "version": "[4.0.3, )"
+          },
+          "System.IO.Abstractions.TestingHelpers": {
+            "target": "Package",
+            "version": "[17.0.12, )"
           },
           "coverlet.collector": {
             "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",

@@ -35,7 +35,7 @@ namespace GoDotAddon {
         addonsInCache.Add(name);
         // since the addon is in the cache, it shouldn't be in our list of
         // addons not in the cache.
-        addonsNotInCache.Remove(cacheDir);
+        addonsNotInCache.Remove(name);
       }
       return new Cache(
         AddonsInCache: addonsInCache,

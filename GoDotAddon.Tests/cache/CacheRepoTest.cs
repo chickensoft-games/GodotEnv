@@ -23,7 +23,7 @@ namespace Chickensoft.GoDotAddon.Tests {
       var app = new Mock<IApp>();
       var fs = new Mock<IFileSystem>();
       app.Setup(app => app.FS).Returns(fs.Object);
-      var cacheRepo = new CacheRepo(Info.App);
+      var cacheRepo = new CacheRepo(app.Object);
       var config = new Config(
         WorkingDir: WORKING_DIR,
         CachePath: CACHE_PATH,
@@ -43,7 +43,7 @@ namespace Chickensoft.GoDotAddon.Tests {
           }
         }
       );
-      var directory = new Mock<DirectoryBase>();
+      var directory = new Mock<IDirectory>();
       fs.Setup(fs => fs.Directory).Returns(directory.Object);
       directory.Setup(dir => dir.GetDirectories(CACHE_PATH)).Returns(
         new string[] { ADDON_PATH }
