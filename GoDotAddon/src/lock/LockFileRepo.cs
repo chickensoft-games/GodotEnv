@@ -8,7 +8,7 @@ namespace GoDotAddon {
   }
 
   public class LockFileRepo : ILockFileRepo {
-    private readonly FileSystem _fs;
+    private readonly IFileSystem _fs;
     private readonly IApp _app;
 
     public LockFileRepo(IApp app) {

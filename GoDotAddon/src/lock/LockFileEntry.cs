@@ -6,14 +6,11 @@ namespace GoDotAddon {
     public string Name { get; init; }
     [JsonPropertyName("checkout")]
     public string Checkout { get; init; }
-    [JsonPropertyName("main")]
-    public string Main { get; init; }
 
     [JsonConstructor]
-    public LockFileEntry(string name, string checkout, string main) {
+    public LockFileEntry(string name, string checkout) {
       Name = name;
       Checkout = checkout;
-      Main = main;
     }
   }
 }

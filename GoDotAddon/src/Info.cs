@@ -27,7 +27,7 @@ namespace GoDotAddon {
     public const string ADDONS_LOCK_FILE = "addons.lock.json";
 
     string WorkingDir { get; }
-    FileSystem FS { get; }
+    IFileSystem FS { get; }
 
     IAppShell CreateShell(string directory);
     T LoadFile<T>(string path);
@@ -35,7 +35,7 @@ namespace GoDotAddon {
 
   public class App : IApp {
     public string WorkingDir { get; } = Environment.CurrentDirectory;
-    public FileSystem FS { get; } = new FileSystem();
+    public IFileSystem FS { get; } = new FileSystem();
 
     public IAppShell CreateShell(string directory)
       => new AppShell(new Shell(

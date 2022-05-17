@@ -6,7 +6,7 @@ namespace GoDotAddon {
   }
 
   public class ConfigFileRepo : IConfigFileRepo {
-    private readonly FileSystem _fs;
+    private readonly IFileSystem _fs;
     private readonly IApp _app;
 
     public ConfigFileRepo(IApp app) {

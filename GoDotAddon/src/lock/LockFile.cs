@@ -1,7 +1,11 @@
 namespace GoDotAddon {
   using System.Text.Json.Serialization;
 
-  public record LockFile {
+  public interface ILockFile {
+    Dictionary<string, Dictionary<string, LockFileEntry>> Addons { get; init; }
+  }
+
+  public record LockFile : ILockFile {
     // [url][subfolder] = LockFileEntry
     [JsonPropertyName("addons")]
     public Dictionary<string, Dictionary<string, LockFileEntry>>

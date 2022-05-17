@@ -8,7 +8,7 @@ namespace GoDotAddon {
 
   public class AddonRepo : IAddonRepo {
     private readonly IApp _app;
-    private readonly FileSystem _fs;
+    private readonly IFileSystem _fs;
 
     public AddonRepo(IApp app) {
       _app = app;
