@@ -48,9 +48,9 @@
               "target": "Package",
               "version": "[2.2.5, )"
             },
-            "MedallionShell": {
+            "CliWrap": {
               "target": "Package",
-              "version": "[1.6.2, )"
+              "version": "[3.4.4, )"
             },
             "Newtonsoft.Json": {
               "target": "Package",
@@ -99,9 +99,9 @@
               "target": "Package",
               "version": "[2.2.5, )"
             },
-            "MedallionShell": {
+            "CliWrap": {
               "target": "Package",
-              "version": "[1.6.2, )"
+              "version": "[3.4.4, )"
             },
             "Newtonsoft.Json": {
               "target": "Package",

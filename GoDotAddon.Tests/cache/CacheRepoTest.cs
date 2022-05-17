@@ -9,7 +9,8 @@ namespace Chickensoft.GoDotAddon.Tests {
 
   public class CacheRepoTest {
     private const string ADDON_NAME = "GoDotAddon";
-    private const string ADDON_URL = "git@github.com:chickensoft-games/GoDotAddon.git";
+    private const string ADDON_URL
+      = "git@github.com:chickensoft-games/GoDotAddon.git";
     private const string SUBFOLDER = "/";
     private const string CHECKOUT = "main";
 

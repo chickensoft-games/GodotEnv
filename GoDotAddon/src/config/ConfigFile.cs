@@ -19,8 +19,8 @@ namespace GoDotAddon {
       string? addonsPath
     ) {
       Addons = addons ?? new();
-      CachePath = cachePath ?? IApp.DEFAULT_CACHE_DIR;
-      AddonsPath = addonsPath ?? IApp.DEFAULT_PATH_DIR;
+      CachePath = cachePath ?? IApp.DEFAULT_CACHE_PATH;
+      AddonsPath = addonsPath ?? IApp.DEFAULT_ADDONS_PATH;
     }
 
     public Config ToConfig(string workingDir) => new(

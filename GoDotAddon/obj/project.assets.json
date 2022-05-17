@@ -11,13 +11,13 @@
           "lib/netstandard2.1/CliFx.dll": {}
         }
       },
-      "MedallionShell/1.6.2": {
+      "CliWrap/3.4.4": {
         "type": "package",
         "compile": {
-          "lib/netstandard2.0/MedallionShell.dll": {}
+          "lib/netcoreapp3.0/CliWrap.dll": {}
         },
         "runtime": {
-          "lib/netstandard2.0/MedallionShell.dll": {}
+          "lib/netcoreapp3.0/CliWrap.dll": {}
         }
       },
       "Microsoft.NETCore.Platforms/5.0.0": {
@@ -118,13 +118,13 @@
           "lib/netstandard2.1/CliFx.dll": {}
         }
       },
-      "MedallionShell/1.6.2": {
+      "CliWrap/3.4.4": {
         "type": "package",
         "compile": {
-          "lib/netstandard2.0/MedallionShell.dll": {}
+          "lib/netcoreapp3.0/CliWrap.dll": {}
         },
         "runtime": {
-          "lib/netstandard2.0/MedallionShell.dll": {}
+          "lib/netcoreapp3.0/CliWrap.dll": {}
         }
       },
       "Newtonsoft.Json/13.0.1": {
@@ -174,25 +174,25 @@
         "lib/netstandard2.1/CliFx.xml"
       ]
     },
-    "MedallionShell/1.6.2": {
-      "sha512": "fk0FLxBt6pRgrEo69IdzMqV51Wha7iK0ZTkNZyhsEZ2n67gooF8GgGE2ag85w5ewUuHVIu+v97c0YRDn448riA==",
+    "CliWrap/3.4.4": {
+      "sha512": "+lMDilJviKVrrk1vUFpZNYdEYH3aIrVx1t3DRgSOuSKB0JSzxhx2YREL4hXNIAgcHaMi2rXa6UYj8PXcjJCJpQ==",
       "type": "package",
-      "path": "medallionshell/1.6.2",
+      "path": "cliwrap/3.4.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "lib/net45/MedallionShell.dll",
-        "lib/net45/MedallionShell.xml",
-        "lib/net46/MedallionShell.dll",
-        "lib/net46/MedallionShell.xml",
-        "lib/net471/MedallionShell.dll",
-        "lib/net471/MedallionShell.xml",
-        "lib/netstandard1.3/MedallionShell.dll",
-        "lib/netstandard1.3/MedallionShell.xml",
-        "lib/netstandard2.0/MedallionShell.dll",
-        "lib/netstandard2.0/MedallionShell.xml",
-        "medallionshell.1.6.2.nupkg.sha512",
-        "medallionshell.nuspec"
+        "Readme.md",
+        "cliwrap.3.4.4.nupkg.sha512",
+        "cliwrap.nuspec",
+        "favicon.png",
+        "lib/net461/CliWrap.dll",
+        "lib/net461/CliWrap.xml",
+        "lib/netcoreapp3.0/CliWrap.dll",
+        "lib/netcoreapp3.0/CliWrap.xml",
+        "lib/netstandard2.0/CliWrap.dll",
+        "lib/netstandard2.0/CliWrap.xml",
+        "lib/netstandard2.1/CliWrap.dll",
+        "lib/netstandard2.1/CliWrap.xml"
       ]
     },
     "Microsoft.NETCore.Platforms/5.0.0": {
@@ -413,13 +413,13 @@
   "projectFileDependencyGroups": {
     "net5.0": [
       "CliFx >= 2.2.5",
-      "MedallionShell >= 1.6.2",
+      "CliWrap >= 3.4.4",
       "Newtonsoft.Json >= 13.0.1",
       "System.IO.Abstractions >= 17.0.10"
     ],
     "net6.0": [
       "CliFx >= 2.2.5",
-      "MedallionShell >= 1.6.2",
+      "CliWrap >= 3.4.4",
       "Newtonsoft.Json >= 13.0.1",
       "System.IO.Abstractions >= 17.0.10"
     ]
@@ -471,9 +471,9 @@
             "target": "Package",
             "version": "[2.2.5, )"
           },
-          "MedallionShell": {
+          "CliWrap": {
             "target": "Package",
-            "version": "[1.6.2, )"
+            "version": "[3.4.4, )"
           },
           "Newtonsoft.Json": {
             "target": "Package",
@@ -522,9 +522,9 @@
             "target": "Package",
             "version": "[2.2.5, )"
           },
-          "MedallionShell": {
+          "CliWrap": {
             "target": "Package",
-            "version": "[1.6.2, )"
+            "version": "[3.4.4, )"
           },
           "Newtonsoft.Json": {
             "target": "Package",

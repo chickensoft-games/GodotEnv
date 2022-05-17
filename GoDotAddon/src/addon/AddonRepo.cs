@@ -33,8 +33,8 @@ namespace GoDotAddon {
       // If we did specify a branch, this will make sure the branch is
       // up-to-date.
       var addonShell = _app.CreateShell(cachedAddonDir);
-      await addonShell.RunRegardless("git", "pull");
-      await addonShell.RunRegardless(
+      await addonShell.RunUnchecked("git", "pull");
+      await addonShell.RunUnchecked(
         "git", "submodule", "update", "--init", "--recursive"
       );
     }
@@ -44,10 +44,10 @@ namespace GoDotAddon {
     ) {
       var addonDir = Path.Combine(addonsPath, addon.Name);
       if (_fs.Directory.Exists(addonDir)) {
-        var status = await _app.CreateShell(addonDir).ManualRun(
+        var status = await _app.CreateShell(addonDir).RunUnchecked(
           "git", "status", "--porcelain"
         );
-        if (!status.Success) {
+        if (status.ExitCode != 0) {
           if (force) {
             await _app.CreateShell(addonsPath).Run("rm", "-rf", addonDir);
           }

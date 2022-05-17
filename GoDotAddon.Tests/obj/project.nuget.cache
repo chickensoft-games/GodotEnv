@@ -1,15 +1,16 @@
 {
   "version": 2,
-  "dgSpecHash": "FslRwJk3lScLxCLiyQCiTqyQdtTQaJJji+yfmResMuGnUqpNv0OHoFwp4B7WRkXIfiOV5jpfU9Ur53cr3Bl1oQ==",
+  "dgSpecHash": "pH79nVhejA8nIB6Dsd4e/Vx+MMzbcOZvnt4SpBlASa5Z5iAGrO6k5+wrcteWp+nKHPFvA5JkfANiPaw8p6VD4A==",
   "success": true,
   "projectFilePath": "/Users/joanna/Dropbox/GameDev/Chickensoft/GoDotAddon/GoDotAddon.Tests/Chickensoft.GoDotAddon.Tests.csproj",
   "expectedPackageFiles": [
     "/Users/joanna/.nuget/packages/castle.core/5.0.0/castle.core.5.0.0.nupkg.sha512",
     "/Users/joanna/.nuget/packages/clifx/2.2.5/clifx.2.2.5.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/cliwrap/3.4.4/cliwrap.3.4.4.nupkg.sha512",
     "/Users/joanna/.nuget/packages/coverlet.collector/3.1.0/coverlet.collector.3.1.0.nupkg.sha512",
+    "/Users/joanna/.nuget/packages/coverlet.msbuild/3.1.2/coverlet.msbuild.3.1.2.nupkg.sha512",
     "/Users/joanna/.nuget/packages/diffengine/6.4.9/diffengine.6.4.9.nupkg.sha512",
     "/Users/joanna/.nuget/packages/emptyfiles/2.3.3/emptyfiles.2.3.3.nupkg.sha512",
-    "/Users/joanna/.nuget/packages/medallionshell/1.6.2/medallionshell.1.6.2.nupkg.sha512",
     "/Users/joanna/.nuget/packages/microsoft.codecoverage/16.11.0/microsoft.codecoverage.16.11.0.nupkg.sha512",
     "/Users/joanna/.nuget/packages/microsoft.csharp/4.7.0/microsoft.csharp.4.7.0.nupkg.sha512",
     "/Users/joanna/.nuget/packages/microsoft.net.test.sdk/16.11.0/microsoft.net.test.sdk.16.11.0.nupkg.sha512",

@@ -5,6 +5,7 @@
     <Import Project="$(NuGetPackageRoot)emptyfiles/2.3.3/buildTransitive/EmptyFiles.targets" Condition="Exists('$(NuGetPackageRoot)emptyfiles/2.3.3/buildTransitive/EmptyFiles.targets')" />
     <Import Project="$(NuGetPackageRoot)microsoft.codecoverage/16.11.0/build/netstandard1.0/Microsoft.CodeCoverage.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.codecoverage/16.11.0/build/netstandard1.0/Microsoft.CodeCoverage.targets')" />
     <Import Project="$(NuGetPackageRoot)microsoft.net.test.sdk/16.11.0/build/netcoreapp2.1/Microsoft.NET.Test.Sdk.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.net.test.sdk/16.11.0/build/netcoreapp2.1/Microsoft.NET.Test.Sdk.targets')" />
+    <Import Project="$(NuGetPackageRoot)coverlet.msbuild/3.1.2/build/coverlet.msbuild.targets" Condition="Exists('$(NuGetPackageRoot)coverlet.msbuild/3.1.2/build/coverlet.msbuild.targets')" />
     <Import Project="$(NuGetPackageRoot)coverlet.collector/3.1.0/build/netstandard1.0/coverlet.collector.targets" Condition="Exists('$(NuGetPackageRoot)coverlet.collector/3.1.0/build/netstandard1.0/coverlet.collector.targets')" />
   </ImportGroup>
 </Project>

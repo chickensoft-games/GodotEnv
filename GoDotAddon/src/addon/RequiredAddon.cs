@@ -7,12 +7,8 @@ namespace GoDotAddon {
     string Subfolder,
     string Checkout
   ) {
-    public override string ToString() {
-      var locationPhrase = Subfolder == null
-        ? "of `{Url}`"
-        : $"to subfolder `{Subfolder}` of `{Url}`";
-      return
-        $"Addon **{Name}** from branch `{Checkout}` {locationPhrase}";
-    }
+    public override string ToString() =>
+      $"Addon **{Name}** to subfolder `{Subfolder}` of `{Url}` from" +
+      $" branch `{Checkout}`";
   }
 }

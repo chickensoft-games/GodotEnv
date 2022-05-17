@@ -28,7 +28,7 @@ namespace GoDotAddon {
 
     private static ConfigFile CreateConfigFile() {
       var configFile = new ConfigFile(
-        addons: new(), cachePath: IApp.DEFAULT_CACHE_DIR, IApp.DEFAULT_PATH_DIR
+        addons: new(), cachePath: IApp.DEFAULT_CACHE_PATH, IApp.DEFAULT_ADDONS_PATH
       );
       return configFile;
     }

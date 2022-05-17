@@ -16,15 +16,15 @@ namespace Chickensoft.GoDotAddon.Tests {
       $"  \"checkout\": \"{CHECKOUT}\"" +
     "}";
 
-    private const string CACHE_DIR = ".addons";
-    private const string PATH_DIR = "addons";
+    private const string CACHE_PATH = ".addons";
+    private const string ADDONS_PATH = "addons";
 
     [Fact]
     public void Deserializes() {
       var json = "{" +
         "  \"addons\": {" + ADDON_NAME + $": {ADDON_JSON}" + "}," +
-        $"  \"cache\": \"{CACHE_DIR}\"," +
-        $"  \"path\": \"{PATH_DIR}\"" +
+        $"  \"cache\": \"{CACHE_PATH}\"," +
+        $"  \"path\": \"{ADDONS_PATH}\"" +
       "}";
       var config = JsonConvert.DeserializeObject<ConfigFile>(json);
       config.ShouldNotBeNull();
@@ -34,8 +34,8 @@ namespace Chickensoft.GoDotAddon.Tests {
       config.Addons[ADDON_NAME].ShouldBe(
         new AddonConfig(url: URL, subfolder: SUBFOLDER, checkout: CHECKOUT)
       );
-      config.CachePath.ShouldBe(CACHE_DIR);
-      config.AddonsPath.ShouldBe(PATH_DIR);
+      config.CachePath.ShouldBe(CACHE_PATH);
+      config.AddonsPath.ShouldBe(ADDONS_PATH);
     }
 
     [Fact]
@@ -49,8 +49,8 @@ namespace Chickensoft.GoDotAddon.Tests {
       config.ShouldNotBeNull();
       config.Addons.ShouldNotBeNull();
       config.Addons.ShouldBeEmpty();
-      config.CachePath.ShouldBe(IApp.DEFAULT_CACHE_DIR);
-      config.AddonsPath.ShouldBe(IApp.DEFAULT_PATH_DIR);
+      config.CachePath.ShouldBe(IApp.DEFAULT_CACHE_PATH);
+      config.AddonsPath.ShouldBe(IApp.DEFAULT_ADDONS_PATH);
     }
 
     [Fact]
@@ -60,8 +60,22 @@ namespace Chickensoft.GoDotAddon.Tests {
       config.ShouldNotBeNull();
       config.Addons.ShouldNotBeNull();
       config.Addons.ShouldBeEmpty();
-      config.CachePath.ShouldBe(IApp.DEFAULT_CACHE_DIR);
-      config.AddonsPath.ShouldBe(IApp.DEFAULT_PATH_DIR);
+      config.CachePath.ShouldBe(IApp.DEFAULT_CACHE_PATH);
+      config.AddonsPath.ShouldBe(IApp.DEFAULT_ADDONS_PATH);
+    }
+
+    [Fact]
+    public void CreatesConfig() {
+      var configFile = new ConfigFile(
+        addons: new(),
+        cachePath: CACHE_PATH,
+        addonsPath: ADDONS_PATH
+      );
+      var config = configFile.ToConfig(".");
+      config.ShouldNotBeNull();
+      config.WorkingDir.ShouldBe(".");
+      config.CachePath.ShouldBe($"./{CACHE_PATH}");
+      config.AddonsPath.ShouldBe($"./{ADDONS_PATH}");
     }
   }
 }

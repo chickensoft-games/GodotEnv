@@ -64,6 +64,12 @@
               "target": "Package",
               "version": "[3.1.0, )"
             },
+            "coverlet.msbuild": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.1.2, )"
+            },
             "xunit": {
               "target": "Package",
               "version": "[2.4.1, )"
@@ -138,9 +144,9 @@
               "target": "Package",
               "version": "[2.2.5, )"
             },
-            "MedallionShell": {
+            "CliWrap": {
               "target": "Package",
-              "version": "[1.6.2, )"
+              "version": "[3.4.4, )"
             },
             "Newtonsoft.Json": {
               "target": "Package",
@@ -189,9 +195,9 @@
               "target": "Package",
               "version": "[2.2.5, )"
             },
-            "MedallionShell": {
+            "CliWrap": {
               "target": "Package",
-              "version": "[1.6.2, )"
+              "version": "[3.4.4, )"
             },
             "Newtonsoft.Json": {
               "target": "Package",

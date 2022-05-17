@@ -121,6 +121,7 @@ dotnet_diagnostic.IDE0052.severity = none
 dotnet_diagnostic.IDE0058.severity = none
 dotnet_diagnostic.IDE0059.severity = none
 dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.JSON002.severity = none
 
 # C# Style Rules
 # https://docs.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/language-rules#c-style-rules

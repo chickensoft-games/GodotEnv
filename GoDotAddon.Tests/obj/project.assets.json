@@ -23,10 +23,26 @@
           "lib/netstandard2.1/CliFx.dll": {}
         }
       },
+      "CliWrap/3.4.4": {
+        "type": "package",
+        "compile": {
+          "lib/netcoreapp3.0/CliWrap.dll": {}
+        },
+        "runtime": {
+          "lib/netcoreapp3.0/CliWrap.dll": {}
+        }
+      },
       "coverlet.collector/3.1.0": {
         "type": "package",
         "build": {
           "build/netstandard1.0/coverlet.collector.targets": {}
+        }
+      },
+      "coverlet.msbuild/3.1.2": {
+        "type": "package",
+        "build": {
+          "build/coverlet.msbuild.props": {},
+          "build/coverlet.msbuild.targets": {}
         }
       },
       "DiffEngine/6.4.9": {
@@ -52,15 +68,6 @@
         },
         "build": {
           "buildTransitive/EmptyFiles.targets": {}
-        }
-      },
-      "MedallionShell/1.6.2": {
-        "type": "package",
-        "compile": {
-          "lib/netstandard2.0/MedallionShell.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard2.0/MedallionShell.dll": {}
         }
       },
       "Microsoft.CodeCoverage/16.11.0": {
@@ -2529,7 +2536,7 @@
         "framework": ".NETCoreApp,Version=v6.0",
         "dependencies": {
           "CliFx": "2.2.5",
-          "MedallionShell": "1.6.2",
+          "CliWrap": "3.4.4",
           "Newtonsoft.Json": "13.0.1",
           "System.IO.Abstractions": "17.0.10"
         },
@@ -2593,6 +2600,27 @@
         "lib/netstandard2.1/CliFx.xml"
       ]
     },
+    "CliWrap/3.4.4": {
+      "sha512": "+lMDilJviKVrrk1vUFpZNYdEYH3aIrVx1t3DRgSOuSKB0JSzxhx2YREL4hXNIAgcHaMi2rXa6UYj8PXcjJCJpQ==",
+      "type": "package",
+      "path": "cliwrap/3.4.4",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Readme.md",
+        "cliwrap.3.4.4.nupkg.sha512",
+        "cliwrap.nuspec",
+        "favicon.png",
+        "lib/net461/CliWrap.dll",
+        "lib/net461/CliWrap.xml",
+        "lib/netcoreapp3.0/CliWrap.dll",
+        "lib/netcoreapp3.0/CliWrap.xml",
+        "lib/netstandard2.0/CliWrap.dll",
+        "lib/netstandard2.0/CliWrap.xml",
+        "lib/netstandard2.1/CliWrap.dll",
+        "lib/netstandard2.1/CliWrap.xml"
+      ]
+    },
     "coverlet.collector/3.1.0": {
       "sha512": "YzYqSRrjoP5lULBhTDcTOjuM4IDPPi6PhFsl4w8EI4WdZhE6llt7E38Tg4CHyrS+QKwyu1+9OwkdDgluOdoBTw==",
       "type": "package",
@@ -2642,6 +2670,65 @@
         "coverlet-icon.png",
         "coverlet.collector.3.1.0.nupkg.sha512",
         "coverlet.collector.nuspec"
+      ]
+    },
+    "coverlet.msbuild/3.1.2": {
+      "sha512": "QhM0fnDtmIMImY7oxyQ/kh1VYtRxPyRVeLwRUGuUvI6Xp83pSYG9gerK8WgJj4TzUl7ISziADUGtIWKhtlbkbQ==",
+      "type": "package",
+      "path": "coverlet.msbuild/3.1.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "build/Microsoft.Build.Framework.dll",
+        "build/Microsoft.Build.Utilities.Core.dll",
+        "build/Microsoft.CSharp.dll",
+        "build/Microsoft.DotNet.PlatformAbstractions.dll",
+        "build/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "build/Microsoft.Extensions.DependencyInjection.dll",
+        "build/Microsoft.Extensions.DependencyModel.dll",
+        "build/Microsoft.Extensions.FileSystemGlobbing.dll",
+        "build/Mono.Cecil.Mdb.dll",
+        "build/Mono.Cecil.Pdb.dll",
+        "build/Mono.Cecil.Rocks.dll",
+        "build/Mono.Cecil.dll",
+        "build/Newtonsoft.Json.dll",
+        "build/System.AppContext.dll",
+        "build/System.Collections.Concurrent.dll",
+        "build/System.Collections.Immutable.dll",
+        "build/System.Collections.NonGeneric.dll",
+        "build/System.Dynamic.Runtime.dll",
+        "build/System.IO.FileSystem.Primitives.dll",
+        "build/System.Linq.Expressions.dll",
+        "build/System.Linq.dll",
+        "build/System.ObjectModel.dll",
+        "build/System.Private.DataContractSerialization.dll",
+        "build/System.Reflection.Emit.ILGeneration.dll",
+        "build/System.Reflection.Emit.Lightweight.dll",
+        "build/System.Reflection.Emit.dll",
+        "build/System.Reflection.Metadata.dll",
+        "build/System.Reflection.TypeExtensions.dll",
+        "build/System.Resources.Reader.dll",
+        "build/System.Runtime.Serialization.Primitives.dll",
+        "build/System.Runtime.Serialization.Xml.dll",
+        "build/System.Text.RegularExpressions.dll",
+        "build/System.Threading.Tasks.Extensions.dll",
+        "build/System.Threading.Tasks.Parallel.dll",
+        "build/System.Threading.Thread.dll",
+        "build/System.Threading.ThreadPool.dll",
+        "build/System.Threading.dll",
+        "build/System.Xml.ReaderWriter.dll",
+        "build/System.Xml.XDocument.dll",
+        "build/System.Xml.XmlDocument.dll",
+        "build/System.Xml.XmlSerializer.dll",
+        "build/coverlet.core.dll",
+        "build/coverlet.core.pdb",
+        "build/coverlet.msbuild.props",
+        "build/coverlet.msbuild.targets",
+        "build/coverlet.msbuild.tasks.dll",
+        "build/coverlet.msbuild.tasks.pdb",
+        "coverlet-icon.png",
+        "coverlet.msbuild.3.1.2.nupkg.sha512",
+        "coverlet.msbuild.nuspec"
       ]
     },
     "DiffEngine/6.4.9": {
@@ -2721,27 +2808,6 @@
         "lib/netstandard2.0/EmptyFiles.xml",
         "lib/netstandard2.1/EmptyFiles.dll",
         "lib/netstandard2.1/EmptyFiles.xml"
-      ]
-    },
-    "MedallionShell/1.6.2": {
-      "sha512": "fk0FLxBt6pRgrEo69IdzMqV51Wha7iK0ZTkNZyhsEZ2n67gooF8GgGE2ag85w5ewUuHVIu+v97c0YRDn448riA==",
-      "type": "package",
-      "path": "medallionshell/1.6.2",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "lib/net45/MedallionShell.dll",
-        "lib/net45/MedallionShell.xml",
-        "lib/net46/MedallionShell.dll",
-        "lib/net46/MedallionShell.xml",
-        "lib/net471/MedallionShell.dll",
-        "lib/net471/MedallionShell.xml",
-        "lib/netstandard1.3/MedallionShell.dll",
-        "lib/netstandard1.3/MedallionShell.xml",
-        "lib/netstandard2.0/MedallionShell.dll",
-        "lib/netstandard2.0/MedallionShell.xml",
-        "medallionshell.1.6.2.nupkg.sha512",
-        "medallionshell.nuspec"
       ]
     },
     "Microsoft.CodeCoverage/16.11.0": {
@@ -8823,6 +8889,7 @@
       "Shouldly >= 4.0.3",
       "System.IO.Abstractions.TestingHelpers >= 17.0.12",
       "coverlet.collector >= 3.1.0",
+      "coverlet.msbuild >= 3.1.2",
       "xunit >= 2.4.1",
       "xunit.runner.visualstudio >= 2.4.3"
     ]
@@ -8889,6 +8956,12 @@
             "suppressParent": "All",
             "target": "Package",
             "version": "[3.1.0, )"
+          },
+          "coverlet.msbuild": {
+            "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[3.1.2, )"
           },
           "xunit": {
             "target": "Package",
