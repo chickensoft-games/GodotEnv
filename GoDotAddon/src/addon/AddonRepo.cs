@@ -7,7 +7,7 @@ namespace GoDotAddon {
     Task DeleteExistingInstalledAddon(
       RequiredAddon addon, string addonsPath
     );
-    Task CopyAddonFromCacheToDestination(
+    Task CopyAddonFromCache(
       string workingDir, string cachedAddonDir, string addonDir
     );
   }
@@ -59,21 +59,16 @@ namespace GoDotAddon {
       }
     }
 
-    // installs the addon from the
-    public async Task CopyAddonFromCacheToDestination(
+    public async Task CopyAddonFromCache(
       string workingDir, string cachedAddonDir, string addonDir
     ) {
       // copy addon from cache to installation location
-      var addonShell = _app.CreateShell(workingDir);
-      await addonShell.Run(
-        "cp", "-r", cachedAddonDir, addonDir
+      var workingShell = _app.CreateShell(workingDir);
+      // copy files from addon cache to addon dir, excluding git folders.
+      await workingShell.Run(
+        "rsync", "-av", cachedAddonDir, addonDir, "--exclude", ".git"
       );
-      // find any `.git` folders and remove them
-      var gitDirs = _fs.Directory.GetDirectories(addonDir, ".git");
-      // remove any nested git folders from submodules, etc
-      foreach (var gitDir in gitDirs) {
-        _fs.Directory.Delete(gitDir, recursive: true);
-      }
+      var addonShell = _app.CreateShell(addonDir);
       // Make a junk repo in the installed addon dir. We use this for change
       // tracking to avoid deleting a modified addon.
       await addonShell.Run("git", "init");

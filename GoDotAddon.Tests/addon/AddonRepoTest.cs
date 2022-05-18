@@ -162,6 +162,63 @@ namespace Chickensoft.GoDotAddon.Tests {
       cli.VerifyAll();
     }
 
+    [Fact]
+    public async Task CopyAddonCopiesAddon() {
+      var workingDir = "/some/working/dir";
+      var addonDir = "/some/working/dir/addons/GoDotAddon";
+      var cachedAddonDir = "some/working/dir/.addons/GoDotAddon";
+
+      var app = new Mock<IApp>();
+      var fs = new Mock<IFileSystem>();
+      var cli = new ShellVerifier();
+
+      var workingShell = cli.CreateShell(workingDir);
+      var addonShell = cli.CreateShell(addonDir);
+
+      app.Setup(app => app.CreateShell(workingDir))
+        .Returns(workingShell.Object);
+      app.Setup(app => app.CreateShell(addonDir))
+        .Returns(addonShell.Object);
+
+      cli.Setup(
+        workingDir,
+        new ProcessResult(0),
+        RunMode.Run,
+        "rsync",
+        "-av", cachedAddonDir, addonDir, "--exclude", ".git"
+      );
+
+      cli.Setup(
+        addonDir,
+        new ProcessResult(0),
+        RunMode.Run,
+        "git",
+        "init"
+      );
+
+      cli.Setup(
+        addonDir,
+        new ProcessResult(0),
+        RunMode.Run,
+        "git",
+        "add", "."
+      );
+
+      cli.Setup(
+        addonDir,
+        new ProcessResult(0),
+        RunMode.Run,
+        "git",
+        "commit", "-m", "Initial commit"
+      );
+
+      var addonRepo = new AddonRepo(app.Object);
+      await addonRepo.CopyAddonFromCache(workingDir, cachedAddonDir, addonDir);
+
+      app.VerifyAll();
+      cli.VerifyAll();
+    }
+
     private enum RunMode {
       Run,
       RunUnchecked,
