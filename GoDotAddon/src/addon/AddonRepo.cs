@@ -3,7 +3,13 @@ namespace GoDotAddon {
   using CliFx.Exceptions;
 
   public interface IAddonRepo {
-    Task InstallAddon(RequiredAddon addon, Config config, bool force);
+    Task CacheAddon(RequiredAddon addon, string cachePath);
+    Task DeleteExistingInstalledAddon(
+      RequiredAddon addon, string addonsPath, bool force
+    );
+    Task CopyAddonFromCacheToDestination(
+      string workingDir, string cachedAddonDir, string addonDir
+    );
   }
 
   public class AddonRepo : IAddonRepo {
@@ -15,31 +21,23 @@ namespace GoDotAddon {
       _fs = app.FS;
     }
 
-    private async Task CacheAddon(
+    public async Task CacheAddon(
       RequiredAddon addon, string cachePath
     ) {
-      // makes sure we have a clone of the addon in the .addons cache directory.
-      var cachedAddonDir = Path.Combine(addon.Name, cachePath);
+      var cachedAddonDir = Path.Combine(cachePath, addon.Name);
       if (!_fs.Directory.Exists(cachedAddonDir)) {
-        await _app.CreateShell(
-          cachePath
-        ).Run("git", "clone", "--recurse-submodule", addon.Url, addon.Name);
+        var cachePathShell = _app.CreateShell(cachePath);
+        await cachePathShell.Run("git", "clone", "--recurse-submodules", addon.Url, addon.Name);
       }
-      // Folder for addon already exists. Make sure we checkout the
-      // appropriate ref and make sure it's up to date.
-      await _app.CreateShell(cachePath).Run("git", "checkout", addon.Checkout);
-      // If we're on a tag or something that isn't a branch, this will fail.
-      // We don't care in that situation, so ignore the error.
-      // If we did specify a branch, this will make sure the branch is
-      // up-to-date.
       var addonShell = _app.CreateShell(cachedAddonDir);
+      await addonShell.Run("git", "checkout", addon.Checkout);
       await addonShell.RunUnchecked("git", "pull");
       await addonShell.RunUnchecked(
         "git", "submodule", "update", "--init", "--recursive"
       );
     }
 
-    private async Task DeleteExistingInstalledAddon(
+    public async Task DeleteExistingInstalledAddon(
       RequiredAddon addon, string addonsPath, bool force
     ) {
       var addonDir = Path.Combine(addonsPath, addon.Name);
@@ -65,7 +63,7 @@ namespace GoDotAddon {
     }
 
     // installs the addon from the
-    private async Task CopyAddonFromCacheToDestination(
+    public async Task CopyAddonFromCacheToDestination(
       string workingDir, string cachedAddonDir, string addonDir
     ) {
       // copy addon from cache to installation location
@@ -85,25 +83,6 @@ namespace GoDotAddon {
       await addonShell.Run("git", "add", ".");
       await addonShell.Run(
         "git", "commit", "-m", "Initial commit"
-      );
-    }
-
-    public async Task InstallAddon(
-      RequiredAddon addon, Config config, bool force
-    ) {
-      var cachedAddonDir = Path.Combine(
-        config.CachePath, addon.Name, addon.Subfolder
-      );
-      var addonDir = Path.Combine(config.AddonsPath, addon.Name);
-
-      await CacheAddon(addon: addon, cachePath: config.CachePath);
-      await DeleteExistingInstalledAddon(
-        addon: addon, addonsPath: config.AddonsPath, force: force
-      );
-      await CopyAddonFromCacheToDestination(
-        workingDir: config.WorkingDir,
-        cachedAddonDir: cachedAddonDir,
-        addonDir: addonDir
       );
     }
   }
