@@ -5,7 +5,7 @@ namespace GoDotAddon {
   public interface IAddonRepo {
     Task CacheAddon(RequiredAddon addon, string cachePath);
     Task DeleteExistingInstalledAddon(
-      RequiredAddon addon, string addonsPath, bool force
+      RequiredAddon addon, string addonsPath
     );
     Task CopyAddonFromCacheToDestination(
       string workingDir, string cachedAddonDir, string addonDir
@@ -38,26 +38,23 @@ namespace GoDotAddon {
     }
 
     public async Task DeleteExistingInstalledAddon(
-      RequiredAddon addon, string addonsPath, bool force
+      RequiredAddon addon, string addonsPath
     ) {
       var addonDir = Path.Combine(addonsPath, addon.Name);
       if (_fs.Directory.Exists(addonDir)) {
         var status = await _app.CreateShell(addonDir).RunUnchecked(
           "git", "status", "--porcelain"
         );
-        if (status.ExitCode != 0) {
-          if (force) {
-            await _app.CreateShell(addonsPath).Run("rm", "-rf", addonDir);
-          }
-          else {
-            // git status dirty, don't delete an existing installed addon that
-            // has been modified.
-            throw new CommandException(
-              $"Cannot delete modified addon {addon}. You may backup your " +
-              "changes elsewhere, delete the addon yourself, or use --force." +
-              "\n" + status.StandardOutput
-            );
-          }
+        if (status.Success) {
+          // Installed addon is unmodified by the user, free to delete.
+          await _app.CreateShell(addonsPath).Run("rm", "-rf", addonDir);
+        }
+        else {
+          throw new CommandException(
+            $"Cannot delete modified addon {addon}. Please backup or discard " +
+            "your changes and delete the addon manually." +
+            "\n" + status.StandardOutput
+          );
         }
       }
     }

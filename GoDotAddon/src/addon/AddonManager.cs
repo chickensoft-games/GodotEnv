@@ -4,16 +4,14 @@ namespace GoDotAddon {
 
     public AddonManager(IAddonRepo addonRepo) => _addonRepo = addonRepo;
 
-    public async Task InstallAddon(
-      RequiredAddon addon, Config config, bool force
-    ) {
+    public async Task InstallAddon(RequiredAddon addon, Config config) {
       var cachedAddonDir = Path.Combine(
         config.CachePath, addon.Name, addon.Subfolder
       );
       var addonDir = Path.Combine(config.AddonsPath, addon.Name);
       await _addonRepo.CacheAddon(addon: addon, cachePath: config.CachePath);
       await _addonRepo.DeleteExistingInstalledAddon(
-        addon: addon, addonsPath: config.AddonsPath, force: force
+        addon: addon, addonsPath: config.AddonsPath
       );
       await _addonRepo.CopyAddonFromCacheToDestination(
         workingDir: config.WorkingDir,

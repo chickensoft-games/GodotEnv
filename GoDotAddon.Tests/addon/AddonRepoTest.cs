@@ -3,10 +3,11 @@ namespace Chickensoft.GoDotAddon.Tests {
   using System.Collections.Generic;
   using System.IO.Abstractions;
   using System.Threading.Tasks;
+  using CliFx.Exceptions;
   using global::GoDotAddon;
 
   using Moq;
-
+  using Shouldly;
   using Xunit;
 
   public class AddonRepoTest {
@@ -72,6 +73,90 @@ namespace Chickensoft.GoDotAddon.Tests {
       var addonRepo = new AddonRepo(app.Object);
 
       await addonRepo.CacheAddon(_addon, CACHE_PATH);
+
+      directory.VerifyAll();
+      cli.VerifyAll();
+    }
+
+    [Fact]
+    public async Task DeleteExistingInstalledAddonDeletesAddon() {
+      var addonDir = $"{ADDONS_PATH}/{_addon.Name}";
+
+      var app = new Mock<IApp>();
+      var fs = new Mock<IFileSystem>();
+      var directory = new Mock<IDirectory>();
+
+      fs.Setup(fs => fs.Directory).Returns(directory.Object);
+      directory.Setup(dir => dir.Exists(addonDir)).Returns(true);
+
+      var cli = new ShellVerifier();
+
+      var addonShell = cli.CreateShell(addonDir);
+      var addonsPathShell = cli.CreateShell(ADDONS_PATH);
+
+      app.Setup(app => app.FS).Returns(fs.Object);
+      app.Setup(app => app.CreateShell(addonDir))
+        .Returns(addonShell.Object);
+      app.Setup(app => app.CreateShell(ADDONS_PATH))
+        .Returns(addonsPathShell.Object);
+
+      cli.Setup(
+        addonDir,
+        new ProcessResult(0),
+        RunMode.RunUnchecked,
+        "git", "status", "--porcelain"
+      );
+
+      cli.Setup(
+        ADDONS_PATH,
+        new ProcessResult(0),
+        RunMode.Run,
+        "rm", "-rf", $"{ADDONS_PATH}/{_addon.Name}"
+      );
+
+      var addonRepo = new AddonRepo(app.Object);
+
+      await addonRepo.DeleteExistingInstalledAddon(_addon, ADDONS_PATH);
+
+      directory.VerifyAll();
+      cli.VerifyAll();
+    }
+
+    [Fact]
+    public async Task DeleteExistingInstalledAddonThrowsIfAddonModified() {
+      var addonDir = $"{ADDONS_PATH}/{_addon.Name}";
+
+      var app = new Mock<IApp>();
+      var fs = new Mock<IFileSystem>();
+      var directory = new Mock<IDirectory>();
+
+      fs.Setup(fs => fs.Directory).Returns(directory.Object);
+      directory.Setup(dir => dir.Exists(addonDir)).Returns(true);
+
+      var cli = new ShellVerifier();
+
+      var addonShell = cli.CreateShell(addonDir);
+      var addonsPathShell = cli.CreateShell(ADDONS_PATH);
+
+      app.Setup(app => app.FS).Returns(fs.Object);
+      app.Setup(app => app.CreateShell(addonDir))
+        .Returns(addonShell.Object);
+      app.Setup(app => app.CreateShell(ADDONS_PATH))
+        .Returns(addonsPathShell.Object);
+
+      cli.Setup(
+        addonDir,
+        new ProcessResult(1),
+        RunMode.RunUnchecked,
+        "git", "status", "--porcelain"
+      );
+
+      var addonRepo = new AddonRepo(app.Object);
+
+      await Should.ThrowAsync<CommandException>(
+        async ()
+          => await addonRepo.DeleteExistingInstalledAddon(_addon, ADDONS_PATH)
+      );
 
       directory.VerifyAll();
       cli.VerifyAll();
