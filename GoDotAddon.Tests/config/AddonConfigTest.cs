@@ -19,7 +19,6 @@ namespace Chickensoft.GoDotAddon.Tests {
       "}";
       var config = JsonConvert.DeserializeObject<AddonConfig>(json);
       config.ShouldNotBeNull();
-      config.Url.ShouldBe(URL);
       config.Subfolder.ShouldBe(SUBFOLDER);
       config.Checkout.ShouldBe(CHECKOUT);
     }
@@ -33,33 +32,17 @@ namespace Chickensoft.GoDotAddon.Tests {
       "}";
       var config = JsonConvert.DeserializeObject<AddonConfig>(json);
       config.ShouldNotBeNull();
-      config.Url.ShouldBe(URL);
       config.Subfolder.ShouldBe(IApp.DEFAULT_SUBFOLDER);
       config.Checkout.ShouldBe(IApp.DEFAULT_CHECKOUT);
     }
 
     [Fact]
     public void DeserializesWithMissingValues() {
-      var json = "{}";
+      var json = "{" + $"\"url\": \"{URL}\"" + "}";
       var config = JsonConvert.DeserializeObject<AddonConfig>(json);
       config.ShouldNotBeNull();
-      config.Url.ShouldBeNull();
       config.Subfolder.ShouldBe(IApp.DEFAULT_SUBFOLDER);
       config.Checkout.ShouldBe(IApp.DEFAULT_CHECKOUT);
-    }
-
-    [Fact]
-    public void KnowsWhenValid() {
-      var config
-        = new AddonConfig(url: URL, subfolder: SUBFOLDER, checkout: CHECKOUT);
-      config.IsValid.ShouldBeTrue();
-    }
-
-    [Fact]
-    public void KnowsWhenNotValid() {
-      var config
-        = new AddonConfig(url: null, subfolder: SUBFOLDER, checkout: CHECKOUT);
-      config.IsValid.ShouldBeFalse();
     }
   }
 }

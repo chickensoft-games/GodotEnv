@@ -26,7 +26,7 @@ namespace Chickensoft.GoDotAddon.Tests {
       app.Setup(app => app.FS).Returns(fs.Object);
       var cacheRepo = new CacheRepo(app.Object);
       var config = new Config(
-        WorkingDir: WORKING_DIR,
+        ProjectDir: WORKING_DIR,
         CachePath: CACHE_PATH,
         AddonsPath: ADDONS_PATH
       );

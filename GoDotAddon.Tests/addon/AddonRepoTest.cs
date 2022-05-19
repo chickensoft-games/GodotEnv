@@ -14,10 +14,11 @@ namespace Chickensoft.GoDotAddon.Tests {
     private const string CACHE_PATH = ".addons";
     private const string ADDONS_PATH = "addons";
     private readonly RequiredAddon _addon = new(
-      Name: "GoDotAddon",
-      Url: "git@github.com:chickensoft-games/GoDotAddon.git",
-      Subfolder: "/",
-      Checkout: "Main"
+      name: "go_dot_addon",
+      configFilePath: "some/working/dir/addons.json",
+      url: "git@github.com:chickensoft-games/GoDotAddon.git",
+      checkout: "Main",
+      subfolder: "/"
     );
 
     [Fact]
@@ -53,7 +54,7 @@ namespace Chickensoft.GoDotAddon.Tests {
         cachedAddonDir,
         new ProcessResult(0),
         RunMode.Run,
-        "git", "checkout", _addon.Checkout
+        "git", "checkout", "-f", _addon.Checkout
       );
 
       cli.Setup(
@@ -72,7 +73,7 @@ namespace Chickensoft.GoDotAddon.Tests {
 
       var addonRepo = new AddonRepo(app.Object);
 
-      await addonRepo.CacheAddon(_addon, CACHE_PATH);
+      await addonRepo.CacheAddon(_addon, CACHE_PATH, cachedAddonDir);
 
       directory.VerifyAll();
       cli.VerifyAll();

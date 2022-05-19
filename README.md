@@ -11,26 +11,18 @@ Coming soon!
 
 ## Usage
 
-GoDotAddon uses an `addons.yaml` file to keep track of which addons you'd like to install. Each addon entry can contain optional information about how the addon should be used.
+GoDotAddon uses an `addons.json` file to keep track of which addons you'd like to install. Each addon entry can contain optional information about how the addon should be used.
 
-```yaml
-addons:
-  # Name of an addon to install. The name will also be used as the folder
-  # name inside your `addons/` directory for the installed addon.
-  my_addon:
-    # Addon git url.
-    url: https://github.com/my_github/my_addon
-    # Subfolder of the repo to copy to destination — relative to the addon 
-    # repo contents.
-    subfolder: addons/my_addon
-    # A git checkout ref — can be a commit has, branch name, or tag specifier.
-    checkout: 'tags/1.0'
-    # Main branch — if it's called anything other than "main", specify it here.
-    main: 'master'
-  # The only two required values are the name and url. Everything else is
-  # optional.
-  my_other_addon:
-    url: https://github.com/my_github/my_other_addon
+```json
+{
+  "addons:" {
+    "git@github.com:chickensoft-games/go_dot_net.git": {
+      "checkout": "tags/v1.0",
+      "subfolder": "/"
+    },
+    "git@github.com/chickensoft-games/go_dot_test.git": {}
+  }
+}
 ```
 
 All addons must have a `url` for the git repository which contains the addon.
@@ -39,7 +31,7 @@ Because GoDotAddon relies on the local shell to run git, you can clone from anyw
 
 > Not sure how to use SSH with GitHub? [Click here][ssh-github].
 
-An optional `destination` folder allows you to specify where the addon should be copied to when it is installed. If the `destination` property is omitted, the addon will be installed inside the project's `addons` folder under the same name as its entry in `addons.yaml`.
+An optional `destination` folder allows you to specify where the addon should be copied to when it is installed. If the `destination` property is omitted, the addon will be installed inside the project's `addons` folder under the same name as its entry in `addons.json`.
 
 Each addon can specify an optional `tag` property. When GoDotAddon installs addons, it will checkout the given tag on the addon before copying the addon to the destination folder, allowing you to use specific addon versions (if needed).
 
@@ -76,7 +68,7 @@ To install addons, run the following:
 godotaddon install
 ```
 
-The command above installs all addons in the `addons.yaml` file if they are not already present. If any addons are already installed, the command will fail with an error message.
+The command above installs all addons in the `addons.json` file if they are not already present. If any addons are already installed, the command will fail with an error message.
 
 If you have already installed addons, but you want to delete them and reinstall them again, you can run the following command:
 
@@ -88,7 +80,7 @@ If you have made changes to any addons since they were installed, GoDotAddon wil
 
 ## Addons with Addons
 
-If an installed addon has its own `addons.yaml` file, any addons it requires (that don't conflict with any of the other addons) will be downloaded into your project's `addons` folder as well.
+If an installed addon has its own `addons.json` file, any addons it requires (that don't conflict with any of the other addons) will be downloaded into your project's `addons` folder as well.
 
 **Important:** If more than one addon specifies a different tag for the same repository and subfolder, a conflict will occur and `godotaddon install` will fail with an error message. This is a fundamental limitation of flat dependency graphs.
 

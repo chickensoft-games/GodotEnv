@@ -1,6 +1,6 @@
 namespace GoDotAddon {
   public record Config(
-    string WorkingDir,
+    string ProjectPath,
     string CachePath,
     string AddonsPath
   );

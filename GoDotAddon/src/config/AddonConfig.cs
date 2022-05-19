@@ -3,15 +3,15 @@ namespace GoDotAddon {
 
   public record AddonConfig {
     [JsonProperty("url")]
-    public string? Url { get; init; }
+    public string Url { get; init; }
     [JsonProperty("subfolder")]
-    public string Subfolder { get; init; } = IApp.DEFAULT_SUBFOLDER;
+    public string Subfolder { get; init; }
     [JsonProperty("checkout")]
-    public string Checkout { get; init; } = IApp.DEFAULT_CHECKOUT;
+    public string Checkout { get; init; }
 
     [JsonConstructor]
     public AddonConfig(
-      string? url,
+      string url,
       string? subfolder,
       string? checkout
     ) {
@@ -19,8 +19,5 @@ namespace GoDotAddon {
       Subfolder = subfolder ?? IApp.DEFAULT_SUBFOLDER;
       Checkout = checkout ?? IApp.DEFAULT_CHECKOUT;
     }
-
-    [JsonIgnore]
-    public bool IsValid => Url != null;
   }
 }

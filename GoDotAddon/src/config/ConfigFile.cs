@@ -23,10 +23,10 @@ namespace GoDotAddon {
       AddonsPath = addonsPath ?? IApp.DEFAULT_ADDONS_PATH;
     }
 
-    public Config ToConfig(string workingDir) => new(
-      WorkingDir: workingDir,
-      CachePath: Path.Combine(workingDir, CachePath),
-      AddonsPath: Path.Combine(workingDir, AddonsPath)
+    public Config ToConfig(string projectPath) => new(
+      ProjectPath: projectPath,
+      CachePath: Path.Combine(projectPath, CachePath),
+      AddonsPath: Path.Combine(projectPath, AddonsPath)
     );
   }
 }
