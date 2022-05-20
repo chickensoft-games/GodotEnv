@@ -10,12 +10,13 @@ namespace Chickensoft.GoDotAddon.Tests {
   using Xunit;
 
   public class AddonRepoTest {
+    private const string PROJECT_DIR = "some/work/dir";
     private const string CACHE_PATH = ".addons";
     private const string ADDONS_PATH = "addons";
     private readonly Config _config = new(
-      ProjectPath: "some/work/dir",
-      CachePath: CACHE_PATH,
-      AddonsPath: ADDONS_PATH
+      ProjectPath: PROJECT_DIR,
+      CachePath: PROJECT_DIR + "/" + CACHE_PATH,
+      AddonsPath: PROJECT_DIR + "/" + ADDONS_PATH
     );
 
     private readonly RequiredAddon _addon = new(
@@ -23,57 +24,33 @@ namespace Chickensoft.GoDotAddon.Tests {
       configFilePath: "some/working/dir/addons.json",
       url: "git@github.com:chickensoft-games/GoDotAddon.git",
       checkout: "Main",
-      subfolder: "/"
+      subfolder: "subfolder"
     );
 
     [Fact]
     public async void CacheAddonCachesAddon() {
-      var cachedAddonDir = $"{CACHE_PATH}/{_addon.Name}";
+      var addonCachePath = $"{_config.CachePath}/{_addon.Name}";
 
       var app = new Mock<IApp>();
       var fs = new Mock<IFileSystem>();
       var directory = new Mock<IDirectory>();
 
       fs.Setup(fs => fs.Directory).Returns(directory.Object);
-      directory.Setup(dir => dir.Exists(cachedAddonDir)).Returns(false);
+      directory.Setup(dir => dir.Exists(addonCachePath)).Returns(false);
 
       var cli = new ShellVerifier();
 
-      var cachePathShell = cli.CreateShell(CACHE_PATH);
-      var addonPathShell = cli.CreateShell(cachedAddonDir);
+      var cachePathShell = cli.CreateShell(addonCachePath);
 
       app.Setup(app => app.FS).Returns(fs.Object);
-      app.Setup(app => app.CreateShell(CACHE_PATH))
+      app.Setup(app => app.CreateShell(_config.CachePath))
         .Returns(cachePathShell.Object);
-      app.Setup(app => app.CreateShell(cachedAddonDir))
-        .Returns(addonPathShell.Object);
 
       cli.Setup(
-        CACHE_PATH,
+        addonCachePath,
         new ProcessResult(0),
         RunMode.Run,
         "git", "clone", "--recurse-submodules", _addon.Url, _addon.Name
-      );
-
-      cli.Setup(
-        cachedAddonDir,
-        new ProcessResult(0),
-        RunMode.Run,
-        "git", "checkout", "-f", _addon.Checkout
-      );
-
-      cli.Setup(
-        cachedAddonDir,
-        new ProcessResult(0),
-        RunMode.RunUnchecked,
-        "git", "pull"
-      );
-
-      cli.Setup(
-        cachedAddonDir,
-        new ProcessResult(0),
-        RunMode.RunUnchecked,
-        "git", "submodule", "update", "--init", "--recursive"
       );
 
       var addonRepo = new AddonRepo(app.Object);
@@ -86,7 +63,7 @@ namespace Chickensoft.GoDotAddon.Tests {
 
     [Fact]
     public async Task DeleteAddonDeletesAddon() {
-      var addonDir = $"{ADDONS_PATH}/{_addon.Name}";
+      var addonDir = _config.AddonsPath + "/" + _addon.Name;
 
       var app = new Mock<IApp>();
       var fs = new Mock<IFileSystem>();
@@ -98,12 +75,12 @@ namespace Chickensoft.GoDotAddon.Tests {
       var cli = new ShellVerifier();
 
       var addonShell = cli.CreateShell(addonDir);
-      var addonsPathShell = cli.CreateShell(ADDONS_PATH);
+      var addonsPathShell = cli.CreateShell(_config.AddonsPath);
 
       app.Setup(app => app.FS).Returns(fs.Object);
       app.Setup(app => app.CreateShell(addonDir))
         .Returns(addonShell.Object);
-      app.Setup(app => app.CreateShell(ADDONS_PATH))
+      app.Setup(app => app.CreateShell(_config.AddonsPath))
         .Returns(addonsPathShell.Object);
 
       cli.Setup(
@@ -114,10 +91,10 @@ namespace Chickensoft.GoDotAddon.Tests {
       );
 
       cli.Setup(
-        ADDONS_PATH,
+        _config.AddonsPath,
         new ProcessResult(0),
         RunMode.Run,
-        "rm", "-rf", $"{ADDONS_PATH}/{_addon.Name}"
+        "rm", "-rf", $"{_config.AddonsPath}/{_addon.Name}"
       );
 
       var addonRepo = new AddonRepo(app.Object);
@@ -130,7 +107,7 @@ namespace Chickensoft.GoDotAddon.Tests {
 
     [Fact]
     public async Task DeleteAddonThrowsIfAddonModified() {
-      var addonDir = $"{ADDONS_PATH}/{_addon.Name}";
+      var addonDir = _config.AddonsPath + "/" + _addon.Name;
 
       var app = new Mock<IApp>();
       var fs = new Mock<IFileSystem>();
@@ -142,12 +119,12 @@ namespace Chickensoft.GoDotAddon.Tests {
       var cli = new ShellVerifier();
 
       var addonShell = cli.CreateShell(addonDir);
-      var addonsPathShell = cli.CreateShell(ADDONS_PATH);
+      var addonsPathShell = cli.CreateShell(_config.AddonsPath);
 
       app.Setup(app => app.FS).Returns(fs.Object);
       app.Setup(app => app.CreateShell(addonDir))
         .Returns(addonShell.Object);
-      app.Setup(app => app.CreateShell(ADDONS_PATH))
+      app.Setup(app => app.CreateShell(_config.AddonsPath))
         .Returns(addonsPathShell.Object);
 
       cli.Setup(
@@ -170,28 +147,52 @@ namespace Chickensoft.GoDotAddon.Tests {
 
     [Fact]
     public async Task CopyAddonCopiesAddon() {
-      var workingDir = "/some/working/dir";
-      var addonDir = "/some/working/dir/addons/GoDotAddon";
-      var cachedAddonDir = "some/working/dir/.addons/GoDotAddon";
+      var addonCachePath = _config.CachePath + "/" + _addon.Name;
+      var copyFromPath = addonCachePath + "/" + _addon.Subfolder;
+      var workingDir = _config.ProjectPath;
+      var addonDir = _config.AddonsPath + "/" + _addon.Name;
 
       var app = new Mock<IApp>();
       var fs = new Mock<IFileSystem>();
       var cli = new ShellVerifier();
-
+      var addonCacheShell = cli.CreateShell(addonCachePath);
       var workingShell = cli.CreateShell(workingDir);
       var addonShell = cli.CreateShell(addonDir);
 
+      app.Setup(app => app.CreateShell(addonCachePath))
+        .Returns(addonCacheShell.Object);
       app.Setup(app => app.CreateShell(workingDir))
         .Returns(workingShell.Object);
       app.Setup(app => app.CreateShell(addonDir))
         .Returns(addonShell.Object);
 
       cli.Setup(
+        addonCachePath,
+        new ProcessResult(0),
+        RunMode.Run,
+        "git", "checkout", "-f", _addon.Checkout
+      );
+
+      cli.Setup(
+        addonCachePath,
+        new ProcessResult(0),
+        RunMode.RunUnchecked,
+        "git", "pull"
+      );
+
+      cli.Setup(
+        addonCachePath,
+        new ProcessResult(0),
+        RunMode.RunUnchecked,
+        "git", "submodule", "update", "--init", "--recursive"
+      );
+
+      cli.Setup(
         workingDir,
         new ProcessResult(0),
         RunMode.Run,
         "rsync",
-        "-av", cachedAddonDir, addonDir, "--exclude", ".git"
+        "-av", copyFromPath, addonDir, "--exclude", ".git"
       );
 
       cli.Setup(
@@ -235,6 +236,8 @@ namespace Chickensoft.GoDotAddon.Tests {
     private class ShellVerifier {
       private readonly Dictionary<string, Mock<IShell>> _shells = new();
       private readonly MockSequence _sequence = new();
+      private int _calls;
+      private int _added;
 
       public ShellVerifier() { }
 
@@ -272,7 +275,7 @@ namespace Chickensoft.GoDotAddon.Tests {
           MockSetup(sh, result, runMode, exe, args);
         }
         else {
-          throw new InvalidOperationException("Shell not found");
+          throw new InvalidOperationException($"Shell not found: {workingDir}");
         }
       }
 
@@ -285,6 +288,12 @@ namespace Chickensoft.GoDotAddon.Tests {
         foreach (var (_, value) in _shells) {
           value.VerifyAll();
         }
+        if (_calls < _added) {
+          throw new InvalidOperationException(
+            $"{_calls} calls were made, but {_added} were added. " +
+            $"Missing {_added - _calls} calls."
+          );
+        }
       }
 
       private void MockSetup(
@@ -294,14 +303,18 @@ namespace Chickensoft.GoDotAddon.Tests {
         string exe,
         string[] args
       ) {
+        var call = _added++;
         if (runMode == RunMode.Run) {
           shell.InSequence(_sequence).Setup(shell => shell.Run(exe, args))
-            .Returns(Task.FromResult(result));
+            .Returns(Task.FromResult(result))
+            .Callback(() => _calls++.ShouldBe(call));
         }
         else {
           shell.InSequence(_sequence).Setup(
             shell => shell.RunUnchecked(exe, args)
-          ).Returns(Task.FromResult(result));
+          )
+          .Returns(Task.FromResult(result))
+          .Callback(() => _calls++.ShouldBe(call));
         }
       }
     }

@@ -35,14 +35,12 @@ namespace Chickensoft.GoDotAddon {
   public class App : IApp {
     public string WorkingDir { get; } = Environment.CurrentDirectory;
     public IFileSystem FS { get; } = new FileSystem();
-    private readonly ConsoleWriter _output;
 
-    public App() => _output = null!;
+    public App() { }
 
-    public App(string workingDir, IFileSystem fs, ConsoleWriter output) {
+    public App(string workingDir, IFileSystem fs) {
       WorkingDir = workingDir;
       FS = fs;
-      _output = output;
     }
 
     public T LoadFile<T>(string path) {
@@ -63,8 +61,20 @@ namespace Chickensoft.GoDotAddon {
       }
     }
 
-    public IShell CreateShell(string workingDir)
+    public virtual IShell CreateShell(string workingDir)
+      => new Shell(new ProcessRunner(), workingDir);
+  }
+
+  public class DryRunApp : App {
+    private readonly ConsoleWriter _output;
+
+    public DryRunApp(
+      string workingDir,
+      IFileSystem fs,
+      ConsoleWriter output = null!
+    ) : base(workingDir: workingDir, fs: fs) => _output = output;
+
+    public override IShell CreateShell(string workingDir)
       => new FakeShell(_output, workingDir);
-    // => new Shell(new ProcessRunner(), workingDir);
   }
 }

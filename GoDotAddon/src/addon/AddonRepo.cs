@@ -29,14 +29,14 @@ namespace Chickensoft.GoDotAddon {
     }
 
     public async Task DeleteAddon(RequiredAddon addon, Config config) {
-      var addonDir = Path.Combine(config.AddonsPath, addon.Name);
-      if (!_fs.Directory.Exists(addonDir)) { return; }
-      var status = await _app.CreateShell(addonDir).RunUnchecked(
+      var addonPath = Path.Combine(config.AddonsPath, addon.Name);
+      if (!_fs.Directory.Exists(addonPath)) { return; }
+      var status = await _app.CreateShell(addonPath).RunUnchecked(
         "git", "status", "--porcelain"
       );
       if (status.Success) {
         // Installed addon is unmodified by the user, free to delete.
-        await _app.CreateShell(config.AddonsPath).Run("rm", "-rf", addonDir);
+        await _app.CreateShell(config.AddonsPath).Run("rm", "-rf", addonPath);
       }
       else {
         throw new CommandException(
@@ -59,19 +59,19 @@ namespace Chickensoft.GoDotAddon {
       );
       // copy addon from cache to installation location
       var workingShell = _app.CreateShell(config.ProjectPath);
-      var copyFromDir
+      var copyFromPath
         = Path.Combine(config.CachePath, addon.Name, addon.Subfolder);
       var addonInstallPath = Path.Combine(config.AddonsPath, addon.Name);
       // copy files from addon cache to addon dir, excluding git folders.
       await workingShell.Run(
-        "rsync", "-av", copyFromDir, addonInstallPath, "--exclude", ".git"
+        "rsync", "-av", copyFromPath, addonInstallPath, "--exclude", ".git"
       );
       var addonShell = _app.CreateShell(addonInstallPath);
       // Make a junk repo in the installed addon dir. We use this for change
       // tracking to avoid deleting a modified addon.
-      await addonCacheShell.Run("git", "init");
-      await addonCacheShell.Run("git", "add", ".");
-      await addonCacheShell.Run(
+      await addonShell.Run("git", "init");
+      await addonShell.Run("git", "add", ".");
+      await addonShell.Run(
         "git", "commit", "-m", "Initial commit"
       );
     }
