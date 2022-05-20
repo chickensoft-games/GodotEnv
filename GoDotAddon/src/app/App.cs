@@ -2,6 +2,7 @@ namespace Chickensoft.GoDotAddon {
   using System;
   using System.IO.Abstractions;
   using CliFx.Exceptions;
+  using CliFx.Infrastructure;
   using Newtonsoft.Json;
 
   /// <summary>
@@ -34,12 +35,14 @@ namespace Chickensoft.GoDotAddon {
   public class App : IApp {
     public string WorkingDir { get; } = Environment.CurrentDirectory;
     public IFileSystem FS { get; } = new FileSystem();
+    private readonly ConsoleWriter _output;
 
-    public App() { }
+    public App() => _output = null!;
 
-    public App(string workingDir, IFileSystem fs) {
+    public App(string workingDir, IFileSystem fs, ConsoleWriter output) {
       WorkingDir = workingDir;
       FS = fs;
+      _output = output;
     }
 
     public T LoadFile<T>(string path) {
@@ -61,6 +64,7 @@ namespace Chickensoft.GoDotAddon {
     }
 
     public IShell CreateShell(string workingDir)
-      => new Shell(new ProcessRunner(), workingDir);
+      => new FakeShell(_output, workingDir);
+    // => new Shell(new ProcessRunner(), workingDir);
   }
 }
