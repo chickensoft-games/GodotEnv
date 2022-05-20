@@ -1,4 +1,5 @@
-namespace GoDotAddon {
+namespace Chickensoft.GoDotAddon {
+  using System.Collections.Generic;
   using System.Text.Json.Serialization;
 
   public interface ILockFile {

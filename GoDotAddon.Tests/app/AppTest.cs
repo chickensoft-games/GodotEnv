@@ -4,8 +4,8 @@ namespace Chickensoft.GoDotAddon.Tests {
   using System.IO.Abstractions;
   using System.IO.Abstractions.TestingHelpers;
   using System.Threading.Tasks;
+  using Chickensoft.GoDotAddon;
   using CliFx.Exceptions;
-  using global::GoDotAddon;
   using Moq;
   using Newtonsoft.Json;
   using Shouldly;
@@ -14,7 +14,7 @@ namespace Chickensoft.GoDotAddon.Tests {
   public class AppTest {
     private const string FILENAME = @"c:\test.txt";
     private const string DATA = "data";
-    private const string TEST_DATA = $"{{ \"test\": \"{DATA}\" }}";
+    private readonly string _testData = $"{{ \"test\": \"{DATA}\" }}";
 
     private class TestObject {
       [JsonProperty("test")]
@@ -39,7 +39,7 @@ namespace Chickensoft.GoDotAddon.Tests {
     [Fact]
     public void AppLoadsFile() {
       var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
-        { FILENAME, new MockFileData(TEST_DATA) },
+        { FILENAME, new MockFileData(_testData) },
       });
       var app = new App(workingDir: ".", fs: fs);
       var file = app.LoadFile<TestObject>(FILENAME);

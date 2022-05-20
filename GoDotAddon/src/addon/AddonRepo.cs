@@ -1,5 +1,7 @@
-namespace GoDotAddon {
+namespace Chickensoft.GoDotAddon {
+  using System.IO;
   using System.IO.Abstractions;
+  using System.Threading.Tasks;
   using CliFx.Exceptions;
 
   public interface IAddonRepo {

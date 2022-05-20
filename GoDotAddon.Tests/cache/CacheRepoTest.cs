@@ -1,7 +1,7 @@
 namespace Chickensoft.GoDotAddon.Tests {
   using System.Collections.Generic;
   using System.IO.Abstractions;
-  using global::GoDotAddon;
+  using Chickensoft.GoDotAddon;
   using Moq;
   using Shouldly;
   using Xunit;
@@ -17,7 +17,8 @@ namespace Chickensoft.GoDotAddon.Tests {
     private const string WORKING_DIR = "./";
     private const string CACHE_PATH = ".addons/";
     private const string ADDONS_PATH = "addons/";
-    private const string ADDON_PATH = $"{CACHE_PATH}{ADDON_NAME}{SUBFOLDER}";
+    private readonly string _addonPath
+      = $"{CACHE_PATH}{ADDON_NAME}{SUBFOLDER}";
 
     [Fact]
     public void LoadsCacheCorrectlyWhenAddonIsCached() {
@@ -26,7 +27,7 @@ namespace Chickensoft.GoDotAddon.Tests {
       app.Setup(app => app.FS).Returns(fs.Object);
       var cacheRepo = new CacheRepo(app.Object);
       var config = new Config(
-        ProjectDir: WORKING_DIR,
+        ProjectPath: WORKING_DIR,
         CachePath: CACHE_PATH,
         AddonsPath: ADDONS_PATH
       );
@@ -47,7 +48,7 @@ namespace Chickensoft.GoDotAddon.Tests {
       var directory = new Mock<IDirectory>();
       fs.Setup(fs => fs.Directory).Returns(directory.Object);
       directory.Setup(dir => dir.GetDirectories(CACHE_PATH)).Returns(
-        new string[] { ADDON_PATH }
+        new string[] { _addonPath }
       );
       var cache = cacheRepo.LoadCache(config, lockFile.Object);
       cache.IsInCache(ADDON_NAME).ShouldBeTrue();

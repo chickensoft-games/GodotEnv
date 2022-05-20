@@ -1,4 +1,8 @@
-namespace GoDotAddon {
+namespace Chickensoft.GoDotAddon {
+  using System.Collections.Generic;
+  using System.IO;
+  using System.Threading.Tasks;
+
   public class AddonManager {
     private readonly IAddonRepo _addonRepo;
     private readonly IReporter _reporter;

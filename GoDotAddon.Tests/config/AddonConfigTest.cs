@@ -1,5 +1,5 @@
 namespace Chickensoft.GoDotAddon.Tests {
-  using global::GoDotAddon;
+  using Chickensoft.GoDotAddon;
   using Newtonsoft.Json;
   using Shouldly;
   using Xunit;

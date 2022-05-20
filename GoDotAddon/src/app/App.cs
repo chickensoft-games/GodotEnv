@@ -1,4 +1,5 @@
-namespace GoDotAddon {
+namespace Chickensoft.GoDotAddon {
+  using System;
   using System.IO.Abstractions;
   using CliFx.Exceptions;
   using Newtonsoft.Json;

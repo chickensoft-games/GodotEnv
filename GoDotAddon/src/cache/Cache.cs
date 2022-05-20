@@ -1,4 +1,6 @@
-namespace GoDotAddon {
+namespace Chickensoft.GoDotAddon {
+  using System.Collections.Generic;
+
   /// <summary>
   /// Represents an addon cache. An addon cache is just a folder which contains
   /// git clones of addon repositories.

@@ -1,4 +1,6 @@
-namespace GoDotAddon {
+namespace Chickensoft.GoDotAddon {
+  using System.Collections.Generic;
+
   public interface IDependencyGraph {
     DependencyEvent? Add(RequiredAddon addon, Config config);
   }

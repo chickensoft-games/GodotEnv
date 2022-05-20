@@ -1,7 +1,7 @@
 namespace Chickensoft.GoDotAddon.Tests {
   using System;
   using System.Threading.Tasks;
-  using global::GoDotAddon;
+  using Chickensoft.GoDotAddon;
   using Shouldly;
   using Xunit;
 

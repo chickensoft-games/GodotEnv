@@ -1,4 +1,6 @@
-﻿namespace GoDotAddon {
+﻿namespace Chickensoft.GoDotAddon {
+  using System;
+  using System.Threading.Tasks;
   using CliFx;
   using CliFx.Attributes;
   using CliFx.Infrastructure;

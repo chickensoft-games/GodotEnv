@@ -1,4 +1,4 @@
-namespace GoDotAddon {
+namespace Chickensoft.GoDotAddon {
   using Newtonsoft.Json;
 
   public record AddonConfig {

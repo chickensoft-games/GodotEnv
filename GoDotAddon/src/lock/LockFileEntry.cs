@@ -1,4 +1,4 @@
-namespace GoDotAddon {
+namespace Chickensoft.GoDotAddon {
   using System.Text.Json.Serialization;
 
   public record LockFileEntry {

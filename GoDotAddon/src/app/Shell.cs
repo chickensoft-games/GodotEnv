@@ -1,4 +1,5 @@
-namespace GoDotAddon {
+namespace Chickensoft.GoDotAddon {
+  using System.Threading.Tasks;
   using CliFx.Exceptions;
 
   public interface IShell {

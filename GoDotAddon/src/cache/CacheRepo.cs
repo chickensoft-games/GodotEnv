@@ -1,5 +1,8 @@
-namespace GoDotAddon {
+namespace Chickensoft.GoDotAddon {
+  using System.Collections.Generic;
+  using System.IO;
   using System.IO.Abstractions;
+  using System.Linq;
 
   public class CacheRepo {
     private readonly IFileSystem _fs;

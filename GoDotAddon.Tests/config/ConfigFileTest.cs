@@ -1,5 +1,5 @@
 namespace Chickensoft.GoDotAddon.Tests {
-  using global::GoDotAddon;
+  using Chickensoft.GoDotAddon;
   using Newtonsoft.Json;
   using Shouldly;
   using Xunit;
@@ -10,7 +10,7 @@ namespace Chickensoft.GoDotAddon.Tests {
     private const string SUBFOLDER = "GoDotAddon";
     private const string CHECKOUT = "main";
     private const string ADDON_NAME = "go_dot_addon";
-    private const string ADDON_JSON = "{" +
+    private readonly string _addonJson = "{" +
       $"  \"url\": \"{URL}\"," +
       $"  \"subfolder\": \"{SUBFOLDER}\"," +
       $"  \"checkout\": \"{CHECKOUT}\"" +
@@ -22,7 +22,7 @@ namespace Chickensoft.GoDotAddon.Tests {
     [Fact]
     public void Deserializes() {
       var json = "{" +
-        "  \"addons\": {" + ADDON_NAME + $": {ADDON_JSON}" + "}," +
+        "  \"addons\": {" + ADDON_NAME + $": {_addonJson}" + "}," +
         $"  \"cache\": \"{CACHE_PATH}\"," +
         $"  \"path\": \"{ADDONS_PATH}\"" +
       "}";
@@ -73,7 +73,7 @@ namespace Chickensoft.GoDotAddon.Tests {
       );
       var config = configFile.ToConfig(".");
       config.ShouldNotBeNull();
-      config.WorkingDir.ShouldBe(".");
+      config.ProjectPath.ShouldBe(".");
       config.CachePath.ShouldBe($"./{CACHE_PATH}");
       config.AddonsPath.ShouldBe($"./{ADDONS_PATH}");
     }

@@ -1,4 +1,6 @@
-namespace GoDotAddon {
+namespace Chickensoft.GoDotAddon {
+  using System.Collections.Generic;
+  using System.IO;
   using Newtonsoft.Json;
 
   /// <summary>

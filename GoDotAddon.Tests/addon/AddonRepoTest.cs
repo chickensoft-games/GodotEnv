@@ -3,9 +3,8 @@ namespace Chickensoft.GoDotAddon.Tests {
   using System.Collections.Generic;
   using System.IO.Abstractions;
   using System.Threading.Tasks;
+  using Chickensoft.GoDotAddon;
   using CliFx.Exceptions;
-  using global::GoDotAddon;
-
   using Moq;
   using Shouldly;
   using Xunit;
@@ -13,6 +12,12 @@ namespace Chickensoft.GoDotAddon.Tests {
   public class AddonRepoTest {
     private const string CACHE_PATH = ".addons";
     private const string ADDONS_PATH = "addons";
+    private readonly Config _config = new(
+      ProjectPath: "some/work/dir",
+      CachePath: CACHE_PATH,
+      AddonsPath: ADDONS_PATH
+    );
+
     private readonly RequiredAddon _addon = new(
       name: "go_dot_addon",
       configFilePath: "some/working/dir/addons.json",
@@ -73,14 +78,14 @@ namespace Chickensoft.GoDotAddon.Tests {
 
       var addonRepo = new AddonRepo(app.Object);
 
-      await addonRepo.CacheAddon(_addon, CACHE_PATH, cachedAddonDir);
+      await addonRepo.CacheAddon(_addon, _config);
 
       directory.VerifyAll();
       cli.VerifyAll();
     }
 
     [Fact]
-    public async Task DeleteExistingInstalledAddonDeletesAddon() {
+    public async Task DeleteAddonDeletesAddon() {
       var addonDir = $"{ADDONS_PATH}/{_addon.Name}";
 
       var app = new Mock<IApp>();
@@ -117,14 +122,14 @@ namespace Chickensoft.GoDotAddon.Tests {
 
       var addonRepo = new AddonRepo(app.Object);
 
-      await addonRepo.DeleteExistingInstalledAddon(_addon, ADDONS_PATH);
+      await addonRepo.DeleteAddon(_addon, _config);
 
       directory.VerifyAll();
       cli.VerifyAll();
     }
 
     [Fact]
-    public async Task DeleteExistingInstalledAddonThrowsIfAddonModified() {
+    public async Task DeleteAddonThrowsIfAddonModified() {
       var addonDir = $"{ADDONS_PATH}/{_addon.Name}";
 
       var app = new Mock<IApp>();
@@ -156,7 +161,7 @@ namespace Chickensoft.GoDotAddon.Tests {
 
       await Should.ThrowAsync<CommandException>(
         async ()
-          => await addonRepo.DeleteExistingInstalledAddon(_addon, ADDONS_PATH)
+          => await addonRepo.DeleteAddon(_addon, _config)
       );
 
       directory.VerifyAll();
@@ -214,7 +219,7 @@ namespace Chickensoft.GoDotAddon.Tests {
       );
 
       var addonRepo = new AddonRepo(app.Object);
-      await addonRepo.CopyAddonFromCache(workingDir, cachedAddonDir, addonDir);
+      await addonRepo.CopyAddonFromCache(_addon, _config);
 
       app.VerifyAll();
       cli.VerifyAll();
