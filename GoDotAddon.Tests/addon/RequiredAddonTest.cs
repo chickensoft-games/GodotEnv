@@ -63,7 +63,7 @@ namespace Chickensoft.GoDotAddon.Tests {
         checkout: CHECKOUT,
         subfolder: SUBFOLDER + "/"
       );
-      addon.Id.ShouldBe("chickensoft_games_go_dot_addon#main:GoDotAddon.Tests");
+      addon.Id.ShouldBe("chickensoft_games_go_dot_addon");
     }
 
     [Fact]
@@ -74,7 +74,7 @@ namespace Chickensoft.GoDotAddon.Tests {
         configFilePath: CONFIG_FILE_PATH,
         url: testUrl, checkout: CHECKOUT, subfolder: SUBFOLDER
       );
-      addon.Id.ShouldBe("bob_the_url#main:GoDotAddon.Tests");
+      addon.Id.ShouldBe("bob_the_url");
     }
   }
 }

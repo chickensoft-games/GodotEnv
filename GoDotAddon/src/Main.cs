@@ -17,9 +17,27 @@
       Description = "Clears the cache and downloads packages again.")]
     public bool ClearCache { get; init; } = false;
 
+    private IApp _app { get; init; } = Info.App;
+
+    public InstallCommand() { }
+    public InstallCommand(IApp app) => _app = app;
+
     public async ValueTask ExecuteAsync(IConsole console) {
-      await Task.CompletedTask;
-      console.Output.WriteLine("Hello, installation.");
+      var addonRepo = new AddonRepo(app: Info.App);
+      var configFileRepo = new ConfigFileRepo(app: Info.App);
+      var reporter = new Reporter(console.Output);
+      var dependencyGraph = new DependencyGraph();
+
+      var addonManger = new AddonManager(
+        addonRepo: addonRepo,
+        configFileRepo: configFileRepo,
+        reporter: reporter,
+        dependencyGraph: dependencyGraph
+      );
+
+      await addonManger.InstallAddons(
+        projectPath: Environment.CurrentDirectory
+      );
     }
   }
 

@@ -1,19 +1,30 @@
 namespace GoDotAddon {
   public class AddonManager {
     private readonly IAddonRepo _addonRepo;
+    private readonly IReporter _reporter;
+    private readonly IConfigFileRepo _configFileRepo;
+    private readonly IDependencyGraph _dependencyGraph;
 
-    public AddonManager(IAddonRepo addonRepo) => _addonRepo = addonRepo;
-
-    public async Task InstallAddons(
-      string projectPath, ConfigFileRepo configFileRepo
+    public AddonManager(
+      IAddonRepo addonRepo,
+      IConfigFileRepo configFileRepo,
+      IReporter reporter,
+      IDependencyGraph dependencyGraph
     ) {
+      _addonRepo = addonRepo;
+      _configFileRepo = configFileRepo;
+      _reporter = reporter;
+      _dependencyGraph = dependencyGraph;
+    }
+
+    public async Task InstallAddons(string projectPath) {
       var searchPaths = new Queue<string>();
       searchPaths.Enqueue(projectPath);
 
       var projConfigFilePath
         = Path.Combine(projectPath, IApp.ADDONS_CONFIG_FILE);
       var projConfigFile
-        = configFileRepo.LoadOrCreateConfigFile(projConfigFilePath);
+        = _configFileRepo.LoadOrCreateConfigFile(projConfigFilePath);
       var config = projConfigFile.ToConfig(projectPath);
 
       var addonsByUrl = new Dictionary<string, RequiredAddon>();
@@ -21,7 +32,7 @@ namespace GoDotAddon {
       do {
         var path = searchPaths.Dequeue();
         var configFilePath = Path.Combine(path, IApp.ADDONS_CONFIG_FILE);
-        var configFile = configFileRepo.LoadOrCreateConfigFile(configFilePath);
+        var configFile = _configFileRepo.LoadOrCreateConfigFile(configFilePath);
         var addonConfigs = configFile.Addons;
 
         foreach ((var addonName, var addonConfig) in addonConfigs) {
@@ -45,6 +56,15 @@ namespace GoDotAddon {
             checkout: addonConfig.Checkout,
             subfolder: addonConfig.Subfolder
           );
+
+          var depEvent = _dependencyGraph.Add(addon, config);
+          if (depEvent is ReportableDependencyEvent reportableDepEvent) {
+            _reporter.DependencyEvent(reportableDepEvent);
+          }
+
+          if (depEvent is IDependencyNotInstalledEvent) {
+            shouldInstall = false;
+          }
 
           if (shouldInstall) {
             // Clone the addon from the git url, if needed.

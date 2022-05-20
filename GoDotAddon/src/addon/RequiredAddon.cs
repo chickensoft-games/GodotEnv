@@ -15,7 +15,7 @@ namespace GoDotAddon {
     public string Subfolder { get; init; }
     public string ConfigFilePath { get; init; }
 
-    // Deterministic id based on url, subfolder, and branch only.
+    // Deterministic id based on url username and repository name
     public string Id {
       get {
         var match = _urlRegex.Match(Url);
@@ -23,7 +23,7 @@ namespace GoDotAddon {
           match.Success
             ? match.Groups[6].Value + "_" + match.Groups[7].Value
             : MakeValidFolderName(Url.ToSnakeCase())
-        ).ToSnakeCase() + "#" + Checkout + ":" + Subfolder;
+        ).ToSnakeCase();
       }
     }
 
