@@ -59,12 +59,15 @@ namespace Chickensoft.GoDotAddon {
       );
       // copy addon from cache to installation location
       var workingShell = _app.CreateShell(config.ProjectPath);
-      var copyFromPath
-        = Path.Combine(config.CachePath, addon.Name, addon.Subfolder);
+      var copyFromPath = Path.Combine(config.CachePath, addon.Name);
+      var subfolder = addon.Subfolder;
+      if (subfolder != "/") {
+        copyFromPath = Path.Combine(copyFromPath, subfolder);
+      }
       var addonInstallPath = Path.Combine(config.AddonsPath, addon.Name);
       // copy files from addon cache to addon dir, excluding git folders.
       await workingShell.Run(
-        "rsync", "-av", copyFromPath, addonInstallPath, "--exclude", ".git"
+        "rsync", "-av", copyFromPath, config.AddonsPath, "--exclude", ".git"
       );
       var addonShell = _app.CreateShell(addonInstallPath);
       // Make a junk repo in the installed addon dir. We use this for change

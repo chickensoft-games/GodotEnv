@@ -25,10 +25,8 @@ namespace Chickensoft.GoDotAddon {
       var searchPaths = new Queue<string>();
       searchPaths.Enqueue(projectPath);
 
-      var projConfigFilePath
-        = Path.Combine(projectPath, IApp.ADDONS_CONFIG_FILE);
       var projConfigFile
-        = _configFileRepo.LoadOrCreateConfigFile(projConfigFilePath);
+        = _configFileRepo.LoadOrCreateConfigFile(projectPath);
       var config = projConfigFile.ToConfig(projectPath);
 
       var addonsByUrl = new Dictionary<string, RequiredAddon>();
