@@ -8,7 +8,8 @@ namespace Chickensoft.GoDotAddon.Tests {
 
 
   public class ConfigFileRepoTest {
-    private const string CONFIG_FILE_PATH = "file.json";
+    private const string PROJECT_PATH = ".";
+    private const string CONFIG_FILE_PATH = "./addons.json";
     private readonly ConfigFile _configFile = new(
       addons: new(), cachePath: "./.addons", addonsPath: "./addons"
     );
@@ -34,7 +35,7 @@ namespace Chickensoft.GoDotAddon.Tests {
         _configFile
       );
       var repo = new ConfigFileRepo(app.Object);
-      var config = repo.LoadOrCreateConfigFile(CONFIG_FILE_PATH);
+      var config = repo.LoadOrCreateConfigFile(PROJECT_PATH);
       config.ShouldBe(_configFile);
     }
 
@@ -44,7 +45,7 @@ namespace Chickensoft.GoDotAddon.Tests {
       var fs = new MockFileSystem();
       app.Setup(app => app.FS).Returns(fs);
       var repo = new ConfigFileRepo(app.Object);
-      var config = repo.LoadOrCreateConfigFile(CONFIG_FILE_PATH);
+      var config = repo.LoadOrCreateConfigFile(PROJECT_PATH);
       config.ShouldBeOfType(typeof(ConfigFile));
       config.CachePath.ShouldBe(IApp.DEFAULT_CACHE_PATH);
       config.AddonsPath.ShouldBe(IApp.DEFAULT_ADDONS_PATH);

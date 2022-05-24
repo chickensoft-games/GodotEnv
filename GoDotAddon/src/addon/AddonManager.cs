@@ -35,8 +35,8 @@ namespace Chickensoft.GoDotAddon {
 
       do {
         var path = searchPaths.Dequeue();
+        var configFile = _configFileRepo.LoadOrCreateConfigFile(path);
         var configFilePath = Path.Combine(path, IApp.ADDONS_CONFIG_FILE);
-        var configFile = _configFileRepo.LoadOrCreateConfigFile(configFilePath);
         var addonConfigs = configFile.Addons;
 
         foreach ((var addonName, var addonConfig) in addonConfigs) {

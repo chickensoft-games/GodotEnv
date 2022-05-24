@@ -1,9 +1,10 @@
 namespace Chickensoft.GoDotAddon {
+  using System.IO;
   using System.IO.Abstractions;
   using Newtonsoft.Json;
 
   public interface IConfigFileRepo {
-    ConfigFile LoadOrCreateConfigFile(string configFilePath);
+    ConfigFile LoadOrCreateConfigFile(string projectPath);
   }
 
   public class ConfigFileRepo : IConfigFileRepo {
@@ -15,7 +16,8 @@ namespace Chickensoft.GoDotAddon {
       _fs = app.FS;
     }
 
-    public ConfigFile LoadOrCreateConfigFile(string configFilePath) {
+    public ConfigFile LoadOrCreateConfigFile(string projectPath) {
+      var configFilePath = Path.Combine(projectPath, IApp.ADDONS_CONFIG_FILE);
       var configFile = _fs.File.Exists(configFilePath)
         ? Load(configFilePath)
         : Create(configFilePath);
