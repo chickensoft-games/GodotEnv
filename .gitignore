@@ -6,3 +6,4 @@ GoDotAddon.Tests/coverage
 GoDotAddon.Tests/badges
 GoDotAddon/addons
 GoDotAddons/.addons
+GoDotAddon/addons.json
