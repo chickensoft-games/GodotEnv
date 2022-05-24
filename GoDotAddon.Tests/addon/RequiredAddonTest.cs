@@ -32,6 +32,7 @@ namespace Chickensoft.GoDotAddon.Tests {
         checkout: CHECKOUT,
         subfolder: SUBFOLDER + "/"
       );
+      addon.Name.ShouldBe(ADDON_NAME);
       addon.Url.ShouldBe(ADDON_URL);
       addon.Checkout.ShouldBe(CHECKOUT);
       addon.Subfolder.ShouldBe(SUBFOLDER);
