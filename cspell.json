@@ -1,9 +1,18 @@
 {
   "words": [
+    "branchcoverage",
     "Chickensoft",
+    "CYGWIN",
     "godotaddon",
+    "lcov",
+    "linecoverage",
+    "methodcoverage",
+    "MSYS",
     "Newtonsoft",
+    "reportgenerator",
+    "reporttypes",
     "Shouldly",
+    "targetdir",
     "Xunit"
   ]
 }

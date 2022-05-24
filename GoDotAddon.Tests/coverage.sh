@@ -5,12 +5,12 @@ dotnet test \
   -p:CoverletOutput=./coverage/
 
 reportgenerator \
-  -reports:"./coverage/coverage.info" \
+  -reports:"./coverage/coverage.net6.0.info" \
   -targetdir:"./coverage/report" \
-  -reporttypes:Html;Badges
+  -reporttypes:Html
 
 reportgenerator \
-  -reports:"./coverage/coverage.info" \
+  -reports:"./coverage/coverage.net6.0.info" \
   -targetdir:"./badges" \
   -reporttypes:Badges
 
