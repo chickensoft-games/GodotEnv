@@ -30,6 +30,7 @@ namespace Chickensoft.GoDotAddon {
 
     IShell CreateShell(string workingDir);
     T LoadFile<T>(string path);
+    void SaveFile(string path, string contents);
   }
 
   public class App : IApp {
@@ -57,6 +58,17 @@ namespace Chickensoft.GoDotAddon {
       catch (Exception e) {
         throw new CommandException(
           $"Failed to deserialize {path}", innerException: e
+        );
+      }
+    }
+
+    public void SaveFile(string path, string contents) {
+      try {
+        FS.File.WriteAllText(path, contents);
+      }
+      catch (Exception e) {
+        throw new CommandException(
+          $"Failed to write to {path}", innerException: e
         );
       }
     }
