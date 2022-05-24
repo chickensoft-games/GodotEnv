@@ -192,7 +192,7 @@ namespace Chickensoft.GoDotAddon.Tests {
         new ProcessResult(0),
         RunMode.Run,
         "rsync",
-        "-av", copyFromPath, addonDir, "--exclude", ".git"
+        "-av", copyFromPath, _config.AddonsPath, "--exclude", ".git"
       );
 
       cli.Setup(
