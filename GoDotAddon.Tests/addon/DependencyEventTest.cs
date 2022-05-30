@@ -82,5 +82,24 @@ namespace Chickensoft.GoDotAddon.Tests {
         "different branches (`main`, `dev`) from `https://user/a.git`."
       );
     }
+
+    [Fact]
+    public void SimilarDependencyWarningDescribesMultipleConflicts() {
+      var similarDependencyWarning = new SimilarDependencyWarning(
+        conflict: _addonA,
+        addons: new List<RequiredAddon> { _addonASubfolder, _addonABranch }
+      );
+
+      similarDependencyWarning.ToString().ShouldBe(
+        "The addon \"A\" could conflict with the previously installed addons." +
+        "\n\n" +
+        $"  Attempted to install {_addonA}\n\n" +
+        "Both \"A\" and \"A2\" install different subfolders " +
+        "(`/`, `subfolder/`) on the same branch `main` from " +
+        "`https://user/a.git`.\n\n" +
+        "Both \"A\" and \"A3\" install the same subfolder `/` of two " +
+        "different branches (`main`, `dev`) from `https://user/a.git`."
+      );
+    }
   }
 }

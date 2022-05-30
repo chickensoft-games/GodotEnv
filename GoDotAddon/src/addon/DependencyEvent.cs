@@ -1,7 +1,6 @@
 namespace Chickensoft.GoDotAddon {
   using System.Collections.Generic;
   using System.IO;
-  using System.Text;
 
   public abstract record DependencyEvent { }
   public abstract record ReportableDependencyEvent : DependencyEvent { }
@@ -22,7 +21,7 @@ namespace Chickensoft.GoDotAddon {
     public override string ToString() {
       var article = Addons.Count == 1 ? "a" : "the";
       var s = Addons.Count == 1 ? "" : "s";
-      var buffer = new StringBuilder();
+      var buffer = new List<string>();
       var desc = "";
       foreach (var addon in Addons) {
         var names = $"\"{Conflict.Name}\" and \"{addon.Name}\"";
@@ -32,20 +31,20 @@ namespace Chickensoft.GoDotAddon {
             $"`{addon.Subfolder}/` of two different branches " +
             $"(`{Conflict.Checkout}`, `{addon.Checkout}`) from " +
             $"`{Conflict.Url}`.";
-          buffer.Append(desc);
+          buffer.Add(desc);
         }
         else if (addon.Checkout == Conflict.Checkout) {
           desc = $"Both {names} install different subfolders " +
             $"(`{Conflict.Subfolder}/`, `{addon.Subfolder}/`) on the same " +
             $"branch `{addon.Checkout}` from `{addon.Url}`.";
-          buffer.Append(desc);
+          buffer.Add(desc);
         }
       }
       return
         $"The addon \"{Conflict.Name}\" could conflict with {article} " +
         $"previously installed addon{s}.\n\n" +
         $"  Attempted to install {Conflict}\n\n" +
-        buffer.ToString();
+        string.Join("\n\n", buffer);
     }
   }
 
