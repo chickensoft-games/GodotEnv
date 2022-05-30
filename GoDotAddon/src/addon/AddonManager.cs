@@ -59,7 +59,7 @@ namespace Chickensoft.GoDotAddon {
             subfolder: addonConfig.Subfolder
           );
 
-          var depEvent = _dependencyGraph.Add(addon, config);
+          var depEvent = _dependencyGraph.Add(addon);
           if (depEvent is ReportableDependencyEvent reportableDepEvent) {
             _reporter.DependencyEvent(reportableDepEvent);
           }

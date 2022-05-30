@@ -1,9 +1,10 @@
 namespace Chickensoft.GoDotAddon {
   using System.Collections.Generic;
-  using System.IO;
 
   public abstract record DependencyEvent { }
+
   public abstract record ReportableDependencyEvent : DependencyEvent { }
+
   public interface IDependencyNotInstalledEvent { }
 
   public record SimilarDependencyWarning : ReportableDependencyEvent {
@@ -52,31 +53,27 @@ namespace Chickensoft.GoDotAddon {
     : ReportableDependencyEvent, IDependencyNotInstalledEvent {
     public RequiredAddon Conflict { get; init; }
     public RequiredAddon Addon { get; init; }
-    private readonly string _cachePath;
 
     public ConflictingDestinationPathEvent(
       RequiredAddon conflict,
-      RequiredAddon addon,
-      Config config
+      RequiredAddon addon
     ) {
       Conflict = conflict;
       Addon = addon;
-      _cachePath = config.CachePath;
     }
 
-    public override string ToString() {
-      var path = Path.Combine(_cachePath, Conflict.Name);
-      return $"Cannot install \"{Conflict.Name}\" from " +
+    public override string ToString() =>
+      $"Cannot install \"{Conflict.Name}\" from " +
       $"`{Conflict.ConfigFilePath}` because it would conflict " +
       $"with a previously installed addon of the same name from " +
       $"`{Addon.ConfigFilePath}`.\n\n" +
-      $"Both addons would be installed to the same path: `{path}`.\n\n" +
+      $"Both addons would be installed to the same path.\n\n" +
       $"  Attempted to install: {Conflict}\n\n" +
       $"  Previously installed: {Addon}";
-    }
   }
 
   public record DependencyAlreadyInstalledEvent()
     : DependencyEvent, IDependencyNotInstalledEvent;
+
   public record DependencyInstalledEvent() : DependencyEvent;
 }

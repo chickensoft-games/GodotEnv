@@ -15,6 +15,14 @@ namespace Chickensoft.GoDotAddon.Tests {
       subfolder: "/"
     );
 
+    private readonly RequiredAddon _addonAConflict = new(
+      name: "A",
+      configFilePath: "project/addons/other/addons.json",
+      url: "https://user/a.git",
+      checkout: "main",
+      subfolder: "/"
+    );
+
     private readonly RequiredAddon _addonASubfolder = new(
       name: "A2",
       configFilePath: "project/addons.json",
@@ -41,12 +49,12 @@ namespace Chickensoft.GoDotAddon.Tests {
 
     [Fact]
     public void SimilarDependencyWarningDescribesUnrelatedDependencies() {
-      var similarDependencyWarning = new SimilarDependencyWarning(
+      var e = new SimilarDependencyWarning(
         conflict: _addonA,
         addons: new List<RequiredAddon> { _addonB }
       );
 
-      similarDependencyWarning.ToString().ShouldBe(
+      e.ToString().ShouldBe(
         "The addon \"A\" could conflict with a previously installed addon.\n\n"
         + $"  Attempted to install {_addonA}\n\n"
       );
@@ -54,12 +62,12 @@ namespace Chickensoft.GoDotAddon.Tests {
 
     [Fact]
     public void SimilarDependencyWarningDescribesDifferentSubfolders() {
-      var similarDependencyWarning = new SimilarDependencyWarning(
+      var e = new SimilarDependencyWarning(
         conflict: _addonA,
         addons: new List<RequiredAddon> { _addonASubfolder }
       );
 
-      similarDependencyWarning.ToString().ShouldBe(
+      e.ToString().ShouldBe(
         "The addon \"A\" could conflict with a previously installed addon.\n\n"
         + $"  Attempted to install {_addonA}\n\n" +
         "Both \"A\" and \"A2\" install different subfolders " +
@@ -70,12 +78,12 @@ namespace Chickensoft.GoDotAddon.Tests {
 
     [Fact]
     public void SimilarDependencyWarningDescribesDifferentCheckouts() {
-      var similarDependencyWarning = new SimilarDependencyWarning(
+      var e = new SimilarDependencyWarning(
         conflict: _addonA,
         addons: new List<RequiredAddon> { _addonABranch }
       );
 
-      similarDependencyWarning.ToString().ShouldBe(
+      e.ToString().ShouldBe(
         "The addon \"A\" could conflict with a previously installed addon.\n\n"
         + $"  Attempted to install {_addonA}\n\n" +
         "Both \"A\" and \"A3\" install the same subfolder `/` of two " +
@@ -85,12 +93,12 @@ namespace Chickensoft.GoDotAddon.Tests {
 
     [Fact]
     public void SimilarDependencyWarningDescribesMultipleConflicts() {
-      var similarDependencyWarning = new SimilarDependencyWarning(
+      var e = new SimilarDependencyWarning(
         conflict: _addonA,
         addons: new List<RequiredAddon> { _addonASubfolder, _addonABranch }
       );
 
-      similarDependencyWarning.ToString().ShouldBe(
+      e.ToString().ShouldBe(
         "The addon \"A\" could conflict with the previously installed addons." +
         "\n\n" +
         $"  Attempted to install {_addonA}\n\n" +
@@ -99,6 +107,23 @@ namespace Chickensoft.GoDotAddon.Tests {
         "`https://user/a.git`.\n\n" +
         "Both \"A\" and \"A3\" install the same subfolder `/` of two " +
         "different branches (`main`, `dev`) from `https://user/a.git`."
+      );
+    }
+
+    [Fact]
+    public void ConflictingDestinationPathEventDescribesConflict() {
+      var e = new ConflictingDestinationPathEvent(
+        conflict: _addonAConflict,
+        addon: _addonA
+      );
+
+      e.ToString().ShouldBe(
+        "Cannot install \"A\" from `project/addons/other/addons.json` " +
+        "because it would conflict with a previously installed addon of the " +
+        "same name from `project/addons.json`.\n\n" +
+        "Both addons would be installed to the same path.\n\n" +
+        $"  Attempted to install: {_addonAConflict}\n\n" +
+        $"  Previously installed: {_addonA}"
       );
     }
   }
