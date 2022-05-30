@@ -46,7 +46,7 @@ namespace Chickensoft.GoDotAddon {
     }
 
     public override string ToString() => $"Addon \"{Name}\" from " +
-      $"`{ConfigFilePath}` to `{Subfolder}/` on branch `{Checkout}` of `{Url}`";
+      $"`{ConfigFilePath}` at `{Subfolder}/` on branch `{Checkout}` of `{Url}`";
 
     // Credit: https://stackoverflow.com/a/33353841
     private static string MakeValidFolderName(string value) {

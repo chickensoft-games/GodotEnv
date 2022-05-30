@@ -23,29 +23,44 @@ namespace Chickensoft.GoDotAddon {
       var article = Addons.Count == 1 ? "a" : "the";
       var s = Addons.Count == 1 ? "" : "s";
       var buffer = new List<string>();
-      var desc = "";
       foreach (var addon in Addons) {
-        var names = $"\"{Conflict.Name}\" and \"{addon.Name}\"";
         if (addon.Url != Conflict.Url) { continue; }
-        if (addon.Subfolder == Conflict.Subfolder) {
-          desc = $"Both {names} install the same subfolder " +
-            $"`{addon.Subfolder}/` of two different branches " +
-            $"(`{Conflict.Checkout}`, `{addon.Checkout}`) from " +
-            $"`{Conflict.Url}`.";
-          buffer.Add(desc);
+        buffer.Add(
+          $"\nBoth \"{Conflict.Name}\" and \"{addon.Name}\" could potentially " +
+          "conflict with each other.\n"
+        );
+        if (Conflict.Subfolder != addon.Subfolder) {
+          buffer.Add(
+            "- Different subfolders from the same url are installed."
+          );
+          buffer.Add(
+            $"    - \"{Conflict.Name}\" installs `{Conflict.Subfolder}/` " +
+            $"from `{Conflict.Url}`"
+          );
+          buffer.Add(
+            $"    - \"{addon.Name}\" installs `{addon.Subfolder}/` " +
+            $"from `{addon.Url}`"
+          );
         }
-        else if (addon.Checkout == Conflict.Checkout) {
-          desc = $"Both {names} install different subfolders " +
-            $"(`{Conflict.Subfolder}/`, `{addon.Subfolder}/`) on the same " +
-            $"branch `{addon.Checkout}` from `{addon.Url}`.";
-          buffer.Add(desc);
+        else if (Conflict.Checkout != addon.Checkout) {
+          buffer.Add(
+            "- Different branches from the same url are installed."
+          );
+          buffer.Add(
+            $"    - \"{Conflict.Name}\" installs `{Conflict.Checkout}` " +
+            $"from `{Conflict.Url}`"
+          );
+          buffer.Add(
+            $"    - \"{addon.Name}\" installs `{addon.Checkout}` " +
+            $"from `{addon.Url}`"
+          );
         }
       }
       return
         $"The addon \"{Conflict.Name}\" could conflict with {article} " +
         $"previously installed addon{s}.\n\n" +
         $"  Attempted to install {Conflict}\n\n" +
-        string.Join("\n\n", buffer);
+        string.Join("\n", buffer).Trim();
     }
   }
 

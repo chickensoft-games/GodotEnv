@@ -50,7 +50,7 @@ namespace Chickensoft.GoDotAddon.Tests {
       var description = addon.ToString();
       description.ShouldBe(
         $"Addon \"{ADDON_NAME}\" from `{CONFIG_FILE_PATH}`" +
-        $" to `{SUBFOLDER}/` on branch `{CHECKOUT}` of `{ADDON_URL}`"
+        $" at `{SUBFOLDER}/` on branch `{CHECKOUT}` of `{ADDON_URL}`"
       );
     }
 
@@ -65,7 +65,7 @@ namespace Chickensoft.GoDotAddon.Tests {
       );
       addon.ToString().ShouldBe(
         $"Addon \"{ADDON_NAME}\" from `{CONFIG_FILE_PATH}`" +
-        $" to `/` on branch `{CHECKOUT}` of `{ADDON_URL}`"
+        $" at `/` on branch `{CHECKOUT}` of `{ADDON_URL}`"
       );
     }
 

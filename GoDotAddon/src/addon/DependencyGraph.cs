@@ -44,12 +44,8 @@ namespace Chickensoft.GoDotAddon {
             // Dependency is already installed under a different name.
             return new DependencyAlreadyInstalledEvent();
           }
-          else if (existingAddon.Subfolder == addon.Subfolder) {
-            // only branch is different
-            conflicts.Add(existingAddon);
-          }
-          else if (existingAddon.Checkout == addon.Checkout) {
-            // only subfolder is different
+          else {
+            // name, subfolder, or branch are different, but url is the same
             conflicts.Add(existingAddon);
           }
         }

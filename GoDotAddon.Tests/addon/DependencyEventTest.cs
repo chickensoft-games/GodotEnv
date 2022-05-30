@@ -70,9 +70,10 @@ namespace Chickensoft.GoDotAddon.Tests {
       e.ToString().ShouldBe(
         "The addon \"A\" could conflict with a previously installed addon.\n\n"
         + $"  Attempted to install {_addonA}\n\n" +
-        "Both \"A\" and \"A2\" install different subfolders " +
-        "(`/`, `subfolder/`) on the same branch `main` from " +
-        "`https://user/a.git`."
+        "Both \"A\" and \"A2\" could potentially conflict with each other.\n" +
+        "\n- Different subfolders from the same url are installed.\n" +
+        "    - \"A\" installs `/` from `https://user/a.git`\n" +
+        "    - \"A2\" installs `subfolder/` from `https://user/a.git`"
       );
     }
 
@@ -86,8 +87,10 @@ namespace Chickensoft.GoDotAddon.Tests {
       e.ToString().ShouldBe(
         "The addon \"A\" could conflict with a previously installed addon.\n\n"
         + $"  Attempted to install {_addonA}\n\n" +
-        "Both \"A\" and \"A3\" install the same subfolder `/` of two " +
-        "different branches (`main`, `dev`) from `https://user/a.git`."
+        "Both \"A\" and \"A3\" could potentially conflict with each other.\n" +
+        "\n- Different branches from the same url are installed.\n" +
+        "    - \"A\" installs `main` from `https://user/a.git`\n" +
+        "    - \"A3\" installs `dev` from `https://user/a.git`"
       );
     }
 
@@ -102,11 +105,15 @@ namespace Chickensoft.GoDotAddon.Tests {
         "The addon \"A\" could conflict with the previously installed addons." +
         "\n\n" +
         $"  Attempted to install {_addonA}\n\n" +
-        "Both \"A\" and \"A2\" install different subfolders " +
-        "(`/`, `subfolder/`) on the same branch `main` from " +
-        "`https://user/a.git`.\n\n" +
-        "Both \"A\" and \"A3\" install the same subfolder `/` of two " +
-        "different branches (`main`, `dev`) from `https://user/a.git`."
+        "Both \"A\" and \"A2\" could potentially conflict with each other.\n" +
+        "\n- Different subfolders from the same url are installed.\n" +
+        "    - \"A\" installs `/` from `https://user/a.git`\n" +
+        "    - \"A2\" installs `subfolder/` from `https://user/a.git`\n" +
+        "\n" +
+        "Both \"A\" and \"A3\" could potentially conflict with each other.\n" +
+        "\n- Different branches from the same url are installed.\n" +
+        "    - \"A\" installs `main` from `https://user/a.git`\n" +
+        "    - \"A3\" installs `dev` from `https://user/a.git`"
       );
     }
 
