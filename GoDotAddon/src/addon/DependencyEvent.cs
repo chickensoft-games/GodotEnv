@@ -1,13 +1,13 @@
 namespace Chickensoft.GoDotAddon {
   using System.Collections.Generic;
 
-  public abstract record DependencyEvent { }
+  public interface IDependencyEvent { }
 
-  public abstract record ReportableDependencyEvent : DependencyEvent { }
+  public interface IReportableDependencyEvent : IDependencyEvent { }
 
   public interface IDependencyNotInstalledEvent { }
 
-  public record SimilarDependencyWarning : ReportableDependencyEvent {
+  public record SimilarDependencyWarning : IReportableDependencyEvent {
     public RequiredAddon Conflict { get; init; }
     public List<RequiredAddon> Addons { get; init; }
 
@@ -50,7 +50,7 @@ namespace Chickensoft.GoDotAddon {
   }
 
   public record ConflictingDestinationPathEvent
-    : ReportableDependencyEvent, IDependencyNotInstalledEvent {
+    : IReportableDependencyEvent, IDependencyNotInstalledEvent {
     public RequiredAddon Conflict { get; init; }
     public RequiredAddon Addon { get; init; }
 
@@ -73,7 +73,7 @@ namespace Chickensoft.GoDotAddon {
   }
 
   public record DependencyAlreadyInstalledEvent()
-    : DependencyEvent, IDependencyNotInstalledEvent;
+    : IDependencyEvent, IDependencyNotInstalledEvent;
 
-  public record DependencyInstalledEvent() : DependencyEvent;
+  public record DependencyInstalledEvent() : IDependencyEvent;
 }

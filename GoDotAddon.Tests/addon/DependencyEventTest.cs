@@ -126,5 +126,17 @@ namespace Chickensoft.GoDotAddon.Tests {
         $"  Previously installed: {_addonA}"
       );
     }
+
+    [Fact]
+    public void InstantiatesAlreadyInstalledEvent() {
+      var e = new DependencyAlreadyInstalledEvent();
+      e.ShouldBeOfType(typeof(DependencyAlreadyInstalledEvent));
+    }
+
+    [Fact]
+    public void InstantiatesInstalledEvent() {
+      var e = new DependencyInstalledEvent();
+      e.ShouldBeOfType(typeof(DependencyInstalledEvent));
+    }
   }
 }

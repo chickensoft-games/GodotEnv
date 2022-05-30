@@ -60,7 +60,7 @@ namespace Chickensoft.GoDotAddon {
           );
 
           var depEvent = _dependencyGraph.Add(addon);
-          if (depEvent is ReportableDependencyEvent reportableDepEvent) {
+          if (depEvent is IReportableDependencyEvent reportableDepEvent) {
             _reporter.DependencyEvent(reportableDepEvent);
           }
 

@@ -2,7 +2,7 @@ namespace Chickensoft.GoDotAddon {
   using System.Collections.Generic;
 
   public interface IDependencyGraph {
-    DependencyEvent? Add(RequiredAddon addon);
+    IDependencyEvent? Add(RequiredAddon addon);
   }
 
   public class DependencyGraph : IDependencyGraph {
@@ -14,7 +14,7 @@ namespace Chickensoft.GoDotAddon {
 
     public DependencyGraph() { }
 
-    public DependencyEvent Add(RequiredAddon addon) {
+    public IDependencyEvent Add(RequiredAddon addon) {
       // First, check to make sure another addon isn't installed to the same
       // path as the new one.
       if (_dependenciesByName.TryGetValue(addon.Name, out var sameNameAddon)) {
