@@ -7,20 +7,18 @@ namespace Chickensoft.GoDotAddon {
 
   [Command("install")]
   public class InstallCommand : ICommand {
-    [CommandOption("dry-run", 'd',
-      Description = "Doesn't actually install anything, just outputs what it" +
-      "would do.")]
-    public bool DryRun { get; init; } = false;
+    private readonly IApp _app;
+
+    public InstallCommand() => _app = new App();
+
+    public InstallCommand(IApp app) => _app = app;
 
     public async ValueTask ExecuteAsync(IConsole console) {
       var startDir = Environment.CurrentDirectory;
       var output = console.Output;
-      var app = DryRun
-        ? new DryRunApp(startDir, Info.App.FS, output)
-        : Info.App;
 
-      var addonRepo = new AddonRepo(app: app);
-      var configFileRepo = new ConfigFileRepo(app: app);
+      var addonRepo = new AddonRepo(app: _app);
+      var configFileRepo = new ConfigFileRepo(app: _app);
       var reporter = new Reporter(output);
       var dependencyGraph = new DependencyGraph();
 

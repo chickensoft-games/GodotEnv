@@ -26,7 +26,6 @@ namespace Chickensoft.GoDotAddon.Tests {
       var app = new App();
       app.WorkingDir.ShouldBe(Environment.CurrentDirectory);
       app.FS.ShouldBeOfType<FileSystem>();
-      Info.App.ShouldBeOfType(typeof(App));
     }
 
     [Fact]
@@ -67,6 +66,27 @@ namespace Chickensoft.GoDotAddon.Tests {
       )
       .InnerException?.ShouldNotBeNull()
       .Message.ShouldBe($"Couldn't load file `{FILENAME}`");
+    }
+
+    [Fact]
+    public void AppSavesFile() {
+      var fs = new MockFileSystem(new Dictionary<string, MockFileData> { });
+      var app = new App(workingDir: ".", fs: fs);
+      app.SaveFile(FILENAME, DATA);
+      var file = fs.File.ReadAllText(FILENAME);
+      file.ShouldBe(DATA);
+    }
+
+    [Fact]
+    public void AppThrowsErrorWhenSavingFileDoesNotWork() {
+      var fs = new Mock<IFileSystem>(MockBehavior.Strict);
+      var file = new Mock<IFile>(MockBehavior.Strict);
+      file.Setup(f => f.WriteAllText(FILENAME, DATA)).Throws<Exception>();
+      fs.Setup(fs => fs.File).Returns(file.Object);
+      var app = new App(workingDir: ".", fs: fs.Object);
+      Should.Throw<CommandException>(
+        () => app.SaveFile(FILENAME, DATA)
+      );
     }
   }
 }

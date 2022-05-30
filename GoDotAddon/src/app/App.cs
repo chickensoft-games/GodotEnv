@@ -2,20 +2,7 @@ namespace Chickensoft.GoDotAddon {
   using System;
   using System.IO.Abstractions;
   using CliFx.Exceptions;
-  using CliFx.Infrastructure;
   using Newtonsoft.Json;
-
-  /// <summary>
-  /// Contains information used by the GoDotAddon app. Static fields can be
-  /// overridden for testing purposes — a makeshift sort of dependency injection
-  /// for a simple CLI app.
-  /// </summary>
-  public static class Info {
-    // These can be overridden for testing.
-#pragma warning disable CA2211
-    public static IApp App = new App();
-#pragma warning restore CA2211
-  }
 
   public interface IApp {
     public const string DEFAULT_CACHE_PATH = ".addons";
@@ -75,18 +62,5 @@ namespace Chickensoft.GoDotAddon {
 
     public virtual IShell CreateShell(string workingDir)
       => new Shell(new ProcessRunner(), workingDir);
-  }
-
-  public class DryRunApp : App {
-    private readonly ConsoleWriter _output;
-
-    public DryRunApp(
-      string workingDir,
-      IFileSystem fs,
-      ConsoleWriter output = null!
-    ) : base(workingDir: workingDir, fs: fs) => _output = output;
-
-    public override IShell CreateShell(string workingDir)
-      => new FakeShell(_output, workingDir);
   }
 }
