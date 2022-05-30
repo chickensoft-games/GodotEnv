@@ -39,7 +39,10 @@ namespace Chickensoft.GoDotAddon {
       ConfigFilePath = configFilePath;
       Url = url;
       Checkout = checkout;
-      Subfolder = Path.TrimEndingDirectorySeparator(subfolder);
+      Subfolder = Path.TrimEndingDirectorySeparator(subfolder).TrimEnd(
+        Path.DirectorySeparatorChar,
+        Path.AltDirectorySeparatorChar
+      );
     }
 
     public override string ToString() => $"Addon \"{Name}\" from " +

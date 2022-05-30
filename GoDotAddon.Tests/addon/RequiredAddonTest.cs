@@ -54,6 +54,21 @@ namespace Chickensoft.GoDotAddon.Tests {
       );
     }
 
+    [Fact]
+    public void ToStringTrimsSlashOnSubfolder() {
+      var addon = new RequiredAddon(
+        name: ADDON_NAME,
+        configFilePath: CONFIG_FILE_PATH,
+        url: ADDON_URL,
+        checkout: CHECKOUT,
+        subfolder: "/"
+      );
+      addon.ToString().ShouldBe(
+        $"Addon \"{ADDON_NAME}\" from `{CONFIG_FILE_PATH}`" +
+        $" to `/` on branch `{CHECKOUT}` of `{ADDON_URL}`"
+      );
+    }
+
 
     [Fact]
     public void IdIsExpectedString() {

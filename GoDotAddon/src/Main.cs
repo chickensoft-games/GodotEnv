@@ -3,9 +3,9 @@
   using CliFx;
 
   public class GoDotAddon {
-    public static ValueTask<int> Main(string[] args)
+    public static Task<int> Main(string[] args)
       => new CliApplicationBuilder()
         .AddCommandsFromThisAssembly()
-        .Build().RunAsync(args);
+        .Build().RunAsync(args).AsTask();
   }
 }

@@ -12,6 +12,7 @@
     "reportgenerator",
     "reporttypes",
     "Shouldly",
+    "subfolders",
     "targetdir",
     "Xunit"
   ]

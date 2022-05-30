@@ -63,8 +63,7 @@ namespace Chickensoft.GoDotAddon {
         if (conflicts.Count > 0) {
           return new SimilarDependencyWarning(
             conflict: addon,
-            addons: conflicts,
-            config: config
+            addons: conflicts
           );
         }
       }
