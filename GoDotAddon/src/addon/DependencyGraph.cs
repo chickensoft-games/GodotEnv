@@ -55,12 +55,10 @@ namespace Chickensoft.GoDotAddon {
         // the user regardless in case it is a mistake.
         MarkInstalled(addon);
 
-        if (conflicts.Count > 0) {
-          return new SimilarDependencyWarning(
-            conflict: addon,
-            addons: conflicts
-          );
-        }
+        return new SimilarDependencyWarning(
+          conflict: addon,
+          addons: conflicts
+        );
       }
       else {
         MarkInstalled(addon);
