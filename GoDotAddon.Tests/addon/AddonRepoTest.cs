@@ -62,6 +62,27 @@ namespace Chickensoft.GoDotAddon.Tests {
     }
 
     [Fact]
+    public async Task CacheAddonDoesNothingIfAddonIsAlreadyCached() {
+      var addonCachePath = $"{_config.CachePath}/{_addon.Name}";
+
+      var app = new Mock<IApp>(MockBehavior.Strict);
+      var fs = new Mock<IFileSystem>(MockBehavior.Strict);
+      var directory = new Mock<IDirectory>(MockBehavior.Strict);
+
+      app.Setup(app => app.FS).Returns(fs.Object);
+      fs.Setup(fs => fs.Directory).Returns(directory.Object);
+      directory.Setup(dir => dir.Exists(addonCachePath)).Returns(true);
+
+      var addonRepo = new AddonRepo(app.Object);
+
+      await addonRepo.CacheAddon(_addon, _config);
+
+      fs.VerifyAll();
+      directory.VerifyAll();
+      app.VerifyAll();
+    }
+
+    [Fact]
     public async Task DeleteAddonDeletesAddon() {
       var addonDir = _config.AddonsPath + "/" + _addon.Name;
 
@@ -103,6 +124,27 @@ namespace Chickensoft.GoDotAddon.Tests {
 
       directory.VerifyAll();
       cli.VerifyAll();
+    }
+
+    [Fact]
+    public async Task DeleteAddonDoesNothingIfAddonDoesNotExist() {
+      var addonDir = _config.AddonsPath + "/" + _addon.Name;
+
+      var app = new Mock<IApp>(MockBehavior.Strict);
+      var fs = new Mock<IFileSystem>(MockBehavior.Strict);
+      var directory = new Mock<IDirectory>(MockBehavior.Strict);
+
+      app.Setup(app => app.FS).Returns(fs.Object);
+      fs.Setup(fs => fs.Directory).Returns(directory.Object);
+      directory.Setup(dir => dir.Exists(addonDir)).Returns(false);
+
+      var addonRepo = new AddonRepo(app.Object);
+
+      await addonRepo.DeleteAddon(_addon, _config);
+
+      fs.VerifyAll();
+      directory.VerifyAll();
+      app.VerifyAll();
     }
 
     [Fact]
