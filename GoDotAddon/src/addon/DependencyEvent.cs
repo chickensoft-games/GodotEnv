@@ -90,5 +90,6 @@ namespace Chickensoft.GoDotAddon {
   public record DependencyAlreadyInstalledEvent()
     : IDependencyEvent, IDependencyNotInstalledEvent;
 
-  public record DependencyInstalledEvent() : IDependencyEvent;
+  public record DependencyInstalledEvent()
+    : IDependencyEvent, IReportableDependencyEvent;
 }
