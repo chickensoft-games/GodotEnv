@@ -22,20 +22,22 @@ namespace Chickensoft.GoDotAddon {
     }
 
     /// <summary>
-    /// Returns a set of url's that have been cloned to the cache.
+    /// Returns a dictionary of addons in the cache. Each key is the addon's
+    /// url and each value is the directory in the cache containing a git clone
+    /// of the addon.
     ///
     /// The cache is just a folder (typically `.addons` in a project folder)
     /// which contains git clones of addon repositories.
     /// </summary>
     /// <param name="config">Addon configuration containing paths.</param>
-    /// <returns>Set of url's contained in the cache.</returns>
-    public async Task<HashSet<string>> LoadCache(
+    /// <returns>Map of url's to addon cache directories.</returns>
+    public async Task<Dictionary<string, string>> LoadCache(
       Config config
     ) {
       if (!_fs.Directory.Exists(config.CachePath)) {
         _fs.Directory.CreateDirectory(config.CachePath);
       }
-      var urls = new HashSet<string>();
+      var urls = new Dictionary<string, string>();
       var directoriesInCachePath = _fs.Directory.GetDirectories(
         config.CachePath
       );
@@ -43,7 +45,7 @@ namespace Chickensoft.GoDotAddon {
         var shell = _app.CreateShell(directory);
         var result = await shell.Run("git", "remote", "get-url", "origin");
         var url = result.StandardOutput.Trim();
-        urls.Add(url);
+        urls.Add(url, directory);
       }
       return urls;
     }
@@ -107,5 +109,7 @@ namespace Chickensoft.GoDotAddon {
         "git", "commit", "-m", "Initial commit"
       );
     }
+
+    Task<HashSet<string>> IAddonRepo.LoadCache(Config config) => throw new System.NotImplementedException();
   }
 }

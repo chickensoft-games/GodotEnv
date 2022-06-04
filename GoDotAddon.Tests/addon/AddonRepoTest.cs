@@ -71,7 +71,10 @@ namespace Chickensoft.GoDotAddon.Tests {
         .Returns(Task.FromResult(result2.Object));
 
       var urls = await cacheRepo.LoadCache(config);
-      urls.ShouldBe(new HashSet<string> { url1, url2 });
+      urls.ShouldBe(new Dictionary<string, string> {
+        { url1, "project/.addons/addon_1" },
+        { url2, "project/.addons/addon_2" }
+      });
     }
 
     [Fact]

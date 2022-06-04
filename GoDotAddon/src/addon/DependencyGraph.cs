@@ -23,8 +23,8 @@ namespace Chickensoft.GoDotAddon {
           sameNameAddon.Subfolder == addon.Subfolder &&
           sameNameAddon.Checkout == addon.Checkout
         ) {
-          // Dependency is already installed.
-          return new DependencyAlreadyInstalledEvent();
+          // Dependency is already installed under the same name.
+          return new DependencyAlreadyInstalledEvent(Name: sameNameAddon.Name);
         }
         return new ConflictingDestinationPathEvent(
           conflict: addon,
@@ -42,7 +42,9 @@ namespace Chickensoft.GoDotAddon {
             && existingAddon.Checkout == addon.Checkout
           ) {
             // Dependency is already installed under a different name.
-            return new DependencyAlreadyInstalledEvent();
+            return new DependencyAlreadyInstalledEvent(
+              Name: existingAddon.Name
+            );
           }
           else {
             // name, subfolder, or branch are different, but url is the same
