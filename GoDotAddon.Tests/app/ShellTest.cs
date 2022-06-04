@@ -17,11 +17,12 @@ namespace Chickensoft.GoDotAddon.Tests {
       var processRunner = new Mock<IProcessRunner>();
       var exe = "return";
       var arg = "0";
+      IProcessResult processResult = new ProcessResult(exitCode);
       processRunner.Setup(
         pr => pr.Run(WORKING_DIR, exe, It.Is<string[]>(
           value => value.SequenceEqual(new string[] { arg })
         ))
-      ).Returns(Task.FromResult(new ProcessResult(exitCode)));
+      ).Returns(Task.FromResult(processResult));
       var shell = new Shell(processRunner.Object, WORKING_DIR);
       var result = await shell.Run(exe, arg);
       result.ExitCode.ShouldBe(exitCode);
@@ -35,11 +36,12 @@ namespace Chickensoft.GoDotAddon.Tests {
       var processRunner = new Mock<IProcessRunner>();
       var exe = "return";
       var arg = "0";
+      IProcessResult processResult = new ProcessResult(exitCode);
       processRunner.Setup(
         pr => pr.Run(WORKING_DIR, exe, It.Is<string[]>(
           value => value.SequenceEqual(new string[] { arg })
         ))
-      ).Returns(Task.FromResult(new ProcessResult(exitCode)));
+      ).Returns(Task.FromResult(processResult));
       var shell = new Shell(processRunner.Object, WORKING_DIR);
       await Should.ThrowAsync<CommandException>(
         async () => await shell.Run(exe, arg)
@@ -52,11 +54,12 @@ namespace Chickensoft.GoDotAddon.Tests {
       var processRunner = new Mock<IProcessRunner>();
       var exe = "return";
       var arg = "0";
+      IProcessResult processResult = new ProcessResult(exitCode);
       processRunner.Setup(
         pr => pr.Run(WORKING_DIR, exe, It.Is<string[]>(
           value => value.SequenceEqual(new string[] { arg })
         ))
-      ).Returns(Task.FromResult(new ProcessResult(exitCode)));
+      ).Returns(Task.FromResult(processResult));
       var shell = new Shell(processRunner.Object, WORKING_DIR);
       var result = await shell.RunUnchecked(exe, arg);
       result.ExitCode.ShouldBe(exitCode);

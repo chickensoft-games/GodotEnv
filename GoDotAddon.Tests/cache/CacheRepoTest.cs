@@ -1,6 +1,7 @@
 namespace Chickensoft.GoDotAddon.Tests {
   using System.Collections.Generic;
   using System.IO.Abstractions;
+  using System.Threading.Tasks;
   using Chickensoft.GoDotAddon;
   using Moq;
   using Shouldly;
@@ -8,51 +9,52 @@ namespace Chickensoft.GoDotAddon.Tests {
 
 
   public class CacheRepoTest {
-    private const string ADDON_NAME = "GoDotAddon";
-    private const string ADDON_URL
-      = "git@github.com:chickensoft-games/GoDotAddon.git";
-    private const string SUBFOLDER = "/";
-    private const string CHECKOUT = "main";
-
-    private const string WORKING_DIR = "./";
-    private const string CACHE_PATH = ".addons/";
-    private const string ADDONS_PATH = "addons/";
-    private readonly string _addonPath
-      = $"{CACHE_PATH}{ADDON_NAME}{SUBFOLDER}";
 
     [Fact]
-    public void LoadsCacheCorrectlyWhenAddonIsCached() {
-      var app = new Mock<IApp>();
-      var fs = new Mock<IFileSystem>();
+    public async Task LoadsCacheCorrectlyWhenAddonIsCached() {
+      var app = new Mock<IApp>(MockBehavior.Strict);
+      var fs = new Mock<IFileSystem>(MockBehavior.Strict);
       app.Setup(app => app.FS).Returns(fs.Object);
       var cacheRepo = new CacheRepo(app.Object);
       var config = new Config(
-        ProjectPath: WORKING_DIR,
-        CachePath: CACHE_PATH,
-        AddonsPath: ADDONS_PATH
+        ProjectPath: "project/",
+        CachePath: "project/.addons",
+        AddonsPath: "project/addons"
       );
-      var lockFile = new Mock<ILockFile>();
-      lockFile.Setup(lf => lf.Addons).Returns(
-        new Dictionary<string, Dictionary<string, LockFileEntry>>() {
-          {
-            ADDON_URL,
-            new Dictionary<string, LockFileEntry>() {
-              {
-                SUBFOLDER,
-                new LockFileEntry(name: ADDON_NAME, checkout: CHECKOUT)
-              }
-            }
-          }
+
+      var directory = new Mock<IDirectory>(MockBehavior.Strict);
+      fs.Setup(fs => fs.Directory).Returns(directory.Object);
+      directory.Setup(dir => dir.Exists("project/.addons")).Returns(true);
+      directory.Setup(dir => dir.GetDirectories("project/.addons")).Returns(
+        new string[] {
+          "project/.addons/addon_1",
+          "project/.addons/addon_2"
         }
       );
-      var directory = new Mock<IDirectory>();
-      fs.Setup(fs => fs.Directory).Returns(directory.Object);
-      directory.Setup(dir => dir.GetDirectories(CACHE_PATH)).Returns(
-        new string[] { _addonPath }
-      );
-      var cache = cacheRepo.LoadCache(config, lockFile.Object);
-      cache.IsInCache(ADDON_NAME).ShouldBeTrue();
-      cache.AddonsNotInCache.ShouldNotContain(ADDON_NAME);
+      var shell1 = new Mock<IShell>(MockBehavior.Strict);
+      var shell2 = new Mock<IShell>(MockBehavior.Strict);
+      app.Setup(app => app.CreateShell("project/.addons/addon_1"))
+        .Returns(shell1.Object);
+      app.Setup(app => app.CreateShell("project/.addons/addon_2"))
+        .Returns(shell2.Object);
+
+      var url1 = "git@github.com:chickensoft-games/addon_1.git";
+      var url2 = "git@github.com:chickensoft-games/addon_2.git";
+
+      var result1 = new Mock<IProcessResult>(MockBehavior.Strict);
+      result1.Setup(r => r.StandardOutput).Returns(url1);
+
+      var result2 = new Mock<IProcessResult>(MockBehavior.Strict);
+      result2.Setup(r => r.StandardOutput).Returns(url2);
+
+      shell1.Setup(sh => sh.Run("git", "remote", "get-url", "origin"))
+        .Returns(Task.FromResult(result1.Object));
+
+      shell2.Setup(sh => sh.Run("git", "remote", "get-url", "origin"))
+        .Returns(Task.FromResult(result2.Object));
+
+      var urls = await cacheRepo.LoadCache(config);
+      urls.ShouldBe(new HashSet<string> { url1, url2 });
     }
   }
 }

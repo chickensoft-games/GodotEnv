@@ -340,7 +340,7 @@ namespace Chickensoft.GoDotAddon.Tests {
 
       private void MockSetup(
         Mock<IShell> shell,
-        ProcessResult result,
+        IProcessResult result,
         RunMode runMode,
         string exe,
         string[] args

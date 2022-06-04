@@ -3,8 +3,8 @@ namespace Chickensoft.GoDotAddon {
   using CliFx.Exceptions;
 
   public interface IShell {
-    Task<ProcessResult> Run(string executable, params string[] args);
-    Task<ProcessResult> RunUnchecked(string executable, params string[] args);
+    Task<IProcessResult> Run(string executable, params string[] args);
+    Task<IProcessResult> RunUnchecked(string executable, params string[] args);
   }
 
   public class Shell : IShell {
@@ -16,7 +16,7 @@ namespace Chickensoft.GoDotAddon {
       _workingDir = workingDir;
     }
 
-    public async Task<ProcessResult> Run(
+    public async Task<IProcessResult> Run(
       string executable, params string[] args
     ) {
       var result = await _runner.Run(_workingDir, executable, args);
@@ -26,7 +26,7 @@ namespace Chickensoft.GoDotAddon {
       return result;
     }
 
-    public async Task<ProcessResult> RunUnchecked(
+    public async Task<IProcessResult> RunUnchecked(
       string executable, params string[] args
     ) => await _runner.Run(_workingDir, executable, args);
   }
