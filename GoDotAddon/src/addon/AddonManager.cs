@@ -29,7 +29,7 @@ namespace Chickensoft.GoDotAddon {
         = _configFileRepo.LoadOrCreateConfigFile(projectPath);
       var config = projConfigFile.ToConfig(projectPath);
 
-      var addonsByUrl = new Dictionary<string, RequiredAddon>();
+      var cache = await _addonRepo.LoadCache(config);
 
       do {
         var path = searchPaths.Dequeue();
@@ -39,17 +39,6 @@ namespace Chickensoft.GoDotAddon {
 
         foreach ((var addonName, var addonConfig) in addonConfigs) {
           var name = addonName;
-          var shouldInstall = true;
-
-          if (addonsByUrl.ContainsKey(addonConfig.Url)) {
-            // We've already cached this addon, potentially under a different
-            // name from a prior dependent's addons.json file.
-            //
-            // The first to depend on an addon with the same url wins.
-            var existingAddon = addonsByUrl[addonConfig.Url];
-            name = existingAddon.Name;
-            shouldInstall = false;
-          }
 
           var addon = new RequiredAddon(
             name: name,
@@ -60,15 +49,12 @@ namespace Chickensoft.GoDotAddon {
           );
 
           var depEvent = _dependencyGraph.Add(addon);
+
           if (depEvent is IReportableDependencyEvent reportableDepEvent) {
             _reporter.DependencyEvent(reportableDepEvent);
           }
 
-          if (depEvent is IDependencyNotInstalledEvent) {
-            shouldInstall = false;
-          }
-
-          if (shouldInstall) {
+          if (depEvent is not IDependencyCannotBeInstalledEvent) {
             // Clone the addon from the git url, if needed.
             await _addonRepo.CacheAddon(addon, config);
             // Delete any previously installed addon.
@@ -76,8 +62,6 @@ namespace Chickensoft.GoDotAddon {
             // Copy the addon files from the cache to the installation folder.
             await _addonRepo.CopyAddonFromCache(addon, config);
           }
-
-          addonsByUrl[addonConfig.Url] = addon;
 
           var installedAddonPath = Path.Combine(config.AddonsPath, name);
           searchPaths.Enqueue(installedAddonPath);

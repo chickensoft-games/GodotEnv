@@ -9,7 +9,7 @@ namespace Chickensoft.GoDotAddon {
     Task CacheAddon(RequiredAddon addon, Config config);
     Task DeleteAddon(RequiredAddon addon, Config config);
     Task CopyAddonFromCache(RequiredAddon addon, Config config);
-    Task<HashSet<string>> LoadCache(Config config);
+    Task<Dictionary<string, string>> LoadCache(Config config);
   }
 
   public class AddonRepo : IAddonRepo {
@@ -109,7 +109,5 @@ namespace Chickensoft.GoDotAddon {
         "git", "commit", "-m", "Initial commit"
       );
     }
-
-    Task<HashSet<string>> IAddonRepo.LoadCache(Config config) => throw new System.NotImplementedException();
   }
 }

@@ -1,4 +1,5 @@
 namespace Chickensoft.GoDotAddon.Tests {
+  using System.Collections.Generic;
   using Chickensoft.GoDotAddon;
   using Shouldly;
   using Xunit;
@@ -56,27 +57,27 @@ namespace Chickensoft.GoDotAddon.Tests {
 
     [Fact]
     public void IndicatesADependencyIsInstalled() {
-      var graph = new DependencyGraph();
+      var graph = new DependencyGraph(cache: new Dictionary<string, string>());
       graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
     }
 
     [Fact]
     public void IndicatesNonConflictingDependenciesAreInstalled() {
-      var graph = new DependencyGraph();
+      var graph = new DependencyGraph(cache: new Dictionary<string, string>());
       graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
       graph.Add(_addonB).ShouldBeOfType(typeof(DependencyInstalledEvent));
     }
 
     [Fact]
     public void IndicatesADependencyIsAlreadyInstalled() {
-      var graph = new DependencyGraph();
+      var graph = new DependencyGraph(cache: new Dictionary<string, string>());
       graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
       graph.Add(_addonA).ShouldBeOfType(typeof(DependencyAlreadyInstalledEvent));
     }
 
     [Fact]
     public void IndicatesAConflictingDestinationPath() {
-      var graph = new DependencyGraph();
+      var graph = new DependencyGraph(cache: new Dictionary<string, string>());
       graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
       graph.Add(_addonAConflictingPath).ShouldBeOfType(
         typeof(ConflictingDestinationPathEvent)
@@ -85,7 +86,7 @@ namespace Chickensoft.GoDotAddon.Tests {
 
     [Fact]
     public void IndicatesADependencyIsInstalledUnderDifferentName() {
-      var graph = new DependencyGraph();
+      var graph = new DependencyGraph(cache: new Dictionary<string, string>());
       graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
       graph.Add(_addonAEquivalent).ShouldBeOfType(
         typeof(DependencyAlreadyInstalledEvent)
@@ -94,7 +95,7 @@ namespace Chickensoft.GoDotAddon.Tests {
 
     [Fact]
     public void IssuesSimilarDependencyWarningForSubfolderChange() {
-      var graph = new DependencyGraph();
+      var graph = new DependencyGraph(cache: new Dictionary<string, string>());
       graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
       var e = graph.Add(_addonASubfolder);
       e.ShouldBeOfType(
@@ -107,7 +108,7 @@ namespace Chickensoft.GoDotAddon.Tests {
 
     [Fact]
     public void IssuesSimilarDependencyWarningForCheckoutChange() {
-      var graph = new DependencyGraph();
+      var graph = new DependencyGraph(cache: new Dictionary<string, string>());
       graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
       var e = graph.Add(_addonACheckout);
       e.ShouldBeOfType(
@@ -120,7 +121,7 @@ namespace Chickensoft.GoDotAddon.Tests {
 
     [Fact]
     public void IssuesSimilarDependencyWarningForMultiplePossibleConflicts() {
-      var graph = new DependencyGraph();
+      var graph = new DependencyGraph(cache: new Dictionary<string, string>());
       graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
       graph.Add(_addonB).ShouldBeOfType(typeof(DependencyInstalledEvent));
       graph.Add(_addonACheckout).ShouldBeOfType(

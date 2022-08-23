@@ -16,7 +16,7 @@ namespace Chickensoft.GoDotAddon {
     public string Subfolder { get; init; }
     public string ConfigFilePath { get; init; }
 
-    // Deterministic id based on url username and repository name
+    // Deterministic id based on url, username, and repository name
     public string Id {
       get {
         var match = _urlRegex.Match(Url);

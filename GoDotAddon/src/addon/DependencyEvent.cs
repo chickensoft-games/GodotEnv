@@ -5,7 +5,7 @@ namespace Chickensoft.GoDotAddon {
 
   public interface IReportableDependencyEvent : IDependencyEvent { }
 
-  public interface IDependencyNotInstalledEvent { }
+  public interface IDependencyCannotBeInstalledEvent { }
 
   public record SimilarDependencyWarning : IReportableDependencyEvent {
     public RequiredAddon Conflict { get; init; }
@@ -65,7 +65,7 @@ namespace Chickensoft.GoDotAddon {
   }
 
   public record ConflictingDestinationPathEvent
-    : IReportableDependencyEvent, IDependencyNotInstalledEvent {
+    : IReportableDependencyEvent, IDependencyCannotBeInstalledEvent {
     public RequiredAddon Conflict { get; init; }
     public RequiredAddon Addon { get; init; }
 
@@ -88,7 +88,7 @@ namespace Chickensoft.GoDotAddon {
   }
 
   public record DependencyAlreadyInstalledEvent(string Name)
-    : IDependencyEvent, IDependencyNotInstalledEvent;
+    : IDependencyEvent, IDependencyCannotBeInstalledEvent;
 
   public record DependencyInstalledEvent()
     : IDependencyEvent, IReportableDependencyEvent;
