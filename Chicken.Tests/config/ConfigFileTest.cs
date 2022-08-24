@@ -9,7 +9,7 @@ namespace Chickensoft.GoDotAddon.Tests {
   = "https://github.com/chickensoft-games/GoDotAddon";
     private const string SUBFOLDER = "GoDotAddon";
     private const string CHECKOUT = "main";
-    private const string ADDON_NAME = "go_dot_addon";
+    private const string ADDON_NAME = "chicken";
     private readonly string _addonJson = "{" +
       $"  \"url\": \"{URL}\"," +
       $"  \"subfolder\": \"{SUBFOLDER}\"," +

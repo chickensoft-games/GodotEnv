@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chickensoft.GoDotAddon", "GoDotAddon\Chickensoft.GoDotAddon.csproj", "{7B60417F-D533-4FF8-B4E4-04ADDED32544}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chickensoft.Chicken", "Chicken\Chickensoft.Chicken.csproj", "{7B60417F-D533-4FF8-B4E4-04ADDED32544}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chickensoft.GoDotAddon.Tests", "GoDotAddon.Tests\Chickensoft.GoDotAddon.Tests.csproj", "{9786D0F7-4B4E-4CAF-BDD0-67B7FEB978C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chickensoft.Chicken.Tests", "Chicken.Tests\Chickensoft.Chicken.Tests.csproj", "{9786D0F7-4B4E-4CAF-BDD0-67B7FEB978C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

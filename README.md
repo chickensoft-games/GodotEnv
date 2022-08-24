@@ -2,7 +2,7 @@
 
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)]([https://https://discord.com/](https://discord.gg/gSjaPgMmYW)) ![line coverage](GoDotAddon.Tests/reports/line_coverage.svg) ![branch coverage](GoDotAddon.Tests/reports/branch_coverage.svg)
 
-Command-line addon manager for Godot, written in C# and supplied as a dotnet tool for .NET 5 or 6. Uses a flat dependency graph and the system git installation to download and install dependencies from git url's.
+Command-line addon manager for Godot, written in C# and supplied as a dotnet tool for .NET 5 and .NET 6. Uses a flat dependency graph and the system git installation to download and install dependencies from git url's.
 
 ## Installation
 

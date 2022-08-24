@@ -20,7 +20,7 @@ namespace Chickensoft.GoDotAddon.Tests {
     );
 
     private readonly RequiredAddon _addon = new(
-      name: "go_dot_addon",
+      name: "chicken",
       configFilePath: "some/working/dir/addons.json",
       url: "git@github.com:chickensoft-games/GoDotAddon.git",
       checkout: "Main",

@@ -5,11 +5,11 @@ namespace Chickensoft.GoDotAddon.Tests {
 
 
   public class RequiredAddonTest {
-    private const string ADDON_NAME = "go_dot_addon";
+    private const string ADDON_NAME = "chicken";
     private const string CONFIG_FILE_PATH = "some/working/dir/addons.json";
     private const string ADDON_URL
-      = "git@github.com:chickensoft-games/GoDotAddon.git";
-    private const string SUBFOLDER = "GoDotAddon.Tests";
+      = "git@github.com:chickensoft-games/chicken.git";
+    private const string SUBFOLDER = "Chicken.Tests";
     private const string CHECKOUT = "main";
 
     private readonly string[] _testUrls = {
@@ -79,7 +79,7 @@ namespace Chickensoft.GoDotAddon.Tests {
         checkout: CHECKOUT,
         subfolder: SUBFOLDER + "/"
       );
-      addon.Id.ShouldBe("chickensoft_games_go_dot_addon");
+      addon.Id.ShouldBe("chickensoft_games_chicken");
     }
 
     [Fact]

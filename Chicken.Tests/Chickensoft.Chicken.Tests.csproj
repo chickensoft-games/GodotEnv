@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GoDotAddon\Chickensoft.GoDotAddon.csproj" />
+    <ProjectReference Include="..\GoDotAddon\Chickensoft.Chicken.csproj" />
   </ItemGroup>
 
 </Project>
