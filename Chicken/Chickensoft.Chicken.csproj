@@ -5,8 +5,26 @@
     <LanguageVersion>latest</LanguageVersion>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>chicken</ToolCommandName>
-    <PackageOutputPath>./nupkg</PackageOutputPath>
     <Nullable>enable</Nullable>
+
+    <Title>Chicken</Title>
+    <Description>Command line utility for C# Godot game development and addon management.</Description>
+    <Copyright>© 2022 Chickensoft Games</Copyright>
+    <Company>Chickensoft</Company>
+
+    <PackageId>Chickensoft.Chicken</PackageId>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <PackageVersion>0.1.0</PackageVersion>
+    <PackageReleaseNotes>Chicken release.</PackageReleaseNotes>
+    <PackageIcon></PackageIcon>
+    <PackageTags>Godot;CSharp;C#;Chickensoft;Gamedev;Utility;Utilities;Addon;Addon Manager;Addons</PackageTags>
+    <PackageReadmeFile>../README.md</PackageReadmeFile>
+    <PackageProjectUrl>git@github.com:chickensoft-games/Chicken.git</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/chickensoft-games/chicken</RepositoryUrl>
+
   </PropertyGroup>
 
   <ItemGroup>
