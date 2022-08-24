@@ -5,8 +5,8 @@ namespace Chickensoft.Chicken.Tests {
 
   public class AddonConfigTest {
     private const string URL
-      = "https://github.com/chickensoft-games/GoDotAddon";
-    private const string SUBFOLDER = "GoDotAddon";
+      = "https://github.com/chickensoft-games/Chicken";
+    private const string SUBFOLDER = "Chicken";
     private const string CHECKOUT = "main";
 
     [Fact]

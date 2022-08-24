@@ -2,15 +2,15 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug GoDotAddon CLI",
+      "name": "Debug Chicken CLI",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/GoDotAddon/bin/Debug/net6.0/Chickensoft.Chicken.dll",
+      "program": "${workspaceFolder}/Chicken/bin/Debug/net6.0/Chickensoft.Chicken.dll",
       "args": [
         "${input:args}"
       ],
-      "cwd": "${workspaceFolder}/GoDotAddon",
+      "cwd": "${workspaceFolder}/Chicken",
       "console": "integratedTerminal",
       "stopAtEntry": false,
       "internalConsoleOptions": "neverOpen"

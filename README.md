@@ -1,4 +1,4 @@
-# GoDotAddon
+# Chicken
 
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)]([https://https://discord.com/](https://discord.gg/gSjaPgMmYW)) ![line coverage](GoDotAddon.Tests/reports/line_coverage.svg) ![branch coverage](GoDotAddon.Tests/reports/branch_coverage.svg)
 
