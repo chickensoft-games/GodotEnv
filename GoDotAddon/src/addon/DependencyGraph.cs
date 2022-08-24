@@ -12,9 +12,7 @@ namespace Chickensoft.GoDotAddon {
     private readonly Dictionary<string, RequiredAddon> _dependenciesByName
       = new();
 
-    private readonly Dictionary<string, string> _cache;
-
-    public DependencyGraph(Dictionary<string, string> cache) => _cache = cache;
+    public DependencyGraph() { }
 
     public IDependencyEvent Add(RequiredAddon addon) {
       // First, check to make sure another addon isn't installed to the same
@@ -33,8 +31,6 @@ namespace Chickensoft.GoDotAddon {
           addon: sameNameAddon
         );
       }
-
-      var isInCache = _cache.ContainsKey(addon.Url);
 
       // Check for similar dependencies in the flat dependency graph to
       // alert the user to potential conflicts.

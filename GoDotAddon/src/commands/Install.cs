@@ -22,8 +22,7 @@ namespace Chickensoft.GoDotAddon {
       var reporter = new Reporter(output);
       var configFile = configFileRepo.LoadOrCreateConfigFile(startDir);
       var config = configFile.ToConfig(projectPath: startDir);
-      var cache = await addonRepo.LoadCache(config);
-      var dependencyGraph = new DependencyGraph(cache: cache);
+      var dependencyGraph = new DependencyGraph();
 
       var addonManger = new AddonManager(
         addonRepo: addonRepo,

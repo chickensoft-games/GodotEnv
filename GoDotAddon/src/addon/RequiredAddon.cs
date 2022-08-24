@@ -14,6 +14,7 @@ namespace Chickensoft.GoDotAddon {
     public string Url { get; init; }
     public string Checkout { get; init; }
     public string Subfolder { get; init; }
+    /// <summary>Path of the config file that required this addon.</summary>
     public string ConfigFilePath { get; init; }
 
     // Deterministic id based on url, username, and repository name

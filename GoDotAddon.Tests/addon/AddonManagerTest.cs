@@ -1,77 +1,117 @@
-// namespace Chickensoft.GoDotAddon.Tests {
-//   using System.Collections.Generic;
-//   using System.Threading.Tasks;
-//   using Moq;
-//   using Xunit;
+namespace Chickensoft.GoDotAddon.Tests {
+  using System.Collections.Generic;
+  using System.Threading.Tasks;
+  using Moq;
+  using Xunit;
 
-//   public class AddonManagerTest {
-//     [Fact]
-//     public async Task InstallsAddonsInProject() {
-//       var projectPath = "/";
-//       var addonRepo = new Mock<IAddonRepo>(MockBehavior.Strict);
-//       var configFileRepo = new Mock<IConfigFileRepo>(MockBehavior.Strict);
-//       var reporter = new Mock<IReporter>(MockBehavior.Strict);
-//       var dependencyGraph = new Mock<IDependencyGraph>(MockBehavior.Strict);
+  public class AddonManagerTest {
+    [Fact]
+    public async Task InstallsAddonsInProject() {
+      var projectPath = "/";
+      var addonRepo = new Mock<IAddonRepo>(MockBehavior.Strict);
+      var configFileRepo = new Mock<IConfigFileRepo>(MockBehavior.Strict);
+      var reporter = new Mock<IReporter>(MockBehavior.Strict);
+      var dependencyGraph = new Mock<IDependencyGraph>(MockBehavior.Strict);
 
-//       var addon1 = new RequiredAddon(
-//           name: "addon1",
-//           configFilePath: "/addons.json",
-//           url: "http://example.com/addon1.git",
-//           checkout: "master",
-//           subfolder: "/"
-//         );
+      var addon1 = new RequiredAddon(
+          name: "addon1",
+          configFilePath: "/addons.json",
+          url: "http://example.com/addon1.git",
+          checkout: "master",
+          subfolder: "addon1"
+        );
 
-//       dependencyGraph.Setup(dg => dg.Add(addon1)).Returns(
-//         new DependencyInstalledEvent()
-//       );
+      var addon2 = new RequiredAddon(
+          name: "addon2",
+          configFilePath: "/addons.json",
+          url: "http://example.com/addon2.git",
+          checkout: "master",
+          subfolder: "addon2"
+        );
 
-//       var manager = new AddonManager(
-//         addonRepo: addonRepo.Object,
-//         configFileRepo: configFileRepo.Object,
-//         reporter: reporter.Object,
-//         dependencyGraph: dependencyGraph.Object
-//       );
+      var manager = new AddonManager(
+        addonRepo: addonRepo.Object,
+        configFileRepo: configFileRepo.Object,
+        reporter: reporter.Object,
+        dependencyGraph: dependencyGraph.Object
+      );
 
-//       var projectConfigFile = new ConfigFile(
-//         addons: new Dictionary<string, AddonConfig>() {
-//           { "addon1", new AddonConfig(
-//             url: "http://example.com/addon1.git",
-//             checkout: "master",
-//             subfolder: "addon1"
-//           )},
-//           { "addon2", new AddonConfig(
-//             url: "http://example.com/addon2.git",
-//             checkout: "master",
-//             subfolder: "addon2"
-//           )},
-//         },
-//         cachePath: ".addons",
-//         addonsPath: "addons"
-//       );
+      var projectConfigFile = new ConfigFile(
+        addons: new Dictionary<string, AddonConfig>() {
+          { "addon1", new AddonConfig(
+            url: "http://example.com/addon1.git",
+            checkout: "master",
+            subfolder: "addon1"
+          )},
+          { "addon2", new AddonConfig(
+            url: "http://example.com/addon2.git",
+            checkout: "master",
+            subfolder: "addon2"
+          )},
+        },
+        cachePath: ".addons",
+        addonsPath: "addons"
+      );
 
-//       configFileRepo.Setup(repo => repo.LoadOrCreateConfigFile(projectPath))
-//         .Returns(projectConfigFile);
+      var projectConfig = projectConfigFile.ToConfig(projectPath);
 
-//       addonRepo.Setup(repo => repo.LoadCache(
-//         new Config(
-//           projectPath,
-//           "/.addons",
-//           "/addons"
-//         )
-//       )).Returns(Task.FromResult(new Dictionary<string, string>() {
-//         { "http://example.com/addon1.git", "addon1" }
-//       }));
+      configFileRepo.Setup(repo => repo.LoadOrCreateConfigFile(projectPath))
+        .Returns(projectConfigFile);
 
-//       var addon1ConfigFile = new ConfigFile(
-//         addons: new Dictionary<string, AddonConfig>(),
-//         cachePath: null,
-//         addonsPath: null
-//       );
-//       configFileRepo.Setup(
-//         repo => repo.LoadOrCreateConfigFile("/addons/addon1")
-//       ).Returns(addon1ConfigFile);
+      addonRepo.Setup(repo => repo.LoadCache(projectConfig)).Returns(
+        Task.FromResult(new Dictionary<string, string>() {
+          { "http://example.com/addon1.git", "addon1" }
+        })
+      );
 
-//       await manager.InstallAddons(projectPath);
-//     }
-//   }
-// }
+      // Addon 1 installation calls
+      dependencyGraph.Setup(dg => dg.Add(addon1)).Returns(
+        new DependencyInstalledEvent()
+      );
+      reporter.Setup(r => r.DependencyEvent(new DependencyInstalledEvent()));
+      addonRepo.Setup(ar => ar.CacheAddon(addon1, projectConfig)).Returns(
+        Task.CompletedTask
+      );
+      addonRepo.Setup(ar => ar.DeleteAddon(addon1, projectConfig)).Returns(
+        Task.CompletedTask
+      );
+      addonRepo.Setup(
+        ar => ar.CopyAddonFromCache(addon1, projectConfig)
+      ).Returns(Task.CompletedTask);
+      var addon1ConfigFile = new ConfigFile(
+        addons: new Dictionary<string, AddonConfig>(),
+        cachePath: null,
+        addonsPath: null
+      );
+      configFileRepo.Setup(
+        repo => repo.LoadOrCreateConfigFile("/addons/addon1")
+      ).Returns(addon1ConfigFile);
+
+      // Addon 2 installation calls
+      dependencyGraph.Setup(dg => dg.Add(addon2)).Returns(
+        new DependencyInstalledEvent()
+      );
+      reporter.Setup(r => r.DependencyEvent(new DependencyInstalledEvent()));
+      addonRepo.Setup(ar => ar.CacheAddon(addon2, projectConfig)).Returns(
+        Task.CompletedTask
+      );
+      addonRepo.Setup(ar => ar.DeleteAddon(addon2, projectConfig)).Returns(
+        Task.CompletedTask
+      );
+      addonRepo.Setup(
+        ar => ar.CopyAddonFromCache(addon2, projectConfig)
+      ).Returns(Task.CompletedTask);
+      var addon2ConfigFile = new ConfigFile(
+        addons: new Dictionary<string, AddonConfig>(),
+        cachePath: null,
+        addonsPath: null
+      );
+      configFileRepo.Setup(
+        repo => repo.LoadOrCreateConfigFile("/addons/addon2")
+      ).Returns(addon2ConfigFile);
+
+
+      await manager.InstallAddons(projectPath);
+    }
+  }
+}

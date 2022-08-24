@@ -27,9 +27,9 @@ namespace Chickensoft.GoDotAddon {
 
       var projConfigFile
         = _configFileRepo.LoadOrCreateConfigFile(projectPath);
-      var config = projConfigFile.ToConfig(projectPath);
+      var projectConfig = projConfigFile.ToConfig(projectPath);
 
-      var cache = await _addonRepo.LoadCache(config);
+      var cache = await _addonRepo.LoadCache(projectConfig);
 
       do {
         var path = searchPaths.Dequeue();
@@ -56,14 +56,14 @@ namespace Chickensoft.GoDotAddon {
 
           if (depEvent is not IDependencyCannotBeInstalledEvent) {
             // Clone the addon from the git url, if needed.
-            await _addonRepo.CacheAddon(addon, config);
+            await _addonRepo.CacheAddon(addon, projectConfig);
             // Delete any previously installed addon.
-            await _addonRepo.DeleteAddon(addon, config);
+            await _addonRepo.DeleteAddon(addon, projectConfig);
             // Copy the addon files from the cache to the installation folder.
-            await _addonRepo.CopyAddonFromCache(addon, config);
+            await _addonRepo.CopyAddonFromCache(addon, projectConfig);
           }
 
-          var installedAddonPath = Path.Combine(config.AddonsPath, name);
+          var installedAddonPath = Path.Combine(projectConfig.AddonsPath, name);
           searchPaths.Enqueue(installedAddonPath);
         }
       } while (searchPaths.Count > 0);
