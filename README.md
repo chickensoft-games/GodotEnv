@@ -69,22 +69,20 @@ Here's an example of an `addons.json` file you might include in the root of your
 
 ```json
 {
+  "path": "addons",
+  "cache": ".addons",
   "addons": {
-    "path": "addons",
-    "cache": ".addons",
-    "addons": {
-      "addon_a": {
-        "url": "git@github.com:chickensoft-games/addon_a.git",
-        "subfolder": "some-subfolder",
-        "checkout": "tags/v1.0.0"
-      },
-      "addon_b": {
-        "url": "git@github.com/chickensoft-games/addon_b.git"
-      },
-      "addon_c": {
-        "url": "git@github.com/chickensoft-games/addon_c.git",
-        "checkout": "some-feature"
-      }
+    "addon_a": {
+      "url": "git@github.com:chickensoft-games/addon_a.git",
+      "subfolder": "some-subfolder",
+      "checkout": "tags/v1.0.0"
+    },
+    "addon_b": {
+      "url": "git@github.com/chickensoft-games/addon_b.git"
+    },
+    "addon_c": {
+      "url": "git@github.com/chickensoft-games/addon_c.git",
+      "checkout": "some-feature"
     }
   }
 }
