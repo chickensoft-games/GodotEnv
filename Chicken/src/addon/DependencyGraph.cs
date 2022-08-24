@@ -62,9 +62,8 @@ namespace Chickensoft.Chicken {
           addons: conflicts
         );
       }
-      else {
-        MarkInstalled(addon);
-      }
+
+      MarkInstalled(addon);
       return new DependencyInstalledEvent();
     }
 

@@ -1,93 +1,156 @@
 # Chicken
 
-[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)]([https://https://discord.com/](https://discord.gg/gSjaPgMmYW)) ![line coverage](GoDotAddon.Tests/reports/line_coverage.svg) ![branch coverage](GoDotAddon.Tests/reports/branch_coverage.svg)
+[![Chickensoft Badge][chickensoft-badge]][chickensoft-website] [![Discord](https://img.shields.io/badge/Chickensoft%20Discord-%237289DA.svg?style=flat&logo=discord&logoColor=white)][discord] ![line coverage][line-coverage] ![branch coverage][branch-coverage]
 
-Command-line addon manager for Godot, written in C# and supplied as a dotnet tool for .NET 5 and .NET 6. Uses a flat dependency graph and the system git installation to download and install dependencies from git url's.
+Command line utility for C# Godot game development and addon management. Written in C# and provided as a dotnet tool for .NET 5 and .NET 6.
 
 ## Installation
 
-Coming soon!
+Chicken uses the local `git` installation available from the shell, so make sure you've installed `git` and configured your local shell environment to your liking.
 
+Use the `dotnet` CLI to install Chicken as a global tool:
 
-## Usage
+```sh
+dotnet tool install -g Chickensoft.Chicken
+```
 
-GoDotAddon uses an `addons.json` file to keep track of which addons you'd like to install. Each addon entry can contain optional information about how the addon should be used.
+Run Chicken:
+
+```sh
+chicken --help
+```
+
+## Addon Management
+
+Chicken can be used to manage Godot addons (or "eggs") in your game project.
+
+### How Addons Are Managed
+
+Chicken looks for an `addons.json` file in the folder that you execute it from. **You should always run chicken from your project's root folder** (where the `project.godot` file is).
+
+The `addons.json` file allows you to declare which addons you'd like to include in your project, along with options for using just a subfolder of an addon and/or a particular branch or tag, known as the `checkout`.
+
+Chicken uses a cache to download addons you want to include in your project. The cache is stored in a `.addons` folder in your project root. You can change the cache directory by setting the `cache` in your `addons.json` file.
+
+Default settings for `addons.json`:
 
 ```json
 {
-  "addons:" {
-    "git@github.com:chickensoft-games/go_dot_net.git": {
-      "checkout": "tags/v1.0",
-      "subfolder": "/"
-    },
-    "git@github.com/chickensoft-games/go_dot_test.git": {}
-  }
+  "path": "addons",
+  "cache": ".addons"
 }
 ```
 
-All addons must have a `url` for the git repository which contains the addon.
+### Setting Up .gitignore 
 
-Because GoDotAddon relies on the local shell to run git, you can clone from anywhere git has been configured with SSH.
-
-> Not sure how to use SSH with GitHub? [Click here][ssh-github].
-
-An optional `destination` folder allows you to specify where the addon should be copied to when it is installed. If the `destination` property is omitted, the addon will be installed inside the project's `addons` folder under the same name as its entry in `addons.json`.
-
-Each addon can specify an optional `tag` property. When GoDotAddon installs addons, it will checkout the given tag on the addon before copying the addon to the destination folder, allowing you to use specific addon versions (if needed).
-
-The `subfolder` property allows you to only use a certain subfolder from the addon's repository. Whatever is in this folder will be copied to the destination when the addon is installed.
-
-## Ignoring
-
-To properly use GoDotAddon, you should `.gitignore` the following:
+Add the following to your `.gitignore`:
 
 ```gitignore
 .addons/
 addons/
 ```
 
-The `.addons` folder is used as a cache area to download addons before they are copied to the correct location. It can be deleted any time without hurting anything, but it shouldn't ever be committed to source control.
+To avoid issues when changing branches which use different addons (or different versions), it is recommended to ignore the entire `addons` folder and use Chicken to install all of your addons. Otherwise, add each folder Chicken creates for the addons it installs to your `.gitignore`.
 
-To avoid issues when changing branches which use different addons (or different versions), it is recommended to ignore the entire `addons` folder and use GoDotAddon to install all of your addons.
-
-> If you choose not to let GoDotAddon install all of your addons, you should at least ignore the addons that GoDotAddon will be responsible for installing.
-
-## Modifying Addons
-
-After installing addons, GoDotAddon creates a temporary git repository in each of the addons that have been installed and makes a commit.
-
-If you accidentally change any of the files in the addons folder, GoDotAddon will not proceed with installation (or reinstallation) for that particular addon. You can then use your preferred tooling to view the changes you've made and determine what to do with them.
-
-> GoDotAddon attempts to be as non-destructive as possible, but you should be careful when using any automated tooling as a risk of data loss is always possible. That being said, GoDotAddon tries to be as safe as possible (but I cannot make any guarantees!) If you are worried about data integrity, you should look at the code carefully and make a determination about what is right for your project.
-
-## Installing Addons
-
-To install addons, run the following:
-
-```sh
-godotaddon install
+```gitignore
+.addons/
+addons/chickensoft_addon_a
+addons/chickensoft_addon_b
+addons/username_addon_name
 ```
 
-The command above installs all addons in the `addons.json` file if they are not already present. If any addons are already installed, the command will fail with an error message.
+### Where Addons Are Installed
 
-If you have already installed addons, but you want to delete them and reinstall them again, you can run the following command:
+Addons will be installed to the folder named `addons` in your project root. You can change the installation directory by setting the `path` in your `addons.json` file.
 
-```sh
-godotaddon uninstall && godotaddon install
+If you're using Chicken to manage all your Godot addons, you can put the `addons/` folder in your `.gitignore` file, as well. Whenever you clone a repo or checkout a different branch with different addons, you can use chicken to reinstall the addons.
+
+Here's an example of an `addons.json` file you might include in the root of your Godot project:
+
+```json
+{
+  "addons:" {
+    "path": "addons",
+    "cache": ".addons",
+    "addons": {
+      "addon_a": {
+        "url": "git@github.com:chickensoft-games/addon_a.git",
+        "subfolder": "some-subfolder",
+        "checkout": "tags/v1.0.0"
+      },
+      "addon_b": {
+        "url": "git@github.com/chickensoft-games/addon_b.git"
+      },
+      "addon_c": {
+        "url": "git@github.com/chickensoft-games/addon_c.git",
+        "checkout": "some-feature"
+      }
+    }
+  }
+}
 ```
 
-If you have made changes to any addons since they were installed, GoDotAddon will give you an error and those addons will not be removed. The `&&` bash operator prevents the second installation command from running if the previous command fails, so you can remove the addons you've modified and run the `godotaddon install` command when you are ready.
+The first addon required by the project, `addon_a`, will be pinned to the `v1.0.0` tag and will copy only the files in `some-subfolder`. The second addon, `addon_b`, will use the latest from `main`. The last addon, `addon_c`, installs the addon using the `some-feature` branch of the addon repository.
 
-## Addons with Addons
+> Note: You can install two different folders from the same repository url, as long as you give them unique addon names.
+>
+> ```json
+> {
+>   "addons": {
+>     "addon_a_1": {
+>       "url": "git@github.com:chickensoft-games/addon_a.git",
+>       "subfolder": "subfolder_a",
+>     },
+>     "addon_a_2": {
+>       "url": "git@github.com:chickensoft-games/addon_a.git",
+>       "subfolder": "subfolder_b",
+>     },
+>   }
+> }
+> ```
 
-If an installed addon has its own `addons.json` file, any addons it requires (that don't conflict with any of the other addons) will be downloaded into your project's `addons` folder as well.
+### Installing Addons
 
-**Important:** If more than one addon specifies a different tag for the same repository and subfolder, a conflict will occur and `godotaddon install` will fail with an error message. This is a fundamental limitation of flat dependency graphs.
+Use Chicken to install (or reinstall) all of the addons mentioned in `addons.json`:
 
-## Git Hooks
+```sh
+chicken egg install
+```
+
+> If your `addons.json` file changes (perhaps because you check out a different branch of your project), you can just run `chicken egg install` again to reinstall the addons.
+
+Under the hood, Chicken runs `git` from the system shell to clone addon repositories to the cache. If you've properly configured git with [ssh keys][ssh-github], Chicken can use git to clone any repo you already have access to.
+
+Chicken generates a normalized `addon id` based on the repository url which contains the repository owner and repository name. For example, `addon_a` mentioned above will be installed to `addons/chickensoft_addon_id`.
+
+Once an addon is installed, Chicken creates a temporary git repository in the folder the addon was copied to and makes a single commit. Chicken checks to make sure there aren't any uncommitted changes if it needs to reinstall the addon to avoid accidentally overwriting any changes you might have made.
+
+> Chicken attempts to be as non-destructive as possible, but you should be careful when using any automated tooling as a risk of data loss is always possible.
+
+You can delete the addons cache any time you want. Chicken will just re-download all of the addons it needs to the cache next time you install.
+
+> There's no particular reason for calling addons "eggs." It just makes the command line interface more fun to use.
+
+### When To Use Addons And Nuget Packages
+
+In general, if you are creating a reusable library of C# code, create a nuget package. If you need to create a reusable group of scenes that may (or may not) have scripts attached, use an addon.
+
+### Addons With Dependencies
+
+An addon can itself contain an `addons.json` file. When it is installed, Chicken will also put it in a queue and download any addons it needs. If Chicken detects a potential conflict, it will balk and you will end up with an incomplete addons folder.
+
+Chicken uses a flat dependency graph that harkens back to tools like [bower]. It tries to be forgiving, but if it encounters a scenario it can't support, it tries to display the error as clearly as possible.
+### Git Hooks
 
 You can optionally reinstall addons automatically after a git checkout. See [post-checkout].
 
-[bower]: https://bower.io
+[chickensoft-badge]: https://chickensoft.games/images/chickensoft/chickensoft_badge.svg
+[chickensoft-website]: https://chickensoft.games
+[discord]: https://discord.gg/gSjaPgMmYW
+[line-coverage]: https://raw.githubusercontent.com/chickensoft-games/Chicken/main/Chicken.Tests/reports/line_coverage.svg
+[branch-coverage]: https://raw.githubusercontent.com/chickensoft-games/Chicken/main/Chicken.Tests/reports/branch_coverage.svg
+
 [ssh-github]: https://docs.github.com/en/authentication/connecting-to-github-with-ssh
+[bower]: https://bower.io
 [post-checkout]: https://git-scm.com/docs/githooks#_post_checkout
+[go_dot_dep]: https://github.com/chickensoft-games/go_dot_dep

@@ -10,14 +10,20 @@ namespace Chickensoft.Chicken {
       @"([^\/:]+)[\/:]([^\/:]+)\/(.+).git\/?$"
     );
 
+    /// <summary>Addon name.</summary>
     public string Name { get; init; }
+    /// <summary>Git repository url.</summary>
     public string Url { get; init; }
+    /// <summary>Git checkout (branch, tag, or other valid reference).</summary>
     public string Checkout { get; init; }
+    /// <summary>
+    /// Subfolder of the git repo to copy for the installation. Defaults to "/"
+    /// </summary>
     public string Subfolder { get; init; }
     /// <summary>Path of the config file that required this addon.</summary>
     public string ConfigFilePath { get; init; }
 
-    // Deterministic id based on url, username, and repository name
+    /// <summary>Deterministic id based only on the url.</summary>
     public string Id {
       get {
         var match = _urlRegex.Match(Url);

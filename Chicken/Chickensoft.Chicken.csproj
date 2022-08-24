@@ -3,6 +3,9 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net6.0;net5.0</TargetFrameworks>
     <LanguageVersion>latest</LanguageVersion>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>chicken</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 

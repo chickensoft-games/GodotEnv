@@ -2,9 +2,7 @@
 
 Thank you for your interest!
 
-## Code Coverage
-
-The general flow is to open the subfolder `Chicken` and change the code up as needed, and then create or update tests in the `Chicken.Tests` folder. You can open the root of the repo in VSCode to debug the app from the command line, but most test runs will likely be for running tests, which VSCode will allow you to do from the test file itself. Make sure you have the code lens testing features enabled.
+The general development flow consists of opening the subfolder `Chicken` and changing the code up as needed, and then creating or updating tests in the `Chicken.Tests` folder. You can open the root of the repo in VSCode to debug the app from the command line, but most test runs will likely be for running tests, which VSCode will allow you to do from the test file itself (make sure you have the code lens testing features enabled).
 
 For checking test coverage (we require 100%), make sure you have [reportgenerator] installed:
 
@@ -17,5 +15,14 @@ From the `Chicken.Tests` folder you can then run the following (in bash) to gene
 ```sh
 ./coverage.sh
 ```
+
+To run (but not debug) the tool locally, run the following.
+
+```sh
+dotnet build
+dotnet run --framework=net6.0 -- --help
+```
+
+Make sure you substitute your local framework version (both `net5.0` or `net6.0` are supported). You can pass command line flags to Chicken after the double dashes `--`.
 
 [reportgenerator]: https://github.com/danielpalme/ReportGenerator
