@@ -54,8 +54,8 @@ To avoid issues when changing branches which use different addons (or different 
 
 ```gitignore
 .addons/
-addons/chickensoft_addon_a
-addons/chickensoft_addon_b
+addons/addon_a
+addons/addon_b
 addons/username_addon_name
 ```
 
@@ -118,8 +118,6 @@ chicken egg install
 > If your `addons.json` file changes (perhaps because you check out a different branch of your project), you can just run `chicken egg install` again to reinstall the addons.
 
 Under the hood, Chicken runs `git` from the system shell to clone addon repositories to the cache. If you've properly configured git with [ssh keys][ssh-github], Chicken can use git to clone any repo you already have access to.
-
-Chicken generates a normalized `addon id` based on the repository url which contains the repository owner and repository name. For example, `addon_a` mentioned above will be installed to `addons/chickensoft_addon_id`.
 
 Once an addon is installed, Chicken creates a temporary git repository in the folder the addon was copied to and makes a single commit. Chicken checks to make sure there aren't any uncommitted changes if it needs to reinstall the addon to avoid accidentally overwriting any changes you might have made.
 
