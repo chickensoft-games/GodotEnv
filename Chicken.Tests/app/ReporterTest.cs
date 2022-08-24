@@ -1,9 +1,8 @@
 // Figured out how to test CliFx console from:
 // https://github.com/Tyrrrz/CliFx/blob/master/CliFx.Tests/ConsoleSpecs.cs#L192
 
-namespace Chickensoft.GoDotAddon.Tests {
+namespace Chickensoft.Chicken.Tests {
   using System.IO;
-  using Chickensoft.GoDotAddon;
   using CliFx.Infrastructure;
   using Moq;
   using Shouldly;

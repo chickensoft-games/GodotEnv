@@ -6,7 +6,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/GoDotAddon/bin/Debug/net6.0/Chickensoft.GoDotAddon.dll",
+      "program": "${workspaceFolder}/GoDotAddon/bin/Debug/net6.0/Chickensoft.Chicken.dll",
       "args": [
         "${input:args}"
       ],

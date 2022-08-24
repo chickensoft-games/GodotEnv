@@ -1,8 +1,7 @@
-namespace Chickensoft.GoDotAddon.Tests {
+namespace Chickensoft.Chicken.Tests {
   using System;
   using System.Linq;
   using System.Threading.Tasks;
-  using Chickensoft.GoDotAddon;
   using CliFx.Exceptions;
   using Moq;
   using Shouldly;

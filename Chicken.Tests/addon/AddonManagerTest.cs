@@ -1,4 +1,4 @@
-namespace Chickensoft.GoDotAddon.Tests {
+namespace Chickensoft.Chicken.Tests {
   using System.Collections.Generic;
   using System.Threading.Tasks;
   using Moq;

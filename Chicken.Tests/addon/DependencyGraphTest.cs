@@ -1,5 +1,5 @@
-namespace Chickensoft.GoDotAddon.Tests {
-  using Chickensoft.GoDotAddon;
+namespace Chickensoft.Chicken.Tests {
+  using Chickensoft.Chicken;
   using Shouldly;
   using Xunit;
 

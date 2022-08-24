@@ -1,4 +1,4 @@
-namespace Chickensoft.GoDotAddon {
+namespace Chickensoft.Chicken {
   using System.Collections.Generic;
 
   public interface IDependencyGraph {

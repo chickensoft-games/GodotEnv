@@ -1,9 +1,8 @@
-namespace Chickensoft.GoDotAddon.Tests {
+namespace Chickensoft.Chicken.Tests {
   using System;
   using System.Collections.Generic;
   using System.IO.Abstractions;
   using System.Threading.Tasks;
-  using Chickensoft.GoDotAddon;
   using CliFx.Exceptions;
   using Moq;
   using Shouldly;
@@ -22,7 +21,7 @@ namespace Chickensoft.GoDotAddon.Tests {
     private readonly RequiredAddon _addon = new(
       name: "chicken",
       configFilePath: "some/working/dir/addons.json",
-      url: "git@github.com:chickensoft-games/GoDotAddon.git",
+      url: "git@github.com:chickensoft-games/Chicken.git",
       checkout: "Main",
       subfolder: "subfolder"
     );

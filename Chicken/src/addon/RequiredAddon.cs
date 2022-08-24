@@ -1,4 +1,4 @@
-namespace Chickensoft.GoDotAddon {
+namespace Chickensoft.Chicken {
   using System.IO;
   using System.Text.RegularExpressions;
   using CaseExtensions;

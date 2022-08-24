@@ -1,4 +1,4 @@
-namespace Chickensoft.GoDotAddon {
+namespace Chickensoft.Chicken {
   using System.Text;
   using System.Threading.Tasks;
   using CliWrap;

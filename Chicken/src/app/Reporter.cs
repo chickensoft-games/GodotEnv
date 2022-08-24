@@ -1,4 +1,4 @@
-namespace Chickensoft.GoDotAddon {
+namespace Chickensoft.Chicken {
   using CliFx.Infrastructure;
 
   public interface IReporter {

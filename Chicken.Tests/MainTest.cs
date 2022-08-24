@@ -1,6 +1,5 @@
-namespace Chickensoft.GoDotAddon.Tests {
+namespace Chickensoft.Chicken.Tests {
   using System.Threading.Tasks;
-  using Chickensoft.GoDotAddon;
   using Shouldly;
   using Xunit;
 
@@ -8,7 +7,7 @@ namespace Chickensoft.GoDotAddon.Tests {
     [Fact]
     public async Task CallsCliFx()
       => await Should.NotThrow<Task<int>>(
-        async () => await GoDotAddon.Main(new string[] { "error" })
+        async () => await Chicken.Main(new string[] { "error" })
       );
   }
 }
