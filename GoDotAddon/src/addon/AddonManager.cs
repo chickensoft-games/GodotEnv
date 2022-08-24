@@ -3,7 +3,11 @@ namespace Chickensoft.GoDotAddon {
   using System.IO;
   using System.Threading.Tasks;
 
-  public class AddonManager {
+  public interface IAddonManager {
+    Task InstallAddons(string projectPath);
+  }
+
+  public class AddonManager : IAddonManager {
     private readonly IAddonRepo _addonRepo;
     private readonly IReporter _reporter;
     private readonly IConfigFileRepo _configFileRepo;

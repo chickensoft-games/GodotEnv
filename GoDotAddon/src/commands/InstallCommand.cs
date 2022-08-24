@@ -17,14 +17,14 @@ namespace Chickensoft.GoDotAddon {
       var startDir = Environment.CurrentDirectory;
       var output = console.Output;
 
-      var addonRepo = new AddonRepo(app: _app);
-      var configFileRepo = new ConfigFileRepo(app: _app);
-      var reporter = new Reporter(output);
+      var addonRepo = _app.CreateAddonRepo();
+      var configFileRepo = _app.CreateConfigFileRepo();
+      var reporter = _app.CreateReporter(output);
       var configFile = configFileRepo.LoadOrCreateConfigFile(startDir);
       var config = configFile.ToConfig(projectPath: startDir);
       var dependencyGraph = new DependencyGraph();
 
-      var addonManger = new AddonManager(
+      var addonManger = _app.CreateAddonManager(
         addonRepo: addonRepo,
         configFileRepo: configFileRepo,
         reporter: reporter,

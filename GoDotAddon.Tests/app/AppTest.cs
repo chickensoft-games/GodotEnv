@@ -1,11 +1,13 @@
 namespace Chickensoft.GoDotAddon.Tests {
   using System;
   using System.Collections.Generic;
+  using System.IO;
   using System.IO.Abstractions;
   using System.IO.Abstractions.TestingHelpers;
   using System.Threading.Tasks;
   using Chickensoft.GoDotAddon;
   using CliFx.Exceptions;
+  using CliFx.Infrastructure;
   using Moq;
   using Newtonsoft.Json;
   using Shouldly;
@@ -22,21 +24,21 @@ namespace Chickensoft.GoDotAddon.Tests {
     }
 
     [Fact]
-    public void AppInitializes() {
+    public void Initializes() {
       var app = new App();
       app.WorkingDir.ShouldBe(Environment.CurrentDirectory);
       app.FS.ShouldBeOfType<FileSystem>();
     }
 
     [Fact]
-    public void AppCreatesShell() {
+    public void CreatesShell() {
       var app = new App(workingDir: ".", fs: new Mock<IFileSystem>().Object);
       var shell = app.CreateShell(".");
       shell.ShouldBeOfType(typeof(Shell));
     }
 
     [Fact]
-    public void AppLoadsFile() {
+    public void LoadsFile() {
       var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
         { FILENAME, new MockFileData(_testData) },
       });
@@ -47,7 +49,7 @@ namespace Chickensoft.GoDotAddon.Tests {
     }
 
     [Fact]
-    public void AppThrowsErrorWhenReadingFileDoesNotWork() {
+    public void ThrowsErrorWhenReadingFileDoesNotWork() {
       var fs = new MockFileSystem(new Dictionary<string, MockFileData> { });
       var app = new App(workingDir: ".", fs: fs);
       Should.Throw<CommandException>(
@@ -56,7 +58,7 @@ namespace Chickensoft.GoDotAddon.Tests {
     }
 
     [Fact]
-    public void AppThrowsErrorWhenDeserializationFails() {
+    public void ThrowsErrorWhenDeserializationFails() {
       var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
         { FILENAME, new MockFileData("") },
       });
@@ -69,7 +71,7 @@ namespace Chickensoft.GoDotAddon.Tests {
     }
 
     [Fact]
-    public void AppSavesFile() {
+    public void SavesFile() {
       var fs = new MockFileSystem(new Dictionary<string, MockFileData> { });
       var app = new App(workingDir: ".", fs: fs);
       app.SaveFile(FILENAME, DATA);
@@ -78,7 +80,7 @@ namespace Chickensoft.GoDotAddon.Tests {
     }
 
     [Fact]
-    public void AppThrowsErrorWhenSavingFileDoesNotWork() {
+    public void ThrowsErrorWhenSavingFileDoesNotWork() {
       var fs = new Mock<IFileSystem>(MockBehavior.Strict);
       var file = new Mock<IFile>(MockBehavior.Strict);
       file.Setup(f => f.WriteAllText(FILENAME, DATA)).Throws<Exception>();
@@ -87,6 +89,49 @@ namespace Chickensoft.GoDotAddon.Tests {
       Should.Throw<CommandException>(
         () => app.SaveFile(FILENAME, DATA)
       );
+    }
+
+    [Fact]
+    public void CreatesAddonManager() {
+      var addonRepo = new Mock<IAddonRepo>();
+      var configFileRepo = new Mock<IConfigFileRepo>();
+      var reporter = new Mock<IReporter>();
+      var dependencyGraph = new Mock<IDependencyGraph>();
+
+      var fs = new Mock<IFileSystem>();
+      var file = new Mock<IFile>();
+      var app = new App(workingDir: ".", fs: fs.Object);
+
+      app.CreateAddonManager(
+        addonRepo: addonRepo.Object,
+        configFileRepo: configFileRepo.Object,
+        reporter: reporter.Object,
+        dependencyGraph: dependencyGraph.Object
+      ).ShouldBeOfType(typeof(AddonManager));
+    }
+
+    [Fact]
+    public void CreatesReporter() {
+      var fs = new Mock<IFileSystem>();
+      var app = new App(workingDir: ".", fs: fs.Object);
+      app.CreateReporter(new ConsoleWriter(
+        console: new FakeInMemoryConsole(),
+        stream: new MemoryStream()
+      )).ShouldBeOfType(typeof(Reporter));
+    }
+
+    [Fact]
+    public void CreatesAddonRepo() {
+      var fs = new Mock<IFileSystem>();
+      var app = new App(workingDir: ".", fs: fs.Object);
+      app.CreateAddonRepo().ShouldBeOfType(typeof(AddonRepo));
+    }
+
+    [Fact]
+    public void CreatesConfigFileRepo() {
+      var fs = new Mock<IFileSystem>();
+      var app = new App(workingDir: ".", fs: fs.Object);
+      app.CreateConfigFileRepo().ShouldBeOfType(typeof(ConfigFileRepo));
     }
   }
 }

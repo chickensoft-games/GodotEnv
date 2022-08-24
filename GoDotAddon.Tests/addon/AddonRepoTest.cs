@@ -28,7 +28,7 @@ namespace Chickensoft.GoDotAddon.Tests {
     );
 
     [Fact]
-    public async Task LoadsCacheCorrectlyWhenAddonIsCached() {
+    public async Task LoadsCacheCorrectlyWhenAddonCacheDoesNotExist() {
       var app = new Mock<IApp>(MockBehavior.Strict);
       var fs = new Mock<IFileSystem>(MockBehavior.Strict);
       app.Setup(app => app.FS).Returns(fs.Object);
@@ -41,7 +41,10 @@ namespace Chickensoft.GoDotAddon.Tests {
 
       var directory = new Mock<IDirectory>(MockBehavior.Strict);
       fs.Setup(fs => fs.Directory).Returns(directory.Object);
-      directory.Setup(dir => dir.Exists("project/.addons")).Returns(true);
+      directory.Setup(dir => dir.Exists("project/.addons")).Returns(false);
+      directory.Setup(dir => dir.CreateDirectory("project/.addons")).Returns(
+        new Mock<IDirectoryInfo>().Object
+      );
       directory.Setup(dir => dir.GetDirectories("project/.addons")).Returns(
         new string[] {
           "project/.addons/addon_1",

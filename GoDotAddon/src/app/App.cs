@@ -2,6 +2,7 @@ namespace Chickensoft.GoDotAddon {
   using System;
   using System.IO.Abstractions;
   using CliFx.Exceptions;
+  using CliFx.Infrastructure;
   using Newtonsoft.Json;
 
   public interface IApp {
@@ -18,6 +19,15 @@ namespace Chickensoft.GoDotAddon {
     IShell CreateShell(string workingDir);
     T LoadFile<T>(string path);
     void SaveFile(string path, string contents);
+    IAddonManager CreateAddonManager(
+      IAddonRepo addonRepo,
+      IConfigFileRepo configFileRepo,
+      IReporter reporter,
+      IDependencyGraph dependencyGraph
+    );
+    IReporter CreateReporter(ConsoleWriter writer);
+    IAddonRepo CreateAddonRepo();
+    IConfigFileRepo CreateConfigFileRepo();
   }
 
   public class App : IApp {
@@ -30,6 +40,28 @@ namespace Chickensoft.GoDotAddon {
       WorkingDir = workingDir;
       FS = fs;
     }
+
+    // The following methods aren't static because we mock them.
+    // Disable the warning about making them static.
+#pragma warning disable CA1822
+    public IAddonManager CreateAddonManager(
+      IAddonRepo addonRepo,
+      IConfigFileRepo configFileRepo,
+      IReporter reporter,
+      IDependencyGraph dependencyGraph
+    ) => new AddonManager(
+      addonRepo: addonRepo,
+      configFileRepo: configFileRepo,
+      reporter: reporter,
+      dependencyGraph: dependencyGraph
+    );
+
+    public IReporter CreateReporter(ConsoleWriter writer)
+      => new Reporter(writer);
+#pragma warning restore CA1822
+
+    public IAddonRepo CreateAddonRepo() => new AddonRepo(this);
+    public IConfigFileRepo CreateConfigFileRepo() => new ConfigFileRepo(this);
 
     public T LoadFile<T>(string path) {
       try {
