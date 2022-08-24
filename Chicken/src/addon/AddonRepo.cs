@@ -55,7 +55,7 @@ namespace Chickensoft.Chicken {
       if (_fs.Directory.Exists(addonCachePath)) { return; }
       var cachePathShell = _app.CreateShell(config.CachePath);
       await cachePathShell.Run(
-        "git", "clone", "--recurse-submodules", addon.Url, addon.Name
+        "git", "clone", addon.Url, "--recurse-submodules", addon.Name
       );
     }
 

@@ -102,7 +102,7 @@ namespace Chickensoft.Chicken.Tests {
         addonCachePath,
         new ProcessResult(0),
         RunMode.Run,
-        "git", "clone", "--recurse-submodules", _addon.Url, _addon.Name
+        "git", "clone", _addon.Url, "--recurse-submodules", _addon.Name
       );
 
       var addonRepo = new AddonRepo(app.Object);
