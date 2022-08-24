@@ -69,7 +69,7 @@ Here's an example of an `addons.json` file you might include in the root of your
 
 ```json
 {
-  "addons:" {
+  "addons": {
     "path": "addons",
     "cache": ".addons",
     "addons": {
