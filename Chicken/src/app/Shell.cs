@@ -21,7 +21,11 @@ namespace Chickensoft.Chicken {
     ) {
       var result = await _runner.Run(_workingDir, executable, args);
       if (!result.Success) {
-        throw new CommandException($"Failed to run `{executable}`");
+        throw new CommandException(
+          $"Failed to run `{executable}` in `{_workingDir}`" +
+          $" with args `{string.Join(" ", args)}`. Received exit " +
+          $"code {result.ExitCode}."
+        );
       }
       return result;
     }
