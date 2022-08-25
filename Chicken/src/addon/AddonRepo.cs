@@ -95,6 +95,9 @@ namespace Chickensoft.Chicken {
       if (subfolder != "/") {
         copyFromPath = Path.Combine(copyFromPath, subfolder);
       }
+      // Add a trailing slash to the source directory we are copying from.
+      // This is very important for rsync to copy correctly.
+      // https://unix.stackexchange.com/a/178095
       copyFromPath = Path.TrimEndingDirectorySeparator(copyFromPath) +
         _fs.Path.DirectorySeparatorChar;
       var addonInstallPath = Path.Combine(config.AddonsPath, addon.Name);
