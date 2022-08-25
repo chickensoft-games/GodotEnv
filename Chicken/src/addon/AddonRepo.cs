@@ -65,7 +65,7 @@ namespace Chickensoft.Chicken {
       var status = await _app.CreateShell(addonPath).RunUnchecked(
         "git", "status", "--porcelain"
       );
-      if (status.Success) {
+      if (status.StandardOutput.Length == 0) {
         // Installed addon is unmodified by the user, free to delete.
         await _app.CreateShell(config.AddonsPath).Run("rm", "-rf", addonPath);
       }

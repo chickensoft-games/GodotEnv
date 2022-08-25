@@ -223,7 +223,7 @@ namespace Chickensoft.Chicken.Tests {
 
       cli.Setup(
         addonDir,
-        new ProcessResult(1),
+        new ProcessResult(0, StandardOutput: "a file was changed"),
         RunMode.RunUnchecked,
         "git", "status", "--porcelain"
       );
