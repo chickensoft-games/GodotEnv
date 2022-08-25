@@ -27,7 +27,7 @@ namespace Chickensoft.Chicken.Tests {
       output.Flush();
 
       var contents = output.Encoding.GetString(stream.ToArray());
-      contents.ShouldBe("DependencyEvent");
+      contents.ShouldBe("DependencyEvent\n");
     }
   }
 }

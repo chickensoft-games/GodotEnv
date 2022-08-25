@@ -10,6 +10,6 @@ namespace Chickensoft.Chicken {
     public Reporter(ConsoleWriter output) => _output = output;
 
     public void DependencyEvent(IReportableDependencyEvent depEvent)
-      => _output.Write(depEvent.ToString());
+      => _output.Write(depEvent.ToString() + "\n");
   }
 }
