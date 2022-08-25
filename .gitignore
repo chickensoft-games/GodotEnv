@@ -5,5 +5,5 @@ Chicken.Tests/obj
 Chicken.Tests/coverage
 Chicken.Tests/badges
 Chicken/addons
-Chickens/.addons
+Chicken/.addons
 Chicken/addons.json
