@@ -242,7 +242,7 @@ namespace Chickensoft.Chicken.Tests {
     [Fact]
     public async Task CopyAddonCopiesAddon() {
       var addonCachePath = _config.CachePath + "/" + _addon.Name;
-      var copyFromPath = addonCachePath + "/" + _addon.Subfolder;
+      var copyFromPath = addonCachePath + "/" + _addon.Subfolder + "/";
       var workingDir = _config.ProjectPath;
       var addonDir = _config.AddonsPath + "/" + _addon.Name;
 
@@ -253,12 +253,17 @@ namespace Chickensoft.Chicken.Tests {
       var workingShell = cli.CreateShell(workingDir);
       var addonShell = cli.CreateShell(addonDir);
 
+      app.Setup(app => app.FS).Returns(fs.Object);
       app.Setup(app => app.CreateShell(addonCachePath))
         .Returns(addonCacheShell.Object);
       app.Setup(app => app.CreateShell(workingDir))
         .Returns(workingShell.Object);
       app.Setup(app => app.CreateShell(addonDir))
         .Returns(addonShell.Object);
+
+      var path = new Mock<IPath>();
+      path.Setup(path => path.DirectorySeparatorChar).Returns('/');
+      fs.Setup(fs => fs.Path).Returns(path.Object);
 
       cli.Setup(
         addonCachePath,
@@ -286,7 +291,7 @@ namespace Chickensoft.Chicken.Tests {
         new ProcessResult(0),
         RunMode.Run,
         "rsync",
-        "-av", copyFromPath, _config.AddonsPath, "--exclude", ".git"
+        "-av", copyFromPath, addonDir, "--exclude", ".git"
       );
 
       cli.Setup(

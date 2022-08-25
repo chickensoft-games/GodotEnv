@@ -95,11 +95,21 @@ namespace Chickensoft.Chicken {
       if (subfolder != "/") {
         copyFromPath = Path.Combine(copyFromPath, subfolder);
       }
+      copyFromPath = Path.TrimEndingDirectorySeparator(copyFromPath) +
+        _fs.Path.DirectorySeparatorChar;
       var addonInstallPath = Path.Combine(config.AddonsPath, addon.Name);
       // copy files from addon cache to addon dir, excluding git folders.
-      await workingShell.Run(
-        "rsync", "-av", copyFromPath, config.AddonsPath, "--exclude", ".git"
-      );
+      if (_fs.Path.DirectorySeparatorChar == '\\') {
+        // if we're running on windows, use robocopy instead of rsync
+        await workingShell.Run(
+          "robocopy", copyFromPath, addonInstallPath, "/e", "/xd", ".git"
+        );
+      }
+      else {
+        await workingShell.Run(
+          "rsync", "-av", copyFromPath, addonInstallPath, "--exclude", ".git"
+        );
+      }
       var addonShell = _app.CreateShell(addonInstallPath);
       // Make a junk repo in the installed addon dir. We use this for change
       // tracking to avoid deleting a modified addon.
