@@ -302,7 +302,7 @@ namespace Chickensoft.Chicken.Tests {
         new ProcessResult(0),
         RunMode.Run,
         "git",
-        "add", "."
+        "add", "-A"
       );
 
       cli.Setup(

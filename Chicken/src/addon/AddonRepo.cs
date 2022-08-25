@@ -104,7 +104,7 @@ namespace Chickensoft.Chicken {
       // Make a junk repo in the installed addon dir. We use this for change
       // tracking to avoid deleting a modified addon.
       await addonShell.Run("git", "init");
-      await addonShell.Run("git", "add", ".");
+      await addonShell.Run("git", "add", "-A");
       await addonShell.Run(
         "git", "commit", "-m", "Initial commit"
       );
