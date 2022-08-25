@@ -66,9 +66,11 @@ namespace Chickensoft.Chicken.Tests {
 
       // Addon 1 installation calls
       dependencyGraph.Setup(dg => dg.Add(addon1)).Returns(
-        new DependencyInstalledEvent()
+        new DependencyInstalledEvent(addon1)
       );
-      reporter.Setup(r => r.DependencyEvent(new DependencyInstalledEvent()));
+      reporter.Setup(
+        r => r.DependencyEvent(new DependencyInstalledEvent(addon1))
+      );
       addonRepo.Setup(ar => ar.CacheAddon(addon1, projectConfig)).Returns(
         Task.CompletedTask
       );
@@ -89,9 +91,11 @@ namespace Chickensoft.Chicken.Tests {
 
       // Addon 2 installation calls
       dependencyGraph.Setup(dg => dg.Add(addon2)).Returns(
-        new DependencyInstalledEvent()
+        new DependencyInstalledEvent(addon2)
       );
-      reporter.Setup(r => r.DependencyEvent(new DependencyInstalledEvent()));
+      reporter.Setup(
+        r => r.DependencyEvent(new DependencyInstalledEvent(addon2))
+      );
       addonRepo.Setup(ar => ar.CacheAddon(addon2, projectConfig)).Returns(
         Task.CompletedTask
       );

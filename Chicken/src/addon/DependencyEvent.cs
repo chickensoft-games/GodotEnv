@@ -87,9 +87,29 @@ namespace Chickensoft.Chicken {
       $"  Previously installed: {Addon}";
   }
 
-  public record DependencyAlreadyInstalledEvent(string Name)
-    : IDependencyEvent, IDependencyCannotBeInstalledEvent;
+  public record DependencyAlreadyInstalledEvent
+    : IDependencyEvent, IDependencyCannotBeInstalledEvent {
+    public RequiredAddon Requested { get; init; }
+    public RequiredAddon AlreadyInstalled { get; init; }
 
-  public record DependencyInstalledEvent()
-    : IDependencyEvent, IReportableDependencyEvent;
+    public DependencyAlreadyInstalledEvent(RequiredAddon requested, RequiredAddon alreadyInstalled) {
+      Requested = requested;
+      AlreadyInstalled = alreadyInstalled;
+    }
+
+    public override string ToString() =>
+      $"The addon \"{Requested.Name}\" is already installed as " +
+      $"\"{AlreadyInstalled.Name}.\"\n\n" +
+      $"  Attempted to install: {Requested}\n\n" +
+      $"  Previously installed: {AlreadyInstalled}";
+  }
+
+  public record DependencyInstalledEvent
+    : IDependencyEvent, IReportableDependencyEvent {
+    public RequiredAddon Addon { get; init; }
+    public DependencyInstalledEvent(RequiredAddon addon) => Addon = addon;
+    public override string ToString() =>
+        $"The addon \"{Addon.Name}\" was installed successfully.\n\n" +
+        $"  Installed: {Addon}";
+  }
 }

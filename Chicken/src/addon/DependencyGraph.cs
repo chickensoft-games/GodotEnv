@@ -17,18 +17,21 @@ namespace Chickensoft.Chicken {
     public IDependencyEvent Add(RequiredAddon addon) {
       // First, check to make sure another addon isn't installed to the same
       // path as the new one.
-      if (_dependenciesByName.TryGetValue(addon.Name, out var sameNameAddon)) {
+      if (_dependenciesByName.TryGetValue(addon.Name, out var installedAddon)) {
         if (
-          sameNameAddon.Url == addon.Url &&
-          sameNameAddon.Subfolder == addon.Subfolder &&
-          sameNameAddon.Checkout == addon.Checkout
+          installedAddon.Url == addon.Url &&
+          installedAddon.Subfolder == addon.Subfolder &&
+          installedAddon.Checkout == addon.Checkout
         ) {
           // Dependency is already installed under the same name.
-          return new DependencyAlreadyInstalledEvent(Name: sameNameAddon.Name);
+          return new DependencyAlreadyInstalledEvent(
+            requested: addon,
+            alreadyInstalled: installedAddon
+          );
         }
         return new ConflictingDestinationPathEvent(
           conflict: addon,
-          addon: sameNameAddon
+          addon: installedAddon
         );
       }
 
@@ -43,7 +46,8 @@ namespace Chickensoft.Chicken {
           ) {
             // Dependency is already installed under a different name.
             return new DependencyAlreadyInstalledEvent(
-              Name: existingAddon.Name
+              requested: addon,
+              alreadyInstalled: existingAddon
             );
           }
           else {
@@ -64,7 +68,7 @@ namespace Chickensoft.Chicken {
       }
 
       MarkInstalled(addon);
-      return new DependencyInstalledEvent();
+      return new DependencyInstalledEvent(addon);
     }
 
     private void MarkInstalled(RequiredAddon addon) {

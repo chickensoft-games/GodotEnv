@@ -13,6 +13,13 @@ namespace Chickensoft.Chicken.Tests {
       checkout: "main",
       subfolder: "/"
     );
+    private readonly RequiredAddon _addonA2 = new(
+      name: "A2",
+      configFilePath: "project/addons.json",
+      url: "https://user/a.git",
+      checkout: "main",
+      subfolder: "/"
+    );
 
     private readonly RequiredAddon _addonAConflict = new(
       name: "A",
@@ -130,6 +137,33 @@ namespace Chickensoft.Chicken.Tests {
         "Both addons would be installed to the same path.\n\n" +
         $"  Attempted to install: {_addonAConflict}\n\n" +
         $"  Previously installed: {_addonA}"
+      );
+    }
+
+    [Fact]
+    public void DependencyAlreadyInstalledEventDescribesItself() {
+      var e = new DependencyAlreadyInstalledEvent(
+        requested: _addonA,
+        alreadyInstalled: _addonA2
+      );
+
+      e.ToString().ShouldBe(
+        $"The addon \"{_addonA.Name}\" is already installed as " +
+        $"\"{_addonA2.Name}.\"\n\n" +
+        $"  Attempted to install: {_addonA}\n\n" +
+        $"  Previously installed: {_addonA2}"
+      );
+    }
+
+    [Fact]
+    public void DependencyInstalledEventDescribesItself() {
+      var e = new DependencyInstalledEvent(
+        addon: _addonA
+      );
+
+      e.ToString().ShouldBe(
+        $"The addon \"{_addonA.Name}\" was installed successfully.\n\n" +
+        $"  Installed: {_addonA}"
       );
     }
   }
