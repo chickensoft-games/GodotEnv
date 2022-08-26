@@ -57,27 +57,27 @@ namespace Chickensoft.Chicken.Tests {
     [Fact]
     public void IndicatesADependencyIsInstalled() {
       var graph = new DependencyGraph();
-      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
+      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyCanBeInstalledEvent));
     }
 
     [Fact]
     public void IndicatesNonConflictingDependenciesAreInstalled() {
       var graph = new DependencyGraph();
-      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
-      graph.Add(_addonB).ShouldBeOfType(typeof(DependencyInstalledEvent));
+      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyCanBeInstalledEvent));
+      graph.Add(_addonB).ShouldBeOfType(typeof(DependencyCanBeInstalledEvent));
     }
 
     [Fact]
     public void IndicatesADependencyIsAlreadyInstalled() {
       var graph = new DependencyGraph();
-      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
+      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyCanBeInstalledEvent));
       graph.Add(_addonA).ShouldBeOfType(typeof(DependencyAlreadyInstalledEvent));
     }
 
     [Fact]
     public void IndicatesAConflictingDestinationPath() {
       var graph = new DependencyGraph();
-      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
+      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyCanBeInstalledEvent));
       graph.Add(_addonAConflictingPath).ShouldBeOfType(
         typeof(ConflictingDestinationPathEvent)
       );
@@ -86,7 +86,7 @@ namespace Chickensoft.Chicken.Tests {
     [Fact]
     public void IndicatesADependencyIsInstalledUnderDifferentName() {
       var graph = new DependencyGraph();
-      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
+      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyCanBeInstalledEvent));
       graph.Add(_addonAEquivalent).ShouldBeOfType(
         typeof(DependencyAlreadyInstalledEvent)
       );
@@ -95,7 +95,7 @@ namespace Chickensoft.Chicken.Tests {
     [Fact]
     public void IssuesSimilarDependencyWarningForSubfolderChange() {
       var graph = new DependencyGraph();
-      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
+      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyCanBeInstalledEvent));
       var e = graph.Add(_addonASubfolder);
       e.ShouldBeOfType(
         typeof(SimilarDependencyWarning)
@@ -108,7 +108,7 @@ namespace Chickensoft.Chicken.Tests {
     [Fact]
     public void IssuesSimilarDependencyWarningForCheckoutChange() {
       var graph = new DependencyGraph();
-      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
+      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyCanBeInstalledEvent));
       var e = graph.Add(_addonACheckout);
       e.ShouldBeOfType(
         typeof(SimilarDependencyWarning)
@@ -121,8 +121,8 @@ namespace Chickensoft.Chicken.Tests {
     [Fact]
     public void IssuesSimilarDependencyWarningForMultiplePossibleConflicts() {
       var graph = new DependencyGraph();
-      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyInstalledEvent));
-      graph.Add(_addonB).ShouldBeOfType(typeof(DependencyInstalledEvent));
+      graph.Add(_addonA).ShouldBeOfType(typeof(DependencyCanBeInstalledEvent));
+      graph.Add(_addonB).ShouldBeOfType(typeof(DependencyCanBeInstalledEvent));
       graph.Add(_addonACheckout).ShouldBeOfType(
         typeof(SimilarDependencyWarning)
       );

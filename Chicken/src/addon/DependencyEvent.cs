@@ -104,12 +104,12 @@ namespace Chickensoft.Chicken {
       $"  Previously installed: {AlreadyInstalled}";
   }
 
-  public record DependencyInstalledEvent
+  public record DependencyCanBeInstalledEvent
     : IDependencyEvent, IReportableDependencyEvent {
     public RequiredAddon Addon { get; init; }
-    public DependencyInstalledEvent(RequiredAddon addon) => Addon = addon;
+    public DependencyCanBeInstalledEvent(RequiredAddon addon) => Addon = addon;
     public override string ToString() =>
-        $"The addon \"{Addon.Name}\" was installed successfully.\n\n" +
-        $"  Installed: {Addon}";
+        $"Attempting to install \"{Addon.Name}.\"\n\n" +
+        $"  Installing: {Addon}";
   }
 }

@@ -156,14 +156,14 @@ namespace Chickensoft.Chicken.Tests {
     }
 
     [Fact]
-    public void DependencyInstalledEventDescribesItself() {
-      var e = new DependencyInstalledEvent(
+    public void DependencyCanBeInstalledEventDescribesItself() {
+      var e = new DependencyCanBeInstalledEvent(
         addon: _addonA
       );
 
       e.ToString().ShouldBe(
-        $"The addon \"{_addonA.Name}\" was installed successfully.\n\n" +
-        $"  Installed: {_addonA}"
+        $"Attempting to install \"{_addonA.Name}.\"\n\n" +
+        $"  Installing: {_addonA}"
       );
     }
   }

@@ -68,7 +68,7 @@ namespace Chickensoft.Chicken {
       }
 
       MarkInstalled(addon);
-      return new DependencyInstalledEvent(addon);
+      return new DependencyCanBeInstalledEvent(addon);
     }
 
     private void MarkInstalled(RequiredAddon addon) {
