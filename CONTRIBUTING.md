@@ -16,13 +16,13 @@ From the `Chicken.Tests` folder you can then run the following (in bash) to gene
 ./coverage.sh
 ```
 
-To run (but not debug) the tool locally, run the following.
+To run (but not debug) the tool locally, run the following from the `Chicken` folder.
 
 ```sh
 dotnet build
-dotnet run --framework=net6.0 -- --help
+dotnet run -- --help
 ```
 
-Make sure you substitute your local framework version (both `net5.0` or `net6.0` are supported). You can pass command line flags to Chicken after the double dashes `--`.
+You can pass command line flags to Chicken after the double dashes `--`.
 
 [reportgenerator]: https://github.com/danielpalme/ReportGenerator

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;net5.0</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
     <LanguageVersion>latest</LanguageVersion>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>chicken</ToolCommandName>
@@ -29,9 +29,10 @@
 
   <ItemGroup>
     <PackageReference Include="CliFx" Version="2.2.5" />
-    <PackageReference Include="System.IO.Abstractions" Version="17.0.10" />
+    <PackageReference Include="System.IO.Abstractions" Version="17.1.1" />
     <PackageReference Include="CliWrap" Version="3.4.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="CaseExtensions" Version="1.1.0" />
+    <PackageReference Include="Murphy.SymbolicLink" Version="1.0.0" />
   </ItemGroup>
 </Project>

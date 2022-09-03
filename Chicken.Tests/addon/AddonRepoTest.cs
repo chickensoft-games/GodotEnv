@@ -323,5 +323,70 @@ namespace Chickensoft.Chicken.Tests {
       app.VerifyAll();
       cli.VerifyAll();
     }
+
+    [Fact]
+    public void IsDirectorySymlinkRecognizesSymlinks() {
+      var app = new Mock<IApp>();
+      var fs = new Mock<IFileSystem>();
+      var dirInfoFactory = new Mock<IDirectoryInfoFactory>();
+      var dirInfo = new Mock<IDirectoryInfo>();
+
+      var path = "a/folder/to/check";
+
+      app.Setup(app => app.FS).Returns(fs.Object);
+      fs.Setup(fs => fs.DirectoryInfo).Returns(dirInfoFactory.Object);
+      dirInfoFactory.Setup(dif => dif.FromDirectoryName(path))
+        .Returns(dirInfo.Object);
+      dirInfo.Setup(di => di.LinkTarget)
+        .Returns("some/path");
+
+      var addonRepo = new AddonRepo(app.Object);
+
+      var result = addonRepo.IsDirectorySymlink(path);
+
+      result.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void IsDirectorySymlinkRecognizesNormalDirectory() {
+      var app = new Mock<IApp>();
+      var fs = new Mock<IFileSystem>();
+      var dirInfoFactory = new Mock<IDirectoryInfoFactory>();
+      var dirInfo = new Mock<IDirectoryInfo>();
+
+      var path = "a/folder/to/check";
+
+      app.Setup(app => app.FS).Returns(fs.Object);
+      fs.Setup(fs => fs.DirectoryInfo).Returns(dirInfoFactory.Object);
+      dirInfoFactory.Setup(dif => dif.FromDirectoryName(path))
+        .Returns(dirInfo.Object);
+      dirInfo.Setup(di => di.LinkTarget).Returns<string?>(null);
+
+      var addonRepo = new AddonRepo(app.Object);
+
+      var result = addonRepo.IsDirectorySymlink(path);
+
+      result.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void CreateSymlinkCreatesSymlink() {
+      var app = new Mock<IApp>();
+      var fs = new Mock<IFileSystem>();
+      var dir = new Mock<IDirectory>();
+
+      var path = "original/folder";
+      var pathToTarget = "target/folder";
+
+      app.Setup(app => app.FS).Returns(fs.Object);
+      fs.Setup(fs => fs.Directory).Returns(dir.Object);
+      dir.Setup(dir => dir.CreateSymbolicLink(path, pathToTarget));
+
+      var addonRepo = new AddonRepo(app.Object);
+
+      addonRepo.CreateSymlink(path, pathToTarget);
+
+      dir.VerifyAll();
+    }
   }
 }

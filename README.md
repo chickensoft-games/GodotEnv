@@ -2,7 +2,7 @@
 
 [![Chickensoft Badge][chickensoft-badge]][chickensoft-website] [![Discord](https://img.shields.io/badge/Chickensoft%20Discord-%237289DA.svg?style=flat&logo=discord&logoColor=white)][discord] ![line coverage][line-coverage] ![branch coverage][branch-coverage]
 
-Command line utility for C# Godot game development and addon management. Written in C# and provided as a dotnet tool for .NET 5 and .NET 6.
+Command line utility for C# Godot game development and addon management. Written in C# and provided as a dotnet tool for .NET 6.
 
 ## Installation
 

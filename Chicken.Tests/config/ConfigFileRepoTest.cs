@@ -1,6 +1,5 @@
 namespace Chickensoft.Chicken.Tests {
-  using System.Collections.Generic;
-  using System.IO.Abstractions.TestingHelpers;
+  using System.IO.Abstractions;
   using Moq;
   using Shouldly;
   using Xunit;
@@ -22,17 +21,25 @@ namespace Chickensoft.Chicken.Tests {
 
 
     [Fact]
-    public void LoadsFile() {
+    public void LoadsFileAndCreatesDirectories() {
       var app = new Mock<IApp>();
-      var fs = new MockFileSystem(
-        new Dictionary<string, MockFileData> {
-          { CONFIG_FILE_PATH, new MockFileData("") }
-        }
-      );
-      app.Setup(app => app.FS).Returns(fs);
+
+      var fs = new Mock<IFileSystem>();
+      var file = new Mock<IFile>();
+      app.Setup(app => app.FS).Returns(fs.Object);
+      fs.Setup(fs => fs.File).Returns(file.Object);
+      file.Setup(file => file.Exists(CONFIG_FILE_PATH)).Returns(true);
       app.Setup(app => app.LoadFile<ConfigFile>(CONFIG_FILE_PATH)).Returns(
         _configFile
       );
+
+      var dir = new Mock<IDirectory>();
+      fs.Setup(fs => fs.Directory).Returns(dir.Object);
+      dir.Setup(dir => dir.Exists(_configFile.AddonsPath)).Returns(false);
+      dir.Setup(dir => dir.CreateDirectory(_configFile.AddonsPath));
+      dir.Setup(dir => dir.Exists(_configFile.CachePath)).Returns(false);
+      dir.Setup(dir => dir.CreateDirectory(_configFile.CachePath));
+
       var repo = new ConfigFileRepo(app.Object);
       var config = repo.LoadOrCreateConfigFile(PROJECT_PATH);
       config.ShouldBe(_configFile);
@@ -41,8 +48,19 @@ namespace Chickensoft.Chicken.Tests {
     [Fact]
     public void CreatesFile() {
       var app = new Mock<IApp>();
-      var fs = new MockFileSystem();
-      app.Setup(app => app.FS).Returns(fs);
+      var fs = new Mock<IFileSystem>();
+      var file = new Mock<IFile>();
+      app.Setup(app => app.FS).Returns(fs.Object);
+      fs.Setup(fs => fs.File).Returns(file.Object);
+      file.Setup(file => file.Exists(CONFIG_FILE_PATH)).Returns(false);
+
+      var dir = new Mock<IDirectory>();
+      fs.Setup(fs => fs.Directory).Returns(dir.Object);
+      dir.Setup(dir => dir.Exists(_configFile.AddonsPath)).Returns(false);
+      dir.Setup(dir => dir.CreateDirectory(_configFile.AddonsPath));
+      dir.Setup(dir => dir.Exists(_configFile.CachePath)).Returns(false);
+      dir.Setup(dir => dir.CreateDirectory(_configFile.CachePath));
+
       var repo = new ConfigFileRepo(app.Object);
       var config = repo.LoadOrCreateConfigFile(PROJECT_PATH);
       config.ShouldBeOfType(typeof(ConfigFile));

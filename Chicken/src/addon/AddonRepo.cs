@@ -10,6 +10,8 @@ namespace Chickensoft.Chicken {
     Task DeleteAddon(RequiredAddon addon, Config config);
     Task CopyAddonFromCache(RequiredAddon addon, Config config);
     Task<Dictionary<string, string>> LoadCache(Config config);
+    bool IsDirectorySymlink(string path);
+    void CreateSymlink(string path, string pathToTarget);
   }
 
   public class AddonRepo : IAddonRepo {
@@ -113,5 +115,11 @@ namespace Chickensoft.Chicken {
         "git", "commit", "-m", "Initial commit"
       );
     }
+
+    public bool IsDirectorySymlink(string path)
+      => _app.FS.DirectoryInfo.FromDirectoryName(path).LinkTarget != null;
+
+    public void CreateSymlink(string path, string pathToTarget)
+      => _app.FS.Directory.CreateSymbolicLink(path, pathToTarget);
   }
 }
