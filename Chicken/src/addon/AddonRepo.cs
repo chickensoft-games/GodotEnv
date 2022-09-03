@@ -6,23 +6,6 @@ namespace Chickensoft.Chicken {
   using CliFx.Exceptions;
 
   public interface IAddonRepo {
-    Task CacheAddon(RequiredAddon addon, Config config);
-    Task DeleteAddon(RequiredAddon addon, Config config);
-    Task CopyAddonFromCache(RequiredAddon addon, Config config);
-    Task<Dictionary<string, string>> LoadCache(Config config);
-    bool IsDirectorySymlink(string path);
-    void CreateSymlink(string path, string pathToTarget);
-  }
-
-  public class AddonRepo : IAddonRepo {
-    private readonly IApp _app;
-    private readonly IFileSystem _fs;
-
-    public AddonRepo(IApp app) {
-      _app = app;
-      _fs = app.FS;
-    }
-
     /// <summary>
     /// Returns a dictionary of addons in the cache. Each key is the addon's
     /// url and each value is the directory in the cache containing a git clone
@@ -33,6 +16,20 @@ namespace Chickensoft.Chicken {
     /// </summary>
     /// <param name="config">Addon configuration containing paths.</param>
     /// <returns>Map of url's to addon cache directories.</returns>
+    Task<Dictionary<string, string>> LoadCache(Config config);
+    Task CacheAddon(RequiredAddon addon, Config config);
+    Task DeleteAddon(RequiredAddon addon, Config config);
+    Task CopyAddonFromCache(RequiredAddon addon, Config config);
+    bool IsDirectorySymlink(string path);
+    void CreateSymlink(string path, string pathToTarget);
+  }
+
+  public class AddonRepo : IAddonRepo {
+    private readonly IApp _app;
+    private IFileSystem _fs => _app.FS;
+
+    public AddonRepo(IApp app) => _app = app;
+
     public async Task<Dictionary<string, string>> LoadCache(
       Config config
     ) {
