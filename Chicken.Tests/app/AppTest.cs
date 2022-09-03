@@ -48,6 +48,17 @@ namespace Chickensoft.Chicken.Tests {
     }
 
     [Fact]
+    public void ThrowsErrorWhenDeserializationIsNull() {
+      var fs = new Mock<IFileSystem>();
+      var file = new Mock<IFile>();
+      fs.Setup(fs => fs.File).Returns(file.Object);
+      file.Setup(file => file.ReadAllText(FILENAME)).Returns("");
+
+      var app = new App(workingDir: ".", fs: fs.Object);
+      Should.Throw<CommandException>(() => app.LoadFile<TestObject>(FILENAME));
+    }
+
+    [Fact]
     public void ThrowsErrorWhenReadingFileDoesNotWork() {
       var fs = new Mock<IFileSystem>();
       var file = new Mock<IFile>();
