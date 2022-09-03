@@ -10,6 +10,7 @@ namespace Chickensoft.Chicken.Tests {
       = "git@github.com:chickensoft-games/chicken.git";
     private const string SUBFOLDER = "Chicken.Tests";
     private const string CHECKOUT = "main";
+    private const bool SYMLINK = true;
 
     private readonly string[] _testUrls = {
         "git://github.com/some-user/my-repo.git",
@@ -29,12 +30,14 @@ namespace Chickensoft.Chicken.Tests {
         configFilePath: CONFIG_FILE_PATH,
         url: ADDON_URL,
         checkout: CHECKOUT,
-        subfolder: SUBFOLDER + "/"
+        subfolder: SUBFOLDER + "/",
+        symlink: SYMLINK
       );
       addon.Name.ShouldBe(ADDON_NAME);
       addon.Url.ShouldBe(ADDON_URL);
       addon.Checkout.ShouldBe(CHECKOUT);
       addon.Subfolder.ShouldBe(SUBFOLDER);
+      addon.Symlink.ShouldBe(SYMLINK);
     }
 
     [Fact]
@@ -83,7 +86,7 @@ namespace Chickensoft.Chicken.Tests {
 
     [Fact]
     public void IdIsExpectedStringWhenRegexFails() {
-      var testUrl = "BobTheUrl";
+      var testUrl = "Some/Folders/BobTheUrl";
       var addon = new RequiredAddon(
         name: ADDON_NAME,
         configFilePath: CONFIG_FILE_PATH,
