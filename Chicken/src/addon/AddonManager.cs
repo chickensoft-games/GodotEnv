@@ -59,18 +59,22 @@ namespace Chickensoft.Chicken {
           }
 
           if (depEvent is not IDependencyCannotBeInstalledEvent) {
-            // Clone the addon from the git url, if needed.
-            await _addonRepo.CacheAddon(addon, projectConfig);
-            // Delete any previously installed addon.
-            await _addonRepo.DeleteAddon(addon, projectConfig);
-            // Copy the addon files from the cache to the installation folder.
-            await _addonRepo.CopyAddonFromCache(addon, projectConfig);
+            await InstallAddon(addon, projectConfig);
           }
 
           var installedAddonPath = Path.Combine(projectConfig.AddonsPath, name);
           searchPaths.Enqueue(installedAddonPath);
         }
       } while (searchPaths.Count > 0);
+    }
+
+    private async Task InstallAddon(RequiredAddon addon, Config projectConfig) {
+      // Clone the addon from the git url, if needed.
+      await _addonRepo.CacheAddon(addon, projectConfig);
+      // Delete any previously installed addon.
+      await _addonRepo.DeleteAddon(addon, projectConfig);
+      // Copy the addon files from the cache to the installation folder.
+      await _addonRepo.CopyAddonFromCache(addon, projectConfig);
     }
   }
 }
