@@ -33,6 +33,5 @@
     <PackageReference Include="CliWrap" Version="3.4.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="CaseExtensions" Version="1.1.0" />
-    <PackageReference Include="Murphy.SymbolicLink" Version="1.0.0" />
   </ItemGroup>
 </Project>

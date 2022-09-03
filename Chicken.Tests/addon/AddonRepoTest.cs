@@ -1,4 +1,5 @@
 namespace Chickensoft.Chicken.Tests {
+  using System;
   using System.Collections.Generic;
   using System.IO.Abstractions;
   using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace Chickensoft.Chicken.Tests {
       name: "chicken",
       configFilePath: "some/working/dir/addons.json",
       url: "git@github.com:chickensoft-games/Chicken.git",
-      checkout: "Main",
+      checkout: "main",
       subfolder: "subfolder"
     );
 
@@ -140,9 +141,16 @@ namespace Chickensoft.Chicken.Tests {
       var app = new Mock<IApp>();
       var fs = new Mock<IFileSystem>();
       var directory = new Mock<IDirectory>();
+      var dirInfoFactory = new Mock<IDirectoryInfoFactory>();
+      var dirInfo = new Mock<IDirectoryInfo>();
 
       fs.Setup(fs => fs.Directory).Returns(directory.Object);
+      fs.Setup(fs => fs.DirectoryInfo).Returns(dirInfoFactory.Object);
+      dirInfoFactory.Setup(dif => dif.FromDirectoryName(addonDir))
+        .Returns(dirInfo.Object);
+      dirInfo.Setup(info => info.LinkTarget).Returns<string?>(null);
       directory.Setup(dir => dir.Exists(addonDir)).Returns(true);
+      directory.Setup(dir => dir.Delete(addonDir, true));
 
       var cli = new ShellVerifier();
 
@@ -162,19 +170,39 @@ namespace Chickensoft.Chicken.Tests {
         "git", "status", "--porcelain"
       );
 
-      cli.Setup(
-        _config.AddonsPath,
-        new ProcessResult(0),
-        RunMode.Run,
-        "rm", "-rf", $"{_config.AddonsPath}/{_addon.Name}"
-      );
-
       var addonRepo = new AddonRepo(app.Object);
 
       await addonRepo.DeleteAddon(_addon, _config);
 
       directory.VerifyAll();
       cli.VerifyAll();
+    }
+
+    [Fact]
+    public async Task DeleteAddonDeletesSymlinkAddon() {
+      var addonDir = _config.AddonsPath + "/" + _addon.Name;
+
+      var app = new Mock<IApp>();
+      var fs = new Mock<IFileSystem>();
+      var directory = new Mock<IDirectory>();
+      var dirInfoFactory = new Mock<IDirectoryInfoFactory>();
+      var dirInfo = new Mock<IDirectoryInfo>();
+
+      fs.Setup(fs => fs.Directory).Returns(directory.Object);
+      fs.Setup(fs => fs.DirectoryInfo).Returns(dirInfoFactory.Object);
+      dirInfoFactory.Setup(dif => dif.FromDirectoryName(addonDir))
+        .Returns(dirInfo.Object);
+      dirInfo.Setup(info => info.LinkTarget).Returns("a/symlink/path");
+      directory.Setup(dir => dir.Exists(addonDir)).Returns(true);
+      directory.Setup(dir => dir.Delete(addonDir));
+
+      app.Setup(app => app.FS).Returns(fs.Object);
+
+      var addonRepo = new AddonRepo(app.Object);
+
+      await addonRepo.DeleteAddon(_addon, _config);
+
+      directory.VerifyAll();
     }
 
     [Fact]
@@ -205,8 +233,14 @@ namespace Chickensoft.Chicken.Tests {
       var app = new Mock<IApp>();
       var fs = new Mock<IFileSystem>();
       var directory = new Mock<IDirectory>();
+      var dirInfoFactory = new Mock<IDirectoryInfoFactory>();
+      var dirInfo = new Mock<IDirectoryInfo>();
 
       fs.Setup(fs => fs.Directory).Returns(directory.Object);
+      fs.Setup(fs => fs.DirectoryInfo).Returns(dirInfoFactory.Object);
+      dirInfoFactory.Setup(dif => dif.FromDirectoryName(addonDir))
+        .Returns(dirInfo.Object);
+      dirInfo.Setup(info => info.LinkTarget).Returns<string?>(null);
       directory.Setup(dir => dir.Exists(addonDir)).Returns(true);
 
       var cli = new ShellVerifier();
@@ -370,6 +404,29 @@ namespace Chickensoft.Chicken.Tests {
     }
 
     [Fact]
+    public void DirectorySymlinkTargetFindsValue() {
+      var app = new Mock<IApp>();
+      var fs = new Mock<IFileSystem>();
+      var dirInfoFactory = new Mock<IDirectoryInfoFactory>();
+      var dirInfo = new Mock<IDirectoryInfo>();
+
+      var path = "a/folder/to/check";
+      var target = "some/symlink/target";
+
+      app.Setup(app => app.FS).Returns(fs.Object);
+      fs.Setup(fs => fs.DirectoryInfo).Returns(dirInfoFactory.Object);
+      dirInfoFactory.Setup(dif => dif.FromDirectoryName(path))
+        .Returns(dirInfo.Object);
+      dirInfo.Setup(di => di.LinkTarget).Returns(target);
+
+      var addonRepo = new AddonRepo(app.Object);
+
+      var result = addonRepo.DirectorySymlinkTarget(path);
+
+      result.ShouldBe(target);
+    }
+
+    [Fact]
     public void CreateSymlinkCreatesSymlink() {
       var app = new Mock<IApp>();
       var fs = new Mock<IFileSystem>();
@@ -387,6 +444,106 @@ namespace Chickensoft.Chicken.Tests {
       addonRepo.CreateSymlink(path, pathToTarget);
 
       dir.VerifyAll();
+    }
+
+    [Fact]
+    public void InstallAddonWithSymlinkInstallsSymlinkAddon() {
+      var app = new Mock<IApp>();
+      var fs = new Mock<IFileSystem>();
+      var dir = new Mock<IDirectory>();
+
+      var addon = new RequiredAddon(
+        name: "addon",
+        configFilePath: "some/working/dir/addons.json",
+        url: "git@github.com:chickensoft-games/Chicken.git",
+        checkout: "main",
+        subfolder: "subfolder",
+        symlink: true
+      );
+
+      var addonDir = _config.AddonsPath + "/" + addon.Name;
+
+      app.Setup(app => app.FS).Returns(fs.Object);
+      fs.Setup(fs => fs.Directory).Returns(dir.Object);
+      dir.Setup(dir => dir.Exists(addonDir)).Returns(false);
+      dir.Setup(dir => dir.CreateSymbolicLink(addonDir, addon.Url));
+
+      var addonRepo = new AddonRepo(app.Object);
+
+      addonRepo.InstallAddonWithSymlink(addon, _config);
+
+      dir.VerifyAll();
+    }
+
+    [Fact]
+    public void InstallAddonWithSymlinkOnlyInstallsSymlinkAddon() {
+      var app = new Mock<IApp>();
+
+      var addonDir = _config.AddonsPath + "/" + _addon.Name;
+
+      var addonRepo = new AddonRepo(app.Object);
+
+      Should.Throw<CommandException>(
+        () => addonRepo.InstallAddonWithSymlink(_addon, _config)
+      );
+    }
+
+    [Fact]
+    public void InstallAddonWithSymlinkThrowsIfAddonDirExists() {
+      var app = new Mock<IApp>();
+      var fs = new Mock<IFileSystem>();
+      var dir = new Mock<IDirectory>();
+
+      var addon = new RequiredAddon(
+        name: "addon",
+        configFilePath: "some/working/dir/addons.json",
+        url: "git@github.com:chickensoft-games/Chicken.git",
+        checkout: "main",
+        subfolder: "subfolder",
+        symlink: true
+      );
+
+      var addonDir = _config.AddonsPath + "/" + addon.Name;
+
+      app.Setup(app => app.FS).Returns(fs.Object);
+      fs.Setup(fs => fs.Directory).Returns(dir.Object);
+      dir.Setup(dir => dir.Exists(addonDir)).Returns(true);
+
+      var addonRepo = new AddonRepo(app.Object);
+
+      Should.Throw<CommandException>(
+        () => addonRepo.InstallAddonWithSymlink(addon, _config)
+      );
+    }
+
+    [Fact]
+    public void InstallAddonWithSymlinkThrowsIfSymlinkCreationFails() {
+      var app = new Mock<IApp>();
+      var fs = new Mock<IFileSystem>();
+      var dir = new Mock<IDirectory>();
+
+      var addon = new RequiredAddon(
+        name: "addon",
+        configFilePath: "some/working/dir/addons.json",
+        url: "git@github.com:chickensoft-games/Chicken.git",
+        checkout: "main",
+        subfolder: "subfolder",
+        symlink: true
+      );
+
+      var addonDir = _config.AddonsPath + "/" + addon.Name;
+
+      app.Setup(app => app.FS).Returns(fs.Object);
+      fs.Setup(fs => fs.Directory).Returns(dir.Object);
+      dir.Setup(dir => dir.Exists(addonDir)).Returns(false);
+      dir.Setup(dir => dir.CreateSymbolicLink(addonDir, addon.Url))
+        .Throws<InvalidOperationException>();
+
+      var addonRepo = new AddonRepo(app.Object);
+
+      Should.Throw<CommandException>(
+        () => addonRepo.InstallAddonWithSymlink(addon, _config)
+      );
     }
   }
 }
