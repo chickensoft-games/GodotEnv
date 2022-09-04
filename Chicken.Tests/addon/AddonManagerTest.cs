@@ -114,8 +114,59 @@ namespace Chickensoft.Chicken.Tests {
         repo => repo.LoadOrCreateConfigFile("/addons/addon2")
       ).Returns(addon2ConfigFile);
 
-
       await manager.InstallAddons(projectPath);
+    }
+
+    [Fact]
+    public async Task InstallAddonKnowsHowToInstallSymlinkAddonAsync() {
+      var addonRepo = new Mock<IAddonRepo>();
+      var configFileRepo = new Mock<IConfigFileRepo>();
+      var reporter = new Mock<IReporter>();
+      var dependencyGraph = new Mock<IDependencyGraph>();
+
+      var manager = new AddonManager(
+        addonRepo: addonRepo.Object,
+        configFileRepo: configFileRepo.Object,
+        reporter: reporter.Object,
+        dependencyGraph: dependencyGraph.Object
+      );
+
+      var addon = new RequiredAddon(
+        name: "addon1",
+        configFilePath: "/addons.json",
+        url: "http://example.com/addon1.git",
+        checkout: "main",
+        subfolder: "addon1",
+        symlink: true
+      );
+
+      var projectPath = "/";
+
+      var projectConfigFile = new ConfigFile(
+        addons: new Dictionary<string, AddonConfig>() {
+          { "addon1", new AddonConfig(
+            url: "http://example.com/addon1.git",
+            checkout: "main",
+            subfolder: "addon1",
+            symlink: true
+          )}
+        },
+        cachePath: ".addons",
+        addonsPath: "addons"
+      );
+
+      var projectConfig = projectConfigFile.ToConfig(projectPath);
+
+      addonRepo.Setup(repo => repo.DeleteAddon(addon, projectConfig)).Returns(
+        Task.CompletedTask
+      );
+      addonRepo.Setup(
+        repo => repo.InstallAddonWithSymlink(addon, projectConfig)
+      );
+
+      await manager.InstallAddon(addon, projectConfig);
+
+      addonRepo.VerifyAll();
     }
   }
 }

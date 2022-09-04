@@ -1,4 +1,8 @@
-﻿namespace Chickensoft.Chicken {
+﻿using System.Runtime.CompilerServices;
+
+// IMPORTANT: Allow us to test internal methods in our test project.
+[assembly: InternalsVisibleTo("Chickensoft.Chicken.Tests")]
+namespace Chickensoft.Chicken {
   using System.Threading.Tasks;
   using CliFx;
 

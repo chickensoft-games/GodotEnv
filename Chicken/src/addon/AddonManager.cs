@@ -68,7 +68,14 @@ namespace Chickensoft.Chicken {
       } while (searchPaths.Count > 0);
     }
 
-    private async Task InstallAddon(RequiredAddon addon, Config projectConfig) {
+    internal async Task InstallAddon(
+      RequiredAddon addon, Config projectConfig
+    ) {
+      if (addon.Symlink) {
+        await _addonRepo.DeleteAddon(addon, projectConfig);
+        _addonRepo.InstallAddonWithSymlink(addon, projectConfig);
+        return;
+      }
       // Clone the addon from the git url, if needed.
       await _addonRepo.CacheAddon(addon, projectConfig);
       // Delete any previously installed addon.
