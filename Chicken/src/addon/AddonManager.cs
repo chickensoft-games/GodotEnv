@@ -43,13 +43,26 @@ namespace Chickensoft.Chicken {
 
         foreach ((var addonName, var addonConfig) in addonConfigs) {
           var name = addonName;
+          var url = addonConfig.Url;
+
+          if (addonConfig.Symlink && !Path.IsPathRooted(addonConfig.Url)) {
+            // Symlink addons with relative paths are relative to the
+            // addons.json file that defines them.
+            // Why we use GetFullPath: https://stackoverflow.com/a/1299356
+            url = Path.GetFullPath(
+              Path.TrimEndingDirectorySeparator(path) +
+              Path.DirectorySeparatorChar +
+              addonConfig.Url
+            );
+          }
 
           var addon = new RequiredAddon(
             name: name,
             configFilePath: configFilePath,
-            url: addonConfig.Url,
+            url: url,
             checkout: addonConfig.Checkout,
-            subfolder: addonConfig.Subfolder
+            subfolder: addonConfig.Subfolder,
+            symlink: addonConfig.Symlink
           );
 
           var depEvent = _dependencyGraph.Add(addon);
