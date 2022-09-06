@@ -1,4 +1,5 @@
 namespace Chickensoft.Chicken.Tests {
+  using System;
   using System.Collections.Generic;
   using System.Threading.Tasks;
   using Moq;
@@ -70,7 +71,10 @@ namespace Chickensoft.Chicken.Tests {
         new DependencyCanBeInstalledEvent(addon1)
       );
       reporter.Setup(
-        r => r.DependencyEvent(new DependencyCanBeInstalledEvent(addon1))
+        r => r.Handle(new DependencyCanBeInstalledEvent(addon1))
+      );
+      reporter.Setup(
+        r => r.Handle(new AddonInstalledEvent(addon1))
       );
       addonRepo.Setup(ar => ar.CacheAddon(addon1, projectConfig)).Returns(
         Task.CompletedTask
@@ -95,7 +99,10 @@ namespace Chickensoft.Chicken.Tests {
         new DependencyCanBeInstalledEvent(addon2)
       );
       reporter.Setup(
-        r => r.DependencyEvent(new DependencyCanBeInstalledEvent(addon2))
+        r => r.Handle(new DependencyCanBeInstalledEvent(addon2))
+      );
+      reporter.Setup(
+        r => r.Handle(new AddonInstalledEvent(addon2))
       );
       addonRepo.Setup(ar => ar.CacheAddon(addon2, projectConfig)).Returns(
         Task.CompletedTask
@@ -117,6 +124,91 @@ namespace Chickensoft.Chicken.Tests {
 
       await manager.InstallAddons(projectPath);
     }
+
+    [Fact]
+    public async Task InstallAddonsReportsFailedInstallationEvents() {
+      var projectPath = "/";
+      var addonRepo = new Mock<IAddonRepo>(MockBehavior.Strict);
+      var configFileRepo = new Mock<IConfigFileRepo>(MockBehavior.Strict);
+      var reporter = new Mock<IReporter>(MockBehavior.Strict);
+      var dependencyGraph = new Mock<IDependencyGraph>(MockBehavior.Strict);
+
+      var addon = new RequiredAddon(
+          name: "addon1",
+          configFilePath: "/addons.json",
+          url: "/some/local/path",
+          checkout: "main",
+          subfolder: "",
+          source: AddonSource.Local
+        );
+
+      var manager = new AddonManager(
+        addonRepo: addonRepo.Object,
+        configFileRepo: configFileRepo.Object,
+        reporter: reporter.Object,
+        dependencyGraph: dependencyGraph.Object
+      );
+
+      var projectConfigFile = new ConfigFile(
+        addons: new Dictionary<string, AddonConfig>() {
+          { addon.Name, new AddonConfig(
+            url: addon.Url,
+            checkout: addon.Checkout,
+            subfolder: null,
+            source: addon.Source
+          )},
+        },
+        cachePath: ".addons",
+        addonsPath: "addons"
+      );
+
+      var projectConfig = projectConfigFile.ToConfig(projectPath);
+
+      configFileRepo.Setup(repo => repo.LoadOrCreateConfigFile(projectPath))
+        .Returns(projectConfigFile);
+
+      addonRepo.Setup(repo => repo.LoadCache(projectConfig)).Returns(
+        Task.FromResult(new Dictionary<string, string>() { })
+      );
+
+      dependencyGraph.Setup(dg => dg.Add(addon)).Returns(
+        new DependencyCanBeInstalledEvent(addon)
+      );
+      reporter.Setup(
+        r => r.Handle(new DependencyCanBeInstalledEvent(addon))
+      );
+      reporter.Setup(
+        r => r.Handle(
+         It.IsAny<AddonFailedToInstallEvent>()
+        )
+      );
+      addonRepo.Setup(ar => ar.CacheAddon(addon, projectConfig)).Returns(
+        Task.CompletedTask
+      );
+      addonRepo.Setup(repo => repo.IsDirectorySymlink(projectPath)).Returns(false);
+      addonRepo.Setup(ar => ar.DeleteAddon(addon, projectConfig)).Returns(
+        Task.CompletedTask
+      );
+
+      // Make addon fail to install at last step
+      addonRepo.Setup(
+        ar => ar.CopyAddonFromCache(addon, projectConfig)
+      ).Throws<InvalidOperationException>();
+
+      var addonConfigFile = new ConfigFile(
+        addons: new Dictionary<string, AddonConfig>(),
+        cachePath: null,
+        addonsPath: null
+      );
+
+      configFileRepo.Setup(
+        repo => repo.LoadOrCreateConfigFile("/addons/addon1")
+      ).Returns(addonConfigFile);
+
+
+      await manager.InstallAddons(projectPath);
+    }
+
 
     [Fact]
     public async Task InstallAddonKnowsHowToInstallSymlinkAddon() {
@@ -177,19 +269,49 @@ namespace Chickensoft.Chicken.Tests {
       var addonConfig = new AddonConfig(
         url: url
       );
-      AddonManager.ResolveUrl(addonConfig, path).ShouldBe(url);
+
+      var addonRepo = new Mock<IAddonRepo>();
+      var configFileRepo = new Mock<IConfigFileRepo>();
+      var reporter = new Mock<IReporter>();
+      var dependencyGraph = new Mock<IDependencyGraph>();
+
+      var addonManager = new AddonManager(
+        addonRepo: addonRepo.Object,
+        configFileRepo: configFileRepo.Object,
+        reporter: reporter.Object,
+        dependencyGraph: dependencyGraph.Object
+      );
+      addonManager.ResolveUrl(addonConfig, path).ShouldBe(url);
     }
 
     [Fact]
     public void ResolveUrlResolvesNonRootedPath() {
       var url = "../some/relative/path";
-      var path = "/volume/directory";
+      var path = "/volume/old/directory";
+      var resolved = "/volume/other/directory";
       var addonConfig = new AddonConfig(
         url: url,
         source: AddonSource.Local
       );
-      AddonManager.ResolveUrl(addonConfig, path)
-        .ShouldBe("/volume/some/relative/path");
+
+      var addonRepo = new Mock<IAddonRepo>(MockBehavior.Strict);
+      var configFileRepo = new Mock<IConfigFileRepo>();
+      var reporter = new Mock<IReporter>();
+      var dependencyGraph = new Mock<IDependencyGraph>();
+
+      addonRepo.Setup(repo => repo.IsDirectorySymlink(path)).Returns(true);
+      addonRepo.Setup(repo => repo.DirectorySymlinkTarget(path))
+        .Returns(resolved);
+
+      var addonManager = new AddonManager(
+        addonRepo: addonRepo.Object,
+        configFileRepo: configFileRepo.Object,
+        reporter: reporter.Object,
+        dependencyGraph: dependencyGraph.Object
+      );
+
+      addonManager.ResolveUrl(addonConfig, path)
+        .ShouldBe("/volume/other/some/relative/path");
     }
 
     [Fact]
@@ -200,7 +322,23 @@ namespace Chickensoft.Chicken.Tests {
         url: url,
         source: AddonSource.Local
       );
-      AddonManager.ResolveUrl(addonConfig, path).ShouldBe(url);
+
+      var addonRepo = new Mock<IAddonRepo>();
+      var configFileRepo = new Mock<IConfigFileRepo>();
+      var reporter = new Mock<IReporter>();
+      var dependencyGraph = new Mock<IDependencyGraph>();
+
+      addonRepo.Setup(repo => repo.IsDirectorySymlink(path)).Returns(false);
+      addonRepo.Setup(repo => repo.DirectorySymlinkTarget(path)).Returns(path);
+
+      var addonManager = new AddonManager(
+        addonRepo: addonRepo.Object,
+        configFileRepo: configFileRepo.Object,
+        reporter: reporter.Object,
+        dependencyGraph: dependencyGraph.Object
+      );
+
+      addonManager.ResolveUrl(addonConfig, path).ShouldBe(url);
     }
   }
 }

@@ -1,6 +1,5 @@
 namespace Chickensoft.Chicken.Tests {
   using System;
-  using System.IO;
   using System.IO.Abstractions;
   using System.Threading.Tasks;
   using CliFx.Exceptions;
@@ -133,11 +132,9 @@ namespace Chickensoft.Chicken.Tests {
     [Fact]
     public void CreatesReporter() {
       var fs = new Mock<IFileSystem>();
+      var console = new FakeInMemoryConsole();
       var app = new App(workingDir: ".", fs: fs.Object);
-      app.CreateReporter(new ConsoleWriter(
-        console: new FakeInMemoryConsole(),
-        stream: new MemoryStream()
-      )).ShouldBeOfType(typeof(Reporter));
+      app.CreateReporter(console).ShouldBeOfType(typeof(Reporter));
     }
 
     [Fact]

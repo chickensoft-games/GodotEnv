@@ -25,7 +25,7 @@ namespace Chickensoft.Chicken {
       IReporter reporter,
       IDependencyGraph dependencyGraph
     );
-    IReporter CreateReporter(ConsoleWriter writer);
+    IReporter CreateReporter(IConsole console);
     IAddonRepo CreateAddonRepo();
     IConfigFileRepo CreateConfigFileRepo();
   }
@@ -53,8 +53,8 @@ namespace Chickensoft.Chicken {
       dependencyGraph: dependencyGraph
     );
 
-    public IReporter CreateReporter(ConsoleWriter writer)
-      => new Reporter(writer);
+    public IReporter CreateReporter(IConsole console)
+      => new Reporter(console);
 
     public IAddonRepo CreateAddonRepo() => new AddonRepo(this);
     public IConfigFileRepo CreateConfigFileRepo() => new ConfigFileRepo(this);

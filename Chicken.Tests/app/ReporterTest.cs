@@ -13,10 +13,10 @@ namespace Chickensoft.Chicken.Tests {
     public void DependencyEventOutputs() {
       var console = new FakeInMemoryConsole();
 
-      var e = new Mock<IReportableDependencyEvent>();
+      var e = new Mock<IDependencyGraphEvent>();
       e.Setup(e => e.ToString()).Returns("DependencyEvent");
-      var reporter = new Reporter(console.Output);
-      reporter.DependencyEvent(e.Object);
+      var reporter = new Reporter(console);
+      reporter.Handle(e.Object);
 
       var contents = console.ReadOutputString();
       contents.ShouldBe("DependencyEvent\n\n");

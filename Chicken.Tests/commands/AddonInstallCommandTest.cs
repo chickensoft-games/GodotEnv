@@ -1,7 +1,6 @@
 namespace Chickensoft.Chicken.Tests {
   using System;
   using System.Collections.Generic;
-  using System.IO;
   using System.Threading.Tasks;
   using CliFx.Infrastructure;
   using Moq;
@@ -18,13 +17,7 @@ namespace Chickensoft.Chicken.Tests {
     [Fact]
     public async Task UsesAddonManagerToInstallAddons() {
       var app = new Mock<IApp>();
-      var console = new Mock<IConsole>();
-      var consoleWriter = new ConsoleWriter(
-        console: new FakeInMemoryConsole(),
-        stream: new MemoryStream()
-      );
-
-      console.Setup(c => c.Output).Returns(consoleWriter);
+      var console = new FakeInMemoryConsole();
 
       var addonManager = new Mock<IAddonManager>();
       var configFileRepo = new Mock<IConfigFileRepo>();
@@ -46,7 +39,7 @@ namespace Chickensoft.Chicken.Tests {
       app.Setup(a => a.CreateConfigFileRepo())
         .Returns(() => configFileRepo.Object);
 
-      app.Setup(a => a.CreateReporter(consoleWriter))
+      app.Setup(a => a.CreateReporter(console))
         .Returns(() => new Mock<IReporter>().Object);
 
       app.Setup(a => a.CreateAddonManager(
@@ -58,9 +51,8 @@ namespace Chickensoft.Chicken.Tests {
 
       var command = new InstallCommand(app.Object);
 
-      await command.ExecuteAsync(console.Object);
+      await command.ExecuteAsync(console);
 
-      console.VerifyAll();
       app.VerifyAll();
       addonManager.VerifyAll();
     }

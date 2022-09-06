@@ -1,4 +1,5 @@
 namespace Chickensoft.Chicken.Tests {
+  using System;
   using System.Collections.Generic;
   using Shouldly;
   using Xunit;
@@ -60,6 +61,8 @@ namespace Chickensoft.Chicken.Tests {
         addons: new List<RequiredAddon> { _addonB }
       );
 
+      e.Color.ShouldBeOfType<ConsoleColor>();
+
       e.ToString().ShouldBe(
         "The addon \"A\" could conflict with a previously installed addon.\n\n"
         + $"  Attempted to install {_addonA}\n\n"
@@ -72,6 +75,8 @@ namespace Chickensoft.Chicken.Tests {
         conflict: _addonA,
         addons: new List<RequiredAddon> { _addonASubfolder }
       );
+
+      e.Color.ShouldBeOfType<ConsoleColor>();
 
       e.ToString().ShouldBe(
         "The addon \"A\" could conflict with a previously installed addon.\n\n"
@@ -130,6 +135,8 @@ namespace Chickensoft.Chicken.Tests {
         addon: _addonA
       );
 
+      e.Color.ShouldBeOfType<ConsoleColor>();
+
       e.ToString().ShouldBe(
         "Cannot install \"A\" from `project/addons/other/addons.json` " +
         "because it would conflict with a previously installed addon of the " +
@@ -147,6 +154,8 @@ namespace Chickensoft.Chicken.Tests {
         alreadyInstalled: _addonA2
       );
 
+      e.Color.ShouldBeOfType<ConsoleColor>();
+
       e.ToString().ShouldBe(
         $"The addon \"{_addonA.Name}\" is already installed as " +
         $"\"{_addonA2.Name}.\"\n\n" +
@@ -160,6 +169,8 @@ namespace Chickensoft.Chicken.Tests {
       var e = new DependencyCanBeInstalledEvent(
         addon: _addonA
       );
+
+      e.Color.ShouldBeOfType<ConsoleColor>();
 
       e.ToString().ShouldBe(
         $"Attempting to install \"{_addonA.Name}.\"\n\n" +

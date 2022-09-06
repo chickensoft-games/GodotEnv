@@ -1,4 +1,5 @@
 namespace Chickensoft.Chicken {
+  using System;
   using System.Collections.Generic;
   using System.IO;
   using System.Threading.Tasks;
@@ -8,10 +9,10 @@ namespace Chickensoft.Chicken {
   }
 
   public class AddonManager : IAddonManager {
-    private readonly IAddonRepo _addonRepo;
-    private readonly IReporter _reporter;
-    private readonly IConfigFileRepo _configFileRepo;
-    private readonly IDependencyGraph _dependencyGraph;
+    public IAddonRepo AddonRepo { get; init; }
+    public IReporter Reporter { get; init; }
+    public IConfigFileRepo ConfigFileRepo { get; init; }
+    public IDependencyGraph DependencyGraph { get; init; }
 
     public AddonManager(
       IAddonRepo addonRepo,
@@ -19,10 +20,10 @@ namespace Chickensoft.Chicken {
       IReporter reporter,
       IDependencyGraph dependencyGraph
     ) {
-      _addonRepo = addonRepo;
-      _configFileRepo = configFileRepo;
-      _reporter = reporter;
-      _dependencyGraph = dependencyGraph;
+      AddonRepo = addonRepo;
+      ConfigFileRepo = configFileRepo;
+      Reporter = reporter;
+      DependencyGraph = dependencyGraph;
     }
 
     public async Task InstallAddons(string projectPath) {
@@ -30,14 +31,14 @@ namespace Chickensoft.Chicken {
       searchPaths.Enqueue(projectPath);
 
       var projConfigFile
-        = _configFileRepo.LoadOrCreateConfigFile(projectPath);
+        = ConfigFileRepo.LoadOrCreateConfigFile(projectPath);
       var projectConfig = projConfigFile.ToConfig(projectPath);
 
-      var cache = await _addonRepo.LoadCache(projectConfig);
+      var cache = await AddonRepo.LoadCache(projectConfig);
 
       do {
         var path = searchPaths.Dequeue();
-        var configFile = _configFileRepo.LoadOrCreateConfigFile(path);
+        var configFile = ConfigFileRepo.LoadOrCreateConfigFile(path);
         var configFilePath = Path.Combine(path, IApp.ADDONS_CONFIG_FILE);
         var addonConfigs = configFile.Addons;
 
@@ -54,14 +55,18 @@ namespace Chickensoft.Chicken {
             source: addonConfig.Source
           );
 
-          var depEvent = _dependencyGraph.Add(addon);
-
-          if (depEvent is IReportableDependencyEvent reportableDepEvent) {
-            _reporter.DependencyEvent(reportableDepEvent);
-          }
+          var depEvent = DependencyGraph.Add(addon);
+          Reporter.Handle(depEvent);
 
           if (depEvent is not IDependencyCannotBeInstalledEvent) {
-            await InstallAddon(addon, projectConfig);
+            try {
+              await InstallAddon(addon, projectConfig);
+              Reporter.Handle(new AddonInstalledEvent(addon));
+            }
+            catch (Exception e) {
+              var failedEvent = new AddonFailedToInstallEvent(addon, e);
+              Reporter.Handle(failedEvent);
+            }
           }
 
           var installedAddonPath = Path.Combine(projectConfig.AddonsPath, name);
@@ -74,16 +79,16 @@ namespace Chickensoft.Chicken {
       RequiredAddon addon, Config projectConfig
     ) {
       if (addon.IsSymlink) {
-        await _addonRepo.DeleteAddon(addon, projectConfig);
-        _addonRepo.InstallAddonWithSymlink(addon, projectConfig);
+        await AddonRepo.DeleteAddon(addon, projectConfig);
+        AddonRepo.InstallAddonWithSymlink(addon, projectConfig);
         return;
       }
       // Clone the addon from the git url, if needed.
-      await _addonRepo.CacheAddon(addon, projectConfig);
+      await AddonRepo.CacheAddon(addon, projectConfig);
       // Delete any previously installed addon.
-      await _addonRepo.DeleteAddon(addon, projectConfig);
+      await AddonRepo.DeleteAddon(addon, projectConfig);
       // Copy the addon files from the cache to the installation folder.
-      await _addonRepo.CopyAddonFromCache(addon, projectConfig);
+      await AddonRepo.CopyAddonFromCache(addon, projectConfig);
     }
 
     /// <summary>
@@ -97,9 +102,16 @@ namespace Chickensoft.Chicken {
     /// <param name="path">Path containing the addons.json the addon was
     /// required from.</param>
     /// <returns>Resolved addon source.</returns>
-    public static string ResolveUrl(AddonConfig addonConfig, string path) {
+    public string ResolveUrl(AddonConfig addonConfig, string path) {
       var url = addonConfig.Url;
       if (addonConfig.IsRemote) { return url; }
+      // If the path containing the addons.json is a symlink, determine the
+      // actual path containing the addons.json file. This allows addons
+      // that have their own addons with relative paths to be relative to
+      // where the addon is actually stored, which is more intuitive.
+      if (AddonRepo.IsDirectorySymlink(path)) {
+        path = AddonRepo.DirectorySymlinkTarget(path);
+      }
       if (!Path.IsPathRooted(url)) {
         // Locally sourced addons with relative paths are relative to the
         // addons.json file that defines them.

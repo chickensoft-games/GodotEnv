@@ -19,7 +19,7 @@ namespace Chickensoft.Chicken {
 
       var addonRepo = _app.CreateAddonRepo();
       var configFileRepo = _app.CreateConfigFileRepo();
-      var reporter = _app.CreateReporter(output);
+      var reporter = _app.CreateReporter(console);
       var configFile = configFileRepo.LoadOrCreateConfigFile(startDir);
       var config = configFile.ToConfig(projectPath: startDir);
       var dependencyGraph = new DependencyGraph();

@@ -22,6 +22,7 @@ namespace Chickensoft.Chicken {
     Task CopyAddonFromCache(RequiredAddon addon, Config config);
     void InstallAddonWithSymlink(RequiredAddon addon, Config config);
     bool IsDirectorySymlink(string path);
+    string DirectorySymlinkTarget(string symlinkPath);
     void CreateSymlink(string path, string pathToTarget);
     void DeleteDirectory(string path);
   }
@@ -120,7 +121,6 @@ namespace Chickensoft.Chicken {
     }
 
     // Creates a symlink to the addon's url (which should be a local file path)
-    // for addons with `symlink: true`.
     public void InstallAddonWithSymlink(RequiredAddon addon, Config config) {
       if (!addon.IsSymlink) {
         throw new CommandException(
@@ -129,12 +129,24 @@ namespace Chickensoft.Chicken {
       }
 
       var source = addon.Url;
+
+      var subfolder = addon.Subfolder;
+      if (subfolder != "/") {
+        source = Path.Combine(source, subfolder);
+      }
+
       var target = Path.Combine(config.AddonsPath, addon.Name);
 
       if (_fs.Directory.Exists(target)) {
         throw new CommandException(
-          $"Addon {addon.Name} already installed. Please delete the " +
+          $"Addon \"{addon.Name}\" already installed. Please delete the " +
           "existing addon and try again."
+        );
+      }
+
+      if (!_fs.Directory.Exists(source)) {
+        throw new CommandException(
+          $"Addon \"{addon.Name}\" cannot be found at `{source}`."
         );
       }
 
@@ -143,7 +155,7 @@ namespace Chickensoft.Chicken {
       }
       catch {
         throw new CommandException(
-          $"Failed to create symlink for addon {addon.Name}. "
+          $"Failed to create symlink for addon \"{addon.Name}\"."
         );
       }
     }

@@ -1,15 +1,16 @@
 namespace Chickensoft.Chicken {
+  using System;
   using System.Collections.Generic;
 
-  public interface IDependencyEvent { }
-
-  public interface IReportableDependencyEvent : IDependencyEvent { }
+  public interface IDependencyGraphEvent : IReportableEvent { }
 
   public interface IDependencyCannotBeInstalledEvent { }
 
-  public record SimilarDependencyWarning : IReportableDependencyEvent {
+  public record SimilarDependencyWarning : IDependencyGraphEvent {
     public RequiredAddon Conflict { get; init; }
     public List<RequiredAddon> Addons { get; init; }
+
+    public ConsoleColor Color => ConsoleColor.Yellow;
 
     public SimilarDependencyWarning(
       RequiredAddon conflict,
@@ -26,8 +27,8 @@ namespace Chickensoft.Chicken {
       foreach (var addon in Addons) {
         if (addon.Url != Conflict.Url) { continue; }
         buffer.Add(
-          $"\nBoth \"{Conflict.Name}\" and \"{addon.Name}\" could potentially " +
-          "conflict with each other.\n"
+          $"\nBoth \"{Conflict.Name}\" and \"{addon.Name}\" could " +
+          "potentially conflict with each other.\n"
         );
         if (Conflict.Subfolder != addon.Subfolder) {
           buffer.Add(
@@ -65,9 +66,11 @@ namespace Chickensoft.Chicken {
   }
 
   public record ConflictingDestinationPathEvent
-    : IReportableDependencyEvent, IDependencyCannotBeInstalledEvent {
+    : IDependencyGraphEvent, IDependencyCannotBeInstalledEvent {
     public RequiredAddon Conflict { get; init; }
     public RequiredAddon Addon { get; init; }
+
+    public ConsoleColor Color => ConsoleColor.Red;
 
     public ConflictingDestinationPathEvent(
       RequiredAddon conflict,
@@ -88,11 +91,16 @@ namespace Chickensoft.Chicken {
   }
 
   public record DependencyAlreadyInstalledEvent
-    : IDependencyEvent, IDependencyCannotBeInstalledEvent {
+    : IDependencyGraphEvent, IDependencyCannotBeInstalledEvent {
     public RequiredAddon Requested { get; init; }
     public RequiredAddon AlreadyInstalled { get; init; }
 
-    public DependencyAlreadyInstalledEvent(RequiredAddon requested, RequiredAddon alreadyInstalled) {
+    public ConsoleColor Color => ConsoleColor.Blue;
+
+    public DependencyAlreadyInstalledEvent(
+      RequiredAddon requested,
+      RequiredAddon alreadyInstalled
+    ) {
       Requested = requested;
       AlreadyInstalled = alreadyInstalled;
     }
@@ -105,8 +113,11 @@ namespace Chickensoft.Chicken {
   }
 
   public record DependencyCanBeInstalledEvent
-    : IDependencyEvent, IReportableDependencyEvent {
+    : IDependencyGraphEvent {
     public RequiredAddon Addon { get; init; }
+
+    public ConsoleColor Color => ConsoleColor.DarkBlue;
+
     public DependencyCanBeInstalledEvent(RequiredAddon addon) => Addon = addon;
     public override string ToString() =>
         $"Attempting to install \"{Addon.Name}.\"\n\n" +
