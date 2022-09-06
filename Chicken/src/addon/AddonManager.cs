@@ -88,7 +88,7 @@ namespace Chickensoft.Chicken {
 
     /// <summary>
     /// Given an addon config and the path where the addon config resides,
-    /// compute the actual addon's source.
+    /// compute the actual addon's source url.
     /// <br />
     /// For addons sourced on the local machine, this will convert relative
     // paths into absolute paths.
@@ -99,8 +99,8 @@ namespace Chickensoft.Chicken {
     /// <returns>Resolved addon source.</returns>
     public static string ResolveUrl(AddonConfig addonConfig, string path) {
       var url = addonConfig.Url;
-      if (addonConfig.IsSymlink && !Path.IsPathRooted(url)) {
-        // Symlink addons with relative paths are relative to the
+      if (!addonConfig.IsRemote && !Path.IsPathRooted(url)) {
+        // Locally sourced addons with relative paths are relative to the
         // addons.json file that defines them.
         // Why we use GetFullPath: https://stackoverflow.com/a/1299356
         url = Path.GetFullPath(
