@@ -2,6 +2,7 @@ namespace Chickensoft.Chicken.Tests {
   using System.Collections.Generic;
   using System.Threading.Tasks;
   using Moq;
+  using Shouldly;
   using Xunit;
 
   public class AddonManagerTest {
@@ -167,6 +168,39 @@ namespace Chickensoft.Chicken.Tests {
       await manager.InstallAddon(addon, projectConfig);
 
       addonRepo.VerifyAll();
+    }
+
+    [Fact]
+    public void ResolveUrlDoesNothingForRemoteAddons() {
+      var url = "http://example.com/addon1.git";
+      var path = "/volume/directory";
+      var addonConfig = new AddonConfig(
+        url: url
+      );
+      AddonManager.ResolveUrl(addonConfig, path).ShouldBe(url);
+    }
+
+    [Fact]
+    public void ResolveUrlResolvesNonRootedPath() {
+      var url = "../some/relative/path";
+      var path = "/volume/directory";
+      var addonConfig = new AddonConfig(
+        url: url,
+        source: AddonSource.Local
+      );
+      AddonManager.ResolveUrl(addonConfig, path)
+        .ShouldBe("/volume/some/relative/path");
+    }
+
+    [Fact]
+    public void ResolveUrlDoesNotResolveRootedPath() {
+      var url = "/volume2/some/path";
+      var path = "/volume/directory";
+      var addonConfig = new AddonConfig(
+        url: url,
+        source: AddonSource.Local
+      );
+      AddonManager.ResolveUrl(addonConfig, path).ShouldBe(url);
     }
   }
 }

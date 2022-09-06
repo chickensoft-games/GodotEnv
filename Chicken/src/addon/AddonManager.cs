@@ -99,7 +99,8 @@ namespace Chickensoft.Chicken {
     /// <returns>Resolved addon source.</returns>
     public static string ResolveUrl(AddonConfig addonConfig, string path) {
       var url = addonConfig.Url;
-      if (!addonConfig.IsRemote && !Path.IsPathRooted(url)) {
+      if (addonConfig.IsRemote) { return url; }
+      if (!Path.IsPathRooted(url)) {
         // Locally sourced addons with relative paths are relative to the
         // addons.json file that defines them.
         // Why we use GetFullPath: https://stackoverflow.com/a/1299356

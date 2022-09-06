@@ -30,8 +30,8 @@ namespace Chickensoft.Chicken {
     [System.Text.Json.Serialization.JsonConstructor]
     public AddonConfig(
       string url,
-      string? subfolder,
-      string? checkout,
+      string? subfolder = null,
+      string? checkout = null,
       AddonSource? source = null
     ) {
       Url = url;
