@@ -8,7 +8,7 @@ namespace Chickensoft.Chicken.Tests {
   using Shouldly;
   using Xunit;
 
-  public class InstallCommandTest {
+  public class AddonInstallCommandTest {
     [Fact]
     public void Initializes() {
       var command = new InstallCommand();

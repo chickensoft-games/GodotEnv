@@ -6,8 +6,8 @@ namespace Chickensoft.Chicken {
   using CliFx.Exceptions;
   using CliFx.Infrastructure;
 
-  [Command("egg link", Description = "Create a symbolic link to a directory.")]
-  public class LinkCommand : ICommand {
+  [Command("addon link", Description = "Create a symbolic link to a directory.")]
+  public class AddonLinkCommand : ICommand {
     private readonly IApp _app;
 
     [CommandParameter(0, Description = "Directory source (original directory you are linking to).")]
@@ -16,9 +16,9 @@ namespace Chickensoft.Chicken {
     [CommandParameter(1, Description = "Directory target (directory which points to the source directory).")]
     public string Target { get; init; } = "";
 
-    public LinkCommand() => _app = new App();
+    public AddonLinkCommand() => _app = new App();
 
-    public LinkCommand(IApp app) => _app = app;
+    public AddonLinkCommand(IApp app) => _app = app;
 
     public async ValueTask ExecuteAsync(IConsole console) {
       var startDir = Environment.CurrentDirectory;

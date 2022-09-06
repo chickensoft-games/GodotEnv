@@ -6,16 +6,16 @@ namespace Chickensoft.Chicken {
   using CliFx.Exceptions;
   using CliFx.Infrastructure;
 
-  [Command("egg unlink", Description = "Remove a symbolic link to a directory.")]
-  public class UnlinkCommand : ICommand {
+  [Command("addon unlink", Description = "Remove a symbolic link to a directory.")]
+  public class AddonUnlinkCommand : ICommand {
     private readonly IApp _app;
 
     [CommandParameter(0, Description = "Directory path symlink.")]
     public string Path { get; init; } = "";
 
-    public UnlinkCommand() => _app = new App();
+    public AddonUnlinkCommand() => _app = new App();
 
-    public UnlinkCommand(IApp app) => _app = app;
+    public AddonUnlinkCommand(IApp app) => _app = app;
 
     public async ValueTask ExecuteAsync(IConsole console) {
       var startDir = Environment.CurrentDirectory;

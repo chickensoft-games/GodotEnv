@@ -5,7 +5,7 @@ namespace Chickensoft.Chicken {
   using CliFx.Attributes;
   using CliFx.Infrastructure;
 
-  [Command("egg install", Description = "Installs addons.")]
+  [Command("addon install", Description = "Installs addons.")]
   public class InstallCommand : ICommand {
     private readonly IApp _app;
 
