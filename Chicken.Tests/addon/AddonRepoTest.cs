@@ -458,7 +458,7 @@ namespace Chickensoft.Chicken.Tests {
         url: "git@github.com:chickensoft-games/Chicken.git",
         checkout: "main",
         subfolder: "subfolder",
-        symlink: true
+        source: AddonSource.Symlink
       );
 
       var addonDir = _config.AddonsPath + "/" + addon.Name;
@@ -500,7 +500,7 @@ namespace Chickensoft.Chicken.Tests {
         url: "git@github.com:chickensoft-games/Chicken.git",
         checkout: "main",
         subfolder: "subfolder",
-        symlink: true
+        source: AddonSource.Symlink
       );
 
       var addonDir = _config.AddonsPath + "/" + addon.Name;
@@ -528,7 +528,7 @@ namespace Chickensoft.Chicken.Tests {
         url: "git@github.com:chickensoft-games/Chicken.git",
         checkout: "main",
         subfolder: "subfolder",
-        symlink: true
+        source: AddonSource.Symlink
       );
 
       var addonDir = _config.AddonsPath + "/" + addon.Name;

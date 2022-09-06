@@ -43,18 +43,7 @@ namespace Chickensoft.Chicken {
 
         foreach ((var addonName, var addonConfig) in addonConfigs) {
           var name = addonName;
-          var url = addonConfig.Url;
-
-          if (addonConfig.Symlink && !Path.IsPathRooted(addonConfig.Url)) {
-            // Symlink addons with relative paths are relative to the
-            // addons.json file that defines them.
-            // Why we use GetFullPath: https://stackoverflow.com/a/1299356
-            url = Path.GetFullPath(
-              Path.TrimEndingDirectorySeparator(path) +
-              Path.DirectorySeparatorChar +
-              addonConfig.Url
-            );
-          }
+          var url = ResolveUrl(addonConfig, path);
 
           var addon = new RequiredAddon(
             name: name,
@@ -62,7 +51,7 @@ namespace Chickensoft.Chicken {
             url: url,
             checkout: addonConfig.Checkout,
             subfolder: addonConfig.Subfolder,
-            symlink: addonConfig.Symlink
+            source: addonConfig.Source
           );
 
           var depEvent = _dependencyGraph.Add(addon);
@@ -84,7 +73,7 @@ namespace Chickensoft.Chicken {
     internal async Task InstallAddon(
       RequiredAddon addon, Config projectConfig
     ) {
-      if (addon.Symlink) {
+      if (addon.IsSymlink) {
         await _addonRepo.DeleteAddon(addon, projectConfig);
         _addonRepo.InstallAddonWithSymlink(addon, projectConfig);
         return;
@@ -95,6 +84,32 @@ namespace Chickensoft.Chicken {
       await _addonRepo.DeleteAddon(addon, projectConfig);
       // Copy the addon files from the cache to the installation folder.
       await _addonRepo.CopyAddonFromCache(addon, projectConfig);
+    }
+
+    /// <summary>
+    /// Given an addon config and the path where the addon config resides,
+    /// compute the actual addon's source.
+    /// <br />
+    /// For addons sourced on the local machine, this will convert relative
+    // paths into absolute paths.
+    /// </summary>
+    /// <param name="addonConfig">Addon config.</param>
+    /// <param name="path">Path containing the addons.json the addon was
+    /// required from.</param>
+    /// <returns>Resolved addon source.</returns>
+    public static string ResolveUrl(AddonConfig addonConfig, string path) {
+      var url = addonConfig.Url;
+      if (addonConfig.IsSymlink && !Path.IsPathRooted(url)) {
+        // Symlink addons with relative paths are relative to the
+        // addons.json file that defines them.
+        // Why we use GetFullPath: https://stackoverflow.com/a/1299356
+        url = Path.GetFullPath(
+          Path.TrimEndingDirectorySeparator(path) +
+          Path.DirectorySeparatorChar +
+          addonConfig.Url
+        );
+      }
+      return url;
     }
   }
 }

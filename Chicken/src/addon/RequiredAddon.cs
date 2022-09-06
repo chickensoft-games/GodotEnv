@@ -23,9 +23,13 @@ namespace Chickensoft.Chicken {
     /// <summary>True if the url is a local path which should be
     /// symlinked.
     /// </summary>
-    public bool Symlink { get; init; }
+    public AddonSource Source { get; init; }
     /// <summary>Path of the config file that required this addon.</summary>
     public string ConfigFilePath { get; init; }
+
+    public bool IsLocal => Source == AddonSource.Local;
+    public bool IsRemote => Source == AddonSource.Remote;
+    public bool IsSymlink => Source == AddonSource.Symlink;
 
     /// <summary>Deterministic id based only on the url.</summary>
     public string Id {
@@ -45,7 +49,7 @@ namespace Chickensoft.Chicken {
       string url,
       string checkout,
       string subfolder,
-      bool symlink = false
+      AddonSource source = AddonSource.Remote
     ) {
       Name = name;
       ConfigFilePath = configFilePath;
@@ -55,7 +59,7 @@ namespace Chickensoft.Chicken {
         Path.DirectorySeparatorChar,
         Path.AltDirectorySeparatorChar
       );
-      Symlink = symlink;
+      Source = source;
     }
 
     public override string ToString() => $"Addon \"{Name}\" from " +

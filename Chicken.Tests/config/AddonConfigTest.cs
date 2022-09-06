@@ -8,7 +8,7 @@ namespace Chickensoft.Chicken.Tests {
       = "https://github.com/chickensoft-games/Chicken";
     private const string SUBFOLDER = "Chicken";
     private const string CHECKOUT = "main";
-    private const bool SYMLINK = true;
+    private const AddonSource SOURCE = AddonSource.Local;
 
     [Fact]
     public void Deserializes() {
@@ -16,28 +16,28 @@ namespace Chickensoft.Chicken.Tests {
         $"  \"url\": \"{URL}\"," +
         $"  \"subfolder\": \"{SUBFOLDER}\"," +
         $"  \"checkout\": \"{CHECKOUT}\"," +
-        $"  \"symlink\": \"{SYMLINK}\"" +
+        $"  \"source\": \"{SOURCE}\"" +
       "}";
       var config = JsonConvert.DeserializeObject<AddonConfig>(json);
       config.ShouldNotBeNull();
       config.Subfolder.ShouldBe(SUBFOLDER);
       config.Checkout.ShouldBe(CHECKOUT);
-      config.Symlink.ShouldBe(SYMLINK);
+      config.Source.ShouldBe(SOURCE);
     }
 
     [Fact]
-    public void DeserializesWithDefaults() {
+    public void DeserializesWithAllPresent() {
       var json = "{" +
         $"  \"url\": \"{URL}\"," +
         $"  \"subfolder\": null," +
         $"  \"checkout\": null," +
-        $"  \"symlink\": true" +
+        $"  \"source\": \"symlink\"" +
       "}";
       var config = JsonConvert.DeserializeObject<AddonConfig>(json);
       config.ShouldNotBeNull();
       config.Subfolder.ShouldBe(IApp.DEFAULT_SUBFOLDER);
       config.Checkout.ShouldBe(IApp.DEFAULT_CHECKOUT);
-      config.Symlink.ShouldBe(true);
+      config.Source.ShouldBe(AddonSource.Symlink);
     }
 
     [Fact]
@@ -47,7 +47,46 @@ namespace Chickensoft.Chicken.Tests {
       config.ShouldNotBeNull();
       config.Subfolder.ShouldBe(IApp.DEFAULT_SUBFOLDER);
       config.Checkout.ShouldBe(IApp.DEFAULT_CHECKOUT);
-      config.Symlink.ShouldBe(false);
+      config.Source.ShouldBe(AddonSource.Remote);
+    }
+
+    [Fact]
+    public void IsLocal() {
+      var config = new AddonConfig(
+        url: URL,
+        subfolder: SUBFOLDER,
+        checkout: CHECKOUT,
+        source: AddonSource.Local
+      );
+      config.IsLocal.ShouldBeTrue();
+      config.IsRemote.ShouldBeFalse();
+      config.IsSymlink.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void IsRemote() {
+      var config = new AddonConfig(
+        url: URL,
+        subfolder: SUBFOLDER,
+        checkout: CHECKOUT,
+        source: AddonSource.Remote
+      );
+      config.IsRemote.ShouldBeTrue();
+      config.IsLocal.ShouldBeFalse();
+      config.IsSymlink.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void IsSymlink() {
+      var config = new AddonConfig(
+        url: URL,
+        subfolder: SUBFOLDER,
+        checkout: CHECKOUT,
+        source: AddonSource.Symlink
+      );
+      config.IsSymlink.ShouldBeTrue();
+      config.IsRemote.ShouldBeFalse();
+      config.IsLocal.ShouldBeFalse();
     }
   }
 }

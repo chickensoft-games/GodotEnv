@@ -118,7 +118,7 @@ namespace Chickensoft.Chicken.Tests {
     }
 
     [Fact]
-    public async Task InstallAddonKnowsHowToInstallSymlinkAddonAsync() {
+    public async Task InstallAddonKnowsHowToInstallSymlinkAddon() {
       var addonRepo = new Mock<IAddonRepo>();
       var configFileRepo = new Mock<IConfigFileRepo>();
       var reporter = new Mock<IReporter>();
@@ -137,7 +137,7 @@ namespace Chickensoft.Chicken.Tests {
         url: "http://example.com/addon1.git",
         checkout: "main",
         subfolder: "addon1",
-        symlink: true
+        source: AddonSource.Symlink
       );
 
       var projectPath = "/";
@@ -148,7 +148,7 @@ namespace Chickensoft.Chicken.Tests {
             url: "http://example.com/addon1.git",
             checkout: "main",
             subfolder: "addon1",
-            symlink: true
+            source: AddonSource.Symlink
           )}
         },
         cachePath: ".addons",

@@ -122,7 +122,7 @@ namespace Chickensoft.Chicken {
     // Creates a symlink to the addon's url (which should be a local file path)
     // for addons with `symlink: true`.
     public void InstallAddonWithSymlink(RequiredAddon addon, Config config) {
-      if (!addon.Symlink) {
+      if (!addon.IsSymlink) {
         throw new CommandException(
           $"Addon {addon.Name} is not a symlink addon."
         );

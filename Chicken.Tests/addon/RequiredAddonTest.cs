@@ -10,7 +10,7 @@ namespace Chickensoft.Chicken.Tests {
       = "git@github.com:chickensoft-games/chicken.git";
     private const string SUBFOLDER = "Chicken.Tests";
     private const string CHECKOUT = "main";
-    private const bool SYMLINK = true;
+    private const AddonSource SOURCE = AddonSource.Symlink;
 
     private readonly string[] _testUrls = {
         "git://github.com/some-user/my-repo.git",
@@ -31,13 +31,13 @@ namespace Chickensoft.Chicken.Tests {
         url: ADDON_URL,
         checkout: CHECKOUT,
         subfolder: SUBFOLDER + "/",
-        symlink: SYMLINK
+        source: SOURCE
       );
       addon.Name.ShouldBe(ADDON_NAME);
       addon.Url.ShouldBe(ADDON_URL);
       addon.Checkout.ShouldBe(CHECKOUT);
       addon.Subfolder.ShouldBe(SUBFOLDER);
-      addon.Symlink.ShouldBe(SYMLINK);
+      addon.Source.ShouldBe(SOURCE);
     }
 
     [Fact]
@@ -93,6 +93,51 @@ namespace Chickensoft.Chicken.Tests {
         url: testUrl, checkout: CHECKOUT, subfolder: SUBFOLDER
       );
       addon.Id.ShouldBe("bob_the_url");
+    }
+
+    [Fact]
+    public void IsLocal() {
+      var config = new RequiredAddon(
+        name: ADDON_NAME,
+        configFilePath: CONFIG_FILE_PATH,
+        url: ADDON_URL,
+        checkout: CHECKOUT,
+        subfolder: SUBFOLDER,
+        source: AddonSource.Local
+      );
+      config.IsLocal.ShouldBeTrue();
+      config.IsRemote.ShouldBeFalse();
+      config.IsSymlink.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void IsRemote() {
+      var config = new RequiredAddon(
+        name: ADDON_NAME,
+        configFilePath: CONFIG_FILE_PATH,
+        url: ADDON_URL,
+        checkout: CHECKOUT,
+        subfolder: SUBFOLDER,
+        source: AddonSource.Remote
+      );
+      config.IsRemote.ShouldBeTrue();
+      config.IsLocal.ShouldBeFalse();
+      config.IsSymlink.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void IsSymlink() {
+      var config = new RequiredAddon(
+        name: ADDON_NAME,
+        configFilePath: CONFIG_FILE_PATH,
+        url: ADDON_URL,
+        checkout: CHECKOUT,
+        subfolder: SUBFOLDER,
+        source: AddonSource.Symlink
+      );
+      config.IsSymlink.ShouldBeTrue();
+      config.IsRemote.ShouldBeFalse();
+      config.IsLocal.ShouldBeFalse();
     }
   }
 }
