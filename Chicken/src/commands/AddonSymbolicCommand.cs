@@ -6,7 +6,10 @@ namespace Chickensoft.Chicken {
   using CliFx.Exceptions;
   using CliFx.Infrastructure;
 
-  [Command("addon symbolic", Description = "Determines if a directory is a symlink.")]
+  [Command(
+    "addon symbolic",
+    Description = "Determines if a directory is a symlink."
+  )]
   public class AddonSymbolicCommand : ICommand {
     private readonly IApp _app;
 
@@ -26,6 +29,7 @@ namespace Chickensoft.Chicken {
       var isSymlink = addonRepo.IsDirectorySymlink(Path);
 
       if (isSymlink) {
+        console.ForegroundColor = ConsoleColor.Green;
         output.WriteLine($"YES: `{Path}` is a symlink");
       }
       else {
