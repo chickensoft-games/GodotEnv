@@ -37,6 +37,10 @@ namespace Chickensoft.Chicken {
 
       addonRepo.DeleteDirectory(Path);
 
+      console.ForegroundColor = ConsoleColor.Green;
+      console.Output
+        .WriteLine($"Successfully removed symlink at `{Path}`.");
+
       await ValueTask.CompletedTask;
     }
   }
