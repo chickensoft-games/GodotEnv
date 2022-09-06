@@ -80,7 +80,7 @@ namespace Chickensoft.Chicken.Tests {
     }
 
     [Fact]
-    public async void CacheAddonCachesAddon() {
+    public async Task CacheAddonCachesAddon() {
       var addonCachePath = $"{_config.CachePath}/{_addon.Name}";
 
       var app = new Mock<IApp>();

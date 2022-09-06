@@ -10,10 +10,17 @@ namespace Chickensoft.Chicken {
   public class AddonLinkCommand : ICommand {
     private readonly IApp _app;
 
-    [CommandParameter(0, Description = "Directory source (original directory you are linking to).")]
+    [CommandParameter(
+      0,
+      Description = "Directory source (original directory you are linking to)."
+    )]
     public string Source { get; init; } = "";
 
-    [CommandParameter(1, Description = "Directory target (directory which points to the source directory).")]
+    [CommandParameter(
+      1,
+      Description = "Directory target (directory which points to the source " +
+      "directory)."
+    )]
     public string Target { get; init; } = "";
 
     public AddonLinkCommand() => _app = new App();
@@ -39,6 +46,10 @@ namespace Chickensoft.Chicken {
       }
 
       addonRepo.CreateSymlink(Target, Source);
+
+      console.ForegroundColor = ConsoleColor.Green;
+      console.Output
+        .WriteLine($"Created symlink from `{Source}` to `{Target}`.");
 
       await ValueTask.CompletedTask;
     }

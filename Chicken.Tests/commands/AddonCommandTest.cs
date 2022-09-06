@@ -1,20 +1,21 @@
 namespace Chickensoft.Chicken.Tests {
-  using System.IO;
+  using System.Threading.Tasks;
   using CliFx.Infrastructure;
-  using Moq;
+  using Shouldly;
   using Xunit;
 
   public class AddonCommandTest {
     [Fact]
-    public async void DoesNothing() {
+    public async Task OutputsInfoMessage() {
       var command = new AddonCommand();
-      var console = new Mock<IConsole>();
-      var consoleWriter = new ConsoleWriter(
-        console: new FakeInMemoryConsole(),
-        stream: new MemoryStream()
+
+      var console = new FakeInMemoryConsole();
+
+      await command.ExecuteAsync(console);
+
+      console.ReadOutputString().ShouldContain(
+        "Please use a subcommand to manage addons."
       );
-      console.SetupGet(c => c.Output).Returns(consoleWriter);
-      await command.ExecuteAsync(console.Object);
     }
   }
 }
