@@ -25,4 +25,8 @@ dotnet run -- --help
 
 You can pass command line flags to Chicken after the double dashes `--`.
 
+Lastly, you can debug the command line tool via the `Debug Chicken CLI` debug configuration in VSCode. Since this profile runs Chicken from it's project directory, it will look for an `addons.json` file in `Chicken/addons.json` and install addons to `Chicken/addons`.
+
+> `Chicken/addons`, `Chicken/.addons`, and `Chicken/addons.json` have been added to `.gitignore` so that you can create them and debug with them as needed.
+
 [reportgenerator]: https://github.com/danielpalme/ReportGenerator

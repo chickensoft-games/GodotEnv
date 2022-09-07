@@ -5,7 +5,7 @@ namespace Chickensoft.Chicken {
   using System.Threading.Tasks;
 
   public interface IAddonManager {
-    Task InstallAddons(string projectPath);
+    Task InstallAddons(string projectPath, int? maxDepth = null);
   }
 
   public class AddonManager : IAddonManager {
@@ -26,7 +26,7 @@ namespace Chickensoft.Chicken {
       DependencyGraph = dependencyGraph;
     }
 
-    public async Task InstallAddons(string projectPath) {
+    public async Task InstallAddons(string projectPath, int? maxDepth = null) {
       var searchPaths = new Queue<string>();
       searchPaths.Enqueue(projectPath);
 
@@ -35,6 +35,8 @@ namespace Chickensoft.Chicken {
       var projectConfig = projConfigFile.ToConfig(projectPath);
 
       var cache = await AddonRepo.LoadCache(projectConfig);
+
+      var depth = 0;
 
       do {
         var path = searchPaths.Dequeue();
@@ -71,8 +73,9 @@ namespace Chickensoft.Chicken {
 
           var installedAddonPath = Path.Combine(projectConfig.AddonsPath, name);
           searchPaths.Enqueue(installedAddonPath);
+          depth++;
         }
-      } while (searchPaths.Count > 0);
+      } while (CanGoOn(searchPaths.Count, depth, maxDepth));
     }
 
     internal async Task InstallAddon(
@@ -124,5 +127,8 @@ namespace Chickensoft.Chicken {
       }
       return url;
     }
+
+    internal static bool CanGoOn(int numPaths, int depth, int? maxDepth)
+      => numPaths > 0 && (maxDepth is null || depth < maxDepth);
   }
 }

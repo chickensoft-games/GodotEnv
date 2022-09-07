@@ -2,143 +2,200 @@
 
 [![Chickensoft Badge][chickensoft-badge]][chickensoft-website] [![Discord](https://img.shields.io/badge/Chickensoft%20Discord-%237289DA.svg?style=flat&logo=discord&logoColor=white)][discord] ![line coverage][line-coverage] ![branch coverage][branch-coverage]
 
-Command line utility for C# Godot game development and addon management. Written in C# and provided as a dotnet tool for .NET 6.
+Chickensoft's official command line tool for Godot and C#.
+
+Chicken is a CLI tool to help with C# Godot game development and addon management. It's written in C# for maximum compatibility and provided as a dotnet tool for .NET 6 on Windows, macOS, and Linux.
 
 ## Installation
 
-Chicken uses the local `git` installation available from the shell, so make sure you've installed `git` and configured your local shell environment to your liking.
+Chicken uses the local `git` installation available from the shell, so make sure you've installed `git` and [configured your local shell environment][ssh-github] to your liking.
 
 Use the `dotnet` CLI to install Chicken as a global tool:
 
-```sh
-dotnet tool install -g Chickensoft.Chicken
+```shell
+$ dotnet tool install -g Chickensoft.Chicken
 ```
 
 Run Chicken:
 
-```sh
-chicken --help
+```shell
+$ chicken --help
 ```
 
-## Addon Management
+You can get help for any command by passing the `--help` flag after a command sequence:
 
-Chicken can be used to manage Godot addons (or "eggs") in your game project.
+```shell
+$ chicken addon install --help
+```
 
-### How Addons Are Managed
+## Code Reuse with Godot
 
-Chicken looks for an `addons.json` file in the folder that you execute it from. **You should always run chicken from your project's root folder** (where the `project.godot` file is).
+At present, Godot provides two main methods of reuse for C# projects: **nuget packages** and **addons**.
 
-The `addons.json` file allows you to declare which addons you'd like to include in your project, along with options for using just a subfolder of an addon and/or a particular branch or tag, known as the `checkout`.
+**Nuget packages** allow C# code to be bundled into a library which can be used across multiple projects.
 
-Chicken uses a cache to download addons you want to include in your project. The cache is stored in a `.addons` folder in your project root. You can change the cache directory by setting the `cache` in your `addons.json` file.
+**Addons** allow scenes and scripts to be reused in multiple projects. If you need to make anything other than a code file reusable across Godot projects, you have to use Godot addons.
 
-Default settings for `addons.json`:
+> If you're just sharing C# code between projects, use a nuget package. If you need to share scenes, resources, or scene scripts, use an addon. That's the general rule, anyways.
+
+Typically, Godot addons are installed through the editor or downloaded manually. With Godot, the convention is to place each addon in its own folder inside a project's top level `addons` folder.
+
+## Using Chicken
+
+Create an `addons.json` file in the project directory (be sure to remove the comments if copying the file below):
 
 ```json
 {
-  "path": "addons",
-  "cache": ".addons"
-}
-```
-
-### Setting Up .gitignore 
-
-Add the following to your `.gitignore`:
-
-```gitignore
-.addons/
-addons/
-```
-
-To avoid issues when changing branches which use different addons (or different versions), it is recommended to ignore the entire `addons` folder and use Chicken to install all of your addons. Otherwise, add each folder Chicken creates for the addons it installs to your `.gitignore`.
-
-```gitignore
-.addons/
-addons/addon_a
-addons/addon_b
-addons/username_addon_name
-```
-
-### Where Addons Are Installed
-
-Addons will be installed to the folder named `addons` in your project root. You can change the installation directory by setting the `path` in your `addons.json` file.
-
-If you're using Chicken to manage all your Godot addons, you can put the `addons/` folder in your `.gitignore` file, as well. Whenever you clone a repo or checkout a different branch with different addons, you can use chicken to reinstall the addons.
-
-Here's an example of an `addons.json` file you might include in the root of your Godot project:
-
-```json
-{
-  "path": "addons",
-  "cache": ".addons",
+  "path": "addons", // optional — this is the default
+  "cache": ".addons", // optional — this is the default
   "addons": {
-    "addon_a": {
-      "url": "git@github.com:chickensoft-games/addon_a.git",
-      "subfolder": "some-subfolder",
-      "checkout": "tags/v1.0.0"
+    "godot_dialogue_manager": {
+      "url": "https://github.com/nathanhoad/godot_dialogue_manager",
+      "source": "remote", // optional — this is the default
+      "checkout": "main", // optional — this is the default
+      "subfolder": "addons/dialogue_manager" // optional — defaults to "/"
     },
-    "addon_b": {
-      "url": "git@github.com/chickensoft-games/addon_b.git"
+    "my_local_addon_repo": {
+      "url": "../my_addons/my_local_addon_repo",
+      "source": "local"
     },
-    "addon_c": {
-      "url": "git@github.com/chickensoft-games/addon_c.git",
-      "checkout": "some-feature"
+    "my_symlinked_addon": {
+      "url": "/drive/path/to/addon",
+      "source": "symlink"
     }
   }
 }
 ```
 
-The first addon required by the project, `addon_a`, will be pinned to the `v1.0.0` tag and will copy only the files in `some-subfolder`. The second addon, `addon_b`, will use the latest from `main`. The last addon, `addon_c`, installs the addon using the `some-feature` branch of the addon repository.
+> Each key in the `addons` dictionary above will be the directory name of the installed addon inside the project addons path. 
 
-> Note: You can install two different folders from the same repository url, as long as you give them unique addon names.
->
-> ```json
-> {
->   "addons": {
->     "addon_a_1": {
->       "url": "git@github.com:chickensoft-games/addon_a.git",
->       "subfolder": "subfolder_a",
->     },
->     "addon_a_2": {
->       "url": "git@github.com:chickensoft-games/addon_a.git",
->       "subfolder": "subfolder_b",
->     },
->   }
-> }
-> ```
+Install addons:
 
-### Installing Addons
-
-Use Chicken to install (or reinstall) all of the addons mentioned in `addons.json`:
-
-```sh
-chicken egg install
+```shell
+$ chicken addon install
 ```
 
-> If your `addons.json` file changes (perhaps because you check out a different branch of your project), you can just run `chicken egg install` again to reinstall the addons.
+Chicken can install addons from local and remote git repositories (provided you have setup git in your shell environment), as well as create symlinks to addons.
 
-Under the hood, Chicken runs `git` from the system shell to clone addon repositories to the cache. If you've properly configured git with [ssh keys][ssh-github], Chicken can use git to clone any repo you already have access to.
+Chicken caches local and remote git repositories in the cache folder, configured above with the `cache` property in the `addons.json` file (the default is `.addons/`. You can safely delete this folder at any time and Chicken will recreate it next time it installs addons. Deleting the cache forces Chicken to re-download or copy everything on the next install.
 
-Once an addon is installed, Chicken creates a temporary git repository in the folder the addon was copied to and makes a single commit. Chicken checks to make sure there aren't any uncommitted changes if it needs to reinstall the addon to avoid accidentally overwriting any changes you might have made.
+> **IMPORTANT:** Add the cache folder to your `.gitignore` file!
 
-> Chicken attempts to be as non-destructive as possible, but you should be careful when using any automated tooling as a risk of data loss is always possible.
+Chicken will install addons into the directory specified by the `path` key in the `addons.json` file (which defaults to just `addons/`.
 
-You can delete the addons cache any time you want. Chicken will just re-download all of the addons it needs to the cache next time you install.
+> **IMPORTANT:** If you're using Chicken to install of your addons, you can safely add your `addons` folder to your `.gitignore` file.
+>
+> Just run `chicken addon install` after cloning your project or whenever your `addons.json` file changes!
 
-> There's no particular reason for calling addons "eggs." It just makes the command line interface more fun to use.
+### Remote Git Repositories
 
-### When To Use Addons And Nuget Packages
+Chicken can install addons from remote git repositories. Below is the addon specification for an addon from a remote git repository. The url can be any valid git remote url.
 
-In general, if you are creating a reusable library of C# code, create a nuget package. If you need to create a reusable group of scenes that may (or may not) have scripts attached, use an addon.
+```json
+{
+  "addons": {
+    "my_remote_addon": {
+      "url": "git@github.com:user/repo.git"
+    }
+  }
+}
+```
+
+By default, Chicken assumes the addon `source` is `remote`, the `checkout` reference is `main`, and the `subfolder` to install is the root `/` of the repository. If you need to customize any of those fields, you can override the default values:
+
+```json
+{
+  "addons": {
+    "my_remote_addon": {
+      "url": "git@github.com:user/repo.git",
+      "source": "remote",
+      "checkout": "master",
+      "subfolder": "some/folder/inside/the/repo",
+    }
+  }
+}
+```
+
+### Local Git Repositories
+
+Chicken can install addons from local git repositories in exactly the same way. Simply provide an absolute or relative path for the url and specify the `source` as `local`:
+
+```json
+{
+  "addons": {
+    "my_remote_addon": {
+      "url": "/Users/myself/Desktop/folder",
+      "source": "local"
+    }
+  }
+}
+```
+
+Just as with remote git repositories, you can override the `checkout` and `subfolder` properties, as well:
+
+```json
+{
+  "addons": {
+    "my_remote_addon": {
+      "url": "/Users/myself/Desktop/folder",
+      "source": "local",
+      "checkout": "master",
+      "subfolder": "some/subfolder"
+    }
+  }
+}
+```
+
+### Symlink Addons
+
+Finally, Chicken can "install" addons using symlinks. Addons installed with symlinks do not need to point to git repositories — instead, Chicken will create a folder which "points" to another folder on your file system using symbolic linking.
+
+```json
+  "addons": {
+    "my_symlink_addon": {
+      "url": "/Users/myself/Desktop/folder",
+      "source": "symlink"
+    },
+    "my_second_symlink_addon": {
+      "url": "../../some/other/folder",
+      "source": "symlink",
+      "subfolder": "some_subfolder"
+    }
+  }
+```
+
+> *Note*: The `checkout` reference is ignored when using symlinks.
+
+Whenever a symlinked addon is modified, the changes will immediately appear in the project, unlike addons included with git repositories. Additionally, if you change the addon from your game project, it updates the addon source where the symbolic link is pointing.
+
+> Using symlinks is a great way to include addons that are still in development across one or more projects.
 
 ### Addons With Dependencies
 
 An addon can itself contain an `addons.json` file. When it is installed, Chicken will also put it in a queue and download any addons it needs. If Chicken detects a potential conflict, it will balk and you will end up with an incomplete addons folder.
 
-Chicken uses a flat dependency graph that harkens back to tools like [bower]. It tries to be forgiving, but if it encounters a scenario it can't support, it tries to display the error as clearly as possible.
-### Git Hooks
+Chicken uses a flat dependency graph that is reminiscent of tools like [bower].
 
-You can optionally reinstall addons automatically after a git checkout. See [post-checkout].
+Chicken tries to be extremely forgiving and helpful, especially if you try to include the same addon in incompatible configurations (the same addon included under two different names, two different branches of the same repository, etc). Chicken will display warnings and errors as clearly as possible to help you resolve any potential conflicting scenarios that may arise.
+
+## History
+
+Chicken was created to make using addons in Godot easier. If you're curious about why Chicken was created, read on!
+
+Managing addons in Godot projects has historically been somewhat problematic:
+
+- If you copy and paste an addon into multiple projects, and then modify the addon in one of the projects, the other projects won't get any updates you've made. Duplicated code across projects leads to code getting out of sync, developer frustration, and forgetting which one is most up-to-date.
+
+- If you want to share addons between projects, you might be tempted to use git submodules. Unfortunately, git submodules can be very finnicky when switching branches, and you have to be mindful of which commit you've checked out. If you're careful, they can work out pretty well — but they are a bit fragile and limited in what they can do.
+
+By using a file to require addons, like other dependency systems, Chicken allows addons to be resolved more declaratively and conveniently. Additionally, it's easy to see which addons have changed over time and across different branches.
+
+Chicken provides mechanisms to install addons from remote git sources (remote and local), as well as create symlinks to local addons for ease of development on macOS, Windows, and Linux.
+
+## Contribution
+
+If you want to contribute, please check out [`CONTRIBUTING.md`](/CONTRIBUTING.md)!
+
 
 [chickensoft-badge]: https://chickensoft.games/images/chickensoft/chickensoft_badge.svg
 [chickensoft-website]: https://chickensoft.games
@@ -148,5 +205,3 @@ You can optionally reinstall addons automatically after a git checkout. See [pos
 
 [ssh-github]: https://docs.github.com/en/authentication/connecting-to-github-with-ssh
 [bower]: https://bower.io
-[post-checkout]: https://git-scm.com/docs/githooks#_post_checkout
-[go_dot_dep]: https://github.com/chickensoft-games/go_dot_dep

@@ -340,5 +340,15 @@ namespace Chickensoft.Chicken.Tests {
 
       addonManager.ResolveUrl(addonConfig, path).ShouldBe(url);
     }
+
+    [Fact]
+    public void CanGoOn() {
+      AddonManager.CanGoOn(0, 1, 10).ShouldBeFalse();
+      AddonManager.CanGoOn(1, 1, 10).ShouldBeTrue();
+      AddonManager.CanGoOn(1, 1, 1).ShouldBeFalse();
+      AddonManager.CanGoOn(1, 1, 2).ShouldBeTrue();
+      AddonManager.CanGoOn(1, 100, null).ShouldBeTrue();
+      AddonManager.CanGoOn(0, 100, null).ShouldBeFalse();
+    }
   }
 }

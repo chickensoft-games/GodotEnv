@@ -9,6 +9,13 @@ namespace Chickensoft.Chicken {
   public class InstallCommand : ICommand {
     private readonly IApp _app;
 
+    [CommandOption(
+      "max-depth",
+      'd',
+      Description = "The maximum depth to recurse while installing addons."
+    )]
+    public int? MaxDepth { get; init; } = null;
+
     public InstallCommand() => _app = new App();
 
     public InstallCommand(IApp app) => _app = app;
@@ -31,7 +38,10 @@ namespace Chickensoft.Chicken {
         dependencyGraph: dependencyGraph
       );
 
-      await addonManger.InstallAddons(projectPath: startDir);
+      await addonManger.InstallAddons(
+        projectPath: startDir,
+        maxDepth: MaxDepth
+      );
     }
   }
 }

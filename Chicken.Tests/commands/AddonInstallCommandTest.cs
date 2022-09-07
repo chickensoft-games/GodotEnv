@@ -16,6 +16,8 @@ namespace Chickensoft.Chicken.Tests {
 
     [Fact]
     public async Task UsesAddonManagerToInstallAddons() {
+      var maxDepth = 1;
+
       var app = new Mock<IApp>();
       var console = new FakeInMemoryConsole();
 
@@ -30,7 +32,9 @@ namespace Chickensoft.Chicken.Tests {
         addonsPath: "/addons"
       ));
 
-      addonManager.Setup(am => am.InstallAddons(Environment.CurrentDirectory))
+
+      addonManager
+        .Setup(am => am.InstallAddons(Environment.CurrentDirectory, maxDepth))
         .Returns(Task.CompletedTask);
 
       app.Setup(a => a.CreateAddonRepo())
@@ -49,7 +53,7 @@ namespace Chickensoft.Chicken.Tests {
         It.IsAny<IDependencyGraph>()
       )).Returns(addonManager.Object);
 
-      var command = new InstallCommand(app.Object);
+      var command = new InstallCommand(app.Object) { MaxDepth = maxDepth };
 
       await command.ExecuteAsync(console);
 
