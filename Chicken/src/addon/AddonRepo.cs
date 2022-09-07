@@ -6,21 +6,6 @@ namespace Chickensoft.Chicken {
   using CliFx.Exceptions;
 
   public interface IAddonRepo {
-    Task CacheAddon(RequiredAddon addon, Config config);
-    Task DeleteAddon(RequiredAddon addon, Config config);
-    Task CopyAddonFromCache(RequiredAddon addon, Config config);
-    Task<Dictionary<string, string>> LoadCache(Config config);
-  }
-
-  public class AddonRepo : IAddonRepo {
-    private readonly IApp _app;
-    private readonly IFileSystem _fs;
-
-    public AddonRepo(IApp app) {
-      _app = app;
-      _fs = app.FS;
-    }
-
     /// <summary>
     /// Returns a dictionary of addons in the cache. Each key is the addon's
     /// url and each value is the directory in the cache containing a git clone
@@ -31,6 +16,23 @@ namespace Chickensoft.Chicken {
     /// </summary>
     /// <param name="config">Addon configuration containing paths.</param>
     /// <returns>Map of url's to addon cache directories.</returns>
+    Task<Dictionary<string, string>> LoadCache(Config config);
+    Task CacheAddon(RequiredAddon addon, Config config);
+    Task DeleteAddon(RequiredAddon addon, Config config);
+    Task CopyAddonFromCache(RequiredAddon addon, Config config);
+    void InstallAddonWithSymlink(RequiredAddon addon, Config config);
+    bool IsDirectorySymlink(string path);
+    string DirectorySymlinkTarget(string symlinkPath);
+    void CreateSymlink(string path, string pathToTarget);
+    void DeleteDirectory(string path);
+  }
+
+  public class AddonRepo : IAddonRepo {
+    private readonly IApp _app;
+    private IFileSystem _fs => _app.FS;
+
+    public AddonRepo(IApp app) => _app = app;
+
     public async Task<Dictionary<string, string>> LoadCache(
       Config config
     ) {
@@ -62,21 +64,25 @@ namespace Chickensoft.Chicken {
     public async Task DeleteAddon(RequiredAddon addon, Config config) {
       var addonPath = Path.Combine(config.AddonsPath, addon.Name);
       if (!_fs.Directory.Exists(addonPath)) { return; }
+      if (IsDirectorySymlink(addonPath)) {
+        // We don't need to check git status for symlink'd addons.
+        DeleteDirectory(addonPath);
+        return;
+      }
       var status = await _app.CreateShell(addonPath).RunUnchecked(
         "git", "status", "--porcelain"
       );
       if (status.StandardOutput.Length == 0) {
         // Installed addon is unmodified by the user, free to delete.
-        await _app.CreateShell(config.AddonsPath).Run("rm", "-rf", addonPath);
+        DeleteDirectory(addonPath);
       }
       else {
         throw new CommandException(
-          $"Cannot delete modified addon {addon}. Please backup or discard " +
-          "your changes and delete the addon manually." +
+          $"Cannot delete modified addon {addon.Name}. Please backup or " +
+          "discard your changes and delete the addon manually." +
           "\n" + status.StandardOutput
         );
       }
-
     }
 
     public async Task CopyAddonFromCache(RequiredAddon addon, Config config) {
@@ -112,6 +118,61 @@ namespace Chickensoft.Chicken {
       await addonShell.Run(
         "git", "commit", "-m", "Initial commit"
       );
+    }
+
+    // Creates a symlink to the addon's url (which should be a local file path)
+    public void InstallAddonWithSymlink(RequiredAddon addon, Config config) {
+      if (!addon.IsSymlink) {
+        throw new CommandException(
+          $"Addon {addon.Name} is not a symlink addon."
+        );
+      }
+
+      var source = addon.Url;
+
+      var subfolder = addon.Subfolder;
+      if (subfolder != "/") {
+        source = Path.Combine(source, subfolder);
+      }
+
+      var target = Path.Combine(config.AddonsPath, addon.Name);
+
+      if (_fs.Directory.Exists(target)) {
+        throw new CommandException(
+          $"Addon \"{addon.Name}\" already installed. Please delete the " +
+          "existing addon and try again."
+        );
+      }
+
+      if (!_fs.Directory.Exists(source)) {
+        throw new CommandException(
+          $"Addon \"{addon.Name}\" cannot be found at `{source}`."
+        );
+      }
+
+      try {
+        CreateSymlink(target, source);
+      }
+      catch {
+        throw new CommandException(
+          $"Failed to create symlink for addon \"{addon.Name}\"."
+        );
+      }
+    }
+
+    public bool IsDirectorySymlink(string path)
+      => _app.FS.DirectoryInfo.FromDirectoryName(path).LinkTarget != null;
+
+    public string DirectorySymlinkTarget(string symlinkPath) =>
+      _app.FS.DirectoryInfo.FromDirectoryName(symlinkPath).LinkTarget;
+
+    public void CreateSymlink(string path, string pathToTarget)
+      => _app.FS.Directory.CreateSymbolicLink(path, pathToTarget);
+
+    // Deletes a directory or a symlink directory correctly.
+    public void DeleteDirectory(string path) {
+      if (IsDirectorySymlink(path)) { _app.FS.Directory.Delete(path); return; }
+      _app.FS.Directory.Delete(path, recursive: true);
     }
   }
 }

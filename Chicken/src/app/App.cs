@@ -25,7 +25,7 @@ namespace Chickensoft.Chicken {
       IReporter reporter,
       IDependencyGraph dependencyGraph
     );
-    IReporter CreateReporter(ConsoleWriter writer);
+    IReporter CreateReporter(IConsole console);
     IAddonRepo CreateAddonRepo();
     IConfigFileRepo CreateConfigFileRepo();
   }
@@ -41,9 +41,6 @@ namespace Chickensoft.Chicken {
       FS = fs;
     }
 
-    // The following methods aren't static because we mock them.
-    // Disable the warning about making them static.
-#pragma warning disable CA1822
     public IAddonManager CreateAddonManager(
       IAddonRepo addonRepo,
       IConfigFileRepo configFileRepo,
@@ -56,9 +53,8 @@ namespace Chickensoft.Chicken {
       dependencyGraph: dependencyGraph
     );
 
-    public IReporter CreateReporter(ConsoleWriter writer)
-      => new Reporter(writer);
-#pragma warning restore CA1822
+    public IReporter CreateReporter(IConsole console)
+      => new Reporter(console);
 
     public IAddonRepo CreateAddonRepo() => new AddonRepo(this);
     public IConfigFileRepo CreateConfigFileRepo() => new ConfigFileRepo(this);
@@ -76,7 +72,7 @@ namespace Chickensoft.Chicken {
       }
       catch (Exception e) {
         throw new CommandException(
-          $"Failed to deserialize {path}", innerException: e
+          $"Failed to deserialize file `{path}`", innerException: e
         );
       }
     }

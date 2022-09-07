@@ -1,9 +1,6 @@
 namespace Chickensoft.Chicken.Tests {
   using System;
-  using System.Collections.Generic;
-  using System.IO;
   using System.IO.Abstractions;
-  using System.IO.Abstractions.TestingHelpers;
   using System.Threading.Tasks;
   using CliFx.Exceptions;
   using CliFx.Infrastructure;
@@ -38,19 +35,36 @@ namespace Chickensoft.Chicken.Tests {
 
     [Fact]
     public void LoadsFile() {
-      var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
-        { FILENAME, new MockFileData(_testData) },
-      });
-      var app = new App(workingDir: ".", fs: fs);
-      var file = app.LoadFile<TestObject>(FILENAME);
-      file.ShouldNotBeNull();
-      file.Test.ShouldBe(DATA);
+      var fs = new Mock<IFileSystem>();
+      var file = new Mock<IFile>();
+      fs.Setup(fs => fs.File).Returns(file.Object);
+      file.Setup(file => file.ReadAllText(FILENAME)).Returns(_testData);
+
+      var app = new App(workingDir: ".", fs: fs.Object);
+      var testObject = app.LoadFile<TestObject>(FILENAME);
+      testObject.ShouldNotBeNull();
+      testObject.Test.ShouldBe(DATA);
+    }
+
+    [Fact]
+    public void ThrowsErrorWhenDeserializationIsNull() {
+      var fs = new Mock<IFileSystem>();
+      var file = new Mock<IFile>();
+      fs.Setup(fs => fs.File).Returns(file.Object);
+      file.Setup(file => file.ReadAllText(FILENAME)).Returns("");
+
+      var app = new App(workingDir: ".", fs: fs.Object);
+      Should.Throw<CommandException>(() => app.LoadFile<TestObject>(FILENAME));
     }
 
     [Fact]
     public void ThrowsErrorWhenReadingFileDoesNotWork() {
-      var fs = new MockFileSystem(new Dictionary<string, MockFileData> { });
-      var app = new App(workingDir: ".", fs: fs);
+      var fs = new Mock<IFileSystem>();
+      var file = new Mock<IFile>();
+      fs.Setup(fs => fs.File).Returns(file.Object);
+      file.Setup(file => file.ReadAllText(FILENAME)).Throws<Exception>();
+
+      var app = new App(workingDir: ".", fs: fs.Object);
       Should.Throw<CommandException>(
         () => Task.FromResult(app.LoadFile<TestObject>(FILENAME))
       );
@@ -58,24 +72,30 @@ namespace Chickensoft.Chicken.Tests {
 
     [Fact]
     public void ThrowsErrorWhenDeserializationFails() {
-      var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
-        { FILENAME, new MockFileData("") },
-      });
-      var app = new App(workingDir: ".", fs: fs);
-      Should.Throw<CommandException>(
+      var fs = new Mock<IFileSystem>();
+      var file = new Mock<IFile>();
+      fs.Setup(fs => fs.File).Returns(file.Object);
+      file.Setup(file => file.ReadAllText(FILENAME)).Returns("invalid json");
+      var app = new App(workingDir: ".", fs: fs.Object);
+      var e = Should.Throw<CommandException>(
         () => Task.FromResult(app.LoadFile<TestObject>(FILENAME))
-      )
-      .InnerException?.ShouldNotBeNull()
-      .Message.ShouldBe($"Couldn't load file `{FILENAME}`");
+      );
+      e.InnerException?.ShouldNotBeNull();
+      e.Message.ShouldBe($"Failed to deserialize file `{FILENAME}`");
     }
 
     [Fact]
     public void SavesFile() {
-      var fs = new MockFileSystem(new Dictionary<string, MockFileData> { });
-      var app = new App(workingDir: ".", fs: fs);
+      var fs = new Mock<IFileSystem>();
+      var file = new Mock<IFile>();
+      fs.Setup(fs => fs.File).Returns(file.Object);
+      file.Setup(file => file.WriteAllText(FILENAME, DATA));
+
+      var app = new App(workingDir: ".", fs: fs.Object);
+
       app.SaveFile(FILENAME, DATA);
-      var file = fs.File.ReadAllText(FILENAME);
-      file.ShouldBe(DATA);
+
+      file.VerifyAll();
     }
 
     [Fact]
@@ -112,11 +132,9 @@ namespace Chickensoft.Chicken.Tests {
     [Fact]
     public void CreatesReporter() {
       var fs = new Mock<IFileSystem>();
+      var console = new FakeInMemoryConsole();
       var app = new App(workingDir: ".", fs: fs.Object);
-      app.CreateReporter(new ConsoleWriter(
-        console: new FakeInMemoryConsole(),
-        stream: new MemoryStream()
-      )).ShouldBeOfType(typeof(Reporter));
+      app.CreateReporter(console).ShouldBeOfType(typeof(Reporter));
     }
 
     [Fact]

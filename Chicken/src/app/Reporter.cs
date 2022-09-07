@@ -1,15 +1,29 @@
 namespace Chickensoft.Chicken {
+  using System;
   using CliFx.Infrastructure;
 
   public interface IReporter {
-    void DependencyEvent(IReportableDependencyEvent depEvent);
+    void Handle(IReportableEvent reportEvent);
+  }
+
+  public interface IReportableEvent {
+    ConsoleColor Color { get; }
   }
 
   public class Reporter : IReporter {
-    private readonly ConsoleWriter _output;
-    public Reporter(ConsoleWriter output) => _output = output;
+    public IConsole Console { get; init; }
+    private ConsoleWriter _output => Console.Output;
 
-    public void DependencyEvent(IReportableDependencyEvent depEvent)
-      => _output.Write(depEvent.ToString() + "\n\n");
+    public Reporter(IConsole console) => Console = console;
+
+    public void Handle(IReportableEvent reportEvent)
+      => Print(reportEvent.ToString(), reportEvent.Color);
+
+    private void Print(string? message, ConsoleColor color) {
+      Console.ForegroundColor = color;
+      _output.WriteLine(message);
+      _output.WriteLine("");
+      Console.ResetColor();
+    }
   }
 }

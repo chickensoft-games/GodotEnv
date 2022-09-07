@@ -5,9 +5,16 @@ namespace Chickensoft.Chicken {
   using CliFx.Attributes;
   using CliFx.Infrastructure;
 
-  [Command("egg install", Description = "Installs addons.")]
+  [Command("addon install", Description = "Installs addons.")]
   public class InstallCommand : ICommand {
     private readonly IApp _app;
+
+    [CommandOption(
+      "max-depth",
+      'd',
+      Description = "The maximum depth to recurse while installing addons."
+    )]
+    public int? MaxDepth { get; init; } = null;
 
     public InstallCommand() => _app = new App();
 
@@ -19,7 +26,7 @@ namespace Chickensoft.Chicken {
 
       var addonRepo = _app.CreateAddonRepo();
       var configFileRepo = _app.CreateConfigFileRepo();
-      var reporter = _app.CreateReporter(output);
+      var reporter = _app.CreateReporter(console);
       var configFile = configFileRepo.LoadOrCreateConfigFile(startDir);
       var config = configFile.ToConfig(projectPath: startDir);
       var dependencyGraph = new DependencyGraph();
@@ -31,7 +38,10 @@ namespace Chickensoft.Chicken {
         dependencyGraph: dependencyGraph
       );
 
-      await addonManger.InstallAddons(projectPath: startDir);
+      await addonManger.InstallAddons(
+        projectPath: startDir,
+        maxDepth: MaxDepth
+      );
     }
   }
 }

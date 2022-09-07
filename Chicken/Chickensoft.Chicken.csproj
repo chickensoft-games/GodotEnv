@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;net5.0</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
     <LanguageVersion>latest</LanguageVersion>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>chicken</ToolCommandName>
     <Nullable>enable</Nullable>
 
     <Title>Chicken</Title>
-    <Description>Command line utility for C# Godot game development and addon management.</Description>
+    <Description>Chickensoft's official command line tool for Godot and C#.</Description>
     <Copyright>© 2022 Chickensoft Games</Copyright>
     <Company>Chickensoft</Company>
 
@@ -17,7 +17,7 @@
     <PackageVersion>0.1.0</PackageVersion>
     <PackageReleaseNotes>Chicken release.</PackageReleaseNotes>
     <PackageIcon></PackageIcon>
-    <PackageTags>Godot;CSharp;C#;Chickensoft;Gamedev;Utility;Utilities;Addon;Addon Manager;Addons</PackageTags>
+    <PackageTags>Godot;CSharp;C#;Chickensoft;Gamedev;Utility;Utilities;Addon;Addon Manager;Addons;Generator</PackageTags>
     <PackageReadmeFile>../README.md</PackageReadmeFile>
     <PackageProjectUrl>git@github.com:chickensoft-games/Chicken.git</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -29,7 +29,7 @@
 
   <ItemGroup>
     <PackageReference Include="CliFx" Version="2.2.5" />
-    <PackageReference Include="System.IO.Abstractions" Version="17.0.10" />
+    <PackageReference Include="System.IO.Abstractions" Version="17.1.1" />
     <PackageReference Include="CliWrap" Version="3.4.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="CaseExtensions" Version="1.1.0" />

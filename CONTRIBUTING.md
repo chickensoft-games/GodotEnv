@@ -16,13 +16,17 @@ From the `Chicken.Tests` folder you can then run the following (in bash) to gene
 ./coverage.sh
 ```
 
-To run (but not debug) the tool locally, run the following.
+To run (but not debug) the tool locally, run the following from the `Chicken` folder.
 
 ```sh
 dotnet build
-dotnet run --framework=net6.0 -- --help
+dotnet run -- --help
 ```
 
-Make sure you substitute your local framework version (both `net5.0` or `net6.0` are supported). You can pass command line flags to Chicken after the double dashes `--`.
+You can pass command line flags to Chicken after the double dashes `--`.
+
+Lastly, you can debug the command line tool via the `Debug Chicken CLI` debug configuration in VSCode. Since this profile runs Chicken from it's project directory, it will look for an `addons.json` file in `Chicken/addons.json` and install addons to `Chicken/addons`.
+
+> `Chicken/addons`, `Chicken/.addons`, and `Chicken/addons.json` have been added to `.gitignore` so that you can create them and debug with them as needed.
 
 [reportgenerator]: https://github.com/danielpalme/ReportGenerator

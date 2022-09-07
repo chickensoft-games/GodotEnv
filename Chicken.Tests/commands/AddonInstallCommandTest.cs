@@ -1,14 +1,13 @@
 namespace Chickensoft.Chicken.Tests {
   using System;
   using System.Collections.Generic;
-  using System.IO;
   using System.Threading.Tasks;
   using CliFx.Infrastructure;
   using Moq;
   using Shouldly;
   using Xunit;
 
-  public class InstallCommandTest {
+  public class AddonInstallCommandTest {
     [Fact]
     public void Initializes() {
       var command = new InstallCommand();
@@ -17,14 +16,10 @@ namespace Chickensoft.Chicken.Tests {
 
     [Fact]
     public async Task UsesAddonManagerToInstallAddons() {
-      var app = new Mock<IApp>();
-      var console = new Mock<IConsole>();
-      var consoleWriter = new ConsoleWriter(
-        console: new FakeInMemoryConsole(),
-        stream: new MemoryStream()
-      );
+      var maxDepth = 1;
 
-      console.Setup(c => c.Output).Returns(consoleWriter);
+      var app = new Mock<IApp>();
+      var console = new FakeInMemoryConsole();
 
       var addonManager = new Mock<IAddonManager>();
       var configFileRepo = new Mock<IConfigFileRepo>();
@@ -37,7 +32,9 @@ namespace Chickensoft.Chicken.Tests {
         addonsPath: "/addons"
       ));
 
-      addonManager.Setup(am => am.InstallAddons(Environment.CurrentDirectory))
+
+      addonManager
+        .Setup(am => am.InstallAddons(Environment.CurrentDirectory, maxDepth))
         .Returns(Task.CompletedTask);
 
       app.Setup(a => a.CreateAddonRepo())
@@ -46,7 +43,7 @@ namespace Chickensoft.Chicken.Tests {
       app.Setup(a => a.CreateConfigFileRepo())
         .Returns(() => configFileRepo.Object);
 
-      app.Setup(a => a.CreateReporter(consoleWriter))
+      app.Setup(a => a.CreateReporter(console))
         .Returns(() => new Mock<IReporter>().Object);
 
       app.Setup(a => a.CreateAddonManager(
@@ -56,11 +53,10 @@ namespace Chickensoft.Chicken.Tests {
         It.IsAny<IDependencyGraph>()
       )).Returns(addonManager.Object);
 
-      var command = new InstallCommand(app.Object);
+      var command = new InstallCommand(app.Object) { MaxDepth = maxDepth };
 
-      await command.ExecuteAsync(console.Object);
+      await command.ExecuteAsync(console);
 
-      console.VerifyAll();
       app.VerifyAll();
       addonManager.VerifyAll();
     }

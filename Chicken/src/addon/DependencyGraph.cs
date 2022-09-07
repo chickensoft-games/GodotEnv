@@ -2,7 +2,7 @@ namespace Chickensoft.Chicken {
   using System.Collections.Generic;
 
   public interface IDependencyGraph {
-    IDependencyEvent? Add(RequiredAddon addon);
+    IDependencyGraphEvent Add(RequiredAddon addon);
   }
 
   public class DependencyGraph : IDependencyGraph {
@@ -14,7 +14,7 @@ namespace Chickensoft.Chicken {
 
     public DependencyGraph() { }
 
-    public IDependencyEvent Add(RequiredAddon addon) {
+    public IDependencyGraphEvent Add(RequiredAddon addon) {
       // First, check to make sure another addon isn't installed to the same
       // path as the new one.
       if (_dependenciesByName.TryGetValue(addon.Name, out var installedAddon)) {
