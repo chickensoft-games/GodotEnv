@@ -44,7 +44,7 @@ Typically, Godot addons are installed through the editor or downloaded manually.
 
 Create an `addons.json` file in the project directory (be sure to remove the comments if copying the file below):
 
-```json
+```javascript
 {
   "path": "addons", // optional — this is the default
   "cache": ".addons", // optional — this is the default
@@ -91,7 +91,7 @@ Chicken will install addons into the directory specified by the `path` key in th
 
 Chicken can install addons from remote git repositories. Below is the addon specification for an addon from a remote git repository. The url can be any valid git remote url.
 
-```json
+```javascript
 {
   "addons": {
     "my_remote_addon": {
@@ -103,7 +103,7 @@ Chicken can install addons from remote git repositories. Below is the addon spec
 
 By default, Chicken assumes the addon `source` is `remote`, the `checkout` reference is `main`, and the `subfolder` to install is the root `/` of the repository. If you need to customize any of those fields, you can override the default values:
 
-```json
+```javascript
 {
   "addons": {
     "my_remote_addon": {
@@ -120,7 +120,7 @@ By default, Chicken assumes the addon `source` is `remote`, the `checkout` refer
 
 Chicken can install addons from local git repositories in exactly the same way. Simply provide an absolute or relative path for the url and specify the `source` as `local`:
 
-```json
+```javascript
 {
   "addons": {
     "my_remote_addon": {
@@ -133,7 +133,7 @@ Chicken can install addons from local git repositories in exactly the same way. 
 
 Just as with remote git repositories, you can override the `checkout` and `subfolder` properties, as well:
 
-```json
+```javascript
 {
   "addons": {
     "my_remote_addon": {
@@ -150,7 +150,7 @@ Just as with remote git repositories, you can override the `checkout` and `subfo
 
 Finally, Chicken can "install" addons using symlinks. Addons installed with symlinks do not need to point to git repositories — instead, Chicken will create a folder which "points" to another folder on your file system using symbolic linking.
 
-```json
+```javascript
   "addons": {
     "my_symlink_addon": {
       "url": "/Users/myself/Desktop/folder",
