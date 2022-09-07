@@ -178,6 +178,15 @@ Chicken uses a flat dependency graph that is reminiscent of tools like [bower].
 
 Chicken tries to be extremely forgiving and helpful, especially if you try to include the same addon in incompatible configurations (the same addon included under two different names, two different branches of the same repository, etc). Chicken will display warnings and errors as clearly as possible to help you resolve any potential conflicting scenarios that may arise.
 
+### Suppressing Code Analysis of Addons
+
+If you want your IDE to disregard code style warnings for C# code in your addons folder, you can create a `.editorconfig` in your `addons` folder with the following contents:
+
+```editorconfig
+[*.cs]
+generated_code = true
+```
+
 ## History
 
 Chicken was created to make using addons in Godot easier. If you're curious about why Chicken was created, read on!
