@@ -4,8 +4,10 @@
     <TargetFramework>net6.0</TargetFramework>
     <LanguageVersion>latest</LanguageVersion>
     <PackAsTool>true</PackAsTool>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <ToolCommandName>chicken</ToolCommandName>
     <Nullable>enable</Nullable>
+    <CopyAllFiles>true</CopyAllFiles>
 
     <Title>Chicken</Title>
     <Description>Chickensoft's official command line tool for Godot and C#.</Description>
@@ -18,7 +20,7 @@
     <PackageReleaseNotes>Chicken release.</PackageReleaseNotes>
     <PackageIcon></PackageIcon>
     <PackageTags>Godot;CSharp;C#;Chickensoft;Gamedev;Utility;Utilities;Addon;Addon Manager;Addons;Generator</PackageTags>
-    <PackageReadmeFile>../README.md</PackageReadmeFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>git@github.com:chickensoft-games/Chicken.git</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
@@ -33,5 +35,10 @@
     <PackageReference Include="CliWrap" Version="3.4.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="CaseExtensions" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Has to be in its own item group -->
+	  <None Include="..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>
