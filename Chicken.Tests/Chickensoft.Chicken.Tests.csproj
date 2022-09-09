@@ -5,7 +5,7 @@
     <LanguageVersion>latest</LanguageVersion>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <DebugType>Full</DebugType>
+    <DebugType>portable</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

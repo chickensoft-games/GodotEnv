@@ -28,6 +28,8 @@ You can get help for any command by passing the `--help` flag after a command se
 $ chicken addon install --help
 ```
 
+> **IMPORTANT:** On Windows, Chicken may need to be run from a terminal that is running as an administrator to properly create symlinks.
+
 ## Code Reuse with Godot
 
 At present, Godot provides two main methods of reuse for C# projects: **nuget packages** and **addons**.

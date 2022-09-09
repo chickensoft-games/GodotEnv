@@ -1,6 +1,7 @@
 namespace Chickensoft.Chicken {
   using System.IO.Abstractions;
   using System.Threading.Tasks;
+  using CliFx.Exceptions;
 
   public class FileCopier {
     public IShell Shell { get; init; }
@@ -14,9 +15,15 @@ namespace Chickensoft.Chicken {
     public async Task Copy(string source, string destination) {
       // If we're running on windows, use robocopy instead of rsync
       if (FS.Path.DirectorySeparatorChar == '\\') {
-        await Shell.Run(
+        var result = await Shell.RunUnchecked(
           "robocopy", source, destination, "/e", "/xd", ".git"
         );
+        if (result.ExitCode >= 8) {
+          // Robocopy has non-traditional exit codes
+          throw new CommandException(
+            $"Failed to copy `{source}` to `{destination}`"
+          );
+        }
       }
       else {
         await Shell.Run(

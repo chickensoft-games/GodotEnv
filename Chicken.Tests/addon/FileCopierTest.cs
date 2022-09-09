@@ -1,6 +1,7 @@
 namespace Chickensoft.Chicken.Tests {
   using System.IO.Abstractions;
   using System.Threading.Tasks;
+  using CliFx.Exceptions;
   using Moq;
   using Shouldly;
   using Xunit;
@@ -29,7 +30,7 @@ namespace Chickensoft.Chicken.Tests {
       cli.Setup(
         "/",
         new ProcessResult(0),
-        RunMode.Run,
+        RunMode.RunUnchecked,
         "robocopy", "a", "b", "/e", "/xd", ".git"
       );
 
@@ -60,6 +61,32 @@ namespace Chickensoft.Chicken.Tests {
       var copier = new FileCopier(shell.Object, fs.Object);
 
       await copier.Copy("a", "b");
+
+      cli.VerifyAll();
+    }
+
+    [Fact]
+    public async Task CopyOnWindowsFailsIfRobocopyHasBadExitCode() {
+      var fs = new Mock<IFileSystem>();
+      var path = new Mock<IPath>();
+      path.Setup(path => path.DirectorySeparatorChar).Returns('\\');
+      fs.Setup(fs => fs.Path).Returns(path.Object);
+
+      var cli = new ShellVerifier();
+      var shell = cli.CreateShell("/");
+
+      cli.Setup(
+        "/",
+        new ProcessResult(8),
+        RunMode.RunUnchecked,
+        "robocopy", "a", "b", "/e", "/xd", ".git"
+      );
+
+      var copier = new FileCopier(shell.Object, fs.Object);
+
+      await Should.ThrowAsync<CommandException>(
+        async () => await copier.Copy("a", "b")
+      );
 
       cli.VerifyAll();
     }
