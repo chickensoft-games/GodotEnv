@@ -16,7 +16,7 @@
 
     <PackageId>Chickensoft.Chicken</PackageId>
     <PackageOutputPath>./nupkg</PackageOutputPath>
-    <PackageVersion>0.1.0</PackageVersion>
+    <PackageVersion>1.0.0</PackageVersion>
     <PackageReleaseNotes>Chicken release.</PackageReleaseNotes>
     <PackageIcon></PackageIcon>
     <PackageTags>Godot;CSharp;C#;Chickensoft;Gamedev;Utility;Utilities;Addon;Addon Manager;Addons;Generator</PackageTags>
