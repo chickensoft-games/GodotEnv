@@ -1,126 +1,124 @@
-namespace Chickensoft.Chicken {
-  using System;
-  using System.Collections.Generic;
+namespace Chickensoft.Chicken;
+using System.Collections.Generic;
 
-  public interface IDependencyGraphEvent : IReportableEvent { }
+public interface IDependencyGraphEvent : IReportableEvent { }
 
-  public interface IDependencyCannotBeInstalledEvent { }
+public interface IDependencyCannotBeInstalledEvent { }
 
-  public record SimilarDependencyWarning : IDependencyGraphEvent {
-    public RequiredAddon Conflict { get; init; }
-    public List<RequiredAddon> Addons { get; init; }
+public record SimilarDependencyWarning : IDependencyGraphEvent {
+  public RequiredAddon Conflict { get; init; }
+  public List<RequiredAddon> Addons { get; init; }
 
-    public ConsoleColor Color => ConsoleColor.Yellow;
+  public SimilarDependencyWarning(
+    RequiredAddon conflict,
+    List<RequiredAddon> addons
+  ) {
+    Conflict = conflict;
+    Addons = addons;
+  }
 
-    public SimilarDependencyWarning(
-      RequiredAddon conflict,
-      List<RequiredAddon> addons
-    ) {
-      Conflict = conflict;
-      Addons = addons;
-    }
+  public void Log(ILog log) => log.Warn(ToString());
 
-    public override string ToString() {
-      var article = Addons.Count == 1 ? "a" : "the";
-      var s = Addons.Count == 1 ? "" : "s";
-      var buffer = new List<string>();
-      foreach (var addon in Addons) {
-        if (addon.Url != Conflict.Url) { continue; }
+  public override string ToString() {
+    var article = Addons.Count == 1 ? "a" : "the";
+    var s = Addons.Count == 1 ? "" : "s";
+    var buffer = new List<string>();
+    foreach (var addon in Addons) {
+      if (addon.Url != Conflict.Url) { continue; }
+      buffer.Add(
+        $"\nBoth \"{Conflict.Name}\" and \"{addon.Name}\" could " +
+        "potentially conflict with each other.\n"
+      );
+      if (Conflict.Subfolder != addon.Subfolder) {
         buffer.Add(
-          $"\nBoth \"{Conflict.Name}\" and \"{addon.Name}\" could " +
-          "potentially conflict with each other.\n"
+          "- Different subfolders from the same url are installed."
         );
-        if (Conflict.Subfolder != addon.Subfolder) {
-          buffer.Add(
-            "- Different subfolders from the same url are installed."
-          );
-          buffer.Add(
-            $"    - \"{Conflict.Name}\" installs `{Conflict.Subfolder}/` " +
-            $"from `{Conflict.Url}`"
-          );
-          buffer.Add(
-            $"    - \"{addon.Name}\" installs `{addon.Subfolder}/` " +
-            $"from `{addon.Url}`"
-          );
-        }
-        else if (Conflict.Checkout != addon.Checkout) {
-          buffer.Add(
-            "- Different branches from the same url are installed."
-          );
-          buffer.Add(
-            $"    - \"{Conflict.Name}\" installs `{Conflict.Checkout}` " +
-            $"from `{Conflict.Url}`"
-          );
-          buffer.Add(
-            $"    - \"{addon.Name}\" installs `{addon.Checkout}` " +
-            $"from `{addon.Url}`"
-          );
-        }
+        buffer.Add(
+          $"    - \"{Conflict.Name}\" installs `{Conflict.Subfolder}/` " +
+          $"from `{Conflict.Url}`"
+        );
+        buffer.Add(
+          $"    - \"{addon.Name}\" installs `{addon.Subfolder}/` " +
+          $"from `{addon.Url}`"
+        );
       }
-      return
-        $"The addon \"{Conflict.Name}\" could conflict with {article} " +
-        $"previously installed addon{s}.\n\n" +
-        $"  Attempted to install {Conflict}\n\n" +
-        string.Join("\n", buffer).Trim();
+      else if (Conflict.Checkout != addon.Checkout) {
+        buffer.Add(
+          "- Different branches from the same url are installed."
+        );
+        buffer.Add(
+          $"    - \"{Conflict.Name}\" installs `{Conflict.Checkout}` " +
+          $"from `{Conflict.Url}`"
+        );
+        buffer.Add(
+          $"    - \"{addon.Name}\" installs `{addon.Checkout}` " +
+          $"from `{addon.Url}`"
+        );
+      }
     }
+    return
+      $"The addon \"{Conflict.Name}\" could conflict with {article} " +
+      $"previously installed addon{s}.\n\n" +
+      $"  Attempted to install {Conflict}\n\n" +
+      string.Join("\n", buffer).Trim();
+  }
+}
+
+public record ConflictingDestinationPathEvent
+  : IDependencyGraphEvent, IDependencyCannotBeInstalledEvent {
+  public RequiredAddon Conflict { get; init; }
+  public RequiredAddon Addon { get; init; }
+
+  public ConflictingDestinationPathEvent(
+    RequiredAddon conflict,
+    RequiredAddon addon
+  ) {
+    Conflict = conflict;
+    Addon = addon;
   }
 
-  public record ConflictingDestinationPathEvent
-    : IDependencyGraphEvent, IDependencyCannotBeInstalledEvent {
-    public RequiredAddon Conflict { get; init; }
-    public RequiredAddon Addon { get; init; }
+  public void Log(ILog log) => log.Err(ToString());
 
-    public ConsoleColor Color => ConsoleColor.Red;
+  public override string ToString() =>
+    $"Cannot install \"{Conflict.Name}\" from " +
+    $"`{Conflict.ConfigFilePath}` because it would conflict " +
+    $"with a previously installed addon of the same name from " +
+    $"`{Addon.ConfigFilePath}`.\n\n" +
+    $"Both addons would be installed to the same path.\n\n" +
+    $"  Attempted to install: {Conflict}\n\n" +
+    $"  Previously installed: {Addon}";
+}
 
-    public ConflictingDestinationPathEvent(
-      RequiredAddon conflict,
-      RequiredAddon addon
-    ) {
-      Conflict = conflict;
-      Addon = addon;
-    }
+public record DependencyAlreadyInstalledEvent
+  : IDependencyGraphEvent, IDependencyCannotBeInstalledEvent {
+  public RequiredAddon Requested { get; init; }
+  public RequiredAddon AlreadyInstalled { get; init; }
 
-    public override string ToString() =>
-      $"Cannot install \"{Conflict.Name}\" from " +
-      $"`{Conflict.ConfigFilePath}` because it would conflict " +
-      $"with a previously installed addon of the same name from " +
-      $"`{Addon.ConfigFilePath}`.\n\n" +
-      $"Both addons would be installed to the same path.\n\n" +
-      $"  Attempted to install: {Conflict}\n\n" +
-      $"  Previously installed: {Addon}";
+  public DependencyAlreadyInstalledEvent(
+    RequiredAddon requested,
+    RequiredAddon alreadyInstalled
+  ) {
+    Requested = requested;
+    AlreadyInstalled = alreadyInstalled;
   }
 
-  public record DependencyAlreadyInstalledEvent
-    : IDependencyGraphEvent, IDependencyCannotBeInstalledEvent {
-    public RequiredAddon Requested { get; init; }
-    public RequiredAddon AlreadyInstalled { get; init; }
+  public void Log(ILog log) => log.Info(ToString());
 
-    public ConsoleColor Color => ConsoleColor.Blue;
+  public override string ToString() =>
+    $"The addon \"{Requested.Name}\" is already installed as " +
+    $"\"{AlreadyInstalled.Name}.\"\n\n" +
+    $"  Attempted to install: {Requested}\n\n" +
+    $"  Previously installed: {AlreadyInstalled}";
+}
 
-    public DependencyAlreadyInstalledEvent(
-      RequiredAddon requested,
-      RequiredAddon alreadyInstalled
-    ) {
-      Requested = requested;
-      AlreadyInstalled = alreadyInstalled;
-    }
+public record DependencyCanBeInstalledEvent
+  : IDependencyGraphEvent {
+  public RequiredAddon Addon { get; init; }
 
-    public override string ToString() =>
-      $"The addon \"{Requested.Name}\" is already installed as " +
-      $"\"{AlreadyInstalled.Name}.\"\n\n" +
-      $"  Attempted to install: {Requested}\n\n" +
-      $"  Previously installed: {AlreadyInstalled}";
-  }
+  public void Log(ILog log) => log.Info(ToString());
 
-  public record DependencyCanBeInstalledEvent
-    : IDependencyGraphEvent {
-    public RequiredAddon Addon { get; init; }
-
-    public ConsoleColor Color => ConsoleColor.DarkBlue;
-
-    public DependencyCanBeInstalledEvent(RequiredAddon addon) => Addon = addon;
-    public override string ToString() =>
-        $"Attempting to install \"{Addon.Name}.\"\n\n" +
-        $"  Installing: {Addon}";
-  }
+  public DependencyCanBeInstalledEvent(RequiredAddon addon) => Addon = addon;
+  public override string ToString() =>
+      $"Attempting to install \"{Addon.Name}.\"\n\n" +
+      $"  Installing: {Addon}";
 }

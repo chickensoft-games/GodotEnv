@@ -16,6 +16,26 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
+      "name": "Debug Create",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/Chicken/bin/Debug/net6.0/Chickensoft.Chicken.dll",
+      "args": [
+        "create",
+        "BestGodot3Game",
+        "-t",
+        "/Users/joanna/Dropbox/GameDev/Chickensoft/chicken_templates/godot_3_game_not_git",
+        "--",
+        "--title",
+        "BestGodot3Game"
+      ],
+      "cwd": "${workspaceFolder}/Chicken",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
       "name": ".NET Core Attach",
       "type": "coreclr",
       "request": "attach"

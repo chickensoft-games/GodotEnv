@@ -1,134 +1,109 @@
-namespace Chickensoft.Chicken {
-  using System;
-  using System.Collections.Generic;
-  using System.IO;
-  using System.Threading.Tasks;
+namespace Chickensoft.Chicken;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Abstractions;
+using System.Threading.Tasks;
 
-  public interface IAddonManager {
-    Task InstallAddons(string projectPath, int? maxDepth = null);
+public interface IAddonManager {
+  Task InstallAddons(
+    IApp app, string projectPath, IFileCopier copier, int? maxDepth = null
+  );
+}
+
+public class AddonManager : IAddonManager {
+  public IAddonRepo AddonRepo { get; init; }
+  public ILog Log { get; init; }
+  public IConfigFileLoader ConfigFileRepo { get; init; }
+  public IDependencyGraph DependencyGraph { get; init; }
+
+  private readonly IFileSystem _fs;
+
+  public AddonManager(
+    IFileSystem fs,
+    IAddonRepo addonRepo,
+    IConfigFileLoader configFileLoader,
+    ILog log,
+    IDependencyGraph dependencyGraph
+  ) {
+    _fs = fs;
+    AddonRepo = addonRepo;
+    ConfigFileRepo = configFileLoader;
+    Log = log;
+    DependencyGraph = dependencyGraph;
   }
 
-  public class AddonManager : IAddonManager {
-    public IAddonRepo AddonRepo { get; init; }
-    public IReporter Reporter { get; init; }
-    public IConfigFileRepo ConfigFileRepo { get; init; }
-    public IDependencyGraph DependencyGraph { get; init; }
+  public async Task InstallAddons(
+    IApp app, string projectPath, IFileCopier copier, int? maxDepth = null
+  ) {
+    var searchPaths = new Queue<string>();
+    searchPaths.Enqueue(projectPath);
 
-    public AddonManager(
-      IAddonRepo addonRepo,
-      IConfigFileRepo configFileRepo,
-      IReporter reporter,
-      IDependencyGraph dependencyGraph
-    ) {
-      AddonRepo = addonRepo;
-      ConfigFileRepo = configFileRepo;
-      Reporter = reporter;
-      DependencyGraph = dependencyGraph;
-    }
+    var projConfigFile
+      = ConfigFileRepo.Load(projectPath);
+    var projectConfig = projConfigFile.ToConfig(projectPath);
 
-    public async Task InstallAddons(string projectPath, int? maxDepth = null) {
-      var searchPaths = new Queue<string>();
-      searchPaths.Enqueue(projectPath);
+    var cache = await AddonRepo.LoadCache(projectConfig);
 
-      var projConfigFile
-        = ConfigFileRepo.LoadOrCreateConfigFile(projectPath);
-      var projectConfig = projConfigFile.ToConfig(projectPath);
+    var depth = 0;
 
-      var cache = await AddonRepo.LoadCache(projectConfig);
+    do {
+      var path = searchPaths.Dequeue();
+      var configFile = ConfigFileRepo.Load(path);
+      var configFilePath
+        = app.FileThatExists(_fs, path, App.ADDONS_CONFIG_FILES);
+      var addonConfigs = configFile.Addons;
 
-      var depth = 0;
+      foreach ((var addonName, var addonConfig) in addonConfigs) {
+        var name = addonName;
+        var url = app.ResolveUrl(_fs, addonConfig, path);
 
-      do {
-        var path = searchPaths.Dequeue();
-        var configFile = ConfigFileRepo.LoadOrCreateConfigFile(path);
-        var configFilePath = Path.Combine(path, IApp.ADDONS_CONFIG_FILE);
-        var addonConfigs = configFile.Addons;
-
-        foreach ((var addonName, var addonConfig) in addonConfigs) {
-          var name = addonName;
-          var url = ResolveUrl(addonConfig, path);
-
-          var addon = new RequiredAddon(
-            name: name,
-            configFilePath: configFilePath,
-            url: url,
-            checkout: addonConfig.Checkout,
-            subfolder: addonConfig.Subfolder,
-            source: addonConfig.Source
-          );
-
-          var depEvent = DependencyGraph.Add(addon);
-          Reporter.Handle(depEvent);
-
-          if (depEvent is not IDependencyCannotBeInstalledEvent) {
-            try {
-              await InstallAddon(addon, projectConfig);
-              Reporter.Handle(new AddonInstalledEvent(addon));
-            }
-            catch (Exception e) {
-              var failedEvent = new AddonFailedToInstallEvent(addon, e);
-              Reporter.Handle(failedEvent);
-            }
-          }
-
-          var installedAddonPath = Path.Combine(projectConfig.AddonsPath, name);
-          searchPaths.Enqueue(installedAddonPath);
-          depth++;
-        }
-      } while (CanGoOn(searchPaths.Count, depth, maxDepth));
-    }
-
-    internal async Task InstallAddon(
-      RequiredAddon addon, Config projectConfig
-    ) {
-      if (addon.IsSymlink) {
-        await AddonRepo.DeleteAddon(addon, projectConfig);
-        AddonRepo.InstallAddonWithSymlink(addon, projectConfig);
-        return;
-      }
-      // Clone the addon from the git url, if needed.
-      await AddonRepo.CacheAddon(addon, projectConfig);
-      // Delete any previously installed addon.
-      await AddonRepo.DeleteAddon(addon, projectConfig);
-      // Copy the addon files from the cache to the installation folder.
-      await AddonRepo.CopyAddonFromCache(addon, projectConfig);
-    }
-
-    /// <summary>
-    /// Given an addon config and the path where the addon config resides,
-    /// compute the actual addon's source url.
-    /// <br />
-    /// For addons sourced on the local machine, this will convert relative
-    // paths into absolute paths.
-    /// </summary>
-    /// <param name="addonConfig">Addon config.</param>
-    /// <param name="path">Path containing the addons.json the addon was
-    /// required from.</param>
-    /// <returns>Resolved addon source.</returns>
-    public string ResolveUrl(AddonConfig addonConfig, string path) {
-      var url = addonConfig.Url;
-      if (addonConfig.IsRemote) { return url; }
-      // If the path containing the addons.json is a symlink, determine the
-      // actual path containing the addons.json file. This allows addons
-      // that have their own addons with relative paths to be relative to
-      // where the addon is actually stored, which is more intuitive.
-      if (AddonRepo.IsDirectorySymlink(path)) {
-        path = AddonRepo.DirectorySymlinkTarget(path);
-      }
-      if (!Path.IsPathRooted(url)) {
-        // Locally sourced addons with relative paths are relative to the
-        // addons.json file that defines them.
-        // Why we use GetFullPath: https://stackoverflow.com/a/1299356
-        url = Path.GetFullPath(
-          Path.TrimEndingDirectorySeparator(path) +
-          Path.DirectorySeparatorChar +
-          addonConfig.Url
+        var addon = new RequiredAddon(
+          name: name,
+          configFilePath: configFilePath,
+          url: url,
+          checkout: addonConfig.Checkout,
+          subfolder: addonConfig.Subfolder,
+          source: addonConfig.Source
         );
-      }
-      return url;
-    }
 
-    internal static bool CanGoOn(int numPaths, int depth, int? maxDepth)
-      => numPaths > 0 && (maxDepth is null || depth < maxDepth);
+        var depEvent = DependencyGraph.Add(addon);
+        depEvent.Log(Log);
+
+        if (depEvent is not IDependencyCannotBeInstalledEvent) {
+          try {
+            await InstallAddon(addon, projectConfig, copier);
+            new AddonInstalledEvent(addon).Log(Log);
+          }
+          catch (Exception e) {
+            var failedEvent = new AddonFailedToInstallEvent(addon, e);
+            failedEvent.Log(Log);
+          }
+        }
+
+        var installedAddonPath = Path.Combine(projectConfig.AddonsPath, name);
+        searchPaths.Enqueue(installedAddonPath);
+        depth++;
+      }
+    } while (CanGoOn(searchPaths.Count, depth, maxDepth));
   }
+
+  internal async Task InstallAddon(
+    RequiredAddon addon, Config projectConfig, IFileCopier copier
+  ) {
+    if ((addon as ISourceRepository).IsSymlink) {
+      await AddonRepo.DeleteAddon(addon, projectConfig);
+      AddonRepo.InstallAddonWithSymlink(addon, projectConfig);
+      return;
+    }
+    // Clone the addon from the git url, if needed.
+    await AddonRepo.CacheAddon(addon, projectConfig);
+    // Delete any previously installed addon.
+    await AddonRepo.DeleteAddon(addon, projectConfig);
+    // Copy the addon files from the cache to the installation folder.
+    await AddonRepo.CopyAddonFromCache(addon, projectConfig, copier);
+  }
+
+  internal static bool CanGoOn(int numPaths, int depth, int? maxDepth)
+    => numPaths > 0 && (maxDepth is null || depth < maxDepth);
 }
