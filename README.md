@@ -215,6 +215,142 @@ Chicken allows you to generate a group of files and folders from a template. A t
 
 Edit actions files specify what inputs the template requires and what actions Chicken should perform when generating a new project or folder based on that template.
 
+Edit actions render their property strings before the action is performed by substituting the values received for the inputs and applying any transformations to them.
+
+The following shows an example edit actions file from the [Godot 3 Game Template][godot-3-game-template].
+
+```js
+// Edit actions tell Chicken how to customize a folder generated from 
+// a template.
+// This edit actions file is a snippet of the EDIT_ACTIONS.jsonc file in
+// https://github.com/chickensoft-games/godot_3_game.
+{
+  "inputs": [
+    {
+      "name": "title",
+      "type": "string",
+      "default": "My Game"
+    }
+  ],
+  "actions": [
+    // Edit game's .csproj file
+    {
+      // Find and replace text inside a file
+      "type": "edit",
+      "file": "MyGame.csproj",
+      "find": "MyGame",
+      "replace": "{title:PascalCase}"
+    },
+    {
+      // Rename file.
+      "type": "rename",
+      "file": "MyGame.csproj",
+      "to": "{title:PascalCase}.csproj"
+    },
+    {
+      // Replace each instance of the text below with a generated guid
+      "type": "guid",
+      "file": "MyGame.sln",
+      "replace": "GUID_PLACEHOLDER"
+    },
+  ]
+}
+```
+
+The template only includes 1 input, `title`. The first edit action is simply an `edit` action which performs a find/replace on a file. It replaces each instance of "MyGame" in the `MyGame.csproj` file in the generated folder with the `title` variable in `PascalCase` using the `{variable:transformer}` syntax.
+
+To generate the Godot 3 Game Template with Chicken, you can run the following shell command.
+
+```sh
+chicken create ./MyGameName \
+  --template git@github.com:chickensoft-games/godot_3_game.git \
+  -- --title MyGameName
+```
+
+Chicken will pass any arguments after `--` to the template itself.
+
+Input variables and transformers are not case sensitive: `{title}`, `{Title}`, and `{TiTlE}` are equivalent.
+
+Given an input string like `MyProject`, we can use transformers to change the case of the text. Chicken supports the following text transformers:
+
+- `snake_case` -> `my_project`
+- `pascalcase` -> `MyProject`
+- `camelcase` -> `myProject`
+- `lowercase` -> `myproject`
+- `uppercase` -> `MYPROJECT`
+```
+
+### Edit Actions
+
+Currently, Chicken only supports 3 simple edit actions. Each edit action needs a `file` property that specifies the file the edit action will be performed on. Edit actions can only refer to files in the template folder by relative path, relative to the template root.
+
+```js
+{
+  "actions": [
+    {
+      "type": "edit",
+      "file": "MyGame.csproj",
+      "find": "MyGame",
+      "replace": "{title:PascalCase}"
+    }
+  ]
+}
+```
+
+In addition to the `file` property, each edit action has its own unique properties to help it accomplish its task.
+
+#### Edit
+
+The `edit` action instructs Chicken to read a file's text contents and run a find/replace on the file. Each instance of the `find` string will be replaced with the `replace` string.
+
+```js
+{
+  "actions": [
+    {
+      // Find and replace
+      "type": "edit",
+      "file": "file.txt",
+      "find": "hello, world!",
+      "replace": "hello, chicken!"
+    }
+  ]
+}
+```
+
+#### Rename
+
+The `rename` action instructs Chicken to rename the `file` to the filename in `to`.
+
+```js
+{
+  "actions": [
+    {
+      // Rename a file
+      "type": "rename",
+      "file": "file.txt",
+      "to": "chicken.txt"
+    }
+  ]
+}
+```
+
+#### Guid
+
+The `guid` action instructs Chicken to search the contents of `file` and replace each instance of `replace` with a generated GUID (useful when creating templates that have Visual Studio Solution `.sln` files in them). 
+
+```js
+{
+  "actions": [
+    {
+      // Replace a placeholder with a GUID
+      "type": "guid",
+      "file": "file.txt",
+      "replace": "GUID_PLACEHOLDER"
+    },
+  ]
+}
+```
+
 ## Contribution
 
 If you want to contribute, please check out [`CONTRIBUTING.md`](/CONTRIBUTING.md)!
@@ -228,3 +364,4 @@ If you want to contribute, please check out [`CONTRIBUTING.md`](/CONTRIBUTING.md
 [jsonc]: https://code.visualstudio.com/docs/languages/json#_json-with-comments
 [ssh-github]: https://docs.github.com/en/authentication/connecting-to-github-with-ssh
 [bower]: https://bower.io
+[godot-3-game-template]: https://github.com/chickensoft-games/godot_3_game
