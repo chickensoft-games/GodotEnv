@@ -1,5 +1,4 @@
 namespace Chickensoft.Chicken;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
@@ -16,7 +15,7 @@ public interface IAddonRepo {
   /// </summary>
   /// <param name="config">Addon configuration containing paths.</param>
   /// <returns>Map of url's to addon cache directories.</returns>
-  Task<Dictionary<string, string>> LoadCache(Config config);
+  void EnsureCacheExists(Config config);
   Task CacheAddon(RequiredAddon addon, Config config);
   Task DeleteAddon(RequiredAddon addon, Config config);
   Task CopyAddonFromCache(
@@ -31,23 +30,10 @@ public class AddonRepo : IAddonRepo {
 
   public AddonRepo(IApp app, IFileSystem fs) { _app = app; _fs = fs; }
 
-  public async Task<Dictionary<string, string>> LoadCache(
-    Config config
-  ) {
+  public void EnsureCacheExists(Config config) {
     if (!_fs.Directory.Exists(config.CachePath)) {
       _fs.Directory.CreateDirectory(config.CachePath);
     }
-    var urls = new Dictionary<string, string>();
-    var directoriesInCachePath = _fs.Directory.GetDirectories(
-      config.CachePath
-    );
-    foreach (var directory in directoriesInCachePath) {
-      var shell = _app.CreateShell(directory);
-      var result = await shell.Run("git", "remote", "get-url", "origin");
-      var url = result.StandardOutput.Trim();
-      urls.Add(url, directory);
-    }
-    return urls;
   }
 
   public async Task CacheAddon(RequiredAddon addon, Config config) {

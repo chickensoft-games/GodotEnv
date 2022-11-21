@@ -43,7 +43,7 @@ public class AddonManager : IAddonManager {
       = ConfigFileRepo.Load(projectPath);
     var projectConfig = projConfigFile.ToConfig(projectPath);
 
-    var cache = await AddonRepo.LoadCache(projectConfig);
+    AddonRepo.EnsureCacheExists(projectConfig);
 
     var depth = 0;
 

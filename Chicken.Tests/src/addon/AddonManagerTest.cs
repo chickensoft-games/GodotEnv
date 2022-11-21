@@ -69,11 +69,7 @@ public class AddonManagerTest {
     configFileLoader.Setup(repo => repo.Load(projectPath))
       .Returns(projectConfigFile);
 
-    addonRepo.Setup(repo => repo.LoadCache(projectConfig)).Returns(
-      Task.FromResult(new Dictionary<string, string>() {
-        { "http://example.com/addon1.git", "addon1" }
-      })
-    );
+    addonRepo.Setup(repo => repo.EnsureCacheExists(projectConfig));
     app.Setup(
       app => app.FileThatExists(fs.Object, "/", App.ADDONS_CONFIG_FILES)
     ).Returns("/addons.json");
@@ -197,9 +193,7 @@ public class AddonManagerTest {
     configFileLoader.Setup(repo => repo.Load(projectPath))
       .Returns(projectConfigFile);
 
-    addonRepo.Setup(repo => repo.LoadCache(projectConfig)).Returns(
-      Task.FromResult(new Dictionary<string, string>() { })
-    );
+    addonRepo.Setup(repo => repo.EnsureCacheExists(projectConfig));
     app.Setup(
       app => app.FileThatExists(fs.Object, "/", App.ADDONS_CONFIG_FILES)
     ).Returns("/addons.json");
