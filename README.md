@@ -278,7 +278,6 @@ Given an input string like `MyProject`, we can use transformers to change the ca
 - `camelcase` -> `myProject`
 - `lowercase` -> `myproject`
 - `uppercase` -> `MYPROJECT`
-```
 
 ### Edit Actions
 
