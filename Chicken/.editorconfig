@@ -122,6 +122,7 @@ dotnet_diagnostic.IDE0058.severity = none
 dotnet_diagnostic.IDE0059.severity = none
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1305.severity = none
+dotnet_diagnostic.CA1051.severity = none
 
 # C# Style Rules
 # https://docs.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/language-rules#c-style-rules
@@ -165,7 +166,7 @@ csharp_using_directive_placement = inside_namespace:warning
 # Modifier preferences
 csharp_prefer_static_local_function = true:warning
 # Undocumented
-csharp_style_namespace_declarations = block_scoped:warning
+csharp_style_namespace_declarations = file_scoped:warning
 
 ##########################################
 # Unnecessary Code Rules

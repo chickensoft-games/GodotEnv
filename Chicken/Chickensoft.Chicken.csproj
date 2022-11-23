@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <LanguageVersion>latest</LanguageVersion>
+    <LanguageVersion>10</LanguageVersion>
     <PackAsTool>true</PackAsTool>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <ToolCommandName>chicken</ToolCommandName>
@@ -16,7 +16,7 @@
 
     <PackageId>Chickensoft.Chicken</PackageId>
     <PackageOutputPath>./nupkg</PackageOutputPath>
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>1.1.0</PackageVersion>
     <PackageReleaseNotes>Chicken release.</PackageReleaseNotes>
     <PackageIcon></PackageIcon>
     <PackageTags>Godot;CSharp;C#;Chickensoft;Gamedev;Utility;Utilities;Addon;Addon Manager;Addons;Generator</PackageTags>
@@ -31,7 +31,7 @@
 
   <ItemGroup>
     <PackageReference Include="CliFx" Version="2.2.5" />
-    <PackageReference Include="System.IO.Abstractions" Version="17.1.1" />
+    <PackageReference Include="System.IO.Abstractions" Version="17.2.3" />
     <PackageReference Include="CliWrap" Version="3.4.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="CaseExtensions" Version="1.1.0" />
@@ -39,6 +39,6 @@
 
   <ItemGroup>
     <!-- Has to be in its own item group -->
-	  <None Include="..\README.md" Pack="true" PackagePath="\"/>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

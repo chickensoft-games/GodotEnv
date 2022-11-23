@@ -2,9 +2,11 @@
 
 [![Chickensoft Badge][chickensoft-badge]][chickensoft-website] [![Discord](https://img.shields.io/badge/Chickensoft%20Discord-%237289DA.svg?style=flat&logo=discord&logoColor=white)][discord] ![line coverage][line-coverage] ![branch coverage][branch-coverage]
 
-Chickensoft's official command line tool for Godot and C#.
+Chicken allows you to easily create new Godot projects from reusable templates and manage Godot addons using a simple, flat dependency graph. Chicken is written in C# and provided as a dotnet tool for Windows, macOS, and Linux.
 
-Chicken is a CLI tool to help with C# Godot game development and addon management. It's written in C# for maximum compatibility and provided as a dotnet tool for .NET 6 on Windows, macOS, and Linux.
+<p align="center">
+<img alt="Chicken CLI Logo" src="doc_assets/chicken_cli.svg" width="200">
+</p>
 
 ## Installation
 
@@ -25,12 +27,16 @@ $ chicken --help
 You can get help for any command by passing the `--help` flag after a command sequence:
 
 ```shell
-$ chicken addon install --help
+$ chicken addons install --help
 ```
+
+## What can Chicken do?
+
+Chicken helps with a couple of things: namely, [managing Godot addons](#managing-addons) and generating a group of files or folders from [reusable templates](#templates). 
 
 > **IMPORTANT:** On Windows, Chicken may need to be run from a terminal that is running as an administrator to properly create symlinks.
 
-## Code Reuse with Godot
+## Managing Addons
 
 At present, Godot provides two main methods of reuse for C# projects: **nuget packages** and **addons**.
 
@@ -42,9 +48,23 @@ At present, Godot provides two main methods of reuse for C# projects: **nuget pa
 
 Typically, Godot addons are installed through the editor or downloaded manually. With Godot, the convention is to place each addon in its own folder inside a project's top level `addons` folder.
 
-## Using Chicken
+### Why use an addon manager for Godot?
 
-Create an `addons.json` file in the project directory (be sure to remove the comments if copying the file below):
+Managing addons in Godot projects has historically been somewhat problematic:
+
+- If you copy and paste an addon into multiple projects, and then modify the addon in one of the projects, the other projects won't get any updates you've made. Duplicated code across projects leads to code getting out of sync, developer frustration, and forgetting which one is most up-to-date.
+
+- If you want to share addons between projects, you might be tempted to use git submodules. Unfortunately, git submodules can be very finnicky when switching branches, and you have to be mindful of which commit you've checked out. If you're careful, they can work out pretty well — but they are a bit fragile and limited in what they can do.
+
+By using a file to require addons, like other dependency systems, Chicken allows addons to be resolved more declaratively and conveniently. Additionally, it's easy to see which addons have changed over time and across different branches.
+
+### Getting Started with Addons
+
+When you run an addon installation command in Chicken, it looks in the current directory for an `addons.json` or `addons.jsonc` file. The `addons.json` or `addons.jsonc` file tells Chicken what addons should be installed in a project.  
+
+> Note that Chicken [supports json files with comments][jsonc], or `jsonc` files.
+
+To get started, create an `addons.json` or `addons.jsonc` file in your game's project directory. If you are using `addons.json`, be sure to remove the comments below.
 
 ```javascript
 {
@@ -74,7 +94,7 @@ Create an `addons.json` file in the project directory (be sure to remove the com
 Install addons:
 
 ```shell
-$ chicken addon install
+$ chicken addons install
 ```
 
 Chicken can install addons from local and remote git repositories (provided you have setup git in your shell environment), as well as create symlinks to addons.
@@ -87,7 +107,7 @@ Chicken will install addons into the directory specified by the `path` key in th
 
 > **IMPORTANT:** If you're using Chicken to install of your addons, you can safely add your `addons` folder to your `.gitignore` file.
 >
-> Just run `chicken addon install` after cloning your project or whenever your `addons.json` file changes!
+> Just run `chicken addons install` after cloning your project or whenever your `addons.json` file changes!
 
 ### Remote Git Repositories
 
@@ -189,19 +209,146 @@ If you want your IDE to disregard code style warnings for C# code in your addons
 generated_code = true
 ```
 
-## History
+## Templates
 
-Chicken was created to make using addons in Godot easier. If you're curious about why Chicken was created, read on!
+Chicken allows you to generate a group of files and folders from a template. A template is any git repository or folder that contains files you'd like to use in the template. Each template must contain an `EDIT_ACTIONS.json` (or `EDIT_ACTIONS.jsonc` file) that tells Chicken how to customize the template each time a new project or folder is generated based on that template.
 
-Managing addons in Godot projects has historically been somewhat problematic:
+Edit actions files specify what inputs the template requires and what actions Chicken should perform when generating a new project or folder based on that template.
 
-- If you copy and paste an addon into multiple projects, and then modify the addon in one of the projects, the other projects won't get any updates you've made. Duplicated code across projects leads to code getting out of sync, developer frustration, and forgetting which one is most up-to-date.
+Edit actions render their property strings before the action is performed by substituting the values received for the inputs and applying any transformations to them.
 
-- If you want to share addons between projects, you might be tempted to use git submodules. Unfortunately, git submodules can be very finnicky when switching branches, and you have to be mindful of which commit you've checked out. If you're careful, they can work out pretty well — but they are a bit fragile and limited in what they can do.
+The following shows an example edit actions file from the [Godot 3 Game Template][godot-3-game-template].
 
-By using a file to require addons, like other dependency systems, Chicken allows addons to be resolved more declaratively and conveniently. Additionally, it's easy to see which addons have changed over time and across different branches.
+```js
+// Edit actions tell Chicken how to customize a folder generated from 
+// a template.
+// This edit actions file is a snippet of the EDIT_ACTIONS.jsonc file in
+// https://github.com/chickensoft-games/godot_3_game.
+{
+  "inputs": [
+    {
+      "name": "title",
+      "type": "string",
+      "default": "My Game"
+    }
+  ],
+  "actions": [
+    // Edit game's .csproj file
+    {
+      // Find and replace text inside a file
+      "type": "edit",
+      "file": "MyGame.csproj",
+      "find": "MyGame",
+      "replace": "{title:PascalCase}"
+    },
+    {
+      // Rename file.
+      "type": "rename",
+      "file": "MyGame.csproj",
+      "to": "{title:PascalCase}.csproj"
+    },
+    {
+      // Replace each instance of the text below with a generated guid
+      "type": "guid",
+      "file": "MyGame.sln",
+      "replace": "GUID_PLACEHOLDER"
+    },
+  ]
+}
+```
 
-Chicken provides mechanisms to install addons from remote git sources (remote and local), as well as create symlinks to local addons for ease of development on macOS, Windows, and Linux.
+The template only includes 1 input, `title`. The first edit action is simply an `edit` action which performs a find/replace on a file. It replaces each instance of "MyGame" in the `MyGame.csproj` file in the generated folder with the `title` variable in `PascalCase` using the `{variable:transformer}` syntax.
+
+To generate the Godot 3 Game Template with Chicken, you can run the following shell command.
+
+```sh
+chicken create ./MyGameName \
+  --template git@github.com:chickensoft-games/godot_3_game.git \
+  -- --title MyGameName
+```
+
+Chicken will pass any arguments after `--` to the template itself.
+
+Input variables and transformers are not case sensitive: `{title}`, `{Title}`, and `{TiTlE}` are equivalent.
+
+Given an input string like `MyProject`, we can use transformers to change the case of the text. Chicken supports the following text transformers:
+
+- `snake_case` -> `my_project`
+- `pascalcase` -> `MyProject`
+- `camelcase` -> `myProject`
+- `lowercase` -> `myproject`
+- `uppercase` -> `MYPROJECT`
+
+### Edit Actions
+
+Currently, Chicken only supports 3 simple edit actions. Each edit action needs a `file` property that specifies the file the edit action will be performed on. Edit actions can only refer to files in the template folder by relative path, relative to the template root.
+
+```js
+{
+  "actions": [
+    {
+      "type": "edit",
+      "file": "MyGame.csproj",
+      "find": "MyGame",
+      "replace": "{title:PascalCase}"
+    }
+  ]
+}
+```
+
+In addition to the `file` property, each edit action has its own unique properties to help it accomplish its task.
+
+#### Edit
+
+The `edit` action instructs Chicken to read a file's text contents and run a find/replace on the file. Each instance of the `find` string will be replaced with the `replace` string.
+
+```js
+{
+  "actions": [
+    {
+      // Find and replace
+      "type": "edit",
+      "file": "file.txt",
+      "find": "hello, world!",
+      "replace": "hello, chicken!"
+    }
+  ]
+}
+```
+
+#### Rename
+
+The `rename` action instructs Chicken to rename the `file` to the filename in `to`.
+
+```js
+{
+  "actions": [
+    {
+      // Rename a file
+      "type": "rename",
+      "file": "file.txt",
+      "to": "chicken.txt"
+    }
+  ]
+}
+```
+
+#### Guid
+
+The `guid` action instructs Chicken to search the contents of `file` and replace each instance of `replace` with a generated GUID (useful when creating templates that have Visual Studio Solution `.sln` files in them). 
+
+```js
+{
+  "actions": [
+    {
+      // Replace a placeholder with a GUID
+      "type": "guid",
+      "file": "file.txt",
+      "replace": "GUID_PLACEHOLDER"
+    },
+  ]
+}
+```
 
 ## Contribution
 
@@ -213,6 +360,7 @@ If you want to contribute, please check out [`CONTRIBUTING.md`](/CONTRIBUTING.md
 [discord]: https://discord.gg/gSjaPgMmYW
 [line-coverage]: https://raw.githubusercontent.com/chickensoft-games/Chicken/main/Chicken.Tests/reports/line_coverage.svg
 [branch-coverage]: https://raw.githubusercontent.com/chickensoft-games/Chicken/main/Chicken.Tests/reports/branch_coverage.svg
-
+[jsonc]: https://code.visualstudio.com/docs/languages/json#_json-with-comments
 [ssh-github]: https://docs.github.com/en/authentication/connecting-to-github-with-ssh
 [bower]: https://bower.io
+[godot-3-game-template]: https://github.com/chickensoft-games/godot_3_game
