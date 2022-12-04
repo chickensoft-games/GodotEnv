@@ -63,7 +63,7 @@ public class CreateCommand : ICommand {
     var checkout = Checkout;
 
     if (template == null) {
-      throw new CommandException("Template (-t) is required.");
+      throw new CommandException("Egg (-e) is required.");
     }
 
     if (name == null) {

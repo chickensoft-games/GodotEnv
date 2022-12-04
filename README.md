@@ -262,9 +262,9 @@ The template only includes 1 input, `title`. The first edit action is simply an 
 To generate the Godot 3 Game Template with Chicken, you can run the following shell command.
 
 ```sh
-chicken create ./MyGameName \
-  --template git@github.com:chickensoft-games/godot_3_game.git \
-  -- --title MyGameName
+chicken egg crack ./MyGameName \
+  --egg "git@github.com:chickensoft-games/godot_3_game.git" \
+  -- --title "MyGameName"
 ```
 
 Chicken will pass any arguments after `--` to the template itself.

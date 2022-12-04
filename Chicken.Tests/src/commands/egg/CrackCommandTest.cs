@@ -53,7 +53,7 @@ public class CreateCommandTest {
     var console = new FakeInMemoryConsole();
     (await Should.ThrowAsync<CommandException>(
       async () => await command.ExecuteAsync(console)
-    )).Message.ShouldContain("Template (-t) is required");
+    )).Message.ShouldContain("Egg (-e) is required");
   }
 
   [Fact]
