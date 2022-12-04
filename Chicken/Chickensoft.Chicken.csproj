@@ -27,6 +27,12 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/chickensoft-games/chicken</RepositoryUrl>
 
+    <DefaultItemExcludes>
+      <!-- Exclude addons and .addons folder inside chicken -->
+      <!-- (helps with debugging) -->
+      $(DefaultItemExcludes);.addons/**/*;addons/**/*
+    </DefaultItemExcludes>
+
   </PropertyGroup>
 
   <ItemGroup>
