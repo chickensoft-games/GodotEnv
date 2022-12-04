@@ -42,7 +42,7 @@ public class CreateCommandTest {
   }
 
   [Fact]
-  public async Task ThrowsIfNoTemplate() {
+  public async Task ThrowsIfNoEgg() {
     var app = new Mock<IApp>();
     var fs = new Mock<IFileSystem>();
     var copier = new Mock<IFileCopier>();

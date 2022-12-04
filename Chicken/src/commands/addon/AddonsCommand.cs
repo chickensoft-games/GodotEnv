@@ -6,7 +6,7 @@ using CliFx.Attributes;
 using CliFx.Infrastructure;
 
 [Command("addons", Description = "Manage addons.")]
-public class AddonCommand : ICommand {
+public class AddonsCommand : ICommand {
   public ValueTask ExecuteAsync(IConsole console) {
     var output = console.Output;
     console.ForegroundColor = ConsoleColor.Yellow;
