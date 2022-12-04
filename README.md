@@ -72,7 +72,7 @@ To get started, create an `addons.json` or `addons.jsonc` file in your game's pr
   "cache": ".addons", // optional — this is the default
   "addons": {
     "godot_dialogue_manager": {
-      "url": "https://github.com/nathanhoad/godot_dialogue_manager",
+      "url": "https://github.com/nathanhoad/godot_dialogue_manager.git",
       "source": "remote", // optional — this is the default
       "checkout": "main", // optional — this is the default
       "subfolder": "addons/dialogue_manager" // optional — defaults to "/"
