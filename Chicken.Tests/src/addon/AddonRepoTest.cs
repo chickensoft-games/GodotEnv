@@ -110,13 +110,16 @@ public class AddonRepoTest {
     var directory = new Mock<IDirectory>();
     var dirInfoFactory = new Mock<IDirectoryInfoFactory>();
     var dirInfo = new Mock<IDirectoryInfo>();
+    var path = new Mock<IPath>();
 
     fs.Setup(fs => fs.Directory).Returns(directory.Object);
     fs.Setup(fs => fs.DirectoryInfo).Returns(dirInfoFactory.Object);
+    fs.Setup(fs => fs.Path).Returns(path.Object);
     dirInfoFactory.Setup(dif => dif.FromDirectoryName(addonDir))
       .Returns(dirInfo.Object);
     dirInfo.Setup(info => info.LinkTarget).Returns<string?>(null);
     directory.Setup(dir => dir.Exists(addonDir)).Returns(true);
+    path.Setup(p => p.DirectorySeparatorChar).Returns('/');
 
     var cli = new ShellVerifier();
 
@@ -125,8 +128,6 @@ public class AddonRepoTest {
 
     app.Setup(app => app.CreateShell(addonDir))
       .Returns(addonShell.Object);
-    app.Setup(app => app.CreateShell(_config.AddonsPath))
-      .Returns(addonsPathShell.Object);
     app.Setup(app => app.DeleteDirectory(fs.Object, addonDir));
 
     cli.Setup(
@@ -140,6 +141,67 @@ public class AddonRepoTest {
 
     await addonRepo.DeleteAddon(_addon, _config);
 
+    app.VerifyAll();
+    directory.VerifyAll();
+    cli.VerifyAll();
+  }
+
+  [Fact]
+  public async Task DeleteAddonDeletesAddonOnWindows() {
+    var addonDir = _config.AddonsPath + "/" + _addon.Name;
+
+    var app = new Mock<IApp>();
+    var fs = new Mock<IFileSystem>();
+    var directory = new Mock<IDirectory>();
+    var dirInfoFactory = new Mock<IDirectoryInfoFactory>();
+    var dirInfo = new Mock<IDirectoryInfo>();
+    var path = new Mock<IPath>();
+
+    fs.Setup(fs => fs.Directory).Returns(directory.Object);
+    fs.Setup(fs => fs.DirectoryInfo).Returns(dirInfoFactory.Object);
+    fs.Setup(fs => fs.Path).Returns(path.Object);
+    dirInfoFactory.Setup(dif => dif.FromDirectoryName(addonDir))
+      .Returns(dirInfo.Object);
+    dirInfo.Setup(info => info.LinkTarget).Returns<string?>(null);
+    directory.Setup(dir => dir.Exists(addonDir)).Returns(true);
+    path.Setup(p => p.DirectorySeparatorChar).Returns('\\');
+
+    var cli = new ShellVerifier();
+
+    var addonShell = cli.CreateShell(addonDir);
+    var addonsPathShell = cli.CreateShell(_config.AddonsPath);
+
+    app.Setup(app => app.CreateShell(addonDir))
+      .Returns(addonShell.Object);
+    app.Setup(app => app.CreateShell(_config.AddonsPath))
+      .Returns(addonsPathShell.Object);
+
+    cli.Setup(
+      addonDir,
+      new ProcessResult(0),
+      RunMode.RunUnchecked,
+      "git", "status", "--porcelain"
+    );
+
+    cli.Setup(
+      addonDir,
+      new ProcessResult(0),
+      RunMode.Run,
+      "cmd.exe", "/c", "erase", "/s", "/f", "/q", "*"
+    );
+
+    cli.Setup(
+      _config.AddonsPath,
+      new ProcessResult(0),
+      RunMode.RunUnchecked,
+      "cmd.exe", "/c", "rmdir", _addon.Name, "/s", "/q"
+    );
+
+    var addonRepo = new AddonRepo(app.Object, fs.Object);
+
+    await addonRepo.DeleteAddon(_addon, _config);
+
+    app.VerifyAll();
     directory.VerifyAll();
     cli.VerifyAll();
   }

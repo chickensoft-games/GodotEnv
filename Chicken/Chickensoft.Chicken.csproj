@@ -16,7 +16,7 @@
 
     <PackageId>Chickensoft.Chicken</PackageId>
     <PackageOutputPath>./nupkg</PackageOutputPath>
-    <PackageVersion>1.1.0</PackageVersion>
+    <PackageVersion>1.2.0</PackageVersion>
     <PackageReleaseNotes>Chicken release.</PackageReleaseNotes>
     <PackageIcon></PackageIcon>
     <PackageTags>Godot;CSharp;C#;Chickensoft;Gamedev;Utility;Utilities;Addon;Addon Manager;Addons;Generator</PackageTags>
@@ -26,6 +26,12 @@
 
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/chickensoft-games/chicken</RepositoryUrl>
+
+    <DefaultItemExcludes>
+      <!-- Exclude addons and .addons folder inside chicken -->
+      <!-- (helps with debugging) -->
+      $(DefaultItemExcludes);.addons/**/*;addons/**/*
+    </DefaultItemExcludes>
 
   </PropertyGroup>
 

@@ -53,11 +53,20 @@ public class AddonRepo : IAddonRepo {
       _app.DeleteDirectory(_fs, addonPath);
       return;
     }
-    var status = await _app.CreateShell(addonPath).RunUnchecked(
+    var shell = _app.CreateShell(addonPath);
+    var status = await shell.RunUnchecked(
       "git", "status", "--porcelain"
     );
     if (status.StandardOutput.Length == 0) {
       // Installed addon is unmodified by the user, free to delete.
+      if (_fs.Path.DirectorySeparatorChar == '\\') {
+        // on windows, delete files using command prompt since C# fails
+        // to delete .git folders using .net file api's
+        await shell.Run("cmd.exe", "/c", "erase", "/s", "/f", "/q", "*");
+        var addonsShell = _app.CreateShell(config.AddonsPath);
+        await addonsShell.RunUnchecked("cmd.exe", "/c", "rmdir", addon.Name, "/s", "/q");
+        return;
+      }
       _app.DeleteDirectory(_fs, addonPath);
     }
     else {
