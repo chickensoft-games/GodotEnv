@@ -7,15 +7,18 @@ using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
 
-[Command("create", Description = "Create a new project based on a template.")]
+[Command(
+  "egg crack",
+  Description = "Create a new project based on an existing egg (template).")
+]
 public class CreateCommand : ICommand {
   [CommandOption(
-    "template",
-    't',
+    "egg",
+    'e',
     Description =
     "Template to use. Can be a git url, a local path, or a template name."
   )]
-  public string? Template { get; init; }
+  public string? Egg { get; init; }
 
   [CommandOption(
     "checkout",
@@ -55,7 +58,7 @@ public class CreateCommand : ICommand {
   }
 
   public async ValueTask ExecuteAsync(IConsole console) {
-    var template = Template;
+    var template = Egg;
     var name = Name;
     var checkout = Checkout;
 

@@ -28,7 +28,7 @@ public class CreateCommandTest {
     var command = new CreateCommand(
       app.Object, fs.Object, copier.Object, argParser.Object
     ) {
-      Template = "template",
+      Egg = "template",
       Checkout = "checkout",
       Name = "name",
     };
@@ -36,7 +36,7 @@ public class CreateCommandTest {
     command.Fs.ShouldBeSameAs(fs.Object);
     command.Copier.ShouldBeSameAs(copier.Object);
     command.ArgParser.ShouldBeSameAs(argParser.Object);
-    command.Template.ShouldBe("template");
+    command.Egg.ShouldBe("template");
     command.Checkout.ShouldBe("checkout");
     command.Name.ShouldBe("name");
   }
@@ -64,7 +64,7 @@ public class CreateCommandTest {
     var argParser = new Mock<IAdditionalArgParser>();
     var command = new CreateCommand(
       app.Object, fs.Object, copier.Object, argParser.Object
-    ) { Template = "template" };
+    ) { Egg = "template" };
     var console = new FakeInMemoryConsole();
     (await Should.ThrowAsync<CommandException>(
       async () => await command.ExecuteAsync(console)
@@ -80,7 +80,7 @@ public class CreateCommandTest {
     var command = new CreateCommand(
       app.Object, fs.Object, copier.Object, argParser.Object
     ) {
-      Template = "template",
+      Egg = "template",
       Name = "name",
     };
 
@@ -104,7 +104,7 @@ public class CreateCommandTest {
     var command = new CreateCommand(
       app.Object, fs.Object, copier.Object, argParser.Object
     ) {
-      Template = "template",
+      Egg = "template",
       Name = "name",
     };
 
@@ -134,7 +134,7 @@ public class CreateCommandTest {
     var command = new CreateCommand(
       app.Object, fs.Object, copier.Object, argParser.Object
     ) {
-      Template = template,
+      Egg = template,
       Checkout = checkout,
       Name = name,
     };
@@ -221,7 +221,7 @@ public class CreateCommandTest {
     var command = new CreateCommand(
       app.Object, fs.Object, copier.Object, argParser.Object
     ) {
-      Template = template,
+      Egg = template,
       Checkout = checkout,
       Name = name,
     };
