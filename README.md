@@ -72,7 +72,7 @@ To get started, create an `addons.json` or `addons.jsonc` file in your game's pr
   "cache": ".addons", // optional — this is the default
   "addons": {
     "godot_dialogue_manager": {
-      "url": "https://github.com/nathanhoad/godot_dialogue_manager",
+      "url": "https://github.com/nathanhoad/godot_dialogue_manager.git",
       "source": "remote", // optional — this is the default
       "checkout": "main", // optional — this is the default
       "subfolder": "addons/dialogue_manager" // optional — defaults to "/"
@@ -262,9 +262,9 @@ The template only includes 1 input, `title`. The first edit action is simply an 
 To generate the Godot 3 Game Template with Chicken, you can run the following shell command.
 
 ```sh
-chicken create ./MyGameName \
-  --template git@github.com:chickensoft-games/godot_3_game.git \
-  -- --title MyGameName
+chicken egg crack ./MyGameName \
+  --egg "git@github.com:chickensoft-games/godot_3_game.git" \
+  -- --title "MyGameName"
 ```
 
 Chicken will pass any arguments after `--` to the template itself.

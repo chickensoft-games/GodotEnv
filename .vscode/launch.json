@@ -24,8 +24,8 @@
       "args": [
         "create",
         "BestGodot3Game",
-        "-t",
-        "/Users/joanna/Dropbox/GameDev/Chickensoft/chicken_templates/godot_3_game_not_git",
+        "-e",
+        "git@github.com:chickensoft-games/godot_3_game.git",
         "--",
         "--title",
         "BestGodot3Game"
