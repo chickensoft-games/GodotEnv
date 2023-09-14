@@ -2,35 +2,16 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Chicken CLI",
+      "name": "Debug GodotEnv CLI",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/Chicken/bin/Debug/net6.0/Chickensoft.Chicken.dll",
+      "program": "${workspaceFolder}/GodotEnv/bin/Debug/net6.0/Chickensoft.GodotEnv.dll",
       "args": [
+        "--debug",
         "${input:args}"
       ],
-      "cwd": "${workspaceFolder}/Chicken",
-      "console": "integratedTerminal",
-      "stopAtEntry": false,
-      "internalConsoleOptions": "neverOpen"
-    },
-    {
-      "name": "Debug Create",
-      "type": "coreclr",
-      "request": "launch",
-      "preLaunchTask": "build",
-      "program": "${workspaceFolder}/Chicken/bin/Debug/net6.0/Chickensoft.Chicken.dll",
-      "args": [
-        "create",
-        "BestGodot3Game",
-        "-e",
-        "git@github.com:chickensoft-games/godot_3_game.git",
-        "--",
-        "--title",
-        "BestGodot3Game"
-      ],
-      "cwd": "${workspaceFolder}/Chicken",
+      "cwd": "${workspaceFolder}/GodotEnv",
       "console": "integratedTerminal",
       "stopAtEntry": false,
       "internalConsoleOptions": "neverOpen"

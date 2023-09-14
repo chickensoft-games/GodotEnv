@@ -1,70 +1,269 @@
-# Chicken
+# GodotEnv
 
-[![Chickensoft Badge][chickensoft-badge]][chickensoft-website] [![Discord](https://img.shields.io/badge/Chickensoft%20Discord-%237289DA.svg?style=flat&logo=discord&logoColor=white)][discord] ![line coverage][line-coverage] ![branch coverage][branch-coverage]
+[![Chickensoft Badge][chickensoft-badge]][chickensoft-website] [![Discord](https://img.shields.io/badge/Chickensoft%20Discord-%237289DA.svg?style=flat&logo=discord&logoColor=white)][discord]
 
-Chicken allows you to easily create new Godot projects from reusable templates and manage Godot addons using a simple, flat dependency graph. Chicken is written in C# and provided as a dotnet tool for Windows, macOS, and Linux.
+<!-- ![line coverage][line-coverage] ![branch coverage][branch-coverage] -->
+
+GodotEnv is a command-line tool that makes it easy to switch between Godot versions and manage addons in your projects.
+
+---
 
 <p align="center">
-<img alt="Chicken CLI Logo" src="doc_assets/chicken_cli.svg" width="200">
+<img alt="GodotEnv" src="GodotEnv/icon.png" width="200">
 </p>
 
-## Installation
+---
 
-Chicken uses the local `git` installation available from the shell, so make sure you've installed `git` and [configured your local shell environment][ssh-github] to your liking.
+GodotEnv can do the following:
 
-Use the `dotnet` CLI to install Chicken as a global tool:
+- ✅ Download, extract, and install Godot 4.0+ versions from the command line on Windows, macOS, and Linux (similar to tools like [NVM], [FVM], [asdf], etc.
+- ✅ Switch the active version of Godot by updating a symlink.
+- ✅ Automatically setup a system `GODOT` environment variable that always points to the active version of Godot.
+- ✅ Install addons in a Godot project from local paths, remote git repositories, or symlinks using an easy-to-understand `addons.json` file. No more fighting with git submodules! Just run `godotenv addons install` whenever your `addons.json` file changes.
+- ✅ Automatically create and configure a `.gitignore`, `addons.json`, and `addons/.editorconfig` in your project to make it easy to manage addons.
+- ✅ Allow addons to declare dependencies on other addons using a flat dependency graph.
 
-```shell
-$ dotnet tool install -g Chickensoft.Chicken
+## 📦 Installation
+
+GodotEnv is a .NET command line tool that runs on Windows, macOS, and Linux.
+
+```sh
+dotnet tool install --global Chickensoft.GodotEnv
 ```
 
-Run Chicken:
+GodotEnv uses the local `git` installation and other processes available from the shell, so make sure you've installed `git` and [configured your local shell environment][ssh-github] correctly.
+
+> ⧉ On Windows, certain operations may require administrator privileges, such as managing symlinks or editing certain files. GodotEnv should prompt you in these cases for your approval, and certain operations will cause a command line window to pop open for a moment before disappearing — this is normal.
+
+## Quick Start
+
+We'll walk through the commands in depth below, but if you prefer to get started right away you can use the `--help` flag with any command to get more information.
 
 ```shell
-$ chicken --help
+# Overall help
+godotenv --help
+
+# Help for entire categories of commands
+godotenv godot --help
+godotenv addons --help
+
+# Help for a specific godot management command
+godotenv godot install --help
+
+# etc...
 ```
 
-You can get help for any command by passing the `--help` flag after a command sequence:
+## 🤖 Godot Version Management
 
-```shell
-$ chicken addons install --help
+GodotEnv can automatically manage Godot versions on your local machine for you.
+
+> 🙋‍♀️ Using GodotEnv to install Godot works best for local development. If you want to install Godot directly on a GitHub actions runner for CI/CD purposes, consider using Chickensoft's [setup-godot] action — it caches Godot installations between runs, installs the Godot export templates, and also works on Windows, macOS, and Ubuntu GitHub runners.
+
+### Installing Godot
+
+To get started managing Godot versions with GodotEnv, you'll need to first instruct GodotEnv to install a version of Godot.
+
+```sh
+godotenv godot install 4.0.1
+# or a non-stable version:
+godotenv godot install 4.1.1-rc.1
 ```
 
-## What can Chicken do?
+Versions should match the format of the versions shown on the [GodotSharp nuget package][godot-sharp-nuget]. Downloads are made from the [Godot TuxFamily.org mirror][tux-family-mirror].
 
-Chicken helps with a couple of things: namely, [managing Godot addons](#managing-addons) and generating a group of files or folders from [reusable templates](#templates). 
+By default, GodotEnv installs .NET-enabled versions of Godot.
 
-> **IMPORTANT:** On Windows, Chicken may need to be run from a terminal that is running as an administrator to properly create symlinks.
+If you really must install the boring, non-.NET version of Godot, you may do so 😢.
 
-## Managing Addons
+```sh
+godotenv godot install 4.0.1 --no-dotnet
+```
 
-At present, Godot provides two main methods of reuse for C# projects: **nuget packages** and **addons**.
+When installing a version of Godot, GodotEnv performs the following steps:
 
-**Nuget packages** allow C# code to be bundled into a library which can be used across multiple projects.
+- 📦 Downloads Godot installation zip archive (if not already downloaded).
+- 🤐 Extracts Godot installation zip archive.
+- 📂 Activates the newly installed version by updating the symlink.
+- 🏝 Makes sure the system `GODOT` environment variable points to the active Godot version symlink.
 
-**Addons** allow scenes and scripts to be reused in multiple projects. If you need to make anything other than a code file reusable across Godot projects, you have to use Godot addons.
+### Listing Godot Versions
 
-> If you're just sharing C# code between projects, use a nuget package. If you need to share scenes, resources, or scene scripts, use an addon. That's the general rule, anyways.
+GodotEnv can show you a list of the Godot versions you have installed.
 
-Typically, Godot addons are installed through the editor or downloaded manually. With Godot, the convention is to place each addon in its own folder inside a project's top level `addons` folder.
+```sh
+godotenv godot list
+```
 
-### Why use an addon manager for Godot?
+Which might produce something like the following, depending on what you have installed:
+
+```text
+4.0.1
+4.0.1 *dotnet
+4.1.1-rc.1
+4.1.1-rc.1 *dotnet
+```
+
+### Using a Different Godot Version
+
+You can change the active version of Godot by instructing GodotEnv to update the symlink to one of the installed versions. By default, it only looks for the .NET-enabled version of Godot. To use a non-.NET version of Godot, specify `--no-dotnet`.
+
+```sh
+# uses dotnet version
+godotenv godot use 4.0.1
+
+# uses non-dotnet version
+godotenv godot use 4.0.1 --no-dotnet
+```
+
+### Uninstalling a Godot Version
+
+Uninstalling works the same way as installing and switching versions does.
+
+```sh
+# uninstalls .NET version
+godotenv godot uninstall 4.0.1
+
+# uninstalls not-dotnet version
+godotenv godot uninstall 4.0.1 --no-dotnet
+```
+
+### Getting the Symlink Path
+
+GodotEnv can provide the path to the symlink that always points to the active version of Godot.
+
+```sh
+godotenv godot env path
+```
+
+### Getting the Active Godot Version Path
+
+GodotEnv will provide you with the path to the active version of Godot that the symlink it uses is currently pointing to.
+
+```sh
+godotenv godot env target
+```
+
+### Getting and Setting the GODOT System Environment Variable
+
+You can use GodotEnv to set the `GODOT` system environment variable to the symlink that always points to the active version of Godot.
+
+```sh
+# Set the GODOT environment variable to the symlink that GodotEnv maintains.
+godotenv godot env setup
+
+# Print the value of the GODOT environment variable.
+godotenv godot env get
+```
+
+> On Windows, this may request administrator privileges to setup a system environment variable available across the entire machine.
+>
+> On macOS, this adds the `GODOT` environment variable to the current user's `.zshrc` file.
+>
+> On Linux, this adds the `GODOT` environment variable to the current user's `.bashrc` file.
+>
+> After making changes to environment variables on any system, be sure to close any open terminals and open a new one to ensure the changes are picked up. If changes are not picked up across other applications, you may have to log out and log back in. Fortunately, since the environment variable points to a symlink which points to the active Godot version, you only have to do this once! Afterwards, you are free to switch Godot versions without any further headache as often as you like.
+
+### 🧼 Clearing the Godot Installers Download Cache
+
+GodotEnv caches the Godot installation zip archives it downloads in a cache folder. You can ask GodotEnv to clear the cache folder for you.
+
+```sh
+godotenv cache clear
+```
+
+## 🔌 Addon Management
+
+GodotEnv allows you to install [Godot addons][asset-library]. A Godot addon is a collection of Godot assets and/or scripts that can be copied into a project. [By convention][godot-addons-structure], these are stored in a folder named `addons` relative to your Godot project. Check out the [Dialogue Manager][godot-dialogue-manager] addon to see how a Godot addon itself is structured.
+
+Besides copying addons from remote sources, GodotEnv allows you to install addons from a local git repository or symlink to local directories on your machine so that you can develop an addon across multiple Godot projects.
+
+Using GodotEnv to manage addons can prevent some of the headaches that occur when using git submodules or manually managing symlinks.
+
+> Additionally, GodotEnv will check for accidental modifications made to addon content files before re-installing addons in your project to prevent overwriting changes you have made. It does this by turning non-symlinked addons into their own temporary git repositories and checking for changes before uninstalling them and reinstalling them.
+
+### When to Use Godot Addons
+
+If you're using C#, you have two ways of sharing code: Godot addons and nuget packages. Each should be used in different scenarios.
+
+- 🔌 **Addons** allow scenes, scripts, or any other Godot assets and files to be reused in multiple Godot projects.
+
+- 📦 **Nuget packages** only allow C# code to be bundled into a library which can be used across multiple Godot projects.
+
+> If you're just sharing C# code between projects, you should use a nuget package or reference another .csproj locally. If you need to share scenes, resources, or any other type of files, use a Godot addon.
+
+#### Why use an addon manager for Godot?
 
 Managing addons in Godot projects has historically been somewhat problematic:
 
 - If you copy and paste an addon into multiple projects, and then modify the addon in one of the projects, the other projects won't get any updates you've made. Duplicated code across projects leads to code getting out of sync, developer frustration, and forgetting which one is most up-to-date.
 
-- If you want to share addons between projects, you might be tempted to use git submodules. Unfortunately, git submodules can be very finnicky when switching branches, and you have to be mindful of which commit you've checked out. If you're careful, they can work out pretty well — but they are a bit fragile and limited in what they can do.
+- If you want to share addons between projects, you might be tempted to use git submodules. Unfortunately, git submodules can be very finnicky when switching branches, and you have to be mindful of which commit you've checked out. Submodules are not known for being friendly to use and can be extremely fragile, even when used by experienced developers.
 
-By using a file to require addons, like other dependency systems, Chicken allows addons to be resolved more declaratively and conveniently. Additionally, it's easy to see which addons have changed over time and across different branches.
+- GodotEnv allows addons to declare dependencies on other addons. While this isn't a common use case, it will still check for various types of conflicts when resolving addons in a flat dependency graph and warn you if it detects any potential issues.
 
-### Getting Started with Addons
+Using an `addons.json` file allows developers to declare which addons their project needs, and then forget about how to get them. Whenever the addons.json file changes across branches, you can just simply reinstall the addons by running `godotenv addons install` and everything will "just work." Additionally, it's easy to see which addons have changed over time and across different branches — just check the git diff for the `addons.json` file.
 
-When you run an addon installation command in Chicken, it looks in the current directory for an `addons.json` or `addons.jsonc` file. The `addons.json` or `addons.jsonc` file tells Chicken what addons should be installed in a project.  
+### Initializing GodotEnv in a Project
 
-> Note that Chicken [supports json files with comments][jsonc], or `jsonc` files.
+GodotEnv needs to tell git to ignore your addons directory so that it can manage addons instead. Additionally, it will place a `.editorconfig` in your addons directory that will suppress C# code analysis warnings, since C# styles tend to vary drastically.
 
-To get started, create an `addons.json` or `addons.jsonc` file in your game's project directory. If you are using `addons.json`, be sure to remove the comments below.
+```sh
+godotenv addons init
+```
+
+This will add something like the following to your .gitignore file:
+
+```gitignore
+# Ignore all addons since they are managed by GodotEnv:
+addons/*
+
+# Don't ignore the editorconfig file in the addons directory.
+!addons/.editorconfig
+```
+
+The `addons init` command will also create a `.editorconfig` in your `addons` directory with the following contents:
+
+```toml
+[*.cs]
+generated_code = true
+```
+
+Finally, GodotEnv will create an example `addons.jsonc` file with the following contents to get you started:
+
+```jsonc
+// Godot addons configuration file for use with the GodotEnv tool.
+// See https://github.com/chickensoft-games/GodotEnv for more info.
+// -------------------------------------------------------------------- //
+// Note: this is a JSONC file, so you can use comments!
+// If using Rider, see https://youtrack.jetbrains.com/issue/RIDER-41716
+// for any issues with JSONC.
+// -------------------------------------------------------------------- //
+{
+  "$schema": "https://chickensoft.games/schemas/addons.schema.json",
+  // "path": "addons", // default
+  // "cache": ".addons", // default
+  "addons": {
+    "imrp": { // name must match the folder name in the repository
+      "url": "https://github.com/MakovWait/improved_resource_picker",
+      // "source": "remote", // default
+      // "checkout": "main", // default
+      "subfolder": "addons/imrp"
+    }
+  }
+}
+```
+
+### Installing Addons
+
+GodotEnv will install addons from symlinks, local paths, or remote git url's using the system shell. Please make sure you've configured git in your shell environment to use any desired credentials, since git will be used to clone local and remote repositories.
+
+```shell
+godotenv addons install
+```
+
+When you run the addon installation command in GodotEnv, it looks in the **current working directory of your shell** for an `addons.json` or [`addons.jsonc`[jsonc] file. The addons file tells GodotEnv what addons should be installed in a project.  
+
+Here's an example addons file that installs 3 addons, each from a different source (remote git repository, local git repository, and symlink).
 
 ```javascript
 {
@@ -89,80 +288,54 @@ To get started, create an `addons.json` or `addons.jsonc` file in your game's pr
 }
 ```
 
-> Each key in the `addons` dictionary above will be the directory name of the installed addon inside the project addons path. 
+> ❗️ Each key in the `addons` dictionary above must be the directory name of the installed addon inside the project addons path. That is, if an addon repository contains its addon contents inside `addons/my_addon`, the name of the key for the addon in the addons file must be `my_addon`.
 
-Install addons:
+### Local Addons
 
-```shell
-$ chicken addons install
-```
-
-Chicken can install addons from local and remote git repositories (provided you have setup git in your shell environment), as well as create symlinks to addons.
-
-Chicken caches local and remote git repositories in the cache folder, configured above with the `cache` property in the `addons.json` file (the default is `.addons/`. You can safely delete this folder at any time and Chicken will recreate it next time it installs addons. Deleting the cache forces Chicken to re-download or copy everything on the next install.
-
-> **IMPORTANT:** Add the cache folder to your `.gitignore` file!
-
-Chicken will install addons into the directory specified by the `path` key in the `addons.json` file (which defaults to just `addons/`.
-
-> **IMPORTANT:** If you're using Chicken to install of your addons, you can safely add your `addons` folder to your `.gitignore` file.
->
-> Just run `chicken addons install` after cloning your project or whenever your `addons.json` file changes!
-
-### Remote Git Repositories
-
-Chicken can install addons from remote git repositories. Below is the addon specification for an addon from a remote git repository. The url can be any valid git remote url.
+If you want to install an addon from a local path on your machine, your local addon must be a git repository. You can specify the `url` as a relative or absolute file path.
 
 ```json
 {
   "addons": {
-    "my_remote_addon": {
-      "url": "git@github.com:user/repo.git"
+    "local_addon": {
+      "url": "../my_addons/local_addon",
+      "checkout": "main",
+      "subfolder": "/",
+      "source": "local"
+    },
+    "other_local_addon": {
+      "url": "/Users/me/my_addons/other_local_addon",
+      "source": "local"
+    },
+  }
+}
+```
+
+### Remote Addons
+
+GodotEnv can install addons from remote git repositories. Below is the addon specification for an addon from a remote git repository. The url can be any valid git remote url.
+
+```json
+{
+  "addons": {
+    "remote_addon": {
+      "url": "git@github.com:user/remote_addon.git",
+      "subfolder": "addons/remote_addon"
     }
   }
 }
 ```
 
-By default, Chicken assumes the addon `source` is `remote`, the `checkout` reference is `main`, and the `subfolder` to install is the root `/` of the repository. If you need to customize any of those fields, you can override the default values:
+By default, GodotEnv assumes the addon `source` is `remote`, the `checkout` reference is `main`, and the `subfolder` to install is the root `/` of the repository. If you need to customize any of those fields, you can override the default values:
 
 ```json
 {
   "addons": {
-    "my_remote_addon": {
-      "url": "git@github.com:user/repo.git",
+    "remote_addon": {
+      "url": "git@github.com:user/remote_addon.git",
       "source": "remote",
       "checkout": "master",
-      "subfolder": "some/folder/inside/the/repo",
-    }
-  }
-}
-```
-
-### Local Git Repositories
-
-Chicken can install addons from local git repositories in exactly the same way. Simply provide an absolute or relative path for the url and specify the `source` as `local`:
-
-```json
-{
-  "addons": {
-    "my_remote_addon": {
-      "url": "/Users/myself/Desktop/folder",
-      "source": "local"
-    }
-  }
-}
-```
-
-Just as with remote git repositories, you can override the `checkout` and `subfolder` properties, as well:
-
-```json
-{
-  "addons": {
-    "my_remote_addon": {
-      "url": "/Users/myself/Desktop/folder",
-      "source": "local",
-      "checkout": "master",
-      "subfolder": "some/subfolder"
+      "subfolder": "subfolder/inside/repo",
     }
   }
 }
@@ -170,7 +343,7 @@ Just as with remote git repositories, you can override the `checkout` and `subfo
 
 ### Symlink Addons
 
-Finally, Chicken can "install" addons using symlinks. Addons installed with symlinks do not need to point to git repositories — instead, Chicken will create a folder which "points" to another folder on your file system using symbolic linking.
+Finally, GodotEnv can "install" addons using symlinks. Addons installed with symlinks do not need to point to git repositories — instead, GodotEnv will create a folder which "points" to another folder on your file system using symbolic linking.
 
 ```json
   "addons": {
@@ -192,175 +365,48 @@ Whenever a symlinked addon is modified, the changes will immediately appear in t
 
 > Using symlinks is a great way to include addons that are still in development across one or more projects.
 
-### Addons With Dependencies
+### Addons Configuration
 
-An addon can itself contain an `addons.json` file. When it is installed, Chicken will also put it in a queue and download any addons it needs. If Chicken detects a potential conflict, it will balk and you will end up with an incomplete addons folder.
+GodotEnv caches local and remote addons in the cache folder, configured above with the `cache` property in the `addons.json` file (the default is `.addons/`, relative to your project). You can safely delete this folder and GodotEnv will recreate it the next time it installs addons. Deleting the cache forces GodotEnv to re-download or copy everything on the next install.
 
-Chicken uses a flat dependency graph that is reminiscent of tools like [bower].
+> **IMPORTANT:** Be sure to add the `.addons/` cache folder to your `.gitignore` file!
 
-Chicken tries to be extremely forgiving and helpful, especially if you try to include the same addon in incompatible configurations (the same addon included under two different names, two different branches of the same repository, etc). Chicken will display warnings and errors as clearly as possible to help you resolve any potential conflicting scenarios that may arise.
+GodotEnv will install addons into the directory specified by the `path` key in the `addons.json` file (which defaults to just `addons/`).
 
-### Suppressing Code Analysis of Addons
+> Addons should be omitted from source control. If you need to work on an addon at the same time you are working on your Godot project, use GodotEnv to symlink the addon. By omitting the addons folder from source control, you are able to effectively treat addons as immutable packages, like NPM does for JavaScript.
+>
+> Just run `godotenv addons install` after cloning your project or whenever your `addons.json` file changes!
 
-If you want your IDE to disregard code style warnings for C# code in your addons folder, you can create a `.editorconfig` in your `addons` folder with the following contents:
+### Addons for Addons
 
-```editorconfig
-[*.cs]
-generated_code = true
-```
+An addon can itself contain an `addons.json` file that declares dependencies on other addons. When the addon is cached during addon resolution, GodotEnv checks to see if it also contains an `addons.json` file. If it does, GodotEnv will add its dependencies to the queue and continue addon resolution. If GodotEnv detects a potential conflict, it will output warnings that explain any potential pitfalls that might occur with the current configuration.
 
-## Templates
-
-Chicken allows you to generate a group of files and folders from a template. A template is any git repository or folder that contains files you'd like to use in the template. Each template must contain an `EDIT_ACTIONS.json` (or `EDIT_ACTIONS.jsonc` file) that tells Chicken how to customize the template each time a new project or folder is generated based on that template.
-
-Edit actions files specify what inputs the template requires and what actions Chicken should perform when generating a new project or folder based on that template.
-
-Edit actions render their property strings before the action is performed by substituting the values received for the inputs and applying any transformations to them.
-
-The following shows an example edit actions file from the [Godot 3 Game Template][godot-3-game-template].
-
-```js
-// Edit actions tell Chicken how to customize a folder generated from 
-// a template.
-// This edit actions file is a snippet of the EDIT_ACTIONS.jsonc file in
-// https://github.com/chickensoft-games/godot_3_game.
-{
-  "inputs": [
-    {
-      "name": "title",
-      "type": "string",
-      "default": "My Game"
-    }
-  ],
-  "actions": [
-    // Edit game's .csproj file
-    {
-      // Find and replace text inside a file
-      "type": "edit",
-      "file": "MyGame.csproj",
-      "find": "MyGame",
-      "replace": "{title:PascalCase}"
-    },
-    {
-      // Rename file.
-      "type": "rename",
-      "file": "MyGame.csproj",
-      "to": "{title:PascalCase}.csproj"
-    },
-    {
-      // Replace each instance of the text below with a generated guid
-      "type": "guid",
-      "file": "MyGame.sln",
-      "replace": "GUID_PLACEHOLDER"
-    },
-  ]
-}
-```
-
-The template only includes 1 input, `title`. The first edit action is simply an `edit` action which performs a find/replace on a file. It replaces each instance of "MyGame" in the `MyGame.csproj` file in the generated folder with the `title` variable in `PascalCase` using the `{variable:transformer}` syntax.
-
-To generate the Godot 3 Game Template with Chicken, you can run the following shell command.
-
-```sh
-chicken egg crack ./MyGameName \
-  --egg "git@github.com:chickensoft-games/godot_3_game.git" \
-  -- --title "MyGameName"
-```
-
-Chicken will pass any arguments after `--` to the template itself.
-
-Input variables and transformers are not case sensitive: `{title}`, `{Title}`, and `{TiTlE}` are equivalent.
-
-Given an input string like `MyProject`, we can use transformers to change the case of the text. Chicken supports the following text transformers:
-
-- `snake_case` -> `my_project`
-- `pascalcase` -> `MyProject`
-- `camelcase` -> `myProject`
-- `lowercase` -> `myproject`
-- `uppercase` -> `MYPROJECT`
-
-### Edit Actions
-
-Currently, Chicken only supports 3 simple edit actions. Each edit action needs a `file` property that specifies the file the edit action will be performed on. Edit actions can only refer to files in the template folder by relative path, relative to the template root.
-
-```js
-{
-  "actions": [
-    {
-      "type": "edit",
-      "file": "MyGame.csproj",
-      "find": "MyGame",
-      "replace": "{title:PascalCase}"
-    }
-  ]
-}
-```
-
-In addition to the `file` property, each edit action has its own unique properties to help it accomplish its task.
-
-#### Edit
-
-The `edit` action instructs Chicken to read a file's text contents and run a find/replace on the file. Each instance of the `find` string will be replaced with the `replace` string.
-
-```js
-{
-  "actions": [
-    {
-      // Find and replace
-      "type": "edit",
-      "file": "file.txt",
-      "find": "hello, world!",
-      "replace": "hello, chicken!"
-    }
-  ]
-}
-```
-
-#### Rename
-
-The `rename` action instructs Chicken to rename the `file` to the filename in `to`.
-
-```js
-{
-  "actions": [
-    {
-      // Rename a file
-      "type": "rename",
-      "file": "file.txt",
-      "to": "chicken.txt"
-    }
-  ]
-}
-```
-
-#### Guid
-
-The `guid` action instructs Chicken to search the contents of `file` and replace each instance of `replace` with a generated GUID (useful when creating templates that have Visual Studio Solution `.sln` files in them). 
-
-```js
-{
-  "actions": [
-    {
-      // Replace a placeholder with a GUID
-      "type": "guid",
-      "file": "file.txt",
-      "replace": "GUID_PLACEHOLDER"
-    },
-  ]
-}
-```
+GodotEnv uses a flat dependency graph that is reminiscent of tools like [bower]. In general, GodotEnv tries to be extremely forgiving and helpful, especially if you try to include addons in incompatible configurations. GodotEnv will display warnings and errors as clearly as possible to help you resolve any potential conflicting scenarios that may arise.
 
 ## Contribution
 
 If you want to contribute, please check out [`CONTRIBUTING.md`](/CONTRIBUTING.md)!
 
+While the addons installation logic is well-tested, the Godot version management feature is new and still needs tests. Currently, a GitHub workflow tests it end-to-end. As I have time, I will add more unit tests.
+
+---
+
+🐣 Made with love by 🐤 Chickensoft — <https://chickensoft.games>
 
 [chickensoft-badge]: https://chickensoft.games/images/chickensoft/chickensoft_badge.svg
 [chickensoft-website]: https://chickensoft.games
 [discord]: https://discord.gg/gSjaPgMmYW
-[line-coverage]: https://raw.githubusercontent.com/chickensoft-games/Chicken/main/Chicken.Tests/reports/line_coverage.svg
-[branch-coverage]: https://raw.githubusercontent.com/chickensoft-games/Chicken/main/Chicken.Tests/reports/branch_coverage.svg
 [jsonc]: https://code.visualstudio.com/docs/languages/json#_json-with-comments
 [ssh-github]: https://docs.github.com/en/authentication/connecting-to-github-with-ssh
 [bower]: https://bower.io
-[godot-3-game-template]: https://github.com/chickensoft-games/godot_3_game
+[godot-sharp-nuget]: https://www.nuget.org/packages/GodotSharp/
+[tux-family-mirror]: https://downloads.tuxfamily.org/godotengine/
+[NVM]: https://github.com/nvm-sh/nvm
+[FVM]: https://github.com/leoafarias/fvm
+[asdf]: https://asdf-vm.com/guide/introduction.html
+[setup-godot]: https://github.com/chickensoft-games/setup-godot
+[godot-addons-structure]: https://docs.godotengine.org/en/stable/tutorials/best_practices/project_organization.html#style-guide
+[godot-dialogue-manager]: https://github.com/nathanhoad/godot_dialogue_manager
+[asset-library]: https://godotengine.org/asset-library/asset
+<!-- [branch-coverage]: ./GodotEnv.Tests/reports/branch_coverage.svg
+[line-coverage]: ./GodotEnv.Tests/reports/line_coverage.svg -->
