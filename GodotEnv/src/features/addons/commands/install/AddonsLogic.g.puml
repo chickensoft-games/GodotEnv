@@ -1,0 +1,22 @@
+@startuml AddonsLogic
+state "AddonsLogic State" as Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State {
+  state "Unresolved" as Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_Unresolved {
+    Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_Unresolved : OnInstall → Report
+  }
+  state "CannotBeResolved" as Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_CannotBeResolved {
+    Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_CannotBeResolved : OnEnter → Report
+  }
+  state "NothingToInstall" as Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_NothingToInstall {
+    Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_NothingToInstall : OnEnter → Report
+  }
+  state "InstallationSucceeded" as Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_InstallationSucceeded {
+    Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_InstallationSucceeded : OnEnter → Report
+  }
+}
+
+Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_Unresolved --> Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_CannotBeResolved : Install
+Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_Unresolved --> Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_InstallationSucceeded : Install
+Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_Unresolved --> Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_NothingToInstall : Install
+
+[*] --> Chickensoft_GodotEnv_Features_Addons_Commands_AddonsLogic_State_Unresolved
+@enduml

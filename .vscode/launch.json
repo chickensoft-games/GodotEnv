@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug GodotEnv CLI",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/GodotEnv/bin/Debug/net6.0/Chickensoft.GodotEnv.dll",
+      "args": [
+        "--debug",
+        "${input:args}"
+      ],
+      "cwd": "${workspaceFolder}/GodotEnv",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": ".NET Core Attach",
+      "type": "coreclr",
+      "request": "attach"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "args",
+      "description": "Command line args for CLI program",
+      "default": "",
+      "type": "promptString"
+    }
+  ]
+}

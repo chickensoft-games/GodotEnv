@@ -1,0 +1,11 @@
+GodotEnv/bin
+GodotEnv/obj
+GodotEnv/nupkg
+GodotEnv.Tests/bin
+GodotEnv.Tests/obj
+GodotEnv.Tests/coverage
+GodotEnv.Tests/badges
+GodotEnv/addons
+GodotEnv/.addons
+GodotEnv/addons.json
+GodotEnv/addons.jsonc
