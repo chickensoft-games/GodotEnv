@@ -46,7 +46,7 @@ jobs:
         run: |
           # Use tool to install Godot. Last line of output is the path to the
           # symlink that always points to the active version of Godot.
-          dotnet run -- godot install 4.1.0
+          dotnet run -- godot install 4.1.1
 
       - name: 🤖 Check Godot Location
         working-directory: GodotEnv
@@ -80,7 +80,9 @@ jobs:
         working-directory: TestPackage/TestPackage.Tests
         run: |
           GODOT="$(dotnet ../../GodotEnv/bin/Debug/net6.0/Chickensoft.GodotEnv.dll godot env get)"
-          $GODOT --headless --build-solutions --run-tests --quit-on-finish
+
+          dotnet build
+          $GODOT --run-tests --quit-on-finish
 
           echo "✅ Built and executed .NET test project."
 
@@ -90,6 +92,6 @@ jobs:
           echo "Before uninstall:"
           dotnet run -- godot list
           echo "Uninstalling..."
-          dotnet run -- godot uninstall 4.1.0
+          dotnet run -- godot uninstall 4.1.1
           echo "After uninstall:"
           dotnet run -- godot list
