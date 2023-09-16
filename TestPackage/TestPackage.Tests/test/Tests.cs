@@ -1,8 +1,8 @@
 namespace TestPackage.Tests;
 
 using System.Reflection;
+using Chickensoft.GoDotTest;
 using Godot;
-using GoDotTest;
 
 public partial class Tests : Node2D {
   public override void _Ready()

@@ -1,7 +1,7 @@
 namespace TestPackage.Tests;
 
+using Chickensoft.GoDotTest;
 using Godot;
-using GoDotTest;
 using Shouldly;
 
 public class PackageTest : TestClass {
