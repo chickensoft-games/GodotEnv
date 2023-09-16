@@ -102,6 +102,22 @@ public interface IGodotEnvironment {
   string GetRelativeExtractedExecutablePath(
     SemanticVersion version, bool isDotnetVersion
   );
+
+  /// <summary>
+  /// For dotnet-enabled versions, this gets the path to the GodotSharp debug
+  /// directory that is included with Godot.
+  /// </summary>
+  /// <param name="version">Godot version.</param>
+  /// <returns>Path to the GodotSharp debug directory.</returns>
+  string GetRelativeGodotSharpDebugPath(SemanticVersion version);
+
+  /// <summary>
+  /// For dotnet-enabled versions, this gets the path to the GodotSharp release
+  /// directory that is included with Godot.
+  /// </summary>
+  /// <param name="version">Godot version.</param>
+  /// <returns>Path to the GodotSharp release directory.</returns>
+  string GetRelativeGodotSharpReleasePath(SemanticVersion version);
 }
 
 public abstract class GodotEnvironment : IGodotEnvironment {
@@ -142,6 +158,12 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   public abstract Task<bool> IsExecutable(IShell shell, IFileInfo file);
   public abstract string GetRelativeExtractedExecutablePath(
     SemanticVersion version, bool isDotnetVersion
+  );
+  public abstract string GetRelativeGodotSharpDebugPath(
+    SemanticVersion version
+  );
+  public abstract string GetRelativeGodotSharpReleasePath(
+    SemanticVersion version
   );
 
   // TODO: Implement

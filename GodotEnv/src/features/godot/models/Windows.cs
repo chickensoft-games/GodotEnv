@@ -40,4 +40,12 @@ public class Windows : GodotEnvironment {
     // being a folder.
     return FileClient.Combine(fsVersionString + "_win64.exe", name);
   }
+
+  public override string GetRelativeGodotSharpDebugPath(
+  SemanticVersion version
+) => "GodotSharp\\Api\\Debug\\";
+
+  public override string GetRelativeGodotSharpReleasePath(
+    SemanticVersion version
+  ) => "GodotSharp\\Api\\Release\\";
 }

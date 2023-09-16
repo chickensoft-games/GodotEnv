@@ -25,6 +25,8 @@ public interface IGodotRepository {
   string GodotCachePath { get; }
   string GodotSymlinkPath { get; }
   string GodotSymlinkTarget { get; }
+  string GodotSharpSymlinkDebugPath { get; }
+  string GodotSharpSymlinkReleasePath { get; }
 
   /// <summary>
   /// Clears the Godot installations cache and recreates the cache directory.
@@ -77,7 +79,7 @@ public interface IGodotRepository {
   /// </summary>
   /// <param name="installation">Godot installation.</param>
   /// <param name="log">Output log.</param>
-  void UpdateGodotSymlink(GodotInstallation installation, ILog log);
+  Task UpdateGodotSymlink(GodotInstallation installation, ILog log);
 
   /// <summary>
   /// Adds (or updates) the GODOT system  environment variable to point to the
@@ -134,6 +136,14 @@ public class GodotRepository : IGodotRepository {
 
   public string GodotSymlinkPath => FileClient.Combine(
     FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH
+  );
+
+  public string GodotSharpSymlinkDebugPath => FileClient.Combine(
+    FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_SHARP_DEBUG
+  );
+
+  public string GodotSharpSymlinkReleasePath => FileClient.Combine(
+    FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_SHARP_RELEASE
   );
 
   public string GodotSymlinkTarget => FileClient.FileSymlinkTarget(
@@ -330,13 +340,57 @@ public class GodotRepository : IGodotRepository {
     );
   }
 
-  public void UpdateGodotSymlink(GodotInstallation installation, ILog log) {
-    if (FileClient.FileExists(GodotSymlinkPath)) {
-      // This will safely remove any existing symlink.
-      FileClient.DeleteFile(GodotSymlinkPath);
+  public async Task UpdateGodotSymlink(
+    GodotInstallation installation, ILog log
+  ) {
+    // Create or update the symlink to the new version of Godot.
+    await FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
+
+    if (installation.IsDotnetVersion) {
+      // Update GodotSharp symlinks
+      var godotSharpDebugPath = GetGodotSharpDebugPath(
+        installation.Path, installation.Version
+      );
+      var godotSharpReleasePath = GetGodotSharpReleasePath(
+        installation.Path, installation.Version
+      );
+
+      var debugPathExists = FileClient.DirectoryExists(godotSharpDebugPath);
+      var releasePathExists = FileClient.DirectoryExists(godotSharpReleasePath);
+
+      log.Print("Listing all paths in installation directory...");
+      var info = await FileClient.SearchRecursively(
+        installation.Path,
+        (file, indent) => {
+          log.Print($"{indent}📄 {file.Name}");
+          return Task.FromResult(file.Name.ToLower() == "godotsharp.dll");
+        },
+        (dirInfo) =>
+          Task.FromResult(!dirInfo.Name.ToLower().EndsWith(".lproj")),
+        (dir, indent) => log.Print($"{indent}📁 {dir.Name}")
+      );
+
+      log.Print("");
+      log.Print($"❓GodotSharp debug path exists: {debugPathExists}");
+      log.Print($"❓GodotSharp release path exists: {releasePathExists}");
+      log.Print("");
+      log.Print(
+        $"🔗 Linking GodotSharp debug {GodotSharpSymlinkDebugPath} -> " +
+        $"{godotSharpDebugPath}"
+      );
+      log.Print(
+        $"🔗 Linking GodotSharp release {GodotSharpSymlinkReleasePath} -> " +
+        $"{godotSharpReleasePath}"
+      );
+
+      await FileClient.CreateSymlink(
+        GodotSharpSymlinkDebugPath, godotSharpDebugPath
+      );
+
+      await FileClient.CreateSymlink(
+        GodotSharpSymlinkReleasePath, godotSharpReleasePath
+      );
     }
-    // Create the symlink to the new version of Godot.
-    FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
 
     if (!FileClient.FileExists(installation.ExecutionPath)) {
       log.Err("🛑 Execution path does not seem to be correct. Am I okay?");
@@ -448,9 +502,21 @@ public class GodotRepository : IGodotRepository {
   ) =>
   FileClient.Combine(
     installationPath,
-    Platform.GetRelativeExtractedExecutablePath(
-      version, isDotnetVersion
-    )
+    Platform.GetRelativeExtractedExecutablePath(version, isDotnetVersion)
+  );
+
+  private string GetGodotSharpDebugPath(
+    string installationPath, SemanticVersion version
+  ) => FileClient.Combine(
+    installationPath,
+    Platform.GetRelativeGodotSharpDebugPath(version)
+  );
+
+  private string GetGodotSharpReleasePath(
+    string installationPath, SemanticVersion version
+  ) => FileClient.Combine(
+    installationPath,
+    Platform.GetRelativeGodotSharpReleasePath(version)
   );
 
   private GodotInstallation? ReadInstallation(

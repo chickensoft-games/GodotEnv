@@ -74,7 +74,7 @@ public class GodotInstallCommand : ICommand, ICliCommand {
     var newInstallation =
       await godotRepo.ExtractGodotInstaller(godotCompressedArchive, log);
 
-    godotRepo.UpdateGodotSymlink(newInstallation, log);
+    await godotRepo.UpdateGodotSymlink(newInstallation, log);
 
     await godotRepo.AddOrUpdateGodotEnvVariable(log);
 

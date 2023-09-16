@@ -31,4 +31,18 @@ public class Linux : Unix {
 
     return name;
   }
+
+  public override string GetRelativeGodotSharpDebugPath(
+    SemanticVersion version
+  ) => FileClient.Combine(
+    GetFilenameVersionString(version) + "_mono_linux_x86_64",
+    "GodotSharp/Api/Debug/"
+  );
+
+  public override string GetRelativeGodotSharpReleasePath(
+    SemanticVersion version
+  ) => FileClient.Combine(
+    GetFilenameVersionString(version) + "_mono_linux_x86_64",
+    "GodotSharp/Api/Release/"
+  );
 }

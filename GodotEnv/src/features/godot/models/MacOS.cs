@@ -22,4 +22,12 @@ public class MacOS : Unix {
   public override string GetRelativeExtractedExecutablePath(
     SemanticVersion version, bool isDotnetVersion
   ) => $"Godot{(isDotnetVersion ? "_mono" : "")}.app/Contents/MacOS/Godot";
+
+  public override string GetRelativeGodotSharpDebugPath(
+    SemanticVersion version
+  ) => "Godot_mono.app/Contents/Resources/GodotSharp/Api/Debug/";
+
+  public override string GetRelativeGodotSharpReleasePath(
+    SemanticVersion version
+  ) => "Godot_mono.app/Contents/Resources/GodotSharp/Api/Release/";
 }
