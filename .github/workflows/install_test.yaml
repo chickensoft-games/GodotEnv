@@ -82,7 +82,7 @@ jobs:
           GODOT="$(dotnet ../../GodotEnv/bin/Debug/net6.0/Chickensoft.GodotEnv.dll godot env get)"
 
           dotnet build
-          $GODOT --run-tests --quit-on-finish
+          $GODOT --headless --run-tests --quit-on-finish
 
           echo "✅ Built and executed .NET test project."
 
