@@ -77,7 +77,7 @@ jobs:
           fi
 
       - name: 🧐 Make sure we can build a .NET Godot game
-        working-directory: TestPackage/TestPackage.Tests/project.godot
+        working-directory: TestPackage/TestPackage.Tests
         run: |
           GODOT="$(dotnet run -- godot env path)"
           $GODOT --headless --build-solutions --quit
