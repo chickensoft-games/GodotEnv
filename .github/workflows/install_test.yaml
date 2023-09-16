@@ -79,7 +79,7 @@ jobs:
       - name: 🧐 Make sure we can build a .NET Godot game
         working-directory: TestPackage/TestPackage.Tests
         run: |
-          GODOT="$(dotnet run -- godot env path)"
+          GODOT="$(dotnet ../../GodotEnv/bin/Debug/net6.0/Chickensoft.GodotEnv.dll godot env get)"
           $GODOT --headless --build-solutions --quit
           $GODOT --headless --run-tests --quit-on-finish
 
