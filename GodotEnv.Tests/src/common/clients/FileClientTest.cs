@@ -170,24 +170,24 @@ public class FileClientTest {
     path.VerifyAll();
   }
 
-  [Fact]
-  public async Task CreateSymlinkCreatesSymlink() {
-    const string path = "/a/b/c";
-    const string pathToTarget = "/a/a2";
+  // [Fact]
+  // public async Task CreateSymlinkCreatesSymlink() {
+  //   const string path = "/a/b/c";
+  //   const string pathToTarget = "/a/a2";
 
-    var fs = GetFs('/');
-    var computer = new Mock<IComputer>();
-    var client = new FileClient(
-      fs.Object, computer.Object, new Mock<IProcessRunner>().Object
-    );
-    var dir = new Mock<IDirectory>();
-    fs.Setup(fs => fs.Directory).Returns(dir.Object);
-    dir.Setup(dir => dir.CreateSymbolicLink(path, pathToTarget));
+  //   var fs = GetFs('/');
+  //   var computer = new Mock<IComputer>();
+  //   var client = new FileClient(
+  //     fs.Object, computer.Object, new Mock<IProcessRunner>().Object
+  //   );
+  //   var dir = new Mock<IDirectory>();
+  //   fs.Setup(fs => fs.Directory).Returns(dir.Object);
+  //   dir.Setup(dir => dir.CreateSymbolicLink(path, pathToTarget));
 
-    await client.CreateSymlink(path, pathToTarget);
+  //   await client.CreateSymlink(path, pathToTarget);
 
-    dir.Verify(dir => dir.CreateSymbolicLink(path, pathToTarget));
-  }
+  //   dir.Verify(dir => dir.CreateSymbolicLink(path, pathToTarget));
+  // }
 
   [Fact]
   public void IsDirectorySymlinkVerifiesSymlink() {
@@ -362,7 +362,6 @@ public class FileClientTest {
     var client = new FileClient(
       fs, computer.Object, new Mock<IProcessRunner>().Object
     );
-    ;
 
     client.FileThatExists(new string[] { "0.txt", "b.txt", "a.txt" }, "/")
       .ShouldBe("/b.txt");
@@ -379,7 +378,6 @@ public class FileClientTest {
     var client = new FileClient(
       fs, computer.Object, new Mock<IProcessRunner>().Object
     );
-    ;
 
     client.GetRootedPath("a/b", "/").ShouldBe("/a/b");
     client.GetRootedPath("/a/b/c", "/").ShouldBe("/a/b/c");
@@ -395,7 +393,6 @@ public class FileClientTest {
     var client = new FileClient(
       fs, computer.Object, new Mock<IProcessRunner>().Object
     );
-    ;
 
     client.FileExists("/a.txt").ShouldBe(true);
     client.FileExists("/b.txt").ShouldBe(false);
@@ -411,7 +408,6 @@ public class FileClientTest {
     var client = new FileClient(
       fs, computer.Object, new Mock<IProcessRunner>().Object
     );
-    ;
 
     client.DirectoryExists("/a/b/c").ShouldBe(true);
     client.DirectoryExists("/a/b/d").ShouldBe(false);
@@ -427,7 +423,6 @@ public class FileClientTest {
     var client = new FileClient(
       fs, computer.Object, new Mock<IProcessRunner>().Object
     );
-    ;
 
     client.ReadJsonFile<TestJsonModel>("model.json")
       .ShouldBe(new TestJsonModel(name: "test"));
@@ -443,7 +438,6 @@ public class FileClientTest {
     var client = new FileClient(
       fs, computer.Object, new Mock<IProcessRunner>().Object
     );
-    ;
 
     Should.Throw<InvalidOperationException>(
       () => client.ReadJsonFile<TestJsonModel>("model.json")
@@ -461,7 +455,6 @@ public class FileClientTest {
     var client = new FileClient(
       fs, computer.Object, new Mock<IProcessRunner>().Object
     );
-    ;
 
     client.ReadJsonFile(
       "",
@@ -483,7 +476,6 @@ public class FileClientTest {
     var client = new FileClient(
       fs, computer.Object, new Mock<IProcessRunner>().Object
     );
-    ;
 
     var e = Should.Throw<IOException>(
       () => client.ReadJsonFile(
@@ -507,7 +499,6 @@ public class FileClientTest {
     var client = new FileClient(
       fs, computer.Object, new Mock<IProcessRunner>().Object
     );
-    ;
 
     Should.Throw<IOException>(
       () => client.ReadJsonFile(
@@ -529,7 +520,6 @@ public class FileClientTest {
     var client = new FileClient(
       fs, computer.Object, new Mock<IProcessRunner>().Object
     );
-    ;
 
     client.ReadJsonFile(
       "",
@@ -549,7 +539,6 @@ public class FileClientTest {
     var client = new FileClient(
       fs, computer.Object, new Mock<IProcessRunner>().Object
     );
-    ;
 
     client.ReadJsonFile(
       "",

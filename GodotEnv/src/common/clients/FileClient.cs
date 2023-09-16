@@ -92,8 +92,10 @@ public interface IFileClient {
   string GetParentDirectoryName(string path);
 
   /// <summary>
-  /// Creates a directory symbolic link identified by <paramref name="path" />
-  /// that points to <paramref name="pathToTarget" />.
+  /// Creates a symbolic link identified by <paramref name="path" />
+  /// that points to <paramref name="pathToTarget" />. If the target is a
+  /// directory, a directory symlink will be created. Otherwise, a file symlink
+  /// is created. If the symlink already exists, it is deleted and recreated.
   /// </summary>
   /// <param name="path">Path to the symbolic link.</param>
   /// <param name="pathToTarget">Path to the target of the symbolic
@@ -374,14 +376,37 @@ public class FileClient : IFileClient {
     Files.DirectoryInfo.FromDirectoryName(path).Name;
 
   public async Task CreateSymlink(string path, string pathToTarget) {
+    // See what kind of symlink we're dealing with by checking the target.
+    var isDirectory = Files.Directory.Exists(pathToTarget);
+
+    // Remove any existing symlink
+    if (isDirectory) {
+      if (Files.Directory.Exists(path)) {
+        await DeleteDirectory(path);
+      }
+    }
+    else if (Files.File.Exists(path)) {
+      await DeleteFile(path);
+    }
+
+    // On Windows, elevated privileges are required to manage symlinks
     if (OS == OSType.Windows) {
-      var dirFlag = Files.Directory.Exists(pathToTarget) ? "/d " : "";
+      var dirFlag = isDirectory ? "/d " : "";
       await ProcessRunner.RunElevatedOnWindows(
         "cmd.exe", $"/c mklink {dirFlag}\"{path}\" \"{pathToTarget}\""
       );
       return;
     }
-    Files.Directory.CreateSymbolicLink(path, pathToTarget);
+
+    // Unix seems to manage symlinks fine.
+    if (isDirectory) {
+      var parentPath = GetParentDirectoryPath(path);
+      Files.Directory.CreateDirectory(parentPath);
+      Files.Directory.CreateSymbolicLink(path, pathToTarget);
+    }
+    else {
+      Files.File.CreateSymbolicLink(path, pathToTarget);
+    }
   }
 
   public bool IsDirectorySymlink(string path)

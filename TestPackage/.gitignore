@@ -1,0 +1,11 @@
+TestPackage/nupkg/
+
+TestPackage.Tests/coverage/*
+!TestPackage.Tests/coverage/.gdignore
+
+.godot/
+bin/
+obj/
+.generated/
+.vs/
+.DS_Store

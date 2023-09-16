@@ -40,4 +40,10 @@ public class Windows : GodotEnvironment {
     // being a folder.
     return FileClient.Combine(fsVersionString + "_win64.exe", name);
   }
+
+  public override string GetRelativeGodotSharpPath(
+    SemanticVersion version
+  ) => FileClient.Combine(
+    GetFilenameVersionString(version) + "_mono_win64", "GodotSharp"
+  );
 }

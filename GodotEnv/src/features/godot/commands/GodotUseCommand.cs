@@ -63,7 +63,7 @@ public class GodotUseCommand : ICommand, ICliCommand {
       return;
     }
 
-    godotRepo.UpdateGodotSymlink(installation, log);
+    await godotRepo.UpdateGodotSymlink(installation, log);
 
     log.Print("");
     log.Success($"Godot version `{installation.VersionName}` is now active.");
