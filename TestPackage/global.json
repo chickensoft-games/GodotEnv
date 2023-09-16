@@ -1,0 +1,9 @@
+{
+  "sdk": {
+    "version": "7.0.306",
+    "rollForward": "latestMinor"
+  },
+  "msbuild-sdks": {
+    "Godot.NET.Sdk": "4.1.0"
+  }
+}

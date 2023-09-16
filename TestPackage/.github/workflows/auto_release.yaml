@@ -1,0 +1,75 @@
+# This workflow will run whenever tests finish running. If tests pass, it will
+# look at the last commit message to see if it contains the phrase
+# "chore(deps): update all dependencies".
+#
+# If it finds a commit with that phrase, and the testing workflow has passed,
+# it will automatically release a new version of the project by running the
+# publish workflow.
+#
+# The commit message phrase above is always used by renovatebot when opening
+# PR's to update dependencies. If you have renovatebot enabled and set to
+# automatically merge in dependency updates, this can automatically release and
+# publish the updated version of the project.
+#
+# You can disable this action by setting the DISABLE_AUTO_RELEASE repository
+# variable to true.
+
+name: 🦾 Auto-Release
+on:
+  workflow_run:
+    workflows: ["🚥 Tests"]
+    branches:
+      - main
+    types:
+      - completed
+
+jobs:
+  auto_release:
+    name: 🦾 Auto-Release
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.release.outputs.should_release }}
+    steps:
+      - name: 🧾 Checkout
+        uses: actions/checkout@v3
+
+      - name: 🧑‍🔬 Check Test Results
+        id: tests
+        run: |
+          echo "passed=${{ github.event.workflow_run.conclusion == 'success' }}" >> "$GITHUB_OUTPUT"
+
+      - name: 📄 Check If Dependencies Changed
+        id: deps
+        run: |
+          message=$(git log -1 --pretty=%B)
+
+          if [[ $message == *"chore(deps):"* ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 📝 Check Release Status
+        id: release
+        run: |
+          echo "Tests passed: ${{ steps.tests.outputs.passed }}"
+          echo "Dependencies changed: ${{ steps.deps.outputs.changed }}"
+          disable_auto_release='${{ vars.DISABLE_AUTO_RELEASE }}'
+          echo "DISABLE_AUTO_RELEASE=$disable_auto_release"
+
+          if [[ ${{ steps.tests.outputs.passed }} == "true" && ${{ steps.deps.outputs.changed }} == "true" && $disable_auto_release != "true" ]]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "🦾 Creating a release!"
+          else
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "✋ Not creating a release."
+          fi
+
+  release:
+    uses: './.github/workflows/publish.yaml'
+    needs: auto_release
+    if: needs.auto_release.outputs.should_release == 'true'
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+    with:
+      bump: patch

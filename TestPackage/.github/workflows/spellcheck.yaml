@@ -1,0 +1,26 @@
+name: '🧑‍🏫 Spellcheck'
+on:
+  push:
+  pull_request:
+
+jobs:
+  spellcheck:
+    name: '🧑‍🏫 Spellcheck'
+    # Only run the workflow if it's not a PR or if it's a PR from a fork.
+    # This prevents duplicate workflows from running on PR's that originate
+    # from the repository itself.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: '.'
+    steps:
+      - uses: actions/checkout@v3
+        name: 🧾 Checkout
+
+      - uses: streetsidesoftware/cspell-action@v2
+        name: 📝 Check Spelling
+        with:
+          config: './cspell.json'
+          incremental_files_only: false
+          root: '.'

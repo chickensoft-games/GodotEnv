@@ -1,0 +1,32 @@
+<Project Sdk="Godot.NET.Sdk/4.1.0">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>TestPackage.Tests</RootNamespace>
+    <!-- Required for some nuget packages to work -->
+    <!-- godotengine/godot/issues/42271#issuecomment-751423827 -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!-- To show generated files -->
+    <!--
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>
+      .generated
+    </CompilerGeneratedFilesOutputPath>
+    -->
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Chickensoft.GoDotTest" Version="1.1.17" />
+    <!-- Bring your own assertion library for tests! -->
+    <PackageReference Include="Shouldly" Version="4.2.1" />
+    <!-- LightMock is a mocking library that can run without reflection. -->
+    <PackageReference Include="LightMock.Generator" Version="1.2.2" />
+    <!-- LightMoq is a Chickensoft package which makes it more like Moq. -->
+    <PackageReference Include="LightMoq" Version="0.1.0" />
+    <!-- Include the package to test. -->
+    <ProjectReference Include="../TestPackage/TestPackage.csproj" />
+  </ItemGroup>
+</Project>

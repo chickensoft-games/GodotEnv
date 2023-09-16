@@ -54,8 +54,7 @@ public static class Defaults {
   /// </summary>
   public const string GODOT_BIN_PATH = "bin";
 
-  public const string GODOT_SHARP_DEBUG = "GodotSharp/Api/Debug";
-  public const string GODOT_SHARP_RELEASE = "GodotSharp/Api/Release";
+  public const string GODOT_SHARP_PATH = "GodotSharp";
 
   /// <summary>
   /// Directory where Godot installer downloads are cached temporarily,
