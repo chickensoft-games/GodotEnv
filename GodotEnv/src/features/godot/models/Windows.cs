@@ -43,5 +43,7 @@ public class Windows : GodotEnvironment {
 
   public override string GetRelativeGodotSharpPath(
     SemanticVersion version
-  ) => "GodotSharp";
+  ) => FileClient.Combine(
+    GetFilenameVersionString(version) + "_mono_win64", "GodotSharp"
+  );
 }
