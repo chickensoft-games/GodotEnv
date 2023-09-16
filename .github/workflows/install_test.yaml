@@ -80,8 +80,7 @@ jobs:
         working-directory: TestPackage/TestPackage.Tests
         run: |
           GODOT="$(dotnet ../../GodotEnv/bin/Debug/net6.0/Chickensoft.GodotEnv.dll godot env get)"
-          $GODOT --headless --build-solutions --quit || exit 0
-          $GODOT --headless --run-tests --quit-on-finish
+          $GODOT --headless --build-solutions --run-tests --quit-on-finish
 
           echo "✅ Built and executed .NET test project."
 
