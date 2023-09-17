@@ -42,14 +42,22 @@ public class ZipClient : IZipClient {
   ) {
     using var archive = ZipFileOpenRead(sourceArchiveFileName);
     var totalBytes = archive.Entries.Sum(e => e.Length);
-    var currentBytes = 0;
+    var currentBytes = 0d;
 
     foreach (var entry in archive.Entries) {
       var fileName = Files.Path.Combine(
         destinationDirectoryName, entry.FullName
       );
 
+      var isDirectory = fileName.EndsWith('/') || fileName.EndsWith('\\');
+
+      if (isDirectory) {
+        Files.Directory.CreateDirectory(fileName);
+        continue;
+      }
+
       Files.Directory.CreateDirectory(Files.Path.GetDirectoryName(fileName));
+
       using (var inputStream = entry.Open())
       using (var outputStream = Files.File.OpenWrite(fileName)) {
         var progressStream = new ProgressStream(

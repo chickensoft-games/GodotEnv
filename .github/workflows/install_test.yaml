@@ -5,7 +5,7 @@ on:
 
 jobs:
   install_tests:
-    name: 🖼 Visual Tests with ${{ matrix.os }}
+    name: 🔋 Integration Tests with ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     # Only run the workflow if it's not a PR or if it's a PR from a fork.
     # This prevents duplicate workflows from running on PR's that originate

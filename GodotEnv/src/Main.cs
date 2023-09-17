@@ -36,7 +36,9 @@ public static class GodotEnv {
       downloadService: new DownloadService(),
       downloadConfiguration: Defaults.DownloadConfiguration
     );
-    var zipClient = new ZipClientTerminal(computer, fileClient.Files);
+    IZipClient zipClient = (fileClient.OS == OSType.Windows)
+      ? new ZipClient(fileClient.Files)
+      : new ZipClientTerminal(computer, fileClient.Files);
     var systemEnvironmentVariableClient =
       new SystemEnvironmentVariableClient(processRunner, fileClient);
 
