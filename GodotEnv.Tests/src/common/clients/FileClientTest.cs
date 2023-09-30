@@ -379,7 +379,8 @@ public class FileClientTest {
       fs, computer.Object, new Mock<IProcessRunner>().Object
     );
 
-    client.GetRootedPath("a/b", "/").ShouldBe("/a/b");
+    var expectedBasePath = fs.Path.GetFullPath(fs.Path.Combine("/", "/a/b"));
+    client.GetRootedPath("a/b", "/").ShouldBe(expectedBasePath);
     client.GetRootedPath("/a/b/c", "/").ShouldBe("/a/b/c");
   }
 

@@ -4,61 +4,60 @@
 namespace Chickensoft.GodotEnv.Tests;
 
 using System;
-using Chickensoft.GodotEnv.Common.Utilities;
-using CliFx.Infrastructure;
+using Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
 
-public class LogTest {
+public sealed class LogTest : IDisposable {
+
+  private readonly OutputTestFakeInMemoryConsole _console = new ();
+
+  public void Dispose() => _console.Dispose();
+
   [Fact]
   public void Prints() {
-    FakeInMemoryConsole console = new();
-    Log log = new(console);
+    Log log = new(_console);
 
     log.Print("Hello, world!");
 
-    console.ReadOutputString().ShouldBe("Hello, world!\n");
+    _console.ReadOutputString().ShouldBe("Hello, world!\n");
   }
 
   [Fact]
   public void PrintsInfo() {
-    FakeInMemoryConsole console = new();
-    Log log = new(console);
+    Log log = new(_console);
 
     log.Info("Hello, world!");
 
-    console.ReadOutputString().ShouldBe("Hello, world!\n");
+    _console.ReadOutputString().ShouldBe("Hello, world!\n");
   }
 
   [Fact]
   public void PrintsWarning() {
-    FakeInMemoryConsole console = new();
-    Log log = new(console);
+    Log log = new(_console);
 
     log.Warn("Hello, world!");
 
-    console.ReadOutputString().ShouldBe("Hello, world!\n");
+    _console.ReadOutputString().ShouldBe("Hello, world!\n");
   }
 
   [Fact]
   public void PrintsErr() {
-    FakeInMemoryConsole console = new();
-    Log log = new(console);
+    Log log = new(_console);
 
     log.Err("Hello, world!");
 
-    console.ReadOutputString().ShouldBe("Hello, world!\n");
+    _console.ReadOutputString().ShouldBe("Hello, world!\n");
   }
 
   [Fact]
   public void PrintsSuccess() {
-    FakeInMemoryConsole console = new();
-    Log log = new(console);
+    Log log = new(_console);
 
     log.Success("Hello, world!");
 
-    console.ReadOutputString().ShouldBe("Hello, world!\n\n");
+    _console.ReadOutputString().ShouldBe("Hello, world!\n\n");
   }
 
   [Fact]
@@ -69,8 +68,7 @@ public class LogTest {
 
   [Fact]
   public void OutputsCorrectStyleChanges() {
-    FakeInMemoryConsole console = new();
-    Log log = new(console);
+    Log log = new(_console);
 
     log.Print("A");
     log.Print("");
@@ -86,7 +84,7 @@ public class LogTest {
     log.Err("E");
     log.Success("F");
 
-    console.ReadOutputString().ShouldBe("A\n\nB\n\nC\nD\n\nE\nF\n\n");
+    _console.ReadOutputString().ShouldBe("A\n\nB\n\nC\nD\n\nE\nF\n\n");
 
     var debugLog = log.ToString();
 
@@ -109,8 +107,7 @@ public class LogTest {
 
   [Fact]
   public void OutputsNull() {
-    FakeInMemoryConsole console = new();
-    Log log = new(console);
+    Log log = new(_console);
 
     log.Print(null);
     log.Info(null);
@@ -118,25 +115,24 @@ public class LogTest {
     log.Err(null);
     log.Success(null);
 
-    console.ReadOutputString().Trim().ShouldBe("");
+    _console.ReadOutputString().Trim().ShouldBe("");
     log.ToString().Trim().ShouldBe("");
   }
 
   [Fact]
   public void OutputsObject() {
-    FakeInMemoryConsole console = new();
-    Log log = new(console);
+    Log log = new(_console);
 
     log.Print(new { Hello = "world" });
 
-    console.ReadOutputString().ShouldBe("{ Hello = world }\n");
+    _console.ReadOutputString().ShouldBe("{ Hello = world }\n");
   }
 
   [Fact]
   public void ReportableEventInvokesCallback() {
     var log = new Mock<ILog>();
     var called = false;
-    var @event = new ReportableEvent((log) => called = true);
+    var @event = new ReportableEvent((_) => called = true);
 
     @event.Report(log.Object);
 
