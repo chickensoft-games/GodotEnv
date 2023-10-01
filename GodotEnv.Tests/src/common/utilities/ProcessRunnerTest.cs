@@ -3,14 +3,25 @@ using System;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Shouldly;
-using Xunit;
 
 public class ProcessRunnerTest {
-  [Fact]
-  public async Task RunsProcess() {
+  [PlatformFact(TestPlatform.Windows)]
+  public async Task RunsProcessOnWindows() {
     var runner = new ProcessRunner();
     var result = await runner.Run(
-      Environment.CurrentDirectory, "echo", new string[] { "hello" }
+      Environment.CurrentDirectory, "cmd", new[] { "/c echo \"hello\"" }
+    );
+    result.ExitCode.ShouldBe(0);
+    result.Succeeded.ShouldBe(true);
+    result.StandardOutput.ShouldBe($"""\"hello\""{Environment.NewLine}""");
+    result.StandardError.ShouldBe("");
+  }
+
+  [PlatformFact(TestPlatform.MacLinux)]
+  public async Task RunsProcessOnMacLinux() {
+    var runner = new ProcessRunner();
+    var result = await runner.Run(
+      Environment.CurrentDirectory, "echo", new[] { "hello" }
     );
     result.ExitCode.ShouldBe(0);
     result.Succeeded.ShouldBe(true);
