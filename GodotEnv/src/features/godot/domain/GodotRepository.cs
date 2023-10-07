@@ -13,6 +13,11 @@ using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 using Downloader;
 using Humanizer;
+using Newtonsoft.Json;
+
+public struct RemoteVersions {
+  public List<string> Versions { get; set; }
+}
 
 public interface IGodotRepository {
   ConfigFile Config { get; }
@@ -101,6 +106,12 @@ public interface IGodotRepository {
   List<GodotInstallation> GetInstallationsList();
 
   /// <summary>
+  /// Get the list of available Godot versions.
+  /// </summary>
+  /// <returns></returns>
+  Task<List<string>> GetRemoteVersionsList();
+
+  /// <summary>
   /// Uninstalls the specified version of Godot.
   /// </summary>
   /// <param name="version">Godot version.</param>
@@ -122,6 +133,8 @@ public class GodotRepository : IGodotRepository {
   public ISystemEnvironmentVariableClient SystemEnvironmentVariableClient {
     get;
   }
+
+  private const string GODOT_REMOTE_VERSIONS_URL = "https://api.nuget.org/v3-flatcontainer/godotsharp/index.json";
 
   public string GodotInstallationsPath => FileClient.Combine(
     FileClient.AppDataDirectory,
@@ -433,6 +446,16 @@ public class GodotRepository : IGodotRepository {
     }
 
     return installations.OrderBy(i => i.VersionName).ToList();
+  }
+
+  public async Task<List<string>> GetRemoteVersionsList() {
+    var response = await NetworkClient.WebRequestGetAsync(GODOT_REMOTE_VERSIONS_URL);
+    response.EnsureSuccessStatusCode();
+
+    var responseBody = await response.Content.ReadAsStringAsync();
+    var deserializedBody = JsonConvert.DeserializeObject<RemoteVersions>(responseBody);
+
+    return deserializedBody.Versions;
   }
 
   public async Task<bool> Uninstall(
