@@ -1,6 +1,7 @@
 namespace Chickensoft.GodotEnv.Common.Clients;
 
 using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using CliFx.Exceptions;
@@ -17,11 +18,15 @@ public interface INetworkClient {
     IProgress<DownloadProgressChangedEventArgs> progress,
     CancellationToken token
   );
+
+  public Task<HttpResponseMessage> WebRequestGetAsync(string url);
 }
 
 public class NetworkClient : INetworkClient {
   public IDownloadService DownloadService { get; }
   public DownloadConfiguration DownloadConfiguration { get; }
+
+  private static HttpClient? _client;
 
   public NetworkClient(
     IDownloadService downloadService,
@@ -29,6 +34,12 @@ public class NetworkClient : INetworkClient {
   ) {
     DownloadService = downloadService;
     DownloadConfiguration = downloadConfiguration;
+  }
+
+  public async Task<HttpResponseMessage> WebRequestGetAsync(string url) {
+    _client ??= new HttpClient();
+
+    return await _client.GetAsync(url);
   }
 
   public async Task DownloadFileAsync(

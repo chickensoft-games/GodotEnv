@@ -101,7 +101,7 @@ public sealed class LogTest : IDisposable {
         [/style][style fg="green"]F
 
         [/style]
-        """.ReplaceLineEndings()
+        """
     );
   }
 
