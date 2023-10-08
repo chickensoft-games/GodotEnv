@@ -103,6 +103,14 @@ Which might produce something like the following, depending on what you have ins
 4.1.1-rc.1 *dotnet
 ```
 
+### Listing Available Godot Versions
+
+GodotEnv also supports showing a list of remote Godot versions available to install using the `-r` option.
+
+```sh
+godotenv godot list -r
+```
+
 ### Using a Different Godot Version
 
 You can change the active version of Godot by instructing GodotEnv to update the symlink to one of the installed versions. By default, it only looks for the .NET-enabled version of Godot. To use a non-.NET version of Godot, specify `--no-dotnet`.
