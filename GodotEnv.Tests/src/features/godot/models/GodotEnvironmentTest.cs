@@ -75,7 +75,7 @@ public class GodotEnvironmentTest {
   }
 
   [Fact]
-  public void GetsExpectedTemplatesDownloadUrlMono() {
+  public void GetsExpectedTemplatesMonoDownloadUrl() {
     var platform = new MacOS(fileClient.Object, computer.Object);
     var downloadUrl = platform.GetDownloadUrl(version, true, true);
 
