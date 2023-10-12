@@ -37,7 +37,7 @@ public class GodotListCommand : ICommand, ICliCommand {
         log.Print(version);
       }
     }
-    catch (HttpRequestException e) {
+    catch (HttpRequestException) {
       log.Print("Unable to reach remote Godot versions list.");
     }
   }
