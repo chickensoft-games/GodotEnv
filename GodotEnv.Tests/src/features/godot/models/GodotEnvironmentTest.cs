@@ -23,7 +23,7 @@ public class GodotEnvironmentTest {
     var platform = new MacOS(fileClient.Object, computer.Object);
     var downloadUrl = platform.GetDownloadUrl(version, false, false);
 
-    downloadUrl.ShouldBe($"{TestConstants.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_macos.universal.zip");
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_macos.universal.zip");
   }
 
   [Fact]
@@ -31,7 +31,7 @@ public class GodotEnvironmentTest {
     var platform = new MacOS(fileClient.Object, computer.Object);
     var downloadUrl = platform.GetDownloadUrl(version, true, false);
 
-    downloadUrl.ShouldBe($"{TestConstants.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_mono_macos.universal.zip");
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_mono_macos.universal.zip");
   }
 
   [Fact]
@@ -39,7 +39,7 @@ public class GodotEnvironmentTest {
     var platform = new Windows(fileClient.Object, computer.Object);
     var downloadUrl = platform.GetDownloadUrl(version, false, false);
 
-    downloadUrl.ShouldBe($"{TestConstants.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_win64.exe.zip");
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_win64.exe.zip");
   }
 
   [Fact]
@@ -47,7 +47,7 @@ public class GodotEnvironmentTest {
     var platform = new Windows(fileClient.Object, computer.Object);
     var downloadUrl = platform.GetDownloadUrl(version, true, false);
 
-    downloadUrl.ShouldBe($"{TestConstants.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_mono_win64.zip");
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_mono_win64.zip");
   }
 
   [Fact]
@@ -55,7 +55,7 @@ public class GodotEnvironmentTest {
     var platform = new Linux(fileClient.Object, computer.Object);
     var downloadUrl = platform.GetDownloadUrl(version, false, false);
 
-    downloadUrl.ShouldBe($"{TestConstants.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_linux.x86_64.zip");
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_linux.x86_64.zip");
   }
 
   [Fact]
@@ -63,7 +63,7 @@ public class GodotEnvironmentTest {
     var platform = new Linux(fileClient.Object, computer.Object);
     var downloadUrl = platform.GetDownloadUrl(version, true, false);
 
-    downloadUrl.ShouldBe($"{TestConstants.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_mono_linux_x86_64.zip");
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_mono_linux_x86_64.zip");
   }
 
   [Fact]
@@ -71,7 +71,7 @@ public class GodotEnvironmentTest {
     var platform = new MacOS(fileClient.Object, computer.Object);
     var downloadUrl = platform.GetDownloadUrl(version, false, true);
 
-    downloadUrl.ShouldBe($"{TestConstants.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_export_templates.tpz");
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_export_templates.tpz");
   }
 
   [Fact]
@@ -79,6 +79,6 @@ public class GodotEnvironmentTest {
     var platform = new MacOS(fileClient.Object, computer.Object);
     var downloadUrl = platform.GetDownloadUrl(version, true, true);
 
-    downloadUrl.ShouldBe($"{TestConstants.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_mono_export_templates.tpz");
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_mono_export_templates.tpz");
   }
 }

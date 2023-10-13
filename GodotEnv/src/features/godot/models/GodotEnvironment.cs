@@ -115,7 +115,7 @@ public interface IGodotEnvironment {
 public abstract class GodotEnvironment : IGodotEnvironment {
   public const string GODOT_FILENAME_PREFIX = "Godot_v";
   public const string GODOT_URL_PREFIX =
-    "https://github.com/godotengine/godot/releases/download/";
+    "https://github.com/godotengine/godot-builds/releases/download/";
 
   /// <summary>
   /// Creates a platform for the given OS.
