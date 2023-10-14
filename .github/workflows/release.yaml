@@ -1,0 +1,98 @@
+name: '📦 Publish'
+on:
+  workflow_dispatch:
+    branches:
+      - main
+    inputs:
+      bump:
+        description: "Version Bump Method"
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+        required: true
+  workflow_call:
+    secrets:
+      NUGET_API_KEY:
+        description: "NuGet API Key"
+        required: true
+    inputs:
+      bump:
+        description: "Version Bump Method"
+        type: string
+        required: true
+
+jobs:
+  publish:
+    name: 📦 Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧾 Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          submodules: 'recursive'
+
+      - name: 🔎 Read Current Project Version
+        uses: KageKirin/get-csproj-version@v1.0.0
+        id: current-version
+        with:
+          file: GodotEnv/Chickensoft.GodotEnv.csproj
+          xpath: /Project/PropertyGroup/Version
+
+      - name: 🖨 Print Current Version
+        run: |
+          echo "Current Version: ${{ steps.current-version.outputs.version }}"
+
+      - name: 🧮 Compute Next Version
+        uses:  chickensoft-games/next-godot-csproj-version@v1
+        id: next-version
+        with:
+          project-version: ${{ steps.current-version.outputs.version }}
+          # This action was designed to pin versions to Godot versions, but
+          # if you pass a stable version in it just bumps the project version
+          # that you give it.
+          godot-version: 1.0.0
+          bump: ${{ inputs.bump }}
+
+      - name: ✨ Print Next Version
+        run: |
+          echo "Next Version: ${{ steps.next-version.outputs.version }}"
+
+      - name: 📝 Change Version
+        uses: vers-one/dotnet-project-version-updater@v1.3
+        with:
+          file: "GodotEnv/Chickensoft.GodotEnv.csproj"
+          version:  ${{ steps.next-version.outputs.version }}
+
+      - name: ✍️ Commit Changes
+        run: |
+          git config user.name "action@github.com"
+          git config user.email "GitHub Action"
+          git commit -a -m "chore(version): update version to ${{ steps.next-version.outputs.version }}"
+          git push
+
+      - name: ✨ Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create --generate-notes "v${{ steps.next-version.outputs.version }}"
+
+      - name: 💽 Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          # Use the .NET SDK from global.json in the root of the repository.
+          global-json-file: global.json
+
+      - name: 📦 Publish
+        run: |
+          # build the package
+          dotnet build GodotEnv/Chickensoft.GodotEnv.csproj -c Release
+
+          # find the built nuget package
+          nuget_package=$(find . -name "Chickensoft.GodotEnv.*.nupkg")
+
+          echo "📦 Publishing package: $nuget_package"
+
+          # publish the nuget package
+          dotnet nuget push "$nuget_package" --api-key "${{ secrets.NUGET_API_KEY }}" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
