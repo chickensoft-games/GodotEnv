@@ -115,7 +115,7 @@ public interface IGodotEnvironment {
 public abstract class GodotEnvironment : IGodotEnvironment {
   public const string GODOT_FILENAME_PREFIX = "Godot_v";
   public const string GODOT_URL_PREFIX =
-    "https://downloads.tuxfamily.org/godotengine/";
+    "https://github.com/godotengine/godot-builds/releases/download/";
 
   /// <summary>
   /// Creates a platform for the given OS.
@@ -253,13 +253,11 @@ public abstract class GodotEnvironment : IGodotEnvironment {
       url += $".{patch}";
     }
 
-    url += "/";
-    if (label != "") {
-      url += $"{label}/";
+    if (label != string.Empty) {
+      url += $"-{label}/";
     }
-
-    if (isDotnetVersion) {
-      url += "mono/";
+    else {
+      url += "-stable/";
     }
 
     // Godot application download url.
