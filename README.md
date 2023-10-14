@@ -69,7 +69,7 @@ godotenv godot install 4.0.1
 godotenv godot install 4.1.1-rc.1
 ```
 
-Versions should match the format of the versions shown on the [GodotSharp nuget package][godot-sharp-nuget]. Downloads are made from the [Godot TuxFamily.org mirror][tux-family-mirror].
+Versions should match the format of the versions shown on the [GodotSharp nuget package][godot-sharp-nuget]. Downloads are made from [GitHub Release Builds][github-release-downloads].
 
 By default, GodotEnv installs .NET-enabled versions of Godot.
 
@@ -408,7 +408,7 @@ While the addons installation logic is well-tested, the Godot version management
 [ssh-github]: https://docs.github.com/en/authentication/connecting-to-github-with-ssh
 [bower]: https://bower.io
 [godot-sharp-nuget]: https://www.nuget.org/packages/GodotSharp/
-[tux-family-mirror]: https://downloads.tuxfamily.org/godotengine/
+[github-release-downloads]: https://github.com/godotengine/godot-builds/releases
 [NVM]: https://github.com/nvm-sh/nvm
 [FVM]: https://github.com/leoafarias/fvm
 [asdf]: https://asdf-vm.com/guide/introduction.html
