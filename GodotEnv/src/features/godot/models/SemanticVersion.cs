@@ -4,7 +4,7 @@ using System;
 using System.Text.RegularExpressions;
 
 public record SemanticVersion(
-  string Major, string Minor, string Patch, string Label
+  string Major, string Minor, string Patch, string Label = ""
 ) {
   // Borrowed from https://semver.org/
 

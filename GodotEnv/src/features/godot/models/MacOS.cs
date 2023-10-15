@@ -14,8 +14,8 @@ public class MacOS : Unix {
       )
     );
 
-  public override string GetInstallerNameSuffix(bool isDotnetVersion) =>
-    $"{(isDotnetVersion ? "_mono" : "")}_macos.universal";
+  public override string GetInstallerNameSuffix(bool isDotnetVersion, SemanticVersion version) =>
+    $"{(isDotnetVersion ? "_mono" : "")}_{(int.Parse(version.Major) == 3 ? "osx" : "macos")}.universal";
 
   public override void Describe(ILog log) => log.Info("🍏 Running on macOS");
 
@@ -24,6 +24,7 @@ public class MacOS : Unix {
   ) => $"Godot{(isDotnetVersion ? "_mono" : "")}.app/Contents/MacOS/Godot";
 
   public override string GetRelativeGodotSharpPath(
-    SemanticVersion version
+    SemanticVersion version,
+    bool isDotnetVersion
   ) => "Godot_mono.app/Contents/Resources/GodotSharp";
 }

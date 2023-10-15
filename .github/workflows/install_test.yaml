@@ -4,8 +4,90 @@ on:
   pull_request:
 
 jobs:
-  install_tests:
-    name: 🔋 Integration Tests with ${{ matrix.os }}
+  install_tests_3x:
+    name: 🔋 Godot 3.x Integration Tests with ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    # Only run the workflow if it's not a PR or if it's a PR from a fork.
+    # This prevents duplicate workflows from running on PR's that originate
+    # from the repository itself.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_NOLOGO: true
+    strategy:
+      # Don't cancel other runners if one fails.
+      fail-fast: false
+      matrix:
+        # Also try windows-2019?
+        os: [ macos-latest, ubuntu-latest, windows-2019 ]
+    defaults:
+      run:
+        # Use bash shells on all platforms.
+        shell: bash
+    steps:
+      - name: 🧾 Checkout
+        uses: actions/checkout@v3
+
+      - name: 💽 Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          # Use the .NET SDK from global.json in the root of the repository.
+          global-json-file: global.json
+
+      - name: 📦 Restore Dependencies
+        run: dotnet restore
+
+      - name: 🦺 Build Projects
+        run: dotnet build
+
+      - name: 🛣 Add Current Installation To Path
+        # Gets the last line of the output from the installation and adds it to the path.
+        working-directory: GodotEnv
+        run: |
+          # Use tool to install Godot. Last line of output is the path to the
+          # symlink that always points to the active version of Godot.
+          dotnet run -- godot install 3.5.3
+
+      - name: 🤖 Check Godot Location
+        working-directory: GodotEnv
+        run: |
+          # Get path to the symlink that always points to the active version of
+          # Godot.
+          GODOT_SYMLINK="$(dotnet run -- godot env path)"
+
+          # Make sure we can use Godot.
+          $GODOT_SYMLINK --version
+
+          echo "✅ Godot location is in path!"
+
+      - name: 🌴 Set GODOT System Environment Variable
+        working-directory: GodotEnv
+        run: |
+          dotnet run -- godot env setup
+
+      - name: 🧪 Verify GODOT System Environment Variable
+        working-directory: GodotEnv
+        run: |
+          # Make sure we can retrieve environment variable on all systems.
+          VERIFY_GODOT=$(dotnet run -- godot env get)
+          echo "GODOT=$VERIFY_GODOT"
+          if [ -z "$VERIFY_GODOT" ]; then
+            echo "❌ GODOT environment variable is empty!"
+            exit 1
+          fi
+
+      - name: 🗑 Uninstall
+        working-directory: GodotEnv
+        run: |
+          echo "Before uninstall:"
+          dotnet run -- godot list
+          echo "Uninstalling..."
+          dotnet run -- godot uninstall 3.5.3
+          echo "After uninstall:"
+          dotnet run -- godot list
+
+  install_tests_4x:
+    name: 🔋 Godot 4.x Integration Tests with ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     # Only run the workflow if it's not a PR or if it's a PR from a fork.
     # This prevents duplicate workflows from running on PR's that originate
