@@ -16,7 +16,7 @@ GodotEnv is a command-line tool that makes it easy to switch between Godot versi
 
 GodotEnv can do the following:
 
-- ✅ Download, extract, and install Godot 4.0+ versions from the command line on Windows, macOS, and Linux (similar to tools like [NVM], [FVM], [asdf], etc.
+- ✅ Download, extract, and install Godot 3.0/4.0+ versions from the command line on Windows, macOS, and Linux (similar to tools like [NVM], [FVM], [asdf], etc.
 - ✅ Switch the active version of Godot by updating a symlink.
 - ✅ Automatically setup a system `GODOT` environment variable that always points to the active version of Godot.
 - ✅ Install addons in a Godot project from local paths, remote git repositories, or symlinks using an easy-to-understand `addons.json` file. No more fighting with git submodules! Just run `godotenv addons install` whenever your `addons.json` file changes.

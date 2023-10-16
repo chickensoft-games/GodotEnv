@@ -11,8 +11,11 @@ public class Linux : Unix {
     FileClient.UserDirectory, ".local/share/godot"
   );
 
-  public override string GetInstallerNameSuffix(bool isDotnetVersion) =>
-    isDotnetVersion ? "_mono_linux_x86_64" : "_linux.x86_64";
+  public override string GetInstallerNameSuffix(bool isDotnetVersion, SemanticVersion version) {
+    var (platformName, architecture) = GetPlatformNameAndArchitecture(version);
+
+    return isDotnetVersion ? $"_mono_{platformName}_{architecture}" : $"_{platformName}.{architecture}";
+  }
 
   public override void Describe(ILog log) => log.Info("🐧 Running on Linux");
 
@@ -20,22 +23,40 @@ public class Linux : Unix {
     SemanticVersion version, bool isDotnetVersion
   ) {
     var fsVersionString = GetFilenameVersionString(version);
-    var name = fsVersionString +
-      $"{(isDotnetVersion ? "_mono" : "")}_linux.x86_64";
+    var nameSuffix = GetInstallerNameSuffix(isDotnetVersion, version);
+    var (platformName, architecture) = GetPlatformNameAndArchitecture(version);
+
+    var pathSuffix = fsVersionString +
+               $"{(isDotnetVersion ? "_mono" : "")}_{platformName}.{architecture}";
 
     if (isDotnetVersion) {
       // Dotnet version extracts to a folder, whereas the non-dotnet version
       // does not.
-      return FileClient.Combine(fsVersionString + "_mono_linux_x86_64", name);
+      return FileClient.Combine(fsVersionString + nameSuffix, pathSuffix);
     }
 
-    return name;
+    return pathSuffix;
   }
 
   public override string GetRelativeGodotSharpPath(
-    SemanticVersion version
+    SemanticVersion version,
+    bool isDotnetVersion
   ) => FileClient.Combine(
-    GetFilenameVersionString(version) + "_mono_linux_x86_64",
-    "GodotSharp/"
-  );
+      GetFilenameVersionString(version) + GetInstallerNameSuffix(isDotnetVersion, version),
+      "GodotSharp/"
+    );
+
+  private static (string platformName, string architecture) GetPlatformNameAndArchitecture(
+    SemanticVersion version
+  ) {
+    var architecture = "x86_64";
+    var platformName = "linux";
+
+    if (int.TryParse(version.Major, out var parsedVersion) && parsedVersion == 3) {
+      architecture = "64";
+      platformName = "x11";
+    }
+
+    return (platformName, architecture);
+  }
 }

@@ -357,7 +357,7 @@ public class GodotRepository : IGodotRepository {
     if (installation.IsDotnetVersion) {
       // Update GodotSharp symlinks
       var godotSharpPath = GetGodotSharpPath(
-        installation.Path, installation.Version
+        installation.Path, installation.Version, installation.IsDotnetVersion
       );
 
       log.Print("");
@@ -495,10 +495,10 @@ public class GodotRepository : IGodotRepository {
   );
 
   private string GetGodotSharpPath(
-    string installationPath, SemanticVersion version
+    string installationPath, SemanticVersion version, bool isDotnetVersion
   ) => FileClient.Combine(
     installationPath,
-    Platform.GetRelativeGodotSharpPath(version)
+    Platform.GetRelativeGodotSharpPath(version, isDotnetVersion)
   );
 
   private GodotInstallation? ReadInstallation(

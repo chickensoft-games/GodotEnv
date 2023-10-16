@@ -14,7 +14,7 @@ public class Windows : GodotEnvironment {
       FileClient.Combine(FileClient.UserDirectory, "\\AppData\\Roaming\\Godot")
     );
 
-  public override string GetInstallerNameSuffix(bool isDotnetVersion) =>
+  public override string GetInstallerNameSuffix(bool isDotnetVersion, SemanticVersion version) =>
     isDotnetVersion ? "_mono_win64" : "_win64.exe";
 
   public override Task<bool> IsExecutable(IShell shell, IFileInfo file) =>
@@ -42,7 +42,8 @@ public class Windows : GodotEnvironment {
   }
 
   public override string GetRelativeGodotSharpPath(
-    SemanticVersion version
+    SemanticVersion version,
+    bool isDotnetVersion
   ) => FileClient.Combine(
     GetFilenameVersionString(version) + "_mono_win64", "GodotSharp"
   );
