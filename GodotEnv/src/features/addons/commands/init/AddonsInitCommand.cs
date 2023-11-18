@@ -37,6 +37,7 @@ public class AddonsInitCommand : ICommand, ICliCommand {
     log.Success("Done!");
     log.Print("");
     log.Success(path);
+    log.Print("");
 
     await Task.CompletedTask;
   }
