@@ -2,8 +2,8 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 
 using System.IO.Abstractions;
 using System.Threading.Tasks;
-using Chickensoft.GodotEnv.Common.Clients;
-using Chickensoft.GodotEnv.Common.Utilities;
+using Common.Clients;
+using Common.Utilities;
 
 public abstract class Unix : GodotEnvironment {
   protected Unix(IFileClient fileClient, IComputer computer)

@@ -103,6 +103,16 @@ public interface IFileClient {
   Task CreateSymlink(string path, string pathToTarget);
 
   /// <summary>
+  /// Creates symbolic links recursively on <paramref name="path" />,
+  /// these links points to <paramref name="pathToTarget" /> by the same structure.
+  /// Directories are not symlinked but created.
+  /// </summary>
+  /// <param name="path">Path to the symbolic link.</param>
+  /// <param name="pathToTarget">Path to the target of the symbolic
+  /// link.</param>
+  Task CreateSymlinkRecursively(string path, string pathToTarget);
+
+  /// <summary>
   /// Determines if the given directory path is a symlink.
   /// </summary>
   /// <param name="path">Path in question.</param>
@@ -290,8 +300,6 @@ public interface IFileClient {
   /// <param name="dir">Directory to examine.</param>
   /// <returns>Enumerable of directory info objects.</returns>
   IEnumerable<IDirectoryInfo> GetSubdirectories(string dir);
-
-  Task CreateShortcuts(string instalationPath, string executionPath);
 }
 
 /// <summary>File system operations client.</summary>
@@ -411,6 +419,17 @@ public class FileClient : IFileClient {
     }
   }
 
+  public async Task CreateSymlinkRecursively(string path, string pathToTarget) {
+    CreateDirectory(path);
+    foreach (var sub in Files.Directory.GetDirectories(pathToTarget)) {
+      await CreateSymlinkRecursively(Files.Path.Join(path, Files.Path.GetFileName(sub)), sub);
+    }
+
+    foreach (var file in Files.Directory.GetFiles(pathToTarget)) {
+      await CreateSymlink(Files.Path.Join(path, Files.Path.GetFileName(file)), file);
+    }
+  }
+
   public bool IsDirectorySymlink(string path)
     => Files.DirectoryInfo.FromDirectoryName(path).LinkTarget != null;
 
@@ -499,61 +518,6 @@ public class FileClient : IFileClient {
 
   public IEnumerable<IDirectoryInfo> GetSubdirectories(string dir) =>
     Files.DirectoryInfo.FromDirectoryName(dir).EnumerateDirectories();
-
-  public async Task CreateShortcuts(string instalationPath, string executionPath) {
-    var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-    switch (OS)
-    {
-      case OSType.MacOS:
-      {
-        var appFilePath = Files.Directory.GetDirectories(instalationPath).First();
-        var applicationsPath = Files.Path.Join(homeDir, "Applications", "Godot.app");
-
-        async Task walk(string path, string output) {
-          CreateDirectory(output);
-          foreach (var sub in Files.Directory.GetDirectories(path)) {
-            await walk(sub, Files.Path.Join(output, Files.Path.GetFileName(sub)));
-          }
-
-          foreach (var file in Files.Directory.GetFiles(path)) {
-            await CreateSymlink(Files.Path.Join(output, Files.Path.GetFileName(file)), file);
-          }
-        }
-
-        await DeleteDirectory(applicationsPath);
-        await walk(appFilePath, applicationsPath);
-        break;
-      }
-
-      case OSType.Linux:
-      {
-        var desktopFile = Files.Path.Join(homeDir, ".local", "share", "applications", "Godot.desktop");
-        CreateFile(desktopFile,
-          $"""
-           [Desktop Entry]
-           Name=Godot
-           Comment=Godot Game Engine
-           Exec={executionPath} %U
-           Icon=godot
-           Terminal=false
-           Type=Application
-           Categories=Development;
-           """);
-        break;
-      }
-
-      case OSType.Windows:
-      {
-        var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu);
-        var applicationsPath = Files.Path.Combine(commonStartMenuPath, "Programs", "Godot");
-        await CreateSymlink(applicationsPath, executionPath);
-        break;
-      }
-      case OSType.Unknown:
-      default:
-        break;
-    }
-  }
 
   public T ReadJsonFile<T>(string path) where T : notnull {
     var contents = Files.File.ReadAllText(path);

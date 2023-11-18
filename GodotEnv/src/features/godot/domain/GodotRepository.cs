@@ -353,7 +353,7 @@ public class GodotRepository : IGodotRepository {
   ) {
     // Create or update the symlink to the new version of Godot.
     await FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
-    await FileClient.CreateShortcuts(installation.Path, installation.ExecutionPath);
+    await CreateShortcuts(installation.Path);
 
     if (installation.IsDotnetVersion) {
       // Update GodotSharp symlinks
@@ -384,6 +384,72 @@ public class GodotRepository : IGodotRepository {
     log.Info("Godot symlink path:");
     log.Print("");
     log.Print(GodotSymlinkPath);
+  }
+
+  public async Task CreateShortcuts(string instalationPath) {
+    switch (FileClient.OS) {
+      case OSType.MacOS: {
+        var appFilePath = FileClient.Files.Directory.GetDirectories(instalationPath).First();
+        var applicationsPath = FileClient.Files.Path.Join(FileClient.UserDirectory, "Applications", "Godot.app");
+        await FileClient.DeleteDirectory(applicationsPath);
+        await FileClient.CreateSymlinkRecursively(applicationsPath, appFilePath);
+        break;
+      }
+
+      case OSType.Linux: {
+        const string iconUrl = "https://godotengine.org/assets/press/icon_color.png";
+        var desktopFile = FileClient.Files.Path.Join(FileClient.UserDirectory, ".local", "share", "applications", "Godot.desktop");
+        var iconFile = FileClient.Files.Path.Join(FileClient.UserDirectory, ".local", "share", "icons", "godot.png");
+        var execBin = FileClient.Files.Path.Join(FileClient.UserDirectory, "bin", "godot");
+
+        var resp = await NetworkClient.WebRequestGetAsync(iconUrl);
+        resp.EnsureSuccessStatusCode();
+
+        var iconContent = await resp.Content.ReadAsByteArrayAsync();
+        await FileClient.Files.File.WriteAllBytesAsync(iconFile, iconContent);
+
+        // https://github.com/godotengine/godot/blob/master/misc/dist/linux/org.godotengine.Godot.desktop
+        FileClient.CreateFile(desktopFile,
+          $"""
+           [Desktop Entry]
+           Name=Godot Engine
+           GenericName=Libre game engine
+           GenericName[el]=Ελεύθερη μηχανή παιχνιδιού
+           GenericName[fr]=Moteur de jeu libre
+           GenericName[zh_CN]=自由的游戏引擎
+           Comment=Multi-platform 2D and 3D game engine with a feature-rich editor
+           Comment[el]=2D και 3D μηχανή παιχνιδιού πολλαπλών πλατφορμών με επεξεργαστή πλούσιο σε χαρακτηριστικά
+           Comment[fr]=Moteur de jeu 2D et 3D multiplateforme avec un éditeur riche en fonctionnalités
+           Comment[zh_CN]=多平台 2D 和 3D 游戏引擎，带有功能丰富的编辑器
+           Exec=godot %f
+           Icon=godot
+           Terminal=false
+           PrefersNonDefaultGPU=true
+           Type=Application
+           MimeType=application/x-godot-project;
+           Categories=Development;IDE;
+           StartupWMClass=Godot
+           """);
+
+        await FileClient.CreateSymlink(execBin, GodotSymlinkPath);
+        break;
+      }
+
+      case OSType.Windows: {
+        var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu);
+        var applicationsPath = FileClient.Files.Path.Combine(commonStartMenuPath, "Programs", "Godot");
+
+// var dirShell = Computer.CreateShell(applicationsPath);
+// await dirShell.Run("cmd.exe", "/c", "");
+//
+// cd /d "C:\Program Files\Git\mingw64\bin"
+// // create-shortcut.exe --work-dir "C:\path\to\files" --arguments "--myarg=myval" "C:\path\to\files\file.ext" "C:\path\to\shortcuts\shortcut.lnk"
+        break;
+      }
+      case OSType.Unknown:
+      default:
+        break;
+    }
   }
 
   public async Task AddOrUpdateGodotEnvVariable(ILog log) {

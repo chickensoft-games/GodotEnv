@@ -2,8 +2,8 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 
 using System.IO.Abstractions;
 using System.Threading.Tasks;
-using Chickensoft.GodotEnv.Common.Clients;
-using Chickensoft.GodotEnv.Common.Utilities;
+using Common.Clients;
+using Common.Utilities;
 
 public class Windows : GodotEnvironment {
   public Windows(IFileClient fileClient, IComputer computer)
