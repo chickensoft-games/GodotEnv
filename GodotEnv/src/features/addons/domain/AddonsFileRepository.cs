@@ -103,10 +103,11 @@ public class AddonsFileRepository : IAddonsFileRepository {
       var addonsIgnoreEntry = $"{Defaults.ADDONS_PATH}/*";
       var addonsEditorConfigExceptionEntry =
         $"!{Defaults.ADDONS_PATH}/.editorconfig";
+      var addonsCacheIgnoreEntry = $"{Defaults.CACHE_PATH}/*";
 
       FileClient.AddLinesToFileIfNotPresent(
         gitIgnoreFilePath,
-        addonsIgnoreEntry, addonsEditorConfigExceptionEntry
+        addonsIgnoreEntry, addonsEditorConfigExceptionEntry, addonsCacheIgnoreEntry
       );
     }
 
