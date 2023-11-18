@@ -398,11 +398,15 @@ public class GodotRepository : IGodotRepository {
 
       case OSType.Linux: {
         const string iconUrl = "https://godotengine.org/assets/press/icon_color.png";
+        
         var desktopFile = FileClient.Files.Path.Join(FileClient.UserDirectory, ".local", "share", "applications", "Godot.desktop");
         var userIconsPath = FileClient.Files.Path.Join(FileClient.UserDirectory, ".local", "share", "icons");
-        var execBin = FileClient.Files.Path.Join(FileClient.UserDirectory, "bin", "godot");
+        var userBinPath = FileClient.Files.Path.Join(FileClient.UserDirectory, "bin");
+        var execBin = FileClient.Files.Path.Join(userBinPath, "godot");
 
         FileClient.CreateDirectory(userIconsPath);
+        FileClient.CreateDirectory(userBinPath);
+
         await NetworkClient.DownloadFileAsync(
           url: iconUrl,
           destinationDirectory: userIconsPath,
