@@ -291,7 +291,7 @@ public interface IFileClient {
   /// <returns>Enumerable of directory info objects.</returns>
   IEnumerable<IDirectoryInfo> GetSubdirectories(string dir);
 
-  Task CreateShortcuts(string instalationPath);
+  Task CreateShortcuts(string instalationPath, string executionPath);
 }
 
 /// <summary>File system operations client.</summary>
@@ -500,13 +500,13 @@ public class FileClient : IFileClient {
   public IEnumerable<IDirectoryInfo> GetSubdirectories(string dir) =>
     Files.DirectoryInfo.FromDirectoryName(dir).EnumerateDirectories();
 
-  public async Task CreateShortcuts(string instalationPath) {
-    var appFilePath = Files.Directory.GetDirectories(instalationPath).First();
+  public async Task CreateShortcuts(string instalationPath, string executionPath) {
     var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
     switch (OS)
     {
       case OSType.MacOS:
       {
+        var appFilePath = Files.Directory.GetDirectories(instalationPath).First();
         var applicationsPath = Files.Path.Join(homeDir, "Applications", "Godot.app");
 
         async Task walk(string path, string output) {
@@ -527,8 +527,18 @@ public class FileClient : IFileClient {
 
       case OSType.Linux:
       {
-        var applicationsPath = Files.Path.Join(homeDir, ".local", "share", "applications", "Godot");
-        await CreateSymlink(appFilePath, applicationsPath);
+        var desktopFile = Files.Path.Join(homeDir, ".local", "share", "applications", "Godot.desktop");
+        CreateFile(desktopFile,
+          $"""
+           [Desktop Entry]
+           Name=Godot
+           Comment=Godot Game Engine
+           Exec={executionPath} %U
+           Icon=godot
+           Terminal=false
+           Type=Application
+           Categories=Development;
+           """);
         break;
       }
 
@@ -536,7 +546,7 @@ public class FileClient : IFileClient {
       {
         var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu);
         var applicationsPath = Files.Path.Combine(commonStartMenuPath, "Programs", "Godot");
-        await CreateSymlink(appFilePath, applicationsPath);
+        await CreateSymlink(applicationsPath, executionPath);
         break;
       }
       case OSType.Unknown:
