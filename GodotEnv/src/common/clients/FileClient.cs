@@ -290,6 +290,8 @@ public interface IFileClient {
   /// <param name="dir">Directory to examine.</param>
   /// <returns>Enumerable of directory info objects.</returns>
   IEnumerable<IDirectoryInfo> GetSubdirectories(string dir);
+
+  Task CreateShortcuts(string instalationPath);
 }
 
 /// <summary>File system operations client.</summary>
@@ -497,6 +499,51 @@ public class FileClient : IFileClient {
 
   public IEnumerable<IDirectoryInfo> GetSubdirectories(string dir) =>
     Files.DirectoryInfo.FromDirectoryName(dir).EnumerateDirectories();
+
+  public async Task CreateShortcuts(string instalationPath) {
+    var appFilePath = Files.Directory.GetDirectories(instalationPath).First();
+    var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+    switch (OS)
+    {
+      case OSType.MacOS:
+      {
+        var applicationsPath = Files.Path.Join(homeDir, "Applications", "Godot.app");
+
+        async Task walk(string path, string output) {
+          CreateDirectory(output);
+          foreach (var sub in Files.Directory.GetDirectories(path)) {
+            await walk(sub, Files.Path.Join(output, Files.Path.GetFileName(sub)));
+          }
+
+          foreach (var file in Files.Directory.GetFiles(path)) {
+            await CreateSymlink(Files.Path.Join(output, Files.Path.GetFileName(file)), file);
+          }
+        }
+
+        await DeleteDirectory(applicationsPath);
+        await walk(appFilePath, applicationsPath);
+        break;
+      }
+
+      case OSType.Linux:
+      {
+        var applicationsPath = Files.Path.Join(homeDir, ".local", "share", "applications", "Godot");
+        await CreateSymlink(appFilePath, applicationsPath);
+        break;
+      }
+
+      case OSType.Windows:
+      {
+        var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu);
+        var applicationsPath = Files.Path.Combine(commonStartMenuPath, "Programs", "Godot");
+        await CreateSymlink(appFilePath, applicationsPath);
+        break;
+      }
+      case OSType.Unknown:
+      default:
+        break;
+    }
+  }
 
   public T ReadJsonFile<T>(string path) where T : notnull {
     var contents = Files.File.ReadAllText(path);

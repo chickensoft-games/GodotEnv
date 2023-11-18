@@ -353,6 +353,7 @@ public class GodotRepository : IGodotRepository {
   ) {
     // Create or update the symlink to the new version of Godot.
     await FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
+    await FileClient.CreateShortcuts(installation.Path);
 
     if (installation.IsDotnetVersion) {
       // Update GodotSharp symlinks
