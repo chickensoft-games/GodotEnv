@@ -398,14 +398,13 @@ public class GodotRepository : IGodotRepository {
 
       case OSType.Linux: {
         const string iconUrl = "https://godotengine.org/assets/press/icon_color.png";
-        
-        var desktopFile = FileClient.Files.Path.Join(FileClient.UserDirectory, ".local", "share", "applications", "Godot.desktop");
-        var userIconsPath = FileClient.Files.Path.Join(FileClient.UserDirectory, ".local", "share", "icons");
-        var userBinPath = FileClient.Files.Path.Join(FileClient.UserDirectory, "bin");
-        var execBin = FileClient.Files.Path.Join(userBinPath, "godot");
+
+        var desktopFile = FileClient.Files.Path.Join(FileClient.UserDirectory,
+          ".local", "share", "applications", "Godot.desktop");
+        var userIconsPath = FileClient.Files.Path.Join(FileClient.UserDirectory,
+          ".local", "share", "icons");
 
         FileClient.CreateDirectory(userIconsPath);
-        FileClient.CreateDirectory(userBinPath);
 
         await NetworkClient.DownloadFileAsync(
           url: iconUrl,
@@ -426,7 +425,7 @@ public class GodotRepository : IGodotRepository {
            Comment[el]=2D και 3D μηχανή παιχνιδιού πολλαπλών πλατφορμών με επεξεργαστή πλούσιο σε χαρακτηριστικά
            Comment[fr]=Moteur de jeu 2D et 3D multiplateforme avec un éditeur riche en fonctionnalités
            Comment[zh_CN]=多平台 2D 和 3D 游戏引擎，带有功能丰富的编辑器
-           Exec=godot %f
+           Exec={GodotSymlinkPath} %f
            Icon=godot
            Terminal=false
            PrefersNonDefaultGPU=true
@@ -435,8 +434,6 @@ public class GodotRepository : IGodotRepository {
            Categories=Development;IDE;
            StartupWMClass=Godot
            """);
-
-        await FileClient.CreateSymlink(execBin, GodotSymlinkPath);
         break;
       }
 
