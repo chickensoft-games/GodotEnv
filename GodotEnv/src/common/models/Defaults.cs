@@ -133,6 +133,26 @@ public static class Defaults {
   # https://github.com/chickensoft-games/GodotEnv
   #
   # -------------------------------------------------------------------- #
+  
+  # Godot
+  # https://github.com/github/gitignore/blob/main/Godot.gitignore
+  #
+  # Godot 4+ specific ignores
+  .godot/
+  #
+  # Godot-specific ignores
+  .import/
+  export.cfg
+  export_presets.cfg
+  #
+  # Imported translations (automatically generated from CSV files)
+  *.translation
+  #
+  # Mono-specific ignores
+  .mono/
+  data_*/
+  mono_crash.*.json
+  # -------------------------------------------------------------------- #
 
   # GodotEnv Addons
   #
@@ -142,6 +162,8 @@ public static class Defaults {
   # Don't ignore the editorconfig file in the addons directory.
   !{ADDONS_PATH}/.editorconfig
   #
+  # Ignore the addons cache
+  {CACHE_PATH}/*
   # -------------------------------------------------------------------- #
   """;
 }

@@ -26,6 +26,7 @@ public class GodotCacheClearCommand : ICommand, ICliCommand {
     log.Print("");
     ExecutionContext.Godot.GodotRepo.ClearCache();
     log.Success("Godot installation cache cleared.");
+    log.Print("");
 
     await Task.CompletedTask;
   }
