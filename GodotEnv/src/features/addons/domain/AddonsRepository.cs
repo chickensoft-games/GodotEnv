@@ -214,6 +214,12 @@ public class AddonsRepository(
     // Make a junk repo in the installed addon dir. We use this for change
     // tracking to avoid deleting a modified addon.
     await addonShell.Run("git", "init");
+    await addonShell.Run(
+      "git", "config", "--local", "user.email", "godotenv@godotenv.com"
+    );
+    await addonShell.Run(
+      "git", "config", "--local", "user.name", "GodotEnv"
+    );
     await addonShell.Run("git", "add", "-A");
     await addonShell.Run(
       "git", "commit", "-m", "Initial commit"

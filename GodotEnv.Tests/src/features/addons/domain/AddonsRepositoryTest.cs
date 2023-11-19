@@ -360,6 +360,12 @@ public class AddonsRepositoryTest {
     );
 
     cli.Runs(addonInstallPath, new ProcessResult(0), "git", "init");
+    cli.Runs(addonInstallPath, new ProcessResult(0), 
+      "git", "config", "--local", "user.email", "godotenv@godotenv.com"
+    );
+    cli.Runs(addonInstallPath, new ProcessResult(0),
+      "git", "config", "--local", "user.name", "GodotEnv"
+    );
     cli.Runs(addonInstallPath, new ProcessResult(0), "git", "add", "-A");
     cli.Runs(
       addonInstallPath, new ProcessResult(0),
