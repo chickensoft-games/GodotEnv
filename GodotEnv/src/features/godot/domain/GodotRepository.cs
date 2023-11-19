@@ -353,7 +353,7 @@ public class GodotRepository : IGodotRepository {
   ) {
     // Create or update the symlink to the new version of Godot.
     await FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
-    await CreateShortcuts(installation.Path);
+    await CreateShortcuts(installation);
 
     if (installation.IsDotnetVersion) {
       // Update GodotSharp symlinks
@@ -386,34 +386,30 @@ public class GodotRepository : IGodotRepository {
     log.Print(GodotSymlinkPath);
   }
 
-  public async Task CreateShortcuts(string instalationPath) {
+  public async Task CreateShortcuts(GodotInstallation instalation) {
     switch (FileClient.OS) {
       case OSType.MacOS: {
-        var appFilePath = FileClient.Files.Directory.GetDirectories(instalationPath).First();
-        var applicationsPath = FileClient.Files.Path.Join(FileClient.UserDirectory, "Applications", "Godot.app");
-        await FileClient.DeleteDirectory(applicationsPath);
-        await FileClient.CreateSymlinkRecursively(applicationsPath, appFilePath);
-        break;
-      }
+          var appFilePath = FileClient.Files.Directory.GetDirectories(instalation.Path).First();
+          var applicationsPath = FileClient.Combine(FileClient.UserDirectory, "Applications", "Godot.app");
+          await FileClient.DeleteDirectory(applicationsPath);
+          await FileClient.CreateSymlinkRecursively(applicationsPath, appFilePath);
+          break;
+        }
 
       case OSType.Linux: {
-        const string iconUrl = "https://godotengine.org/assets/press/icon_color.png";
+          var desktopFile = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "applications", "Godot.desktop");
+          var userIconsPath = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "icons");
 
-        var desktopFile = FileClient.Files.Path.Join(FileClient.UserDirectory,
-          ".local", "share", "applications", "Godot.desktop");
-        var userIconsPath = FileClient.Files.Path.Join(FileClient.UserDirectory,
-          ".local", "share", "icons");
+          FileClient.CreateDirectory(userIconsPath);
 
-        FileClient.CreateDirectory(userIconsPath);
+          await NetworkClient.DownloadFileAsync(
+            url: "https://godotengine.org/assets/press/icon_color.png",
+            destinationDirectory: userIconsPath,
+            filename: "godot.png",
+            CancellationToken.None);
 
-        await NetworkClient.DownloadFileAsync(
-          url: iconUrl,
-          destinationDirectory: userIconsPath,
-          filename: "godot.png",
-          CancellationToken.None);
-
-        // https://github.com/godotengine/godot/blob/master/misc/dist/linux/org.godotengine.Godot.desktop
-        FileClient.CreateFile(desktopFile,
+          // https://github.com/godotengine/godot/blob/master/misc/dist/linux/org.godotengine.Godot.desktop
+          FileClient.CreateFile(desktopFile,
           $"""
            [Desktop Entry]
            Name=Godot Engine
@@ -434,20 +430,27 @@ public class GodotRepository : IGodotRepository {
            Categories=Development;IDE;
            StartupWMClass=Godot
            """);
-        break;
-      }
+          break;
+        }
 
       case OSType.Windows: {
-        var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu);
-        var applicationsPath = FileClient.Files.Path.Combine(commonStartMenuPath, "Programs", "Godot");
+          var hardLinkPath = $"{GodotSymlinkPath}.exe";
+          await FileClient.DeleteFile(hardLinkPath);
+          await FileClient.ProcessRunner.RunElevatedOnWindows(
+            "cmd.exe", $"/c mklink /H \"{hardLinkPath}\" \"{instalation.ExecutionPath}\""
+          );
 
-// var dirShell = Computer.CreateShell(applicationsPath);
-// await dirShell.Run("cmd.exe", "/c", "");
-//
-// cd /d "C:\Program Files\Git\mingw64\bin"
-// // create-shortcut.exe --work-dir "C:\path\to\files" --arguments "--myarg=myval" "C:\path\to\files\file.ext" "C:\path\to\shortcuts\shortcut.lnk"
-        break;
-      }
+          var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+          var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
+          var command = string.Join(";",
+            "$ws = New-Object -ComObject (\"WScript.Shell\")",
+            $"$s = $ws.CreateShortcut(\"{applicationsPath}\")",
+            $"$s.TargetPath = \"{hardLinkPath}\"",
+            "$s.save();"
+          );
+          await FileClient.ProcessRunner.Run(".", "powershell", new[] { "-c", command });
+          break;
+        }
       case OSType.Unknown:
       default:
         break;
