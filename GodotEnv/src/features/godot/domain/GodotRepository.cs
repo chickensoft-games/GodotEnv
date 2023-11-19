@@ -397,9 +397,10 @@ public class GodotRepository : IGodotRepository {
         }
 
       case OSType.Linux: {
-          var desktopFile = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "applications", "Godot.desktop");
+          var userApplicationsPath = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "applications");
           var userIconsPath = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "icons");
 
+          FileClient.CreateDirectory(userApplicationsPath);
           FileClient.CreateDirectory(userIconsPath);
 
           await NetworkClient.DownloadFileAsync(
@@ -409,7 +410,7 @@ public class GodotRepository : IGodotRepository {
             CancellationToken.None);
 
           // https://github.com/godotengine/godot/blob/master/misc/dist/linux/org.godotengine.Godot.desktop
-          FileClient.CreateFile(desktopFile,
+          FileClient.CreateFile(FileClient.Combine(userApplicationsPath, "Godot.desktop"),
           $"""
            [Desktop Entry]
            Name=Godot Engine
