@@ -104,7 +104,7 @@ public class AddonsInstallCommandTest {
     System.InvalidOperationException: Test exception
 
     [/style]
-    """);
+    """, StringCompareShould.IgnoreLineEndings);
   }
 
   [Fact]
