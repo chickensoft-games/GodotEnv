@@ -32,7 +32,6 @@ public class AddonsCommandTest {
 
 
       [/style]
-      """.ReplaceLineEndings()
-    );
+      """, StringCompareShould.IgnoreLineEndings);
   }
 }

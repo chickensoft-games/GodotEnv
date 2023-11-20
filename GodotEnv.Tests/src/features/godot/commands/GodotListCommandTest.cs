@@ -4,15 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Moq;
-using Xunit;
-using Shouldly;
 using CliFx.Infrastructure;
-
 using Common.Models;
 using Common.Utilities;
-using Features.Godot.Domain;
 using Features.Addons.Commands;
+using Features.Godot.Domain;
+using Moq;
+using Shouldly;
+using Xunit;
 
 public sealed class GodotListCommandTest : IDisposable {
 
@@ -51,7 +50,7 @@ public sealed class GodotListCommandTest : IDisposable {
         3.2.3
         4.0.1
 
-        """);
+        """, StringCompareShould.IgnoreLineEndings);
   }
 
   [Fact]
@@ -67,6 +66,6 @@ public sealed class GodotListCommandTest : IDisposable {
         Retrieving available Godot versions...
         Unable to reach remote Godot versions list.
 
-        """);
+        """, StringCompareShould.IgnoreLineEndings);
   }
 }
