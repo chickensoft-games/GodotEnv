@@ -103,6 +103,16 @@ public interface IFileClient {
   Task CreateSymlink(string path, string pathToTarget);
 
   /// <summary>
+  /// Creates symbolic links recursively on <paramref name="path" />,
+  /// these links points to <paramref name="pathToTarget" /> by the same structure.
+  /// Directories are not symlinked but created.
+  /// </summary>
+  /// <param name="path">Path to the symbolic link.</param>
+  /// <param name="pathToTarget">Path to the target of the symbolic
+  /// link.</param>
+  Task CreateSymlinkRecursively(string path, string pathToTarget);
+
+  /// <summary>
   /// Determines if the given directory path is a symlink.
   /// </summary>
   /// <param name="path">Path in question.</param>
@@ -406,6 +416,17 @@ public class FileClient : IFileClient {
     }
     else {
       Files.File.CreateSymbolicLink(path, pathToTarget);
+    }
+  }
+
+  public async Task CreateSymlinkRecursively(string path, string pathToTarget) {
+    CreateDirectory(path);
+    foreach (var sub in Files.Directory.GetDirectories(pathToTarget)) {
+      await CreateSymlinkRecursively(Files.Path.Join(path, Files.Path.GetFileName(sub)), sub);
+    }
+
+    foreach (var file in Files.Directory.GetFiles(pathToTarget)) {
+      await CreateSymlink(Files.Path.Join(path, Files.Path.GetFileName(file)), file);
     }
   }
 

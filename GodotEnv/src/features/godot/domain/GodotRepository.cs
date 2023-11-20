@@ -353,6 +353,7 @@ public class GodotRepository : IGodotRepository {
   ) {
     // Create or update the symlink to the new version of Godot.
     await FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
+    await CreateShortcuts(installation);
 
     if (installation.IsDotnetVersion) {
       // Update GodotSharp symlinks
@@ -383,6 +384,78 @@ public class GodotRepository : IGodotRepository {
     log.Info("Godot symlink path:");
     log.Print("");
     log.Print(GodotSymlinkPath);
+  }
+
+  public async Task CreateShortcuts(GodotInstallation instalation) {
+    switch (FileClient.OS) {
+      case OSType.MacOS: {
+          var appFilePath = FileClient.Files.Directory.GetDirectories(instalation.Path).First();
+          var applicationsPath = FileClient.Combine(FileClient.UserDirectory, "Applications", "Godot.app");
+          await FileClient.DeleteDirectory(applicationsPath);
+          await FileClient.CreateSymlinkRecursively(applicationsPath, appFilePath);
+          break;
+        }
+
+      case OSType.Linux: {
+          var userApplicationsPath = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "applications");
+          var userIconsPath = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "icons");
+
+          FileClient.CreateDirectory(userApplicationsPath);
+          FileClient.CreateDirectory(userIconsPath);
+
+          await NetworkClient.DownloadFileAsync(
+            url: "https://godotengine.org/assets/press/icon_color.png",
+            destinationDirectory: userIconsPath,
+            filename: "godot.png",
+            CancellationToken.None);
+
+          // https://github.com/godotengine/godot/blob/master/misc/dist/linux/org.godotengine.Godot.desktop
+          FileClient.CreateFile(FileClient.Combine(userApplicationsPath, "Godot.desktop"),
+          $"""
+           [Desktop Entry]
+           Name=Godot Engine
+           GenericName=Libre game engine
+           GenericName[el]=Ελεύθερη μηχανή παιχνιδιού
+           GenericName[fr]=Moteur de jeu libre
+           GenericName[zh_CN]=自由的游戏引擎
+           Comment=Multi-platform 2D and 3D game engine with a feature-rich editor
+           Comment[el]=2D και 3D μηχανή παιχνιδιού πολλαπλών πλατφορμών με επεξεργαστή πλούσιο σε χαρακτηριστικά
+           Comment[fr]=Moteur de jeu 2D et 3D multiplateforme avec un éditeur riche en fonctionnalités
+           Comment[zh_CN]=多平台 2D 和 3D 游戏引擎，带有功能丰富的编辑器
+           Exec={GodotSymlinkPath} %f
+           Icon=godot
+           Terminal=false
+           PrefersNonDefaultGPU=true
+           Type=Application
+           MimeType=application/x-godot-project;
+           Categories=Development;IDE;
+           StartupWMClass=Godot
+           """);
+          break;
+        }
+
+      case OSType.Windows: {
+          var hardLinkPath = $"{GodotSymlinkPath}.exe";
+          await FileClient.DeleteFile(hardLinkPath);
+          await FileClient.ProcessRunner.RunElevatedOnWindows(
+            "cmd.exe", $"/c mklink /H \"{hardLinkPath}\" \"{instalation.ExecutionPath}\""
+          );
+
+          var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+          var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
+          var command = string.Join(";",
+            "$ws = New-Object -ComObject (\"WScript.Shell\")",
+            $"$s = $ws.CreateShortcut(\"{applicationsPath}\")",
+            $"$s.TargetPath = \"{hardLinkPath}\"",
+            "$s.save();"
+          );
+          await FileClient.ProcessRunner.Run(".", "powershell", new[] { "-c", command });
+          break;
+        }
+      case OSType.Unknown:
+      default:
+        break;
+    }
   }
 
   public async Task AddOrUpdateGodotEnvVariable(ILog log) {

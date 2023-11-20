@@ -19,6 +19,13 @@ public interface INetworkClient {
     CancellationToken token
   );
 
+  Task DownloadFileAsync(
+    string url,
+    string destinationDirectory,
+    string filename,
+    CancellationToken token
+  );
+
   public Task<HttpResponseMessage> WebRequestGetAsync(string url);
 }
 
@@ -91,5 +98,30 @@ public class NetworkClient : INetworkClient {
 
     download.DownloadProgressChanged -= internalProgress;
     download.DownloadFileCompleted -= done;
+  }
+
+  public async Task DownloadFileAsync(
+    string url,
+    string destinationDirectory,
+    string filename,
+    CancellationToken token
+  ) {
+    var download = DownloadBuilder
+      .New()
+      .WithUrl(url)
+      .WithDirectory(destinationDirectory)
+      .WithFileName(filename)
+      .WithConfiguration(DownloadConfiguration)
+      .Build();
+
+    token.Register(
+      () => {
+        if (download.Status == DownloadStatus.Running) {
+          download.Stop();
+        }
+      }
+    );
+
+    await download.StartAsync(token);
   }
 }
