@@ -37,7 +37,6 @@ public class Windows : GodotEnvironment {
     }
 
     // There is no subfolder for non-dotnet versions.
-    //return FileClient.Combine(fsVersionString + "_win64.exe", name);
     return name;
   }
 
