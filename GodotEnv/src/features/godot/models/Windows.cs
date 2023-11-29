@@ -36,9 +36,8 @@ public class Windows : GodotEnvironment {
       return FileClient.Combine(fsVersionString + "_mono_win64", name);
     }
 
-    // Oddly enough, the non-dotnet folder name ends in ".exe" despite
-    // being a folder.
-    return FileClient.Combine(fsVersionString + "_win64.exe", name);
+    // There is no subfolder for non-dotnet versions.
+    return name;
   }
 
   public override string GetRelativeGodotSharpPath(
