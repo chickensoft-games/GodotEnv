@@ -320,12 +320,18 @@ public class FileClient : IFileClient {
     IsOSPlatformDefault;
 
   public string UserDirectory => Path.TrimEndingDirectorySeparator(
-    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+    Environment.GetFolderPath(
+      Environment.SpecialFolder.UserProfile,
+      Environment.SpecialFolderOption.DoNotVerify
+    )
   );
 
   public string AppDataDirectory => Files.Path.Combine(
     Files.Path.TrimEndingDirectorySeparator(
-      Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
+      Environment.GetFolderPath(
+        Environment.SpecialFolder.ApplicationData,
+        Environment.SpecialFolderOption.Create
+      )
     ),
     Defaults.BIN_NAME
   );

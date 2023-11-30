@@ -256,6 +256,7 @@ public static class GodotEnv {
 /// Custom type activator for CliFx. Creates commands by passing in the
 /// execution context.
 /// </summary>
+/// <param name="context">Execution context.</param>
 public class GodotEnvActivator(IExecutionContext context) : ITypeActivator {
   public IExecutionContext ExecutionContext { get; } = context;
 

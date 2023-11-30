@@ -107,7 +107,10 @@ public class FileClientTest {
 
     client.UserDirectory.ShouldBe(
       Path.TrimEndingDirectorySeparator(
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+        Environment.GetFolderPath(
+          Environment.SpecialFolder.UserProfile,
+          Environment.SpecialFolderOption.DoNotVerify
+        )
       )
     );
   }
