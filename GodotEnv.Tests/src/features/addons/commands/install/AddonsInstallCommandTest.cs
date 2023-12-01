@@ -36,9 +36,12 @@ public class AddonsInstallCommandTest {
     var addonsFileRepo = new Mock<IAddonsFileRepository>();
     var addonGraph = new Mock<IAddonGraph>();
     var addonsRepo = new Mock<IAddonsRepository>();
+    var fileClient = new Mock<IFileClient>();
     var logic = new Mock<AddonsLogic>(
       addonsFileRepo.Object, addonsRepo.Object, addonGraph.Object
     );
+    addonsFileRepo.Setup(ctx => ctx.FileClient).Returns(fileClient.Object);
+    fileClient.Setup(ctx => ctx.OS).Returns(OSType.Linux);
 
     var addonsContext = new Mock<IAddonsContext>();
     addonsContext.Setup(ctx => ctx.AddonsFileRepo)

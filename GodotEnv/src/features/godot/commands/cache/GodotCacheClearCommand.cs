@@ -1,5 +1,6 @@
 namespace Chickensoft.GodotEnv.Features.Godot.Commands;
 
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using CliFx;
@@ -19,6 +20,18 @@ public class GodotCacheClearCommand : ICommand, ICliCommand {
   }
 
   public async ValueTask ExecuteAsync(IConsole console) {
+    var godotRepo = ExecutionContext.Godot.GodotRepo;
+    var platform = ExecutionContext.Godot.Platform;
+
+    // The clear command must be run with the admin role on Windows
+    // To be able to debug, godotenv is not elevated globally if a debugger is attached
+    if (platform.FileClient.OS == OSType.Windows && !godotRepo.ProcessRunner.IsElevatedOnWindows() &&
+        !Debugger.IsAttached)
+    {
+      await godotRepo.ProcessRunner.ElevateOnWindows();
+      return;
+    }
+
     var log = ExecutionContext.CreateLog(console);
 
     log.Print("");
