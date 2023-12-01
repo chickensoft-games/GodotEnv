@@ -1,6 +1,5 @@
 namespace Chickensoft.GodotEnv.Features.Addons.Commands;
 
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Features.Godot.Commands;
@@ -14,7 +13,7 @@ using CliFx.Infrastructure;
   Description = "Changes the active version of Godot by updating the symlink " +
     "to point to the specified version."
 )]
-public class GodotUseCommand : ICommand, ICliCommand {
+public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
   [CommandParameter(
@@ -34,6 +33,8 @@ public class GodotUseCommand : ICommand, ICliCommand {
 )]
   public bool NoDotnet { get; set; }
 
+  public bool IsWindowsElevationRequired => true;
+
   public GodotUseCommand(IExecutionContext context) {
     ExecutionContext = context;
   }
@@ -41,15 +42,6 @@ public class GodotUseCommand : ICommand, ICliCommand {
   public async ValueTask ExecuteAsync(IConsole console) {
     var godotRepo = ExecutionContext.Godot.GodotRepo;
     var platform = ExecutionContext.Godot.Platform;
-
-    // The use command must be run with the admin role on Windows
-    // To be able to debug, godotenv is not elevated globally if a debugger is attached
-    if (platform.FileClient.OS == OSType.Windows && !godotRepo.ProcessRunner.IsElevatedOnWindows() &&
-        !Debugger.IsAttached)
-    {
-      await godotRepo.ProcessRunner.ElevateOnWindows();
-      return;
-    }
 
     var log = ExecutionContext.CreateLog(console);
     var output = console.Output;

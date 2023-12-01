@@ -6,9 +6,12 @@ namespace Chickensoft.GodotEnv;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Clients;
@@ -45,11 +48,13 @@ public static class GodotEnv {
     // Addons feature dependencies
 
     var addonsFileRepo = new AddonsFileRepository(fileClient);
+
     // This loads the addons config from the addons.json or addons.jsonc file
     // (if it's in the working directory — otherwise creates a default config).
+    var mainAddonsFile = addonsFileRepo.LoadAddonsFile(workingDir, out var _);
     var addonsConfig = addonsFileRepo.CreateAddonsConfiguration(
       projectPath: workingDir,
-      addonsFile: addonsFileRepo.LoadAddonsFile(workingDir, out var _)
+      addonsFile: mainAddonsFile
     );
     var addonsRepo = new AddonsRepository(
       fileClient: fileClient,
@@ -65,6 +70,7 @@ public static class GodotEnv {
     );
 
     var addonsContext = new AddonsContext(
+      MainAddonsFile: mainAddonsFile,
       AddonsFileRepo: addonsFileRepo,
       AddonsConfig: addonsConfig,
       AddonsRepo: addonsRepo,
@@ -116,7 +122,9 @@ public static class GodotEnv {
         """
       )
       .AddCommandsFromThisAssembly()
-      .UseTypeActivator(new GodotEnvActivator(context))
+      .UseTypeActivator(
+        new GodotEnvActivator(context, fileClient.OS)
+      )
       .Build().RunAsync(context.CliArgs);
 
     // Save any changes made to our configuration file after running commands.
@@ -259,14 +267,102 @@ public static class GodotEnv {
 /// execution context.
 /// </summary>
 /// <param name="context">Execution context.</param>
-public class GodotEnvActivator(IExecutionContext context) : ITypeActivator {
-  public IExecutionContext ExecutionContext { get; } = context;
+/// <param name="processRunner">Process runner.</param>
+public class GodotEnvActivator : ITypeActivator {
+  public IExecutionContext ExecutionContext { get; }
+  public OSType OS { get; }
+
+  public GodotEnvActivator(
+    IExecutionContext context,
+    OSType os
+  ) {
+    ExecutionContext = context;
+    OS = os;
+  }
 
   /// <summary>
   /// Use slow reflection to create a command. Commands must have a
   /// single-parameter constructor that receives the execution context.
   /// </summary>
   /// <param name="type">Command type to create.</param>
-  public object CreateInstance(Type type)
-    => Activator.CreateInstance(type, ExecutionContext)!;
+  public object CreateInstance(Type type) {
+    var command = Activator.CreateInstance(type, ExecutionContext)!;
+
+    if (ShouldElevateOnWindows(OS, command)) {
+      // TODO: Quit the app, run again as elevated on Windows
+    }
+
+    return command;
+  }
+
+  public static bool ShouldElevateOnWindows(OSType os, object command) =>
+    os == OSType.Windows &&
+    !Debugger.IsAttached &&
+    !IsElevatedOnWindows() &&
+    command is IWindowsElevationEnabled windowsElevationEnabledCommand &&
+    windowsElevationEnabledCommand.IsWindowsElevationRequired;
+
+  public static bool IsElevatedOnWindows() {
+    // This function can't be unit-tested on unix since the compiler requires us
+    // to check the runtime information os platform to use WindowsPrincipal.
+
+    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+      throw new InvalidOperationException(
+        "IsElevatedOnWindows is only supported on Windows."
+      );
+    }
+
+    return new WindowsPrincipal(
+      WindowsIdentity.GetCurrent()
+    ).IsInRole(WindowsBuiltInRole.Administrator);
+  }
+
+  public static async Task<ProcessResult> ElevateOnWindows() {
+    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+      throw new InvalidOperationException(
+        "ElevateOnWindows is only supported on Windows."
+      );
+    }
+
+    var argsList = Environment.GetCommandLineArgs();
+
+    // Regardless of the call context, the executable returned by
+    // GetCommandLineArgs is always a dll.
+    // It can be executed with the dotnet command.
+    var exe = argsList?.FirstOrDefault() ?? string.Empty;
+    if (exe.EndsWith(".exe")) { exe = $"\"{exe}\""; }
+
+    if (exe.EndsWith(".dll")) { exe = $"dotnet \"{exe}\""; }
+
+    var args = string.Join(
+      " ",
+      argsList?.Skip(1)?.Select(
+        arg => (arg?.Contains(' ') ?? false) ? $"\"{arg}\"" : arg
+      )?.ToList() ?? new List<string?>()
+    );
+
+    // Rerun the godotenv command with elevation in a new window
+    var process = new Process() {
+      StartInfo = new() {
+        FileName = "cmd",
+        Arguments = $"/s /c \"cd /d \"{Environment.CurrentDirectory}\" & {exe} {args} & pause\"",
+        UseShellExecute = true,
+        Verb = "runas",
+        RedirectStandardOutput = !Debugger.IsAttached,
+        RedirectStandardError = !Debugger.IsAttached,
+      }
+    };
+
+    process.Start();
+    await process.WaitForExitAsync();
+
+    var stdOutput = process.StandardOutput.ReadToEnd();
+    var stdError = process.StandardError.ReadToEnd();
+
+    return new ProcessResult(
+      ExitCode: process.ExitCode,
+      StandardOutput: stdOutput,
+      StandardError: stdError
+    );
+  }
 }

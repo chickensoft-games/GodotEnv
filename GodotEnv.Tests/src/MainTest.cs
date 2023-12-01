@@ -42,13 +42,18 @@ public class GodotEnvActivatorTest {
   [Fact]
   public void Initializes() {
     var executionContext = new Mock<IExecutionContext>();
-    var activator = new GodotEnvActivator(executionContext.Object);
+    var activator = new GodotEnvActivator(
+      executionContext.Object, OSType.Windows
+    );
+    activator.ShouldBeOfType<GodotEnvActivator>();
   }
 
   [Fact]
   public void CreatesObjectInstance() {
     var executionContext = new Mock<IExecutionContext>();
-    var activator = new GodotEnvActivator(executionContext.Object);
+    var activator = new GodotEnvActivator(
+      executionContext.Object, OSType.MacOS
+    );
 
     var command = (ICliCommand)activator.CreateInstance(typeof(ITestCommand));
     command.ShouldBeOfType<ITestCommand>();

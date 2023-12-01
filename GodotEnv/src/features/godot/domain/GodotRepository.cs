@@ -390,59 +390,58 @@ public class GodotRepository : IGodotRepository {
     log.Print(GodotSymlinkPath);
   }
 
-  public async Task CreateShortcuts(GodotInstallation instalation) {
+  public async Task CreateShortcuts(GodotInstallation installation) {
     switch (FileClient.OS) {
       case OSType.MacOS: {
-          var appFilePath = FileClient.Files.Directory.GetDirectories(instalation.Path).First();
+          var appFilePath = FileClient.Files.Directory.GetDirectories(installation.Path).First();
           var applicationsPath = FileClient.Combine(FileClient.UserDirectory, "Applications", "Godot.app");
           await FileClient.DeleteDirectory(applicationsPath);
           await FileClient.CreateSymlinkRecursively(applicationsPath, appFilePath);
           break;
         }
 
-      case OSType.Linux: {
-          var userApplicationsPath = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "applications");
-          var userIconsPath = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "icons");
+      case OSType.Linux:
+        var userApplicationsPath = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "applications");
+        var userIconsPath = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "icons");
 
-          FileClient.CreateDirectory(userApplicationsPath);
-          FileClient.CreateDirectory(userIconsPath);
+        FileClient.CreateDirectory(userApplicationsPath);
+        FileClient.CreateDirectory(userIconsPath);
 
-          await NetworkClient.DownloadFileAsync(
-            url: "https://godotengine.org/assets/press/icon_color.png",
-            destinationDirectory: userIconsPath,
-            filename: "godot.png",
-            CancellationToken.None);
+        await NetworkClient.DownloadFileAsync(
+          url: "https://godotengine.org/assets/press/icon_color.png",
+          destinationDirectory: userIconsPath,
+          filename: "godot.png",
+          CancellationToken.None);
 
-          // https://github.com/godotengine/godot/blob/master/misc/dist/linux/org.godotengine.Godot.desktop
-          FileClient.CreateFile(FileClient.Combine(userApplicationsPath, "Godot.desktop"),
-          $"""
-           [Desktop Entry]
-           Name=Godot Engine
-           GenericName=Libre game engine
-           GenericName[el]=Ελεύθερη μηχανή παιχνιδιού
-           GenericName[fr]=Moteur de jeu libre
-           GenericName[zh_CN]=自由的游戏引擎
-           Comment=Multi-platform 2D and 3D game engine with a feature-rich editor
-           Comment[el]=2D και 3D μηχανή παιχνιδιού πολλαπλών πλατφορμών με επεξεργαστή πλούσιο σε χαρακτηριστικά
-           Comment[fr]=Moteur de jeu 2D et 3D multiplateforme avec un éditeur riche en fonctionnalités
-           Comment[zh_CN]=多平台 2D 和 3D 游戏引擎，带有功能丰富的编辑器
-           Exec={GodotSymlinkPath} %f
-           Icon=godot
-           Terminal=false
-           PrefersNonDefaultGPU=true
-           Type=Application
-           MimeType=application/x-godot-project;
-           Categories=Development;IDE;
-           StartupWMClass=Godot
-           """);
-          break;
-        }
+        // https://github.com/godotengine/godot/blob/master/misc/dist/linux/org.godotengine.Godot.desktop
+        FileClient.CreateFile(FileClient.Combine(userApplicationsPath, "Godot.desktop"),
+        $"""
+          [Desktop Entry]
+          Name=Godot Engine
+          GenericName=Libre game engine
+          GenericName[el]=Ελεύθερη μηχανή παιχνιδιού
+          GenericName[fr]=Moteur de jeu libre
+          GenericName[zh_CN]=自由的游戏引擎
+          Comment=Multi-platform 2D and 3D game engine with a feature-rich editor
+          Comment[el]=2D και 3D μηχανή παιχνιδιού πολλαπλών πλατφορμών με επεξεργαστή πλούσιο σε χαρακτηριστικά
+          Comment[fr]=Moteur de jeu 2D et 3D multiplateforme avec un éditeur riche en fonctionnalités
+          Comment[zh_CN]=多平台 2D 和 3D 游戏引擎，带有功能丰富的编辑器
+          Exec={GodotSymlinkPath} %f
+          Icon=godot
+          Terminal=false
+          PrefersNonDefaultGPU=true
+          Type=Application
+          MimeType=application/x-godot-project;
+          Categories=Development;IDE;
+          StartupWMClass=Godot
+          """);
+        break;
 
       case OSType.Windows: {
           var hardLinkPath = $"{GodotSymlinkPath}.exe";
           await FileClient.DeleteFile(hardLinkPath);
           await FileClient.ProcessRunner.RunElevatedOnWindows(
-            "cmd.exe", $"/c mklink /H \"{hardLinkPath}\" \"{instalation.ExecutionPath}\""
+            "cmd.exe", $"/c mklink /H \"{hardLinkPath}\" \"{installation.ExecutionPath}\""
           );
 
           var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);

@@ -18,13 +18,6 @@ public interface IAddonsFileRepository {
   AddonsFile LoadAddonsFile(string projectPath, out string filename);
 
   /// <summary>
-  /// Check the addons file and return true if an addon have a symlink source.
-  /// </summary>
-  /// <param name="projectPath">Where to search for an addons file.</param>
-  /// <returns>A boolean indicating if an addon have a symlink source in the addons file.</returns>
-  bool AddonsFileContainsSymlinkAddons(string projectPath);
-
-  /// <summary>
   /// Creates an addons configuration object that represents the configuration
   /// for how addons should be managed.
   /// </summary>
@@ -56,15 +49,6 @@ public class AddonsFileRepository : IAddonsFileRepository {
       filename: out filename,
       defaultValue: new AddonsFile()
     );
-
-  public bool AddonsFileContainsSymlinkAddons(string projectPath) {
-    string? file = FileClient.FileThatExists(new string[] { "addons.json", "addons.jsonc" }, projectPath);
-    if(string.IsNullOrEmpty(file)) return false;
-    return FileClient.FileContains(
-      path: file,
-      str: "\"symlink\""
-    );
-  }
 
   public AddonsConfiguration CreateAddonsConfiguration(
     string projectPath, AddonsFile addonsFile

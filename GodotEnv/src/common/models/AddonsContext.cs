@@ -5,6 +5,7 @@ using Chickensoft.GodotEnv.Features.Addons.Domain;
 using Chickensoft.GodotEnv.Features.Addons.Models;
 
 public record AddonsContext(
+  AddonsFile MainAddonsFile,
   IAddonsFileRepository AddonsFileRepo,
   AddonsConfiguration AddonsConfig,
   IAddonsRepository AddonsRepo,
@@ -14,6 +15,9 @@ public record AddonsContext(
 
 /// <summary>Addons feature dependencies.</summary>
 public interface IAddonsContext {
+  /// <summary>Main addons file.</summary>
+  AddonsFile MainAddonsFile { get; }
+
   /// <summary>Addons file repository.</summary>
   IAddonsFileRepository AddonsFileRepo { get; }
 
