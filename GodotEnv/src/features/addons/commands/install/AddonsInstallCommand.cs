@@ -1,6 +1,7 @@
 namespace Chickensoft.GodotEnv.Features.Addons.Commands;
 
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using CliFx;
@@ -26,7 +27,16 @@ public class AddonsInstallCommand : ICommand, ICliCommand {
   public async ValueTask ExecuteAsync(IConsole console) {
     var log = ExecutionContext.CreateLog(console);
     var addonsFileRepo = ExecutionContext.Addons.AddonsFileRepo;
+    var addonsRepo = ExecutionContext.Addons.AddonsRepo;
     var logic = ExecutionContext.Addons.AddonsLogic;
+
+    // The install command should be run with admin role on Windows if the addons file contains addons with a symlink source
+    // To be able to debug, godotenv is not elevated globally if a debugger is attached
+    if (addonsFileRepo.AddonsFileContainsSymlinkAddons(ExecutionContext.WorkingDir) && addonsFileRepo.FileClient.OS == OSType.Windows && 
+        !addonsRepo.ProcessRunner.IsElevatedOnWindows() && !Debugger.IsAttached) {
+      await addonsRepo.ProcessRunner.ElevateOnWindows();
+      return;
+    }
 
     var binding = logic.Bind();
 

@@ -54,7 +54,8 @@ public static class GodotEnv {
     var addonsRepo = new AddonsRepository(
       fileClient: fileClient,
       computer: computer,
-      config: addonsConfig
+      config: addonsConfig,
+      processRunner: processRunner
     );
     var addonGraph = new AddonGraph();
     var addonsLogic = new AddonsLogic(
@@ -81,7 +82,8 @@ public static class GodotEnv {
       networkClient: networkClient,
       zipClient: zipClient,
       platform: platform,
-      systemEnvironmentVariableClient: systemEnvironmentVariableClient
+      systemEnvironmentVariableClient: systemEnvironmentVariableClient,
+      processRunner: processRunner
     );
 
     var godotContext = new GodotContext(

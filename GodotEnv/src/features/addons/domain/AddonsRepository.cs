@@ -11,6 +11,7 @@ public interface IAddonsRepository {
   IFileClient FileClient { get; }
   AddonsConfiguration Config { get; }
   IComputer Computer { get; }
+  IProcessRunner ProcessRunner { get; }
 
   /// <summary>
   /// <para>
@@ -82,11 +83,13 @@ public interface IAddonsRepository {
 public class AddonsRepository(
   IFileClient fileClient,
   IComputer computer,
-  AddonsConfiguration config
+  AddonsConfiguration config,
+  IProcessRunner processRunner
 ) : IAddonsRepository {
   public IFileClient FileClient { get; } = fileClient;
   public IComputer Computer { get; } = computer;
   public AddonsConfiguration Config { get; } = config;
+  public IProcessRunner ProcessRunner { get; } = processRunner;
 
   public string ResolveUrl(IAsset asset, string path) {
     var url = asset.Url;

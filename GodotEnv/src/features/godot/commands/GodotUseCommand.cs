@@ -1,5 +1,6 @@
 namespace Chickensoft.GodotEnv.Features.Addons.Commands;
 
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Features.Godot.Commands;
@@ -38,10 +39,21 @@ public class GodotUseCommand : ICommand, ICliCommand {
   }
 
   public async ValueTask ExecuteAsync(IConsole console) {
+    var godotRepo = ExecutionContext.Godot.GodotRepo;
+    var platform = ExecutionContext.Godot.Platform;
+
+    // The use command must be run with the admin role on Windows
+    // To be able to debug, godotenv is not elevated globally if a debugger is attached
+    if (platform.FileClient.OS == OSType.Windows && !godotRepo.ProcessRunner.IsElevatedOnWindows() &&
+        !Debugger.IsAttached)
+    {
+      await godotRepo.ProcessRunner.ElevateOnWindows();
+      return;
+    }
+
     var log = ExecutionContext.CreateLog(console);
     var output = console.Output;
 
-    var godotRepo = ExecutionContext.Godot.GodotRepo;
     var version = SemanticVersion.Parse(RawVersion);
     var isDotnetVersion = !NoDotnet;
 

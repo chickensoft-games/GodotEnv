@@ -26,6 +26,7 @@ public interface IGodotRepository {
   IZipClient ZipClient { get; }
   ISystemEnvironmentVariableClient SystemEnvironmentVariableClient { get; }
   IGodotEnvironment Platform { get; }
+  IProcessRunner ProcessRunner { get; }
   string GodotInstallationsPath { get; }
   string GodotCachePath { get; }
   string GodotSymlinkPath { get; }
@@ -133,6 +134,7 @@ public class GodotRepository : IGodotRepository {
   public ISystemEnvironmentVariableClient SystemEnvironmentVariableClient {
     get;
   }
+  public IProcessRunner ProcessRunner { get; }
 
   private const string GODOT_REMOTE_VERSIONS_URL = "https://api.nuget.org/v3-flatcontainer/godotsharp/index.json";
 
@@ -171,7 +173,8 @@ public class GodotRepository : IGodotRepository {
     INetworkClient networkClient,
     IZipClient zipClient,
     IGodotEnvironment platform,
-    ISystemEnvironmentVariableClient systemEnvironmentVariableClient
+    ISystemEnvironmentVariableClient systemEnvironmentVariableClient,
+    IProcessRunner processRunner
   ) {
     Config = config;
     FileClient = fileClient;
@@ -179,6 +182,7 @@ public class GodotRepository : IGodotRepository {
     ZipClient = zipClient;
     Platform = platform;
     SystemEnvironmentVariableClient = systemEnvironmentVariableClient;
+    ProcessRunner = processRunner;
   }
 
   public GodotInstallation? GetInstallation(

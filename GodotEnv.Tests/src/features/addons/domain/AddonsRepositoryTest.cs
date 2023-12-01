@@ -46,6 +46,7 @@ public class AddonsRepositoryTest {
     var client = new Mock<IFileClient>();
     var log = new Mock<ILog>();
     var computer = new Mock<IComputer>();
+    var processRunner = new Mock<IProcessRunner>();
     computer
       .Setup(pc => pc.CreateShell(It.IsAny<string>()))
       .Returns((string path) => {
@@ -59,7 +60,7 @@ public class AddonsRepositoryTest {
         );
       });
     var config = new AddonsConfiguration(projectPath, addonsDir, cacheDir);
-    var repo = new AddonsRepository(client.Object, computer.Object, config);
+    var repo = new AddonsRepository(client.Object, computer.Object, config, processRunner.Object);
     return new Subject(
       console: console,
       client: client,
