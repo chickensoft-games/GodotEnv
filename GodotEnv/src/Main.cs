@@ -289,7 +289,11 @@ public class GodotEnvActivator : ITypeActivator {
     var command = Activator.CreateInstance(type, ExecutionContext)!;
 
     if (ShouldElevateOnWindows(OS, command)) {
-      // TODO: Quit the app, run again as elevated on Windows
+      var elevateTask = ElevateOnWindows();
+      elevateTask.Wait();
+
+      // Prevent the command to be run without elevation
+      Environment.Exit(elevateTask.Result.ExitCode);
     }
 
     return command;
@@ -347,22 +351,17 @@ public class GodotEnvActivator : ITypeActivator {
         FileName = "cmd",
         Arguments = $"/s /c \"cd /d \"{Environment.CurrentDirectory}\" & {exe} {args} & pause\"",
         UseShellExecute = true,
-        Verb = "runas",
-        RedirectStandardOutput = !Debugger.IsAttached,
-        RedirectStandardError = !Debugger.IsAttached,
+        Verb = "runas"
       }
     };
 
     process.Start();
     await process.WaitForExitAsync();
 
-    var stdOutput = process.StandardOutput.ReadToEnd();
-    var stdError = process.StandardError.ReadToEnd();
-
     return new ProcessResult(
       ExitCode: process.ExitCode,
-      StandardOutput: stdOutput,
-      StandardError: stdError
+      StandardOutput: "",
+      StandardError: ""
     );
   }
 }
