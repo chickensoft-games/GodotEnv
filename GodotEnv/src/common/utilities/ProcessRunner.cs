@@ -98,26 +98,19 @@ public class ProcessRunner : IProcessRunner {
       );
     }
 
-    // If a debugger is attached, the godotenv command is not elevated globally
-    if (
-      !Debugger.IsAttached &&
-      !new WindowsPrincipal(WindowsIdentity.GetCurrent())
-        .IsInRole(WindowsBuiltInRole.Administrator)
-    ) {
-      throw new InvalidOperationException(
-        "RunElevatedOnWindows is only supported with admin role."
-      );
-    }
+    // The user should be prompted for elevation if GodotEnv
+    // doesn't have admin rights
+    bool shouldElevate = 
+      !(new WindowsPrincipal(WindowsIdentity.GetCurrent())
+          .IsInRole(WindowsBuiltInRole.Administrator));
 
-    // If a debugger is attached, the process is elevated as the godotenv
-    // command is not elevated globally
     Process process = new() {
       StartInfo = new() {
         FileName = exe,
         Arguments = args,
-        UseShellExecute = Debugger.IsAttached,
-        Verb = Debugger.IsAttached ? "runas" : string.Empty,
-        CreateNoWindow = !Debugger.IsAttached
+        UseShellExecute = shouldElevate,
+        Verb = shouldElevate ? "runas" : string.Empty,
+        CreateNoWindow = !shouldElevate
       }
     };
 
