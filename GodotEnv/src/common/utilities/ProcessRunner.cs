@@ -100,21 +100,16 @@ public class ProcessRunner : IProcessRunner {
 
     // The user should be prompted for elevation if GodotEnv
     // doesn't have admin rights
-    bool shouldElevate = 
-      !(new WindowsPrincipal(WindowsIdentity.GetCurrent())
-          .IsInRole(WindowsBuiltInRole.Administrator));
+    bool shouldElevate = !UACHelper.UACHelper.IsElevated;
 
-    Process process = new() {
-      StartInfo = new() {
-        FileName = exe,
-        Arguments = args,
-        UseShellExecute = shouldElevate,
-        Verb = shouldElevate ? "runas" : string.Empty,
-        CreateNoWindow = !shouldElevate
-      }
-    };
-
-    process.Start();
+    Process process = UACHelper.UACHelper.StartElevated(new ProcessStartInfo()
+    {
+      FileName = exe,
+      Arguments = args,
+      UseShellExecute = shouldElevate,
+      Verb = shouldElevate ? "runas" : string.Empty,
+      CreateNoWindow = !shouldElevate
+    });
 
     await process.WaitForExitAsync();
 

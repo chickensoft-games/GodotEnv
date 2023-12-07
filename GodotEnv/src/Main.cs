@@ -302,24 +302,10 @@ public class GodotEnvActivator : ITypeActivator {
   public static bool ShouldElevateOnWindows(OSType os, object command) =>
     os == OSType.Windows &&
     !Debugger.IsAttached &&
-    !IsElevatedOnWindows() &&
+    !UACHelper.UACHelper.IsElevated &&
+    UACHelper.UACHelper.IsAdministrator &&
     command is IWindowsElevationEnabled windowsElevationEnabledCommand &&
     windowsElevationEnabledCommand.IsWindowsElevationRequired;
-
-  public static bool IsElevatedOnWindows() {
-    // This function can't be unit-tested on unix since the compiler requires us
-    // to check the runtime information os platform to use WindowsPrincipal.
-
-    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
-      throw new InvalidOperationException(
-        "IsElevatedOnWindows is only supported on Windows."
-      );
-    }
-
-    return new WindowsPrincipal(
-      WindowsIdentity.GetCurrent()
-    ).IsInRole(WindowsBuiltInRole.Administrator);
-  }
 
   public static async Task<ProcessResult> ElevateOnWindows() {
     if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
@@ -346,16 +332,14 @@ public class GodotEnvActivator : ITypeActivator {
     );
 
     // Rerun the godotenv command with elevation in a new window
-    var process = new Process() {
-      StartInfo = new() {
-        FileName = "cmd",
-        Arguments = $"/s /c \"cd /d \"{Environment.CurrentDirectory}\" & {exe} {args} & pause\"",
-        UseShellExecute = true,
-        Verb = "runas"
-      }
-    };
+    var process = UACHelper.UACHelper.StartElevated(new ProcessStartInfo()
+    {
+      FileName = "cmd",
+      Arguments = $"/s /c \"cd /d \"{Environment.CurrentDirectory}\" & {exe} {args} & pause\"",
+      UseShellExecute = true,
+      Verb = "runas",
+    });
 
-    process.Start();
     await process.WaitForExitAsync();
 
     return new ProcessResult(
