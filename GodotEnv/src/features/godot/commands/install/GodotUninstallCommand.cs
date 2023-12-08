@@ -1,6 +1,5 @@
 namespace Chickensoft.GodotEnv.Features.Godot.Commands;
 
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Features.Godot.Models;
@@ -13,7 +12,8 @@ using CliWrap;
   "godot uninstall",
   Description = "Uninstalls the specified version of Godot."
 )]
-public class GodotUninstallCommand : ICommand, ICliCommand {
+public class GodotUninstallCommand :
+  ICommand, ICliCommand, IWindowsElevationEnabled {
   public IExecutionContext ExecutionContext { get; set; }
 
   [CommandParameter(
@@ -33,6 +33,8 @@ public class GodotUninstallCommand : ICommand, ICliCommand {
   )]
   public bool NoDotnet { get; set; }
 
+  public bool IsWindowsElevationRequired => true;
+
   public GodotUninstallCommand(IExecutionContext context) {
     ExecutionContext = context;
   }
@@ -40,15 +42,6 @@ public class GodotUninstallCommand : ICommand, ICliCommand {
   public async ValueTask ExecuteAsync(IConsole console) {
     var godotRepo = ExecutionContext.Godot.GodotRepo;
     var platform = ExecutionContext.Godot.Platform;
-
-    // The uninstall command must be run with the admin role on Windows
-    // To be able to debug, godotenv is not elevated globally if a debugger is attached
-    if (platform.FileClient.OS == OSType.Windows && !godotRepo.ProcessRunner.IsElevatedOnWindows() &&
-        !Debugger.IsAttached)
-    {
-      await godotRepo.ProcessRunner.ElevateOnWindows();
-      return;
-    }
 
     var log = ExecutionContext.CreateLog(console);
 

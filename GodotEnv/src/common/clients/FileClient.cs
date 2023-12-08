@@ -227,12 +227,6 @@ public interface IFileClient {
       T defaultValue
     ) where T : notnull;
 
-  /// <summary>Check if a file contains a given string.</summary>
-  /// <param name="path">File to read.</param>
-  /// <param name="str">The string to check.</param>
-  /// <returns>A boolean indicating if the file contains the string.</returns>
-  bool FileContains(string path, string str);
-
   /// <summary>Read text lines from a file.</summary>
   /// <param name="path">File to read.</param>
   /// <returns>List of lines.</returns>
@@ -566,21 +560,6 @@ public class FileClient : IFileClient {
     }
     filename = possibleFilenames[0];
     return defaultValue;
-  }
-
-  public bool FileContains(string path, string str) {
-    if (Files.File.Exists(path)) {
-      try {
-        string content = Files.File.ReadAllText(path);
-        return content.Contains(str);
-      }
-      catch (Exception e) {
-        throw new IOException(
-          $"Failed to read file `{path}`", innerException: e
-        );
-      }
-    }
-    return false;
   }
 
   public void WriteJsonFile<T>(string filePath, T data) where T : notnull {

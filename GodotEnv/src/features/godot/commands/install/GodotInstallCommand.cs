@@ -1,6 +1,5 @@
 namespace Chickensoft.GodotEnv.Features.Godot.Commands;
 
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Features.Godot.Models;
@@ -10,7 +9,8 @@ using CliFx.Infrastructure;
 using CliWrap;
 
 [Command("godot install", Description = "Install a version of Godot.")]
-public class GodotInstallCommand : ICommand, ICliCommand {
+public class GodotInstallCommand :
+  ICommand, ICliCommand, IWindowsElevationEnabled {
   [CommandParameter(
     0,
     Name = "Version",
@@ -30,6 +30,8 @@ public class GodotInstallCommand : ICommand, ICliCommand {
 
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
+  public bool IsWindowsElevationRequired => true;
+
   public GodotInstallCommand(IExecutionContext context) {
     ExecutionContext = context;
   }
@@ -37,15 +39,6 @@ public class GodotInstallCommand : ICommand, ICliCommand {
   public async ValueTask ExecuteAsync(IConsole console) {
     var godotRepo = ExecutionContext.Godot.GodotRepo;
     var platform = ExecutionContext.Godot.Platform;
-
-    // The install command must be run with the admin role on Windows
-    // To be able to debug, godotenv is not elevated globally if a debugger is attached
-    if (platform.FileClient.OS == OSType.Windows && !godotRepo.ProcessRunner.IsElevatedOnWindows() && 
-        !Debugger.IsAttached)
-    {
-      await godotRepo.ProcessRunner.ElevateOnWindows();
-      return;
-    }
 
     var log = ExecutionContext.CreateLog(console);
     var token = console.RegisterCancellationHandler();

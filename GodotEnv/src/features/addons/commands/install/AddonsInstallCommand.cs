@@ -1,7 +1,7 @@
 namespace Chickensoft.GodotEnv.Features.Addons.Commands;
 
 using System;
-using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using CliFx;
@@ -10,7 +10,8 @@ using CliFx.Exceptions;
 using CliFx.Infrastructure;
 
 [Command("addons install", Description = "Install addons in a Godot project.")]
-public class AddonsInstallCommand : ICommand, ICliCommand {
+public class AddonsInstallCommand :
+  ICommand, ICliCommand, IWindowsElevationEnabled {
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
   [CommandOption(
@@ -19,6 +20,13 @@ public class AddonsInstallCommand : ICommand, ICliCommand {
     Description = "The maximum depth to recurse while installing addons."
   )]
   public int? MaxDepth { get; init; }
+
+  // If we have any top-level addons that are symlinks, we know we're going
+  // to need to elevate on Windows.
+  public bool IsWindowsElevationRequired =>
+    ExecutionContext.Addons.MainAddonsFile.Addons.Any(
+      (addon) => addon.Value.Source == AssetSource.Symlink
+    );
 
   public AddonsInstallCommand(IExecutionContext context) {
     ExecutionContext = context;
@@ -29,14 +37,6 @@ public class AddonsInstallCommand : ICommand, ICliCommand {
     var addonsFileRepo = ExecutionContext.Addons.AddonsFileRepo;
     var addonsRepo = ExecutionContext.Addons.AddonsRepo;
     var logic = ExecutionContext.Addons.AddonsLogic;
-
-    // The install command should be run with admin role on Windows if the addons file contains addons with a symlink source
-    // To be able to debug, godotenv is not elevated globally if a debugger is attached
-    if (addonsFileRepo.AddonsFileContainsSymlinkAddons(ExecutionContext.WorkingDir) && addonsFileRepo.FileClient.OS == OSType.Windows && 
-        !addonsRepo.ProcessRunner.IsElevatedOnWindows() && !Debugger.IsAttached) {
-      await addonsRepo.ProcessRunner.ElevateOnWindows();
-      return;
-    }
 
     var binding = logic.Bind();
 
