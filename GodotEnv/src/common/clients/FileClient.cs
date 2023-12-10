@@ -633,7 +633,7 @@ public class FileClient : IFileClient {
       line => !compareLines.Contains(line.ToLower().Trim())
     );
 
-    WriteLines(filePath, newLines.Concat(existingLines));
+    WriteLines(filePath, existingLines.Concat(newLines));
   }
 
   public string FindLineBeginningWithPrefix(string filePath, string prefix) {
