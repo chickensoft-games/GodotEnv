@@ -456,13 +456,17 @@ public class GodotRepository : IGodotRepository {
 
       case OSType.Windows: {
           var hardLinkPath = $"{GodotSymlinkPath}.exe";
-          await FileClient.DeleteFile(hardLinkPath);
+          var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+          var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
+
+          if (FileClient.FileExists(hardLinkPath)) {
+            await FileClient.DeleteFile(hardLinkPath);
+          }
+
           await FileClient.ProcessRunner.RunElevatedOnWindows(
             "cmd.exe", $"/c mklink /H \"{hardLinkPath}\" \"{installation.ExecutionPath}\""
           );
 
-          var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
-          var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
           var command = string.Join(";",
             "$ws = New-Object -ComObject (\"WScript.Shell\")",
             $"$s = $ws.CreateShortcut(\"{applicationsPath}\")",
