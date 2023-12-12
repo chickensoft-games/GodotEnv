@@ -70,7 +70,7 @@ public class EnvironmentVariableClient :
         var tokens = currentValue.Split(';').ToList();
         tokens = tokens.Where(t => !t.Contains(value, StringComparison.OrdinalIgnoreCase)).ToList();
 
-        tokens.Add(value);
+        tokens.Insert(0, value);
         Environment.SetEnvironmentVariable(
           name, filter(tokens), EnvironmentVariableTarget.User
         );
@@ -79,18 +79,17 @@ public class EnvironmentVariableClient :
           name, EnvironmentVariableTarget.User
         ) ?? "";
         break;
-      // TODO: Treat case where exported var is a composite value
+      // In case the path assigned to variable changes, the previous one will remain in the file but with lower priority.
       case OSType.MacOS:
         var zshRcPath = FileClient.Combine(FileClient.UserDirectory, ".zshrc");
         FileClient.AddLinesToFileIfNotPresent(
-          zshRcPath, $"export {name}=\"{value}\""
+          zshRcPath, $"export {name}=\"{value}:${name}\""
         );
         break;
       case OSType.Linux:
-        var bashRcPath =
-          FileClient.Combine(FileClient.UserDirectory, ".bashrc");
+        var bashRcPath = FileClient.Combine(FileClient.UserDirectory, ".bashrc");
         FileClient.AddLinesToFileIfNotPresent(
-          bashRcPath, $"export {name}=\"{value}\""
+          bashRcPath, $"export {name}=\"{value}:${name}\""
         );
         break;
       case OSType.Unknown:
@@ -100,34 +99,32 @@ public class EnvironmentVariableClient :
   }
 
   public string GetUserEnv(string name) {
+    var shell = Computer.CreateShell(FileClient.AppDataDirectory);
+
     switch (FileClient.OS) {
       case OSType.Windows:
         return Environment.GetEnvironmentVariable(
           name, EnvironmentVariableTarget.User
         ) ?? "";
-      case OSType.MacOS:
-        var zshRcPath = FileClient.Combine(FileClient.UserDirectory, ".zshrc");
-        return ExtractBashEnvVarFromLine(
-          FileClient.FindLineBeginningWithPrefix(
-            zshRcPath, $"export {name}="
-          ),
-          name
-        );
-      case OSType.Linux:
-        var bashRcPath =
-          FileClient.Combine(FileClient.UserDirectory, ".bashrc");
-        return ExtractBashEnvVarFromLine(
-          FileClient.FindLineBeginningWithPrefix(
-            bashRcPath, $"export {name}="
-          ),
-          name
-        );
+      // It's important to use the user's default shell to get the env-var value here.
+      // Note the use of the '-i' flag to initialize an interactive shell. Properly loading '<shell>'rc file.
+      case OSType.MacOS: {
+          var task = shell.Run(
+            "zsh", ["-ic", $"echo ${name}"]
+          );
+          task.Wait();
+          return task.Result.StandardOutput;
+        }
+      case OSType.Linux: {
+          var task = shell.Run(
+            "bash", ["-ic", $"echo ${name}"]
+          );
+          task.Wait();
+          return task.Result.StandardOutput;
+        }
       case OSType.Unknown:
       default:
         return "";
     }
   }
-
-  private static string ExtractBashEnvVarFromLine(string line, string name) =>
-    line.Replace($"export {name}=", "").Replace("\"", "").Trim();
 }

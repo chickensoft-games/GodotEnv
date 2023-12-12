@@ -149,6 +149,10 @@ public class GodotRepository : IGodotRepository {
     FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_CACHE_PATH
   );
 
+  public string GodotBinPath => FileClient.Combine(
+    FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH
+  );
+
   public string GodotSymlinkPath => FileClient.Combine(
     FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH, Defaults.GODOT_BIN_NAME
   );
@@ -158,7 +162,7 @@ public class GodotRepository : IGodotRepository {
   );
 
   public string GodotSharpSymlinkPath => FileClient.Combine(
-    FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_SHARP_PATH
+    FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH, Defaults.GODOT_SHARP_PATH
   );
 
   public string GodotSymlinkTarget => FileClient.FileSymlinkTarget(
@@ -360,6 +364,14 @@ public class GodotRepository : IGodotRepository {
   public async Task UpdateGodotSymlink(
     GodotInstallation installation, ILog log
   ) {
+    if (FileClient.IsFileSymlink(GodotBinPath)) {  // Removes old 'bin' file-symlink.
+      await FileClient.DeleteFile(GodotBinPath);
+    }
+
+    if (!FileClient.DirectoryExists(GodotBinPath)) {
+      FileClient.CreateDirectory(GodotBinPath);
+    }
+
     // Create or update the symlink to the new version of Godot.
     await FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
     await CreateShortcuts(installation);
@@ -499,8 +511,7 @@ public class GodotRepository : IGodotRepository {
     log.Print("");
   }
 
-  public string GetGodotEnvVariable() =>
-    EnvironmentVariableClient.GetUserEnv(Defaults.GODOT_ENV_VAR_NAME);
+  public string GetGodotEnvVariable() => EnvironmentVariableClient.GetUserEnv(Defaults.GODOT_ENV_VAR_NAME);
 
   public List<GodotInstallation> GetInstallationsList() {
     var installations = new List<GodotInstallation>();
