@@ -9,7 +9,7 @@ using CliWrap;
 
 [Command(
   "godot env get",
-  Description = "Show the contents of the GODOT system environment variable."
+  Description = "Show the contents of the GODOT user environment variable."
 )]
 public class GodotEnvGetCommand : ICommand, ICliCommand {
   public IExecutionContext ExecutionContext { get; set; } = default!;

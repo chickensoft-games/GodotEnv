@@ -24,7 +24,7 @@ public interface IGodotRepository {
   IFileClient FileClient { get; }
   INetworkClient NetworkClient { get; }
   IZipClient ZipClient { get; }
-  ISystemEnvironmentVariableClient SystemEnvironmentVariableClient { get; }
+  IEnvironmentVariableClient EnvironmentVariableClient { get; }
   IGodotEnvironment Platform { get; }
   IProcessRunner ProcessRunner { get; }
   string GodotInstallationsPath { get; }
@@ -87,17 +87,18 @@ public interface IGodotRepository {
   Task UpdateGodotSymlink(GodotInstallation installation, ILog log);
 
   /// <summary>
-  /// Adds (or updates) the GODOT system  environment variable to point to the
-  /// symlink which points to the active version of Godot.
+  /// Adds (or updates) the GODOT user environment variable to point to the
+  /// symlink which points to the active version of Godot. Updates the user's PATH
+  /// to include the 'bin' folder containing the godot symlink.
   /// </summary>
   /// <param name="log">Output log.</param>
   /// <returns>Completion task.</returns>
   Task AddOrUpdateGodotEnvVariable(ILog log);
 
   /// <summary>
-  /// Gets the GODOT system environment variable.
+  /// Gets the GODOT user environment variable.
   /// </summary>
-  /// <returns>GODOT system environment variable value.</returns>
+  /// <returns>GODOT user environment variable value.</returns>
   string GetGodotEnvVariable();
 
   /// <summary>
@@ -131,7 +132,7 @@ public class GodotRepository : IGodotRepository {
   public INetworkClient NetworkClient { get; }
   public IZipClient ZipClient { get; }
   public IGodotEnvironment Platform { get; }
-  public ISystemEnvironmentVariableClient SystemEnvironmentVariableClient {
+  public IEnvironmentVariableClient EnvironmentVariableClient {
     get;
   }
   public IProcessRunner ProcessRunner { get; }
@@ -149,7 +150,11 @@ public class GodotRepository : IGodotRepository {
   );
 
   public string GodotSymlinkPath => FileClient.Combine(
-    FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH
+    FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH, Defaults.GODOT_BIN_NAME
+  );
+
+  public string GodotEnvHomeSymlinkPath => FileClient.Combine(
+    FileClient.AppDataDirectory
   );
 
   public string GodotSharpSymlinkPath => FileClient.Combine(
@@ -173,7 +178,7 @@ public class GodotRepository : IGodotRepository {
     INetworkClient networkClient,
     IZipClient zipClient,
     IGodotEnvironment platform,
-    ISystemEnvironmentVariableClient systemEnvironmentVariableClient,
+    IEnvironmentVariableClient environmentVariableClient,
     IProcessRunner processRunner
   ) {
     Config = config;
@@ -181,7 +186,7 @@ public class GodotRepository : IGodotRepository {
     NetworkClient = networkClient;
     ZipClient = zipClient;
     Platform = platform;
-    SystemEnvironmentVariableClient = systemEnvironmentVariableClient;
+    EnvironmentVariableClient = environmentVariableClient;
     ProcessRunner = processRunner;
   }
 
@@ -462,35 +467,40 @@ public class GodotRepository : IGodotRepository {
   }
 
   public async Task AddOrUpdateGodotEnvVariable(ILog log) {
-    var symlinkPath = GodotSymlinkPath;
+    var godotSymlinkPath = GodotSymlinkPath;
+    var godotEnvHomeSymlinkPath = GodotEnvHomeSymlinkPath;
     var godotVar = Defaults.GODOT_ENV_VAR_NAME;
 
     log.Print("");
     log.Info($"📝 Adding or updating the {godotVar} environment variable.");
     log.Print("");
 
-    await SystemEnvironmentVariableClient.SetEnv(godotVar, symlinkPath);
+    await EnvironmentVariableClient.SetUserEnv(godotVar, godotSymlinkPath);
 
-    log.Success("Successfully updated the GODOT environment variable.");
+    log.Success($"Successfully updated the {godotVar} environment variable.");
+
+    log.Info($"📝 Updating the PATH environment variable to include godot's binary.");
+    log.Print("");
+
+    await EnvironmentVariableClient.AppendToUserEnv("PATH", FileClient.Combine(godotEnvHomeSymlinkPath, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH));
+
+    log.Success("Successfully updated the PATH environment variable to include.");
 
     log.Print("");
+    log.Warn("You may need to restart your shell or run the following ");
+    log.Warn("to get the updated environment variable value.");
+    log.Print("");
     if (Platform is MacOS) {
-      log.Warn("You may need to restart your shell or run the following ");
-      log.Warn("to get the updated environment variable value.");
-      log.Print("");
       log.Info("    source ~/.zshrc");
     }
     else if (Platform is Linux) {
-      log.Warn("You may need to restart your shell or run the following ");
-      log.Warn("to get the updated environment variable value.");
-      log.Print("");
       log.Info("    source ~/.bashrc");
     }
     log.Print("");
   }
 
   public string GetGodotEnvVariable() =>
-    SystemEnvironmentVariableClient.GetEnv(Defaults.GODOT_ENV_VAR_NAME);
+    EnvironmentVariableClient.GetUserEnv(Defaults.GODOT_ENV_VAR_NAME);
 
   public List<GodotInstallation> GetInstallationsList() {
     var installations = new List<GodotInstallation>();

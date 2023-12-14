@@ -9,7 +9,7 @@ using CliWrap;
 
 [Command(
   "godot env setup",
-  Description = "Set the system-wide GODOT environment variable to the symlink which always points to the active version of Godot."
+  Description = "Set the user-wide GODOT environment variable to the symlink which always points to the active version of Godot."
 )]
 public class GodotEnvSetupCommand
   : ICommand, ICliCommand, IWindowsElevationEnabled {

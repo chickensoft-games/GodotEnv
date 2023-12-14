@@ -1,42 +1,85 @@
 namespace Chickensoft.GodotEnv.Common.Clients;
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 
-public interface ISystemEnvironmentVariableClient {
-  string GetEnv(string name);
-  Task SetEnv(string name, string value);
+public interface IEnvironmentVariableClient {
+  string GetUserEnv(string name);
+  Task SetUserEnv(string name, string value);
+  Task AppendToUserEnv(string name, string value);
 }
 
-public class SystemEnvironmentVariableClient :
-  ISystemEnvironmentVariableClient {
+public class EnvironmentVariableClient :
+  IEnvironmentVariableClient {
   public IProcessRunner ProcessRunner { get; }
   public IFileClient FileClient { get; }
+  public IComputer Computer { get; }
 
-  public SystemEnvironmentVariableClient(
-    IProcessRunner processRunner, IFileClient fileClient
+  public EnvironmentVariableClient(
+    IProcessRunner processRunner, IFileClient fileClient, IComputer computer
   ) {
     ProcessRunner = processRunner;
     FileClient = fileClient;
+    Computer = computer;
   }
 
-  public async Task SetEnv(string name, string value) {
-    // Set a system-wide environment variable.
-    // On Windows, this requires elevated privileges so we ask for permission.
-    //
-    // On macOS, we have to add the value to the .zshrc file.
-    // On Linux, we have to add the value to the .bashrc file.
-    //
-    // Both macOS and Linux users must open a new shell or run `source` on the
-    // rc file for the environment variable to become available afterwards.
+  public async Task SetUserEnv(string name, string value) {
     switch (FileClient.OS) {
       case OSType.Windows:
-        await ProcessRunner.RunElevatedOnWindows(
-          "cmd.exe", $"/c setx {name} \"{value}\" /M"
+        var currentValue = GetUserEnv(name);
+        Environment.SetEnvironmentVariable(
+          name, value, EnvironmentVariableTarget.User
         );
-        return;
+        currentValue = GetUserEnv(name);
+        break;
+      case OSType.MacOS:
+        var zshRcPath = FileClient.Combine(FileClient.UserDirectory, ".zshrc");
+        FileClient.AddLinesToFileIfNotPresent(
+          zshRcPath, $"export {name}=\"{value}\""
+        );
+        break;
+      case OSType.Linux:
+        var bashRcPath = FileClient.Combine(FileClient.UserDirectory, ".bashrc");
+        FileClient.AddLinesToFileIfNotPresent(
+          bashRcPath, $"export {name}=\"{value}\""
+        );
+        break;
+      case OSType.Unknown:
+      default:
+        break;
+    }
+  }
+
+  public async Task AppendToUserEnv(string name, string value) {
+    // Set a user environment variable.
+
+    var shell = Computer.CreateShell(FileClient.AppDataDirectory);
+
+    switch (FileClient.OS) {
+      case OSType.Windows:
+        var currentValue = Environment.GetEnvironmentVariable(
+          name, EnvironmentVariableTarget.User
+        ) ?? "";
+
+        Func<List<string>, string> filter = tokens => tokens.FindAll(t => t.Length > 0).Aggregate((a, b) => a + ';' + b);
+
+        var tokens = currentValue.Split(';').ToList();
+        tokens = tokens.Where(t => !t.Contains(value, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        tokens.Add(value);
+        Environment.SetEnvironmentVariable(
+          name, filter(tokens), EnvironmentVariableTarget.User
+        );
+
+        currentValue = Environment.GetEnvironmentVariable(
+          name, EnvironmentVariableTarget.User
+        ) ?? "";
+        break;
+      // TODO: Treat case where exported var is a composite value
       case OSType.MacOS:
         var zshRcPath = FileClient.Combine(FileClient.UserDirectory, ".zshrc");
         FileClient.AddLinesToFileIfNotPresent(
@@ -56,11 +99,11 @@ public class SystemEnvironmentVariableClient :
     }
   }
 
-  public string GetEnv(string name) {
+  public string GetUserEnv(string name) {
     switch (FileClient.OS) {
       case OSType.Windows:
         return Environment.GetEnvironmentVariable(
-          name, EnvironmentVariableTarget.Machine
+          name, EnvironmentVariableTarget.User
         ) ?? "";
       case OSType.MacOS:
         var zshRcPath = FileClient.Combine(FileClient.UserDirectory, ".zshrc");

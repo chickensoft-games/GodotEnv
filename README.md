@@ -18,7 +18,7 @@ GodotEnv can do the following:
 
 - ✅ Download, extract, and install Godot 3.0/4.0+ versions from the command line on Windows, macOS, and Linux (similar to tools like [NVM], [FVM], [asdf], etc.
 - ✅ Switch the active version of Godot by updating a symlink.
-- ✅ Automatically setup a system `GODOT` environment variable that always points to the active version of Godot.
+- ✅ Automatically setup a user `GODOT` environment variable that always points to the active version of Godot.
 - ✅ Install addons in a Godot project from local paths, remote git repositories, or symlinks using an easy-to-understand `addons.json` file. No more fighting with git submodules! Just run `godotenv addons install` whenever your `addons.json` file changes.
 - ✅ Automatically create and configure a `.gitignore`, `addons.json`, and `addons/.editorconfig` in your project to make it easy to manage addons.
 - ✅ Allow addons to declare dependencies on other addons using a flat dependency graph.
@@ -84,7 +84,7 @@ When installing a version of Godot, GodotEnv performs the following steps:
 - 📦 Downloads Godot installation zip archive (if not already downloaded).
 - 🤐 Extracts Godot installation zip archive.
 - 📂 Activates the newly installed version by updating the symlink.
-- 🏝 Makes sure the system `GODOT` environment variable points to the active Godot version symlink.
+- 🏝 Makes sure the user `GODOT` environment variable points to the active Godot version symlink.
 
 ### Listing Godot Versions
 
@@ -151,9 +151,9 @@ GodotEnv will provide you with the path to the active version of Godot that the 
 godotenv godot env target
 ```
 
-### Getting and Setting the GODOT System Environment Variable
+### Getting and Setting the GODOT Environment Variable
 
-You can use GodotEnv to set the `GODOT` system environment variable to the symlink that always points to the active version of Godot.
+You can use GodotEnv to set the `GODOT` user environment variable to the symlink that always points to the active version of Godot.
 
 ```sh
 # Set the GODOT environment variable to the symlink that GodotEnv maintains.
@@ -163,7 +163,7 @@ godotenv godot env setup
 godotenv godot env get
 ```
 
-> On Windows, this may request administrator privileges to setup a system environment variable available across the entire machine.
+> On Windows, this adds the `GODOT` environment variable to the current user's environment variable.
 >
 > On macOS, this adds the `GODOT` environment variable to the current user's `.zshrc` file.
 >

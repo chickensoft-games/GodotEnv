@@ -42,8 +42,8 @@ public static class GodotEnv {
     IZipClient zipClient = (fileClient.OS == OSType.Windows)
       ? new ZipClient(fileClient.Files)
       : new ZipClientTerminal(computer, fileClient.Files);
-    var systemEnvironmentVariableClient =
-      new SystemEnvironmentVariableClient(processRunner, fileClient);
+    var environmentVariableClient =
+      new EnvironmentVariableClient(processRunner, fileClient, computer);
 
     // Addons feature dependencies
 
@@ -88,7 +88,7 @@ public static class GodotEnv {
       networkClient: networkClient,
       zipClient: zipClient,
       platform: platform,
-      systemEnvironmentVariableClient: systemEnvironmentVariableClient,
+      environmentVariableClient: environmentVariableClient,
       processRunner: processRunner
     );
 
@@ -332,8 +332,7 @@ public class GodotEnvActivator : ITypeActivator {
     );
 
     // Rerun the godotenv command with elevation in a new window
-    var process = UACHelper.UACHelper.StartElevated(new ProcessStartInfo()
-    {
+    var process = UACHelper.UACHelper.StartElevated(new ProcessStartInfo() {
       FileName = "cmd",
       Arguments = $"/s /c \"cd /d \"{Environment.CurrentDirectory}\" & {exe} {args} & pause\"",
       UseShellExecute = true,
