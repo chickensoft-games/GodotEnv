@@ -502,11 +502,16 @@ public class GodotRepository : IGodotRepository {
     log.Warn("You may need to restart your shell or run the following ");
     log.Warn("to get the updated environment variable value.");
     log.Print("");
-    if (Platform is MacOS) {
-      log.Info("    source ~/.zshrc");
-    }
-    else if (Platform is Linux) {
-      log.Info("    source ~/.bashrc");
+
+    switch (FileClient.OS) {
+      case OSType.MacOS:
+      case OSType.Linux:
+        log.Info($"    source ~/.{EnvironmentVariableClient.GetDefaultShell()}rc");
+        break;
+      case OSType.Windows:
+      case OSType.Unknown:
+      default:
+        break;
     }
     log.Print("");
   }
