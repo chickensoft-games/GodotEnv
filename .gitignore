@@ -9,3 +9,6 @@ GodotEnv/addons
 GodotEnv/.addons
 GodotEnv/addons.json
 GodotEnv/addons.jsonc
+GodotEnv.sln.DotSettings.user
+
+.idea/

@@ -27,8 +27,8 @@ public interface IEnvironmentVariableClient {
 public class EnvironmentVariableClient :
   IEnvironmentVariableClient {
 
-  public const string USER_SHELL_COMMAND_MAC = "dscl . -read /Users/$USER UserShell | awk -F/ '{ print $NF }'";
-  public const string USER_SHELL_COMMAND_LINUX = "getent passwd $USER | awk -F/ '{ print $NF }'";
+  public const string USER_SHELL_COMMAND_MAC = "dscl . -read /Users/$USER UserShell";
+  public const string USER_SHELL_COMMAND_LINUX = "getent passwd $USER";
   public static readonly string[] SUPPORTED_UNIX_SHELLS = ["bash", "zsh"];
 
   public IProcessRunner ProcessRunner { get; }
@@ -151,13 +151,15 @@ public class EnvironmentVariableClient :
           var processResult = await shell.Run(
             "sh", ["-c", USER_SHELL_COMMAND_MAC]
           );
-          return processResult.StandardOutput.TrimEnd(Environment.NewLine.ToCharArray());
+          var shellName = processResult.StandardOutput.TrimEnd(Environment.NewLine.ToCharArray());
+          return shellName.Split('/').Last();
         }
       case OSType.Linux: {
           var processResult = await shell.Run(
             "sh", ["-c", USER_SHELL_COMMAND_LINUX]
           );
-          return processResult.StandardOutput.TrimEnd(Environment.NewLine.ToCharArray());
+          var shellName = processResult.StandardOutput.TrimEnd(Environment.NewLine.ToCharArray());
+          return shellName.Split('/').Last();
         }
       case OSType.Windows:
       case OSType.Unknown:
