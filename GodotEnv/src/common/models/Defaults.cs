@@ -36,6 +36,9 @@ public static class Defaults {
   /// <summary>User-wide GODOT environment variable name.</summary>
   public const string GODOT_ENV_VAR_NAME = "GODOT";
 
+  /// <summary>User-wide PATH environment variable name.</summary>
+  public const string PATH_ENV_VAR_NAME = "PATH";
+
   /// <summary>
   /// Where Godot-related commands store data, relative to the application
   /// storage location.

@@ -7,48 +7,61 @@ using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 
-public interface IEnvironmentVariableClient
-{
+public interface IEnvironmentVariableClient {
   string GetUserEnv(string name);
   Task SetUserEnv(string name, string value);
   Task AppendToUserEnv(string name, string value);
-  string GetDefaultShell();
+  string GetUserDefaultShell();
   bool IsShellSupported(string shellName);
+  bool IsDefaultShellSupported { get; }
+
+  /// <summary>
+  /// The user's default shell. Defaulted to 'bash' if not supported.
+  /// </summary>
+  string UserShell { get; }
 }
 
 public class EnvironmentVariableClient :
-  IEnvironmentVariableClient
-{
+  IEnvironmentVariableClient {
+
+  public const string USER_SHELL_COMMAND_MAC = "dscl . -read /Users/$USER UserShell | awk -F/ '{ print $NF }'";
+  public const string USER_SHELL_COMMAND_LINUX = "getent passwd $USER | awk -F/ '{ print $NF }'";
+  public static readonly string[] SUPPORTED_SHELLS = ["bash", "zsh"];
+
   public IProcessRunner ProcessRunner { get; }
   public IFileClient FileClient { get; }
   public IComputer Computer { get; }
+  public IEnvironmentClient EnvironmentClient { get; }
+
+  public bool IsDefaultShellSupported => IsShellSupported(GetUserDefaultShell());
+
+  public string UserShell {
+    get {
+      var userShell = GetUserDefaultShell();
+      userShell = IsShellSupported(userShell) ? userShell : "bash";
+      return userShell;
+    }
+  }
 
   public EnvironmentVariableClient(
-    IProcessRunner processRunner, IFileClient fileClient, IComputer computer
-  )
-  {
+    IProcessRunner processRunner, IFileClient fileClient, IComputer computer, IEnvironmentClient environmentClient
+  ) {
     ProcessRunner = processRunner;
     FileClient = fileClient;
     Computer = computer;
+    EnvironmentClient = environmentClient;
   }
 
-  public async Task SetUserEnv(string name, string value)
-  {
-    var defaultShellName = GetDefaultShell();
-
-    switch (FileClient.OS)
-    {
+  public async Task SetUserEnv(string name, string value) {
+    switch (FileClient.OS) {
       case OSType.Windows:
-        var currentValue = GetUserEnv(name);
-        Environment.SetEnvironmentVariable(
+        EnvironmentClient.SetEnvironmentVariable(
           name, value, EnvironmentVariableTarget.User
         );
-        currentValue = GetUserEnv(name);
         break;
       case OSType.MacOS:
-      case OSType.Linux:
-        {
-          var rcPath = FileClient.Combine(FileClient.UserDirectory, $".{defaultShellName}rc");
+      case OSType.Linux: {
+          var rcPath = FileClient.Combine(FileClient.UserDirectory, $".{UserShell}rc");
           FileClient.AddLinesToFileIfNotPresent(
             rcPath, $"export {name}=\"{value}\""
           );
@@ -60,19 +73,14 @@ public class EnvironmentVariableClient :
     }
   }
 
-  public async Task AppendToUserEnv(string name, string value)
-  {
+  public async Task AppendToUserEnv(string name, string value) {
     // Set a user environment variable.
 
     var shell = Computer.CreateShell(FileClient.AppDataDirectory);
-    var defaultShellName = GetDefaultShell();
 
-    switch (FileClient.OS)
-    {
+    switch (FileClient.OS) {
       case OSType.Windows:
-        var currentValue = Environment.GetEnvironmentVariable(
-          name, EnvironmentVariableTarget.User
-        ) ?? "";
+        var currentValue = GetUserEnv(name);
 
         Func<List<string>, string> filter = tokens => tokens.FindAll(t => t.Length > 0).Aggregate((a, b) => a + ';' + b);
 
@@ -80,18 +88,12 @@ public class EnvironmentVariableClient :
         tokens = tokens.Where(t => !t.Contains(value, StringComparison.OrdinalIgnoreCase)).ToList();
 
         tokens.Insert(0, value);
-        Environment.SetEnvironmentVariable(
-          name, filter(tokens), EnvironmentVariableTarget.User
-        );
-
-        currentValue = Environment.GetEnvironmentVariable(
-          name, EnvironmentVariableTarget.User
-        ) ?? "";
+        await SetUserEnv(name, filter(tokens));
         break;
       // In case the path assigned to variable changes, the previous one will remain in the file but with lower priority.
       case OSType.MacOS:
       case OSType.Linux:
-        var rcPath = FileClient.Combine(FileClient.UserDirectory, $".{defaultShellName}rc");
+        var rcPath = FileClient.Combine(FileClient.UserDirectory, $".{UserShell}rc");
         FileClient.AddLinesToFileIfNotPresent(
           rcPath, $"export {name}=\"{value}:${name}\""
         );
@@ -102,24 +104,20 @@ public class EnvironmentVariableClient :
     }
   }
 
-  public string GetUserEnv(string name)
-  {
+  public string GetUserEnv(string name) {
     var shell = Computer.CreateShell(FileClient.AppDataDirectory);
-    var defaultShellName = GetDefaultShell();
 
-    switch (FileClient.OS)
-    {
+    switch (FileClient.OS) {
       case OSType.Windows:
-        return Environment.GetEnvironmentVariable(
+        return EnvironmentClient.GetEnvironmentVariable(
           name, EnvironmentVariableTarget.User
         ) ?? "";
       // It's important to use the user's default shell to get the env-var value here.
       // Note the use of the '-i' flag to initialize an interactive shell. Properly loading '<shell>'rc file.
       case OSType.MacOS:
-      case OSType.Linux:
-        {
+      case OSType.Linux: {
           var task = shell.Run(
-            $"{defaultShellName}", ["-ic", $"echo ${name}"]
+            $"{UserShell}", ["-ic", $"echo ${name}"]
           );
           task.Wait();
           return task.Result.StandardOutput;
@@ -130,24 +128,20 @@ public class EnvironmentVariableClient :
     }
   }
 
-  public string GetDefaultShell()
-  {
+  public string GetUserDefaultShell() {
     var shell = Computer.CreateShell(FileClient.AppDataDirectory);
 
-    switch (FileClient.OS)
-    {
-      case OSType.MacOS:
-        {
+    switch (FileClient.OS) {
+      case OSType.MacOS: {
           var task = shell.Run(
-            "sh", ["-c", "dscl . -read /Users/$USER UserShell | awk -F/ '{ print $NF }'"]
+            "sh", ["-c", USER_SHELL_COMMAND_MAC]
           );
           task.Wait();
           return task.Result.StandardOutput.TrimEnd(Environment.NewLine.ToCharArray());
         }
-      case OSType.Linux:
-        {
+      case OSType.Linux: {
           var task = shell.Run(
-            "sh", ["-c", "getent passwd $USER | awk -F/ '{ print $NF }'"]
+            "sh", ["-c", USER_SHELL_COMMAND_LINUX]
           );
           task.Wait();
           return task.Result.StandardOutput.TrimEnd(Environment.NewLine.ToCharArray());
@@ -159,7 +153,23 @@ public class EnvironmentVariableClient :
     }
   }
 
-  // Should be called on CLI initialization when making environment validation.
-  // Can be used to guarantee that the user's default shell is supported.
-  public bool IsShellSupported(string shellName) => new[] { "bash", "zsh" }.Contains(shellName.ToLower());
+  public bool IsShellSupported(string shellName) {
+    bool ans = false;
+
+    switch (FileClient.OS) {
+      case OSType.MacOS:
+      case OSType.Linux:
+        ans = SUPPORTED_SHELLS.Contains(shellName.ToLower());
+        break;
+      case OSType.Windows:
+        ans = true;
+        break;
+      case OSType.Unknown:
+      default:
+        ans = false;
+        break;
+    }
+
+    return ans;
+  }
 }

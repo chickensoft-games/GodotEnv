@@ -157,10 +157,6 @@ public class GodotRepository : IGodotRepository {
     FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH, Defaults.GODOT_BIN_NAME
   );
 
-  public string GodotEnvHomeSymlinkPath => FileClient.Combine(
-    FileClient.AppDataDirectory
-  );
-
   public string GodotSharpSymlinkPath => FileClient.Combine(
     FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH, Defaults.GODOT_SHARP_PATH
   );
@@ -484,8 +480,12 @@ public class GodotRepository : IGodotRepository {
 
   public async Task AddOrUpdateGodotEnvVariable(ILog log) {
     var godotSymlinkPath = GodotSymlinkPath;
-    var godotEnvHomeSymlinkPath = GodotEnvHomeSymlinkPath;
     var godotVar = Defaults.GODOT_ENV_VAR_NAME;
+
+    if (!EnvironmentVariableClient.IsDefaultShellSupported) {
+      log.Warn($"Your shell '{EnvironmentVariableClient.GetUserDefaultShell()}' is not supported.");
+      log.Warn("Defaulting changes to bash profile ('~/.bashrc').");
+    }
 
     log.Print("");
     log.Info($"📝 Adding or updating the {godotVar} environment variable.");
@@ -495,12 +495,12 @@ public class GodotRepository : IGodotRepository {
 
     log.Success($"Successfully updated the {godotVar} environment variable.");
 
-    log.Info($"📝 Updating the PATH environment variable to include godot's binary.");
+    log.Info($"📝 Updating the {Defaults.PATH_ENV_VAR_NAME} environment variable to include godot's binary.");
     log.Print("");
 
-    await EnvironmentVariableClient.AppendToUserEnv("PATH", FileClient.Combine(godotEnvHomeSymlinkPath, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH));
+    await EnvironmentVariableClient.AppendToUserEnv(Defaults.PATH_ENV_VAR_NAME, GodotBinPath);
 
-    log.Success("Successfully updated the PATH environment variable to include.");
+    log.Success($"Successfully updated the {Defaults.PATH_ENV_VAR_NAME} environment variable to include.");
 
     log.Print("");
     log.Warn("You may need to restart your shell or run the following ");
@@ -510,7 +510,7 @@ public class GodotRepository : IGodotRepository {
     switch (FileClient.OS) {
       case OSType.MacOS:
       case OSType.Linux:
-        log.Info($"    source ~/.{EnvironmentVariableClient.GetDefaultShell()}rc");
+        log.Info($"    source ~/.{EnvironmentVariableClient.UserShell}rc");
         break;
       case OSType.Windows:
       case OSType.Unknown:

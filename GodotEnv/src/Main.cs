@@ -32,6 +32,7 @@ public static class GodotEnv {
     var computer = new Computer();
     var processRunner = new ProcessRunner();
     var fileClient = new FileClient(new FileSystem(), computer, processRunner);
+    var environmentClient = new EnvironmentClient();
     var configFileRepo = new ConfigFileRepository(fileClient);
     var config = configFileRepo.LoadConfigFile(out var _);
     var workingDir = Environment.CurrentDirectory;
@@ -43,7 +44,7 @@ public static class GodotEnv {
       ? new ZipClient(fileClient.Files)
       : new ZipClientTerminal(computer, fileClient.Files);
     var environmentVariableClient =
-      new EnvironmentVariableClient(processRunner, fileClient, computer);
+      new EnvironmentVariableClient(processRunner, fileClient, computer, environmentClient);
 
     // Addons feature dependencies
 
