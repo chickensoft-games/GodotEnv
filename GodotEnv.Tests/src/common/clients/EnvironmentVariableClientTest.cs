@@ -13,7 +13,7 @@ using Xunit;
 
 public class EnvironmentVariableClientTest {
   [Fact]
-  public async void SetUserEnv() {
+  public async Task SetUserEnv() {
     const string WORKING_DIR = ".";
     var env = "GODOT";
     var envValue = "godotenv/godot/bin/godot";
@@ -54,21 +54,16 @@ public class EnvironmentVariableClientTest {
 
     var envClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, new Mock<EnvironmentClient>().Object);
 
-    // var originalValue = envClient.GetUserEnv(env);
-
     // When
-    await envClient.SetUserEnv(env, envValue);
+    envClient.SetUserEnv(env, envValue);
 
     // Then
-    envClient.GetUserEnv(env).ShouldBe(envValue);
-
-    // Restoring original value
-    // await envClient.SetUserEnv(env, originalValue);
-    // envClient.GetUserEnv(env).ShouldBe(originalValue);
+    var userEnv = await envClient.GetUserEnv(env);
+    userEnv.ShouldBe(envValue);
   }
 
   [Fact]
-  public async void AppendToUserEnv() {
+  public async Task AppendToUserEnv() {
     var WORKING_DIR = ".";
     var env = Defaults.PATH_ENV_VAR_NAME;
     var envValue = "godotenv/godot/bin/godot";
@@ -113,11 +108,12 @@ public class EnvironmentVariableClientTest {
 
     await envVarClient.AppendToUserEnv(env, envValue);
 
-    envVarClient.GetUserEnv(env).ShouldContain(envValue);
+    var userEnv = await envVarClient.GetUserEnv(env);
+    userEnv.ShouldContain(envValue);
   }
 
   [PlatformFact(TestPlatform.Windows)]
-  public void GetDefaultShellOnWindows() {
+  public async Task GetDefaultShellOnWindows() {
     var processRunner = new Mock<IProcessRunner>();
     var fileClient = new Mock<IFileClient>();
     fileClient.Setup(fc => fc.OS).Returns(OSType.Windows);
@@ -125,18 +121,19 @@ public class EnvironmentVariableClientTest {
     var computer = new Mock<IComputer>();
     var envClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, new Mock<EnvironmentClient>().Object);
 
-    envClient.GetUserDefaultShell().ShouldBe(string.Empty);
+    var userDefaultShell = await envClient.GetUserDefaultShell();
+    userDefaultShell.ShouldBe(string.Empty);
   }
 
   [PlatformFact(TestPlatform.Mac)]
-  public void GetDefaultShellOnMac() => GetDefaultShellUnixRoutine(OSType.MacOS,
+  public async Task GetDefaultShellOnMac() => await GetDefaultShellUnixRoutine(OSType.MacOS,
     ["-c", EnvironmentVariableClient.USER_SHELL_COMMAND_MAC]);
 
   [PlatformFact(TestPlatform.Linux)]
-  public void GetDefaultShellOnLinux() =>
-    GetDefaultShellUnixRoutine(OSType.Linux, ["-c", EnvironmentVariableClient.USER_SHELL_COMMAND_LINUX]);
+  public async Task GetDefaultShellOnLinux() =>
+    await GetDefaultShellUnixRoutine(OSType.Linux, ["-c", EnvironmentVariableClient.USER_SHELL_COMMAND_LINUX]);
 
-  private static void GetDefaultShellUnixRoutine(OSType os, string[] shellArgs) {
+  private static async Task GetDefaultShellUnixRoutine(OSType os, string[] shellArgs) {
     var processRunner = new Mock<IProcessRunner>();
     const string WORKING_DIR = ".";
     const int exitCode = 0;
@@ -159,8 +156,7 @@ public class EnvironmentVariableClientTest {
 
     var envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, new Mock<EnvironmentClient>().Object);
 
-    var result = envVarClient.GetUserDefaultShell();
-
+    var result = await envVarClient.GetUserDefaultShell();
     result.ShouldBe(stdOutput);
     processRunner.VerifyAll();
   }

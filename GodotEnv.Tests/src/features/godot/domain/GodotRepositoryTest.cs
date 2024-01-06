@@ -15,7 +15,7 @@ using Xunit;
 
 public class GodotRepositoryTest {
   [Fact]
-  public async void AddOrUpdateGodotEnvVariable() {
+  public async Task AddOrUpdateGodotEnvVariable() {
     var WORKING_DIR = ".";
     var godotVar = "GODOT";
 
@@ -44,8 +44,6 @@ public class GodotRepositoryTest {
     var zipClient = new Mock<ZipClient>(fileClient.Object.Files);
 
     var environmentVariableClient = new Mock<IEnvironmentVariableClient>();
-    environmentVariableClient.Setup(evc => evc.SetUserEnv(It.IsAny<string>(), It.IsAny<string>()))
-      .Returns(Task.CompletedTask);
     environmentVariableClient.Setup(evc => evc.AppendToUserEnv(It.IsAny<string>(), It.IsAny<string>()))
       .Returns(Task.CompletedTask);
 

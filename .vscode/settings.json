@@ -1,9 +1,9 @@
 {
   "[csharp]": {
     "editor.codeActionsOnSave": {
-      "source.addMissingImports": true,
-      "source.fixAll": false,
-      "source.organizeImports": true
+      "source.addMissingImports": "explicit",
+      "source.fixAll": "never",
+      "source.organizeImports": "explicit"
     },
     "editor.formatOnPaste": true,
     "editor.formatOnSave": true,
@@ -162,5 +162,6 @@
       "source": "PowerShell"
     }
   },
-  "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true
+  "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true,
+  "dotnet.defaultSolution": "GodotEnv.sln"
 }

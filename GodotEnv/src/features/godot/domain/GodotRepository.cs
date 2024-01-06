@@ -99,7 +99,7 @@ public interface IGodotRepository {
   /// Gets the GODOT user environment variable.
   /// </summary>
   /// <returns>GODOT user environment variable value.</returns>
-  string GetGodotEnvVariable();
+  Task<string> GetGodotEnvVariable();
 
   /// <summary>
   /// Get the list of installed Godot versions.
@@ -469,7 +469,7 @@ public class GodotRepository : IGodotRepository {
             $"$s.TargetPath = \"{hardLinkPath}\"",
             "$s.save();"
           );
-          await FileClient.ProcessRunner.Run(".", "powershell", new[] { "-c", command });
+          await FileClient.ProcessRunner.Run(".", "powershell", ["-c", command]);
           break;
         }
       case OSType.Unknown:
@@ -483,7 +483,7 @@ public class GodotRepository : IGodotRepository {
     var godotVar = Defaults.GODOT_ENV_VAR_NAME;
 
     if (!EnvironmentVariableClient.IsDefaultShellSupported) {
-      log.Warn($"Your shell '{EnvironmentVariableClient.GetUserDefaultShell()}' is not supported.");
+      log.Warn($"Your shell '{await EnvironmentVariableClient.GetUserDefaultShell()}' is not supported.");
       log.Warn("Defaulting changes to bash profile ('~/.bashrc').");
     }
 
@@ -491,7 +491,7 @@ public class GodotRepository : IGodotRepository {
     log.Info($"📝 Adding or updating the {godotVar} environment variable.");
     log.Print("");
 
-    await EnvironmentVariableClient.SetUserEnv(godotVar, godotSymlinkPath);
+    EnvironmentVariableClient.SetUserEnv(godotVar, godotSymlinkPath);
 
     log.Success($"Successfully updated the {godotVar} environment variable.");
 
@@ -511,16 +511,16 @@ public class GodotRepository : IGodotRepository {
       case OSType.MacOS:
       case OSType.Linux:
         log.Info($"    source ~/.{EnvironmentVariableClient.UserShell}rc");
+        log.Print("");
         break;
       case OSType.Windows:
       case OSType.Unknown:
       default:
         break;
     }
-    log.Print("");
   }
 
-  public string GetGodotEnvVariable() => EnvironmentVariableClient.GetUserEnv(Defaults.GODOT_ENV_VAR_NAME);
+  public async Task<string> GetGodotEnvVariable() => await EnvironmentVariableClient.GetUserEnv(Defaults.GODOT_ENV_VAR_NAME);
 
   public List<GodotInstallation> GetInstallationsList() {
     var installations = new List<GodotInstallation>();
