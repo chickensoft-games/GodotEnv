@@ -2,7 +2,7 @@
   "[csharp]": {
     "editor.codeActionsOnSave": {
       "source.addMissingImports": "explicit",
-      "source.fixAll": "never",
+      "source.fixAll": "explicit",
       "source.organizeImports": "explicit"
     },
     "editor.formatOnPaste": true,

@@ -1,28 +1,19 @@
 namespace Chickensoft.GodotEnv.Tests;
 
-using Chickensoft.GodotEnv.Common.Utilities;
+using System.Linq;
 using Chickensoft.GodotEnv.Features.Addons.Commands;
-using Moq;
+using Shouldly;
 using Xunit;
 
 public class CannotBeResolvedTest {
   [Fact]
   public void ReportsOnEnter() {
-    var context = new Mock<AddonsLogic.IContext>();
-    var log = new Mock<ILog>();
+    var state = new AddonsLogic.State.CannotBeResolved();
+    var context = state.CreateFakeContext();
 
-    log.Setup(log => log.Err(It.IsAny<string>()));
-    context
-      .Setup(ctx => ctx.Output(It.IsAny<AddonsLogic.Output.Report>()))
-      .Callback<AddonsLogic.Output>(
-        output => ((AddonsLogic.Output.Report)output).Event.Report(log.Object)
-      );
+    state.Enter();
 
-    var state = new AddonsLogic.State.CannotBeResolved(context.Object);
-    var stateTester = AddonsLogic.Test(state);
-
-    stateTester.Enter();
-
-    context.VerifyAll();
+    var output =
+      context.Outputs.Single().ShouldBeOfType<AddonsLogic.Output.Report>();
   }
 }

@@ -85,13 +85,11 @@ public class AddonsInstallCommandTest {
 
     logic.Setup(logic => logic.Bind()).Returns(binding.Object);
 
-    var logicContext = new Mock<AddonsLogic.IContext>();
-
     logic
       .Setup(logic => logic.Input(It.IsAny<AddonsLogic.Input.Install>()))
       .Returns(
         Task.FromResult<AddonsLogic.State>(
-          new AddonsLogic.State.InstallationSucceeded(logicContext.Object)
+          new AddonsLogic.State.InstallationSucceeded()
         )
       );
 
@@ -116,9 +114,8 @@ public class AddonsInstallCommandTest {
     var fileClient = new Mock<IFileClient>();
 
     var command = new AddonsInstallCommand(executionContext.Object);
-    var logicContext = new Mock<AddonsLogic.IContext>();
 
-    var state = new AddonsLogic.State.CannotBeResolved(logicContext.Object);
+    var state = new AddonsLogic.State.CannotBeResolved();
 
     Assert.Throws<CommandException>(
       () => command.CheckSuccess(state)
@@ -131,9 +128,8 @@ public class AddonsInstallCommandTest {
     var fileClient = new Mock<IFileClient>();
 
     var command = new AddonsInstallCommand(executionContext.Object);
-    var logicContext = new Mock<AddonsLogic.IContext>();
 
-    var state = new AddonsLogic.State.Unresolved(logicContext.Object);
+    var state = new AddonsLogic.State.Unresolved();
 
     Assert.Throws<CommandException>(
       () => command.CheckSuccess(state)
