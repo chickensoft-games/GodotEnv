@@ -163,11 +163,11 @@ godotenv godot env setup
 godotenv godot env get
 ```
 
-> On Windows, this adds the `GODOT` environment variable to the current user's environment variable.
+> On Windows, this adds the `GODOT` environment variable to the current user's environment variable config.
 >
-> On macOS, this adds the `GODOT` environment variable to the current user's default shell configuration file.
+> On macOS, this adds the `GODOT` environment variable to the current user's default shell configuration file. In case the user's shell isn't compatible, defaults to `zsh`.
 >
-> On Linux, this adds the `GODOT` environment variable to the current user's default shell configuration file.
+> On Linux, this adds the `GODOT` environment variable to the current user's default shell configuration file. In case the user's shell isn't compatible, defaults to `bash`.
 >
 > After making changes to environment variables on any system, be sure to close any open terminals and open a new one to ensure the changes are picked up. If changes are not picked up across other applications, you may have to log out and log back in. Fortunately, since the environment variable points to a symlink which points to the active Godot version, you only have to do this once! Afterwards, you are free to switch Godot versions without any further headache as often as you like.
 

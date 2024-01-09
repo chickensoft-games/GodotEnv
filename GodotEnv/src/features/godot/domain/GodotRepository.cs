@@ -401,6 +401,7 @@ public class GodotRepository : IGodotRepository {
     log.Info("Godot symlink path:");
     log.Print("");
     log.Print(GodotSymlinkPath);
+    log.Print("");
   }
 
   public async Task CreateShortcuts(GodotInstallation installation) {
@@ -485,7 +486,7 @@ public class GodotRepository : IGodotRepository {
 
     if (!EnvironmentVariableClient.IsDefaultShellSupported) {
       log.Warn($"Your shell '{userShellRaw}' is not supported.");
-      log.Warn($"Defaulting changes to {EnvironmentVariableClient.UserShell} profile ('~/.{EnvironmentVariableClient.UserShell}rc').");
+      log.Warn($"Defaulting changes to {EnvironmentVariableClient.UserShell} profile ('{EnvironmentVariableClient.UserShellRcFilePath}').");
     }
 
     log.Print("");
@@ -502,19 +503,21 @@ public class GodotRepository : IGodotRepository {
     await EnvironmentVariableClient.AppendToUserEnv(Defaults.PATH_ENV_VAR_NAME, GodotBinPath);
 
     log.Success($"Successfully updated the {Defaults.PATH_ENV_VAR_NAME} environment variable to include.");
-
-    log.Print("");
-    log.Warn("You may need to restart your shell or run the following ");
-    log.Warn("to get the updated environment variable value.");
     log.Print("");
 
     switch (FileClient.OS) {
       case OSType.MacOS:
       case OSType.Linux:
-        log.Info($"    source ~/.{EnvironmentVariableClient.UserShell}rc");
+        log.Warn("You may need to restart your shell or run the following ");
+        log.Warn("to get the updated environment variable value:");
+        log.Print("");
+        log.Info($"    source {EnvironmentVariableClient.UserShellRcFilePath}");
         log.Print("");
         break;
       case OSType.Windows:
+        log.Warn("You may need to restart your shell.");
+        log.Print("");
+        break;
       case OSType.Unknown:
       default:
         break;

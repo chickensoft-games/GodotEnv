@@ -11,22 +11,33 @@ public interface IEnvironmentVariableClient {
   Task<string> GetUserEnv(string name);
   void SetUserEnv(string name, string value);
   Task AppendToUserEnv(string name, string value);
+  /// <summary>
+  /// Retrieves user's default shell directly from the system
+  /// <returns>Shell name.</returns>
+  /// </summary>
   Task<string> GetUserDefaultShell();
+  /// <summary>
+  /// Check if a given shell name is supported.
+  /// </summary>
+  /// <param name="shellName">Shell name.</param>
   bool IsShellSupported(string shellName);
   /// <summary>
-  /// Retrieves user's default shell and checks if it's supported.
+  /// Checks if user's default shell is supported.
+  /// It's expected that the supported shells have a 'rc' config file.
   /// </summary>
   bool IsDefaultShellSupported { get; }
   /// <summary>
   /// The user's default shell.
-  /// Defaulted to 'bash' if not supported on UNIX systems and to empty string on Windows.
+  /// Defaulted to 'zsh' on MacOS, 'bash' on Linux and an empty string on Windows.
   /// </summary>
   string UserShell { get; }
+  /// <summary>
+  /// The path to the user's shell rc file.
+  /// </summary>
+  string UserShellRcFilePath { get; }
 }
 
-public class EnvironmentVariableClient :
-  IEnvironmentVariableClient {
-
+public class EnvironmentVariableClient : IEnvironmentVariableClient {
   public const string USER_SHELL_COMMAND_MAC = "dscl . -read /Users/$USER UserShell";
   public const string USER_SHELL_COMMAND_LINUX = "getent passwd $USER";
   public static readonly string[] SUPPORTED_UNIX_SHELLS = ["bash", "zsh"];
@@ -54,10 +65,19 @@ public class EnvironmentVariableClient :
       var task = GetUserDefaultShell();
       task.Wait();
       _userShell = task.Result;
-      _userShell = IsShellSupported(_userShell) ? _userShell : "bash";
+
+      var defaultShellOS = FileClient.OS switch {
+        OSType.MacOS => "zsh",
+        OSType.Linux => "bash",
+        OSType.Windows or OSType.Unknown or _ => string.Empty,
+      };
+
+      _userShell = IsShellSupported(_userShell) ? _userShell : defaultShellOS;
       return _userShell;
     }
   }
+
+  public string UserShellRcFilePath => UserShell.Length > 0 ? FileClient.Combine(FileClient.UserDirectory, $".{UserShell}rc") : string.Empty;
 
   public EnvironmentVariableClient(
     IProcessRunner processRunner, IFileClient fileClient, IComputer computer, IEnvironmentClient environmentClient
@@ -77,9 +97,8 @@ public class EnvironmentVariableClient :
         break;
       case OSType.MacOS:
       case OSType.Linux: {
-          var rcPath = FileClient.Combine(FileClient.UserDirectory, $".{UserShell}rc");
           FileClient.AddLinesToFileIfNotPresent(
-            rcPath, $"export {name}=\"{value}\""
+            UserShellRcFilePath, $"export {name}=\"{value}\""
           );
           break;
         }
@@ -90,28 +109,30 @@ public class EnvironmentVariableClient :
   }
 
   public async Task AppendToUserEnv(string name, string value) {
-    // Set a user environment variable.
-
     var shell = Computer.CreateShell(FileClient.AppDataDirectory);
 
     switch (FileClient.OS) {
       case OSType.Windows:
         var currentValue = await GetUserEnv(name);
 
-        Func<List<string>, string> filter = tokens => tokens.FindAll(t => t.Length > 0).Aggregate((a, b) => a + ';' + b);
-
+        // On Windows Path, each segment is separated by ';'. We use this to split the string into tokens.
         var tokens = currentValue.Split(';').ToList();
+        // Filter tokens keeping the ones that are different from the 'value' that we are trying to add.
         tokens = tokens.Where(t => !t.Contains(value, StringComparison.OrdinalIgnoreCase)).ToList();
 
+        // Lambda function that receive a List<string> of tokens.
+        // For each string of length > 0, concatenate each one with ';' between then. 
+        string concatenateWindowsPaths(List<string> tokens) => tokens.FindAll(t => t.Length > 0).Aggregate((a, b) => a + ';' + b);
+
+        // Insert at the beginning.
         tokens.Insert(0, value);
-        SetUserEnv(name, filter(tokens));
+        SetUserEnv(name, concatenateWindowsPaths(tokens));
         break;
-      // In case the path assigned to variable changes, the previous one will remain in the file but with lower priority.
+      // In case the path assigned to existing variable changes, the previous one will remain in the file but with lower priority.
       case OSType.MacOS:
       case OSType.Linux:
-        var rcPath = FileClient.Combine(FileClient.UserDirectory, $".{UserShell}rc");
         FileClient.AddLinesToFileIfNotPresent(
-          rcPath, $"export {name}=\"{value}:${name}\""
+          UserShellRcFilePath, $"export {name}=\"{value}:${name}\""
         );
         break;
       case OSType.Unknown:
