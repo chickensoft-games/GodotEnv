@@ -481,10 +481,11 @@ public class GodotRepository : IGodotRepository {
   public async Task AddOrUpdateGodotEnvVariable(ILog log) {
     var godotSymlinkPath = GodotSymlinkPath;
     var godotVar = Defaults.GODOT_ENV_VAR_NAME;
+    var userShellRaw = await EnvironmentVariableClient.GetUserDefaultShell();
 
     if (!EnvironmentVariableClient.IsDefaultShellSupported) {
-      log.Warn($"Your shell '{await EnvironmentVariableClient.GetUserDefaultShell()}' is not supported.");
-      log.Warn("Defaulting changes to bash profile ('~/.bashrc').");
+      log.Warn($"Your shell '{userShellRaw}' is not supported.");
+      log.Warn($"Defaulting changes to {EnvironmentVariableClient.UserShell} profile ('~/.{EnvironmentVariableClient.UserShell}rc').");
     }
 
     log.Print("");

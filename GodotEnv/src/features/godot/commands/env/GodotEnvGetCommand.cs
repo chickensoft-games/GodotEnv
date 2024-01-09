@@ -22,8 +22,8 @@ public class GodotEnvGetCommand : ICommand, ICliCommand {
     var log = ExecutionContext.CreateLog(console);
     var godotRepo = ExecutionContext.Godot.GodotRepo;
 
-    log.Print(await godotRepo.GetGodotEnvVariable());
+    var godotEnvVar = await godotRepo.GetGodotEnvVariable();
 
-    await Task.CompletedTask;
+    log.Print(godotEnvVar);
   }
 }
