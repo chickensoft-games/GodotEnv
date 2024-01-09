@@ -12,6 +12,7 @@ using Shouldly;
 using Xunit;
 
 public class EnvironmentVariableClientTest {
+
   [Fact]
   public async Task SetUserEnv() {
     const string WORKING_DIR = ".";
@@ -21,12 +22,12 @@ public class EnvironmentVariableClientTest {
     // Given
     var processRunner = new Mock<IProcessRunner>();
 
-    // GetDefaultShell()
+    // GetUserDefaultShell()
     processRunner.Setup(
       pr => pr.Run(WORKING_DIR, "sh", It.Is<string[]>(
         value => value.SequenceEqual(new[] { "-c", EnvironmentVariableClient.USER_SHELL_COMMAND_MAC })
       ))
-    ).Returns(Task.FromResult(new ProcessResult(0, "bash")));
+    ).Returns(Task.FromResult(new ProcessResult(0, "zsh")));
     processRunner.Setup(
       pr => pr.Run(WORKING_DIR, "sh", It.Is<string[]>(
         value => value.SequenceEqual(new[] { "-c", EnvironmentVariableClient.USER_SHELL_COMMAND_LINUX })
@@ -35,7 +36,7 @@ public class EnvironmentVariableClientTest {
 
     // GetUserEnv()
     processRunner.Setup(
-      pr => pr.Run(WORKING_DIR, "bash", It.Is<string[]>(
+      pr => pr.Run(WORKING_DIR, It.IsIn(EnvironmentVariableClient.SUPPORTED_UNIX_SHELLS), It.Is<string[]>(
         value => value.SequenceEqual(new[] { "-ic", $"echo ${env}" })
       ))).Returns(Task.FromResult(new ProcessResult(0, envValue)));
 
@@ -52,13 +53,16 @@ public class EnvironmentVariableClientTest {
     var computer = new Mock<IComputer>();
     computer.Setup(c => c.CreateShell(WORKING_DIR)).Returns(new Shell(processRunner.Object, WORKING_DIR));
 
-    var envClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, new Mock<EnvironmentClient>().Object);
+    var envClient = new Mock<IEnvironmentClient>();
+    envClient.Setup(ec => ec.GetEnvironmentVariable(env, EnvironmentVariableTarget.User)).Returns(envValue);
+
+    var envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
 
     // When
-    envClient.SetUserEnv(env, envValue);
+    envVarClient.SetUserEnv(env, envValue);
 
     // Then
-    var userEnv = await envClient.GetUserEnv(env);
+    var userEnv = await envVarClient.GetUserEnv(env);
     userEnv.ShouldBe(envValue);
   }
 
@@ -85,7 +89,7 @@ public class EnvironmentVariableClientTest {
           pr => pr.Run(WORKING_DIR, "sh", It.Is<string[]>(
             value => value.SequenceEqual(new[] { "-c", EnvironmentVariableClient.USER_SHELL_COMMAND_MAC })
           ))
-        ).Returns(Task.FromResult(new ProcessResult(0, "bash")));
+        ).Returns(Task.FromResult(new ProcessResult(0, "zsh")));
     processRunner.Setup(
       pr => pr.Run(WORKING_DIR, "sh", It.Is<string[]>(
         value => value.SequenceEqual(new[] { "-c", EnvironmentVariableClient.USER_SHELL_COMMAND_LINUX })
@@ -94,7 +98,7 @@ public class EnvironmentVariableClientTest {
 
     // GetUserEnv()
     processRunner.Setup(
-      pr => pr.Run(WORKING_DIR, "bash", It.Is<string[]>(
+      pr => pr.Run(WORKING_DIR, It.IsIn(EnvironmentVariableClient.SUPPORTED_UNIX_SHELLS), It.Is<string[]>(
         value => value.SequenceEqual(new[] { "-ic", $"echo ${env}" })
       ))).Returns(Task.FromResult(new ProcessResult(0, envValue)));
 
@@ -162,7 +166,7 @@ public class EnvironmentVariableClientTest {
   }
 
   [PlatformFact(TestPlatform.Windows)]
-  public void CheckSupportedShellOnWindows() {
+  public void IsSupportedShellOnWindows() {
     var processRunner = new Mock<IProcessRunner>();
     var fileClient = new Mock<IFileClient>();
     fileClient.Setup(fc => fc.OS).Returns(OSType.Windows);
@@ -174,7 +178,7 @@ public class EnvironmentVariableClientTest {
   }
 
   [PlatformFact(TestPlatform.MacLinux)]
-  public void CheckSupportedShellOnMacLinux() {
+  public void IsSupportedShellOnMacLinux() {
     var processRunner = new Mock<IProcessRunner>();
     var fileClient = new Mock<IFileClient>();
     fileClient.Setup(fc => fc.OS).Returns(FileClient.IsOSPlatform(OSPlatform.OSX)
@@ -190,5 +194,284 @@ public class EnvironmentVariableClientTest {
     envClient.IsShellSupported("zsh").ShouldBeTrue();
     envClient.IsShellSupported("bash").ShouldBeTrue();
     envClient.IsShellSupported("fish").ShouldBeFalse();
+  }
+
+  [Fact]
+  public void IsDefaultShellSupportedWhenShellValid() {
+    const string WORKING_DIR = ".";
+    const string shellName = "bash";
+
+    var processRunner = new Mock<IProcessRunner>();
+
+    // GetuUserDefaultShell()
+    processRunner.Setup(
+      pr => pr.Run(WORKING_DIR, "sh", It.Is<string[]>(
+        value => value.SequenceEqual(new[] { "-c", EnvironmentVariableClient.USER_SHELL_COMMAND_LINUX })
+      ))
+    ).Returns(Task.FromResult(new ProcessResult(0, shellName)));
+
+    var fileClient = new Mock<IFileClient>();
+    fileClient.Setup(fc => fc.OS).Returns(OSType.Linux);
+    fileClient.Setup(fc => fc.AppDataDirectory).Returns(WORKING_DIR);
+
+    var computer = new Mock<IComputer>();
+    computer.Setup(c => c.CreateShell(WORKING_DIR)).Returns(new Shell(processRunner.Object, WORKING_DIR));
+
+    var envClient = new Mock<IEnvironmentClient>();
+
+    var envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
+
+    envVarClient.IsDefaultShellSupported.ShouldBeTrue();
+  }
+
+  [Fact]
+  public void IsDefaultShellSupportedWhenInShellValid() {
+    const string WORKING_DIR = ".";
+    const string shellName = "fish";
+
+    var processRunner = new Mock<IProcessRunner>();
+
+    // GetuUserDefaultShell()
+    processRunner.Setup(
+      pr => pr.Run(WORKING_DIR, "sh", It.Is<string[]>(
+        value => value.SequenceEqual(new[] { "-c", EnvironmentVariableClient.USER_SHELL_COMMAND_LINUX })
+      ))
+    ).Returns(Task.FromResult(new ProcessResult(0, shellName)));
+
+    var fileClient = new Mock<IFileClient>();
+    fileClient.Setup(fc => fc.OS).Returns(OSType.Linux);
+    fileClient.Setup(fc => fc.AppDataDirectory).Returns(WORKING_DIR);
+
+    var computer = new Mock<IComputer>();
+    computer.Setup(c => c.CreateShell(WORKING_DIR)).Returns(new Shell(processRunner.Object, WORKING_DIR));
+
+    var envClient = new Mock<IEnvironmentClient>();
+
+    var envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
+
+    envVarClient.IsDefaultShellSupported.ShouldBeFalse();
+  }
+
+  [Fact]
+  public void IsDefaultShellSupportedOnWindows() {
+    const string WORKING_DIR = ".";
+
+    var processRunner = new Mock<IProcessRunner>();
+
+    var fileClient = new Mock<IFileClient>();
+    fileClient.Setup(fc => fc.OS).Returns(OSType.Windows);
+    fileClient.Setup(fc => fc.AppDataDirectory).Returns(WORKING_DIR);
+
+    var computer = new Mock<IComputer>();
+    computer.Setup(c => c.CreateShell(WORKING_DIR)).Returns(new Shell(processRunner.Object, WORKING_DIR));
+
+    var envClient = new Mock<IEnvironmentClient>();
+
+    var envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
+
+    envVarClient.IsDefaultShellSupported.ShouldBeTrue();
+  }
+
+  [Fact]
+  public void UserShellWhenZshOnLinux() {
+    const string WORKING_DIR = ".";
+    const string shellName = "zsh";
+
+    var processRunner = new Mock<IProcessRunner>();
+
+    // GetuUserDefaultShell()
+    processRunner.Setup(
+      pr => pr.Run(WORKING_DIR, "sh", It.Is<string[]>(
+        value => value.SequenceEqual(new[] { "-c", EnvironmentVariableClient.USER_SHELL_COMMAND_LINUX })
+      ))
+    ).Returns(Task.FromResult(new ProcessResult(0, shellName)));
+
+    var fileClient = new Mock<IFileClient>();
+    fileClient.Setup(fc => fc.OS).Returns(OSType.Linux);
+    fileClient.Setup(fc => fc.AppDataDirectory).Returns(WORKING_DIR);
+
+    var computer = new Mock<IComputer>();
+    computer.Setup(c => c.CreateShell(WORKING_DIR)).Returns(new Shell(processRunner.Object, WORKING_DIR));
+
+    var envClient = new Mock<IEnvironmentClient>();
+
+    var envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
+
+    envVarClient.UserShell.ShouldBe(shellName);
+  }
+
+  [Fact]
+  public void UserShellWhenBashOnMac() {
+    const string WORKING_DIR = ".";
+    const string shellName = "bash";
+
+    var processRunner = new Mock<IProcessRunner>();
+
+    // GetuUserDefaultShell()
+    processRunner.Setup(
+      pr => pr.Run(WORKING_DIR, "sh", It.Is<string[]>(
+        value => value.SequenceEqual(new[] { "-c", EnvironmentVariableClient.USER_SHELL_COMMAND_MAC })
+      ))
+    ).Returns(Task.FromResult(new ProcessResult(0, shellName)));
+
+    var fileClient = new Mock<IFileClient>();
+    fileClient.Setup(fc => fc.OS).Returns(OSType.MacOS);
+    fileClient.Setup(fc => fc.AppDataDirectory).Returns(WORKING_DIR);
+
+    var computer = new Mock<IComputer>();
+    computer.Setup(c => c.CreateShell(WORKING_DIR)).Returns(new Shell(processRunner.Object, WORKING_DIR));
+
+    var envClient = new Mock<IEnvironmentClient>();
+
+    var envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
+
+    envVarClient.UserShell.ShouldBe(shellName);
+  }
+
+  [Fact]
+  public void UserShellWhenFishOnMac() {
+    const string WORKING_DIR = ".";
+    const string shellName = "fish";
+
+    var processRunner = new Mock<IProcessRunner>();
+
+    // GetuUserDefaultShell()
+    processRunner.Setup(
+      pr => pr.Run(WORKING_DIR, "sh", It.Is<string[]>(
+        value => value.SequenceEqual(new[] { "-c", EnvironmentVariableClient.USER_SHELL_COMMAND_MAC })
+      ))
+    ).Returns(Task.FromResult(new ProcessResult(0, shellName)));
+
+    var fileClient = new Mock<IFileClient>();
+    fileClient.Setup(fc => fc.OS).Returns(OSType.MacOS);
+    fileClient.Setup(fc => fc.AppDataDirectory).Returns(WORKING_DIR);
+
+    var computer = new Mock<IComputer>();
+    computer.Setup(c => c.CreateShell(WORKING_DIR)).Returns(new Shell(processRunner.Object, WORKING_DIR));
+
+    var envClient = new Mock<IEnvironmentClient>();
+
+    var envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
+
+    envVarClient.UserShell.ShouldBe("zsh");
+  }
+
+  [Fact]
+  public void UserShellOnWindows() {
+    const string WORKING_DIR = ".";
+
+    var processRunner = new Mock<IProcessRunner>();
+
+    var fileClient = new Mock<IFileClient>();
+    fileClient.Setup(fc => fc.OS).Returns(OSType.Windows);
+    fileClient.Setup(fc => fc.AppDataDirectory).Returns(WORKING_DIR);
+
+    var computer = new Mock<IComputer>();
+    computer.Setup(c => c.CreateShell(WORKING_DIR)).Returns(new Shell(processRunner.Object, WORKING_DIR));
+
+    var envClient = new Mock<IEnvironmentClient>();
+
+    var envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
+
+    envVarClient.UserShell.ShouldBe(string.Empty);
+  }
+
+  [Fact]
+  public void UserShellRcFilePathWhenValidShell() {
+    const string WORKING_DIR = ".";
+    const string shellName = "bash";
+    string shellRcFilePath() => $"{WORKING_DIR}/.{shellName}rc";
+
+    var processRunner = new Mock<IProcessRunner>();
+
+    // GetuUserDefaultShell()
+    processRunner.Setup(
+      pr => pr.Run(WORKING_DIR, "sh", It.Is<string[]>(
+        value => value.SequenceEqual(new[] { "-c", EnvironmentVariableClient.USER_SHELL_COMMAND_LINUX })
+      ))
+    ).Returns(Task.FromResult(new ProcessResult(0, shellName)));
+    processRunner.Setup(
+      pr => pr.Run(WORKING_DIR, "sh", It.Is<string[]>(
+        value => value.SequenceEqual(new[] { "-c", EnvironmentVariableClient.USER_SHELL_COMMAND_MAC })
+      ))
+    ).Returns(Task.FromResult(new ProcessResult(0, shellName)));
+
+    var fileClient = new Mock<IFileClient>();
+    fileClient.Setup(fc => fc.OS).Returns(OSType.Linux);
+    fileClient.Setup(fc => fc.AppDataDirectory).Returns(WORKING_DIR);
+    fileClient.Setup(fc => fc.UserDirectory).Returns(WORKING_DIR);
+    fileClient.Setup(fc => fc.Combine(fileClient.Object.UserDirectory, It.Is<string>(s => s.EndsWith("rc"))))
+      .Returns((string[] paths) => paths.Aggregate((a, b) => a + '/' + b));
+
+    var computer = new Mock<IComputer>();
+    computer.Setup(c => c.CreateShell(WORKING_DIR)).Returns(new Shell(processRunner.Object, WORKING_DIR));
+
+    var envClient = new Mock<IEnvironmentClient>();
+
+    var envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
+    // Linux
+    envVarClient.UserShellRcFilePath.ShouldBe(shellRcFilePath());
+
+
+    fileClient.Setup(fc => fc.OS).Returns(OSType.MacOS);
+    envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
+    // MacOS
+    envVarClient.UserShellRcFilePath.ShouldBe(shellRcFilePath());
+
+    fileClient.Setup(fc => fc.OS).Returns(OSType.Windows);
+    envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
+    // Windows
+    envVarClient.UserShellRcFilePath.ShouldBe(string.Empty);
+  }
+
+  [Fact]
+  public void UserShellRcFilePathWhenInValidShell() {
+    const string WORKING_DIR = ".";
+    const string shellName = "fish";
+    string shellRcFilePath(string sl) => $"{WORKING_DIR}/.{sl}rc";
+
+    var processRunner = new Mock<IProcessRunner>();
+
+    // GetuUserDefaultShell()
+    processRunner.Setup(
+      pr => pr.Run(WORKING_DIR, "sh", It.Is<string[]>(
+        value => value.SequenceEqual(new[] { "-c", EnvironmentVariableClient.USER_SHELL_COMMAND_LINUX })
+      ))
+    ).Returns(Task.FromResult(new ProcessResult(0, shellName)));
+    processRunner.Setup(
+      pr => pr.Run(WORKING_DIR, "sh", It.Is<string[]>(
+        value => value.SequenceEqual(new[] { "-c", EnvironmentVariableClient.USER_SHELL_COMMAND_MAC })
+      ))
+    ).Returns(Task.FromResult(new ProcessResult(0, shellName)));
+
+    var fileClient = new Mock<IFileClient>();
+    fileClient.Setup(fc => fc.OS).Returns(OSType.Linux);
+    fileClient.Setup(fc => fc.AppDataDirectory).Returns(WORKING_DIR);
+    fileClient.Setup(fc => fc.UserDirectory).Returns(WORKING_DIR);
+    fileClient.Setup(fc => fc.Combine(fileClient.Object.UserDirectory, It.Is<string>(s => s.EndsWith("rc"))))
+      .Returns((string[] paths) => paths.Aggregate((a, b) => a + '/' + b));
+
+    var computer = new Mock<IComputer>();
+    computer.Setup(c => c.CreateShell(WORKING_DIR)).Returns(new Shell(processRunner.Object, WORKING_DIR));
+
+    var envClient = new Mock<IEnvironmentClient>();
+
+    var envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
+    // Linux
+    envVarClient.UserShell.ShouldBe("bash");
+    envVarClient.UserShellRcFilePath.ShouldBe(shellRcFilePath("bash"));
+
+
+    // MacOS
+    fileClient.Setup(fc => fc.OS).Returns(OSType.MacOS);
+    envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
+    envVarClient.UserShell.ShouldBe("zsh");
+    envVarClient.UserShellRcFilePath.ShouldBe(shellRcFilePath("zsh"));
+
+    // Windows
+    fileClient.Setup(fc => fc.OS).Returns(OSType.Windows);
+    envVarClient = new EnvironmentVariableClient(processRunner.Object, fileClient.Object, computer.Object, envClient.Object);
+    envVarClient.UserShell.ShouldBe(string.Empty);
+    envVarClient.UserShellRcFilePath.ShouldBe(string.Empty);
   }
 }
