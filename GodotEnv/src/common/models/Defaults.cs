@@ -33,8 +33,11 @@ public static class Defaults {
   /// </summary>
   public const string CONFIG_FILE_NAME = "godotenv.json";
 
-  /// <summary>System-wide GODOT environment variable name.</summary>
+  /// <summary>User-wide GODOT environment variable name.</summary>
   public const string GODOT_ENV_VAR_NAME = "GODOT";
+
+  /// <summary>User-wide PATH environment variable name.</summary>
+  public const string PATH_ENV_VAR_NAME = "PATH";
 
   /// <summary>
   /// Where Godot-related commands store data, relative to the application
@@ -53,6 +56,8 @@ public static class Defaults {
   /// relative to <see cref="GODOT_PATH" />.
   /// </summary>
   public const string GODOT_BIN_PATH = "bin";
+
+  public const string GODOT_BIN_NAME = "godot";
 
   public const string GODOT_SHARP_PATH = "GodotSharp";
 
@@ -133,7 +138,7 @@ public static class Defaults {
   # https://github.com/chickensoft-games/GodotEnv
   #
   # -------------------------------------------------------------------- #
-  
+
   # Godot
   # https://github.com/github/gitignore/blob/main/Godot.gitignore
   #

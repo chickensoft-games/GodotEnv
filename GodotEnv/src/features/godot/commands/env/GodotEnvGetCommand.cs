@@ -9,7 +9,7 @@ using CliWrap;
 
 [Command(
   "godot env get",
-  Description = "Show the contents of the GODOT system environment variable."
+  Description = "Show the contents of the GODOT user environment variable."
 )]
 public class GodotEnvGetCommand : ICommand, ICliCommand {
   public IExecutionContext ExecutionContext { get; set; } = default!;
@@ -22,8 +22,8 @@ public class GodotEnvGetCommand : ICommand, ICliCommand {
     var log = ExecutionContext.CreateLog(console);
     var godotRepo = ExecutionContext.Godot.GodotRepo;
 
-    log.Print(godotRepo.GetGodotEnvVariable());
+    var godotEnvVar = await godotRepo.GetGodotEnvVariable();
 
-    await Task.CompletedTask;
+    log.Print(godotEnvVar);
   }
 }

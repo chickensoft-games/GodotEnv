@@ -32,6 +32,7 @@ public static class GodotEnv {
     var computer = new Computer();
     var processRunner = new ProcessRunner();
     var fileClient = new FileClient(new FileSystem(), computer, processRunner);
+    var environmentClient = new EnvironmentClient();
     var configFileRepo = new ConfigFileRepository(fileClient);
     var config = configFileRepo.LoadConfigFile(out var _);
     var workingDir = Environment.CurrentDirectory;
@@ -42,8 +43,8 @@ public static class GodotEnv {
     IZipClient zipClient = (fileClient.OS == OSType.Windows)
       ? new ZipClient(fileClient.Files)
       : new ZipClientTerminal(computer, fileClient.Files);
-    var systemEnvironmentVariableClient =
-      new SystemEnvironmentVariableClient(processRunner, fileClient);
+    var environmentVariableClient =
+      new EnvironmentVariableClient(processRunner, fileClient, computer, environmentClient);
 
     // Addons feature dependencies
 
@@ -88,7 +89,7 @@ public static class GodotEnv {
       networkClient: networkClient,
       zipClient: zipClient,
       platform: platform,
-      systemEnvironmentVariableClient: systemEnvironmentVariableClient,
+      environmentVariableClient: environmentVariableClient,
       processRunner: processRunner
     );
 
@@ -332,8 +333,7 @@ public class GodotEnvActivator : ITypeActivator {
     );
 
     // Rerun the godotenv command with elevation in a new window
-    var process = UACHelper.UACHelper.StartElevated(new ProcessStartInfo()
-    {
+    var process = UACHelper.UACHelper.StartElevated(new ProcessStartInfo() {
       FileName = "cmd",
       Arguments = $"/s /c \"cd /d \"{Environment.CurrentDirectory}\" & {exe} {args} & pause\"",
       UseShellExecute = true,
