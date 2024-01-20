@@ -1,5 +1,6 @@
 namespace Chickensoft.GodotEnv.Features.Addons.Commands;
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Utilities;
@@ -9,16 +10,13 @@ using Chickensoft.LogicBlocks;
 using Chickensoft.LogicBlocks.Generator;
 
 [StateMachine]
-public partial class AddonsLogic : LogicBlockAsync<AddonsLogic.Input, AddonsLogic.State, AddonsLogic.Output> {
+public partial class AddonsLogic : LogicBlockAsync<AddonsLogic.State> {
   public abstract record Input {
-    public record Install(
-      string ProjectPath, int? MaxDepth
-    ) : Input;
+    public readonly record struct Install(string ProjectPath, int? MaxDepth);
   }
 
-  public abstract record State(IContext Context) : StateLogic(Context) {
-    public record Unresolved(IContext Context) :
-      State(Context), IGet<Input.Install> {
+  public abstract record State : StateLogic {
+    public record Unresolved : State, IGet<Input.Install> {
       public async Task<State> On(Input.Install input) {
         var addonsRepo = Context.Get<IAddonsRepository>();
         var addonsFileRepo = Context.Get<IAddonsFileRepository>();
@@ -118,11 +116,11 @@ public partial class AddonsLogic : LogicBlockAsync<AddonsLogic.Input, AddonsLogi
         );
 
         if (fatalResolutionError) {
-          return new CannotBeResolved(Context);
+          return new CannotBeResolved();
         }
 
         if (addonsToInstall.Count == 0) {
-          return new NothingToInstall(Context);
+          return new NothingToInstall();
         }
 
         // Install resolved addons.
@@ -143,7 +141,7 @@ public partial class AddonsLogic : LogicBlockAsync<AddonsLogic.Input, AddonsLogi
           await addonsRepo.InstallAddonFromCache(addon, cacheName);
         }
 
-        return new InstallationSucceeded(Context);
+        return new InstallationSucceeded();
       }
 
       /// <summary>
@@ -165,7 +163,7 @@ public partial class AddonsLogic : LogicBlockAsync<AddonsLogic.Input, AddonsLogi
     }
 
     public record CannotBeResolved : State {
-      public CannotBeResolved(IContext context) : base(context) {
+      public CannotBeResolved() {
         OnEnter<CannotBeResolved>(
           (state) => {
             Context.Output(
@@ -182,7 +180,7 @@ public partial class AddonsLogic : LogicBlockAsync<AddonsLogic.Input, AddonsLogi
     }
 
     public record NothingToInstall : State {
-      public NothingToInstall(IContext context) : base(context) {
+      public NothingToInstall() {
         OnEnter<NothingToInstall>(
           (state) => {
             Context.Output(
@@ -199,7 +197,7 @@ public partial class AddonsLogic : LogicBlockAsync<AddonsLogic.Input, AddonsLogi
     }
 
     public record InstallationSucceeded : State {
-      public InstallationSucceeded(IContext context) : base(context) {
+      public InstallationSucceeded() {
         OnEnter<InstallationSucceeded>(
           (state) => {
             Context.Output(
@@ -217,12 +215,11 @@ public partial class AddonsLogic : LogicBlockAsync<AddonsLogic.Input, AddonsLogi
   }
 
   public abstract record Output {
-    public record Report(IReportableEvent Event) : Output;
+    public readonly record struct Report(IReportableEvent Event);
   }
 }
 
-public partial class AddonsLogic :
-  LogicBlockAsync<AddonsLogic.Input, AddonsLogic.State, AddonsLogic.Output> {
+public partial class AddonsLogic : LogicBlockAsync<AddonsLogic.State> {
   public AddonsLogic(
     IAddonsFileRepository addonsFileRepo,
     IAddonsRepository addonsRepo,
@@ -233,6 +230,16 @@ public partial class AddonsLogic :
     Set(addonGraph);
   }
 
-  public override State GetInitialState(IContext context) =>
-    new State.Unresolved(context);
+  public override State GetInitialState() => new State.Unresolved();
+
+  protected override void HandleError(Exception e) => Context.Output(
+    new Output.Report(
+      new ReportableEvent(
+        (log) => {
+          log.Err("An error occurred while installing addons:");
+          log.Err(e.Message);
+        }
+      )
+    )
+  );
 }

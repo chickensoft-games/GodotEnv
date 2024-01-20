@@ -17,8 +17,6 @@ public class UnresolvedTest {
 
   [Fact]
   public async Task DoesNothingIfNothingToInstall() {
-    var context = new Mock<AddonsLogic.IContext>();
-
     var addonsRepo = new Mock<IAddonsRepository>();
     var addonsFileRepo = new Mock<IAddonsFileRepository>();
     var addonGraph = new Mock<IAddonGraph>();
@@ -27,15 +25,6 @@ public class UnresolvedTest {
     var input = new AddonsLogic.Input.Install(
       ProjectPath: projectPath, MaxDepth: null
     );
-
-    context.Setup(context => context.Get<IAddonsRepository>())
-      .Returns(addonsRepo.Object);
-
-    context.Setup(context => context.Get<IAddonsFileRepository>())
-      .Returns(addonsFileRepo.Object);
-
-    context.Setup(context => context.Get<IAddonGraph>())
-      .Returns(addonGraph.Object);
 
     var addonsFile = new AddonsFile(
       addons: new() { },
@@ -50,10 +39,15 @@ public class UnresolvedTest {
       projectPath, out addonsFilePath
     )).Returns(addonsFile);
 
-    var state = new AddonsLogic.State.Unresolved(context.Object);
+    var state = new AddonsLogic.State.Unresolved();
+    var context = state.CreateFakeContext();
+
+    context.Set(addonsRepo.Object);
+    context.Set(addonsFileRepo.Object);
+    context.Set(addonGraph.Object);
+
     var nextState = await state.On(input);
 
-    context.VerifyAll();
     addonsRepo.VerifyAll();
     addonsFileRepo.VerifyAll();
     addonGraph.VerifyAll();
@@ -61,8 +55,6 @@ public class UnresolvedTest {
 
   [Fact]
   public async Task EndsInCannotBeResolvedIfFatalErrorEncountered() {
-    var context = new Mock<AddonsLogic.IContext>();
-
     var addonsRepo = new Mock<IAddonsRepository>();
     var addonsFileRepo = new Mock<IAddonsFileRepository>();
     var addonGraph = new Mock<IAddonGraph>();
@@ -71,15 +63,6 @@ public class UnresolvedTest {
     var input = new AddonsLogic.Input.Install(
       ProjectPath: projectPath, MaxDepth: null
     );
-
-    context.Setup(context => context.Get<IAddonsRepository>())
-      .Returns(addonsRepo.Object);
-
-    context.Setup(context => context.Get<IAddonsFileRepository>())
-      .Returns(addonsFileRepo.Object);
-
-    context.Setup(context => context.Get<IAddonGraph>())
-      .Returns(addonGraph.Object);
 
     var entry = new AddonsFileEntry(
       url: "https://github.com/chickensoft-games/addon"
@@ -112,12 +95,16 @@ public class UnresolvedTest {
     addonGraph.Setup(graph => graph.Add(addon))
       .Returns(graphResult);
 
-    var state = new AddonsLogic.State.Unresolved(context.Object);
+    var state = new AddonsLogic.State.Unresolved();
+    var context = state.CreateFakeContext();
+    context.Set(addonsRepo.Object);
+    context.Set(addonsFileRepo.Object);
+    context.Set(addonGraph.Object);
+
     var nextState = await state.On(input);
 
     nextState.ShouldBeOfType<AddonsLogic.State.CannotBeResolved>();
 
-    context.VerifyAll();
     addonsRepo.VerifyAll();
     addonsFileRepo.VerifyAll();
     addonGraph.VerifyAll();
@@ -125,8 +112,6 @@ public class UnresolvedTest {
 
   [Fact]
   public async Task DeterminesCanonicalAddonCorrectly() {
-    var context = new Mock<AddonsLogic.IContext>();
-
     var addonsRepo = new Mock<IAddonsRepository>();
     var addonsFileRepo = new Mock<IAddonsFileRepository>();
     var addonGraph = new Mock<IAddonGraph>();
@@ -135,15 +120,6 @@ public class UnresolvedTest {
     var input = new AddonsLogic.Input.Install(
       ProjectPath: projectPath, MaxDepth: null
     );
-
-    context.Setup(context => context.Get<IAddonsRepository>())
-      .Returns(addonsRepo.Object);
-
-    context.Setup(context => context.Get<IAddonsFileRepository>())
-      .Returns(addonsFileRepo.Object);
-
-    context.Setup(context => context.Get<IAddonGraph>())
-      .Returns(addonGraph.Object);
 
     var entry = new AddonsFileEntry(
       url: "https://github.com/chickensoft-games/addon"
@@ -213,12 +189,17 @@ public class UnresolvedTest {
       ))
       .Returns(otherAddonAddonsFile);
 
-    var state = new AddonsLogic.State.Unresolved(context.Object);
+    var state = new AddonsLogic.State.Unresolved();
+
+    var context = state.CreateFakeContext();
+    context.Set(addonsRepo.Object);
+    context.Set(addonsFileRepo.Object);
+    context.Set(addonGraph.Object);
+
     var nextState = await state.On(input);
 
     nextState.ShouldBeOfType<AddonsLogic.State.InstallationSucceeded>();
 
-    context.VerifyAll();
     addonsRepo.VerifyAll();
     addonsFileRepo.VerifyAll();
     addonGraph.VerifyAll();
@@ -226,8 +207,6 @@ public class UnresolvedTest {
 
   [Fact]
   public async Task InstallsSymlinkAddon() {
-    var context = new Mock<AddonsLogic.IContext>();
-
     var addonsRepo = new Mock<IAddonsRepository>();
     var addonsFileRepo = new Mock<IAddonsFileRepository>();
     var addonGraph = new Mock<IAddonGraph>();
@@ -236,15 +215,6 @@ public class UnresolvedTest {
     var input = new AddonsLogic.Input.Install(
       ProjectPath: projectPath, MaxDepth: null
     );
-
-    context.Setup(context => context.Get<IAddonsRepository>())
-      .Returns(addonsRepo.Object);
-
-    context.Setup(context => context.Get<IAddonsFileRepository>())
-      .Returns(addonsFileRepo.Object);
-
-    context.Setup(context => context.Get<IAddonGraph>())
-      .Returns(addonGraph.Object);
 
     var entry = new AddonsFileEntry(
       url: "/symlink_addon/addon",
@@ -297,12 +267,16 @@ public class UnresolvedTest {
     addonsRepo
       .Setup(repo => repo.InstallAddonWithSymlink(It.IsAny<IAddon>()));
 
-    var state = new AddonsLogic.State.Unresolved(context.Object);
+    var state = new AddonsLogic.State.Unresolved();
+    var context = state.CreateFakeContext();
+    context.Set(addonsRepo.Object);
+    context.Set(addonsFileRepo.Object);
+    context.Set(addonGraph.Object);
+
     var nextState = await state.On(input);
 
     nextState.ShouldBeOfType<AddonsLogic.State.InstallationSucceeded>();
 
-    context.VerifyAll();
     addonsRepo.VerifyAll();
     addonsFileRepo.VerifyAll();
     addonGraph.VerifyAll();
