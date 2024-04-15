@@ -1,15 +1,14 @@
-namespace Chickensoft.GodotEnv.Tests;
-
+namespace Chickensoft.GodotEnv.Tests.Features.Godot.Domain;
 
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Chickensoft.GodotEnv.Common.Clients;
+using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
+using Chickensoft.GodotEnv.Features.Godot.Domain;
+using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx.Infrastructure;
-using Common.Clients;
-using Common.Models;
 using Downloader;
-using Features.Godot.Domain;
-using Features.Godot.Models;
 using Moq;
 using Xunit;
 
