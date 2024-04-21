@@ -60,6 +60,13 @@ public record SemanticVersion(
   public string VersionString => $"{Major}.{Minor}.{Patch}" +
     (Label != "" ? $"-{Label}" : "");
 
+  /// <summary>
+  /// Version string as Godot uses them (if Patch is zero, it isn't included).
+  /// </summary>
+  public string AsGodotVersionString => $"{Major}.{Minor}" +
+    (Patch != "0" ? $".{Patch}" : "") +
+    (Label != "" ? $"-{Label}" : "");
+
   public override string ToString() =>
     $"Major({Major}).Minor({Minor}).Patch({Patch})-Label({Label})";
 }

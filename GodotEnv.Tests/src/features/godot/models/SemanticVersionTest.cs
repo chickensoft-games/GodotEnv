@@ -48,4 +48,18 @@ public class SemanticVersionTest {
   public void CorrectVersionStringFormatting(SemanticVersion toFormat, string expected) {
     Assert.Equal(expected, toFormat.VersionString);
   }
+
+  public static IEnumerable<object[]> CorrectGodotVersionFormattingTestData() {
+    yield return [new SemanticVersion("0", "0", "1"), "0.0.1"];
+    yield return [new SemanticVersion("1", "2", "0"), "1.2"];
+    yield return [new SemanticVersion("1", "2", "3"), "1.2.3"];
+    yield return [new SemanticVersion("1", "2", "0", "label"), "1.2-label"];
+    yield return [new SemanticVersion("1", "2", "3", "label"), "1.2.3-label"];
+  }
+
+  [Theory]
+  [MemberData(nameof(CorrectVersionStringFormattingTestData))]
+  public void CorrectGodotVersionStringFormatting(SemanticVersion toFormat, string expected) {
+    Assert.Equal(expected, toFormat.VersionString);
+  }
 }
