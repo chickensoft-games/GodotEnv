@@ -33,4 +33,11 @@
     <ProjectReference Include="../GodotEnv/Chickensoft.GodotEnv.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="src\features\godot\domain\data\godot-4.3-dev5.json" />
+    <EmbeddedResource Include="src\features\godot\domain\data\godot-4.3-dev5.json" />
+    <None Remove="src\features\godot\domain\data\godot-1.1-stable.json" />
+    <EmbeddedResource Include="src\features\godot\domain\data\godot-1.1-stable.json" />
+  </ItemGroup>
+
 </Project>

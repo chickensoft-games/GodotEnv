@@ -57,6 +57,7 @@ public interface IGodotRepository {
   /// </summary>
   /// <param name="version">Godot version.</param>
   /// <param name="isDotnetVersion">True to download the .NET version.</param>
+  /// <param name="skipChecksumVerification">True if checksum verification should be skipped</param>
   /// <param name="log">Output log.</param>
   /// <param name="token">Cancellation token.</param>
   /// <returns>The fully resolved / absolute path of the Godot installation zip
@@ -64,6 +65,7 @@ public interface IGodotRepository {
   Task<GodotCompressedArchive> DownloadGodot(
       SemanticVersion version,
       bool isDotnetVersion,
+      bool skipChecksumVerification,
       ILog log,
       CancellationToken token
     );
@@ -139,6 +141,8 @@ public class GodotRepository : IGodotRepository {
 
   private const string GODOT_REMOTE_VERSIONS_URL = "https://api.nuget.org/v3-flatcontainer/godotsharp/index.json";
 
+  private IGodotChecksumClient ChecksumClient { get; }
+
   public string GodotInstallationsPath => FileClient.Combine(
     FileClient.AppDataDirectory,
     Defaults.GODOT_PATH,
@@ -179,7 +183,8 @@ public class GodotRepository : IGodotRepository {
     IZipClient zipClient,
     IGodotEnvironment platform,
     IEnvironmentVariableClient environmentVariableClient,
-    IProcessRunner processRunner
+    IProcessRunner processRunner,
+    IGodotChecksumClient checksumClient
   ) {
     Config = config;
     FileClient = fileClient;
@@ -188,6 +193,7 @@ public class GodotRepository : IGodotRepository {
     Platform = platform;
     EnvironmentVariableClient = environmentVariableClient;
     ProcessRunner = processRunner;
+    ChecksumClient = checksumClient;
   }
 
   public GodotInstallation? GetInstallation(
@@ -211,6 +217,7 @@ public class GodotRepository : IGodotRepository {
   public async Task<GodotCompressedArchive> DownloadGodot(
     SemanticVersion version,
     bool isDotnetVersion,
+    bool skipChecksumVerification,
     ILog log,
     CancellationToken token
   ) {
@@ -308,6 +315,13 @@ public class GodotRepository : IGodotRepository {
       throw;
     }
 
+    if (!skipChecksumVerification) {
+      await VerifyArchiveChecksum(log, archive);
+    }
+    else {
+      log.Print($"⚠️ Skipping checksum verification due to command-line flag!");
+    }
+
     FileClient.CreateFile(didFinishDownloadFilePath, "done");
 
     log.Print("");
@@ -316,6 +330,29 @@ public class GodotRepository : IGodotRepository {
     return archive;
   }
 
+  private async Task VerifyArchiveChecksum(ILog log, GodotCompressedArchive archive)
+  {
+    try {
+      log.Print("⏳ Verifying Checksum");
+      await ChecksumClient.VerifyArchiveChecksum(archive);
+      log.Print("✅ Checksum verified");
+    }
+    catch (ChecksumMismatchException ex) {
+      log.Print($"⚠️⚠️⚠️ Checksum of downloaded file does not match the one published by Godot!");
+      log.Print($"⚠️⚠️⚠️ {ex.Message}");
+      log.Print($"⚠️⚠️⚠️ You SHOULD NOT proceed with installation!");
+      log.Print($"⚠️⚠️⚠️ If you have a very good reason, this check can be skipped via --unsafe-skip-checksum-verification.");
+      log.Err("🛑 Aborting Godot installation.");
+      throw;
+    }
+    catch (MissingChecksumException) {
+      log.Print($"⚠️ No Godot-published checksum found for the downloaded file.");
+      log.Print($"⚠️ For Godot versions below 3.2.2-beta1, this is expected as none have been published as of 2024-05-01.");
+      log.Print($"⚠️ If you still want to proceed with the installation, this check can be skipped via --unsafe-skip-checksum-verification.");
+      log.Err("🛑 Aborting Godot installation.");
+      throw;
+    }
+  }
   public async Task<GodotInstallation> ExtractGodotInstaller(
     GodotCompressedArchive archive,
     ILog log

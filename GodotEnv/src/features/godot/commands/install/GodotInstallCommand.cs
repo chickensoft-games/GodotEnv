@@ -28,6 +28,12 @@ public class GodotInstallCommand :
   )]
   public bool NoDotnet { get; set; }
 
+  [CommandOption(
+    "unsafe-skip-checksum-verification",
+    Description = "UNSAFE! Specify to skip checksum verification."
+  )]
+  public bool SkipChecksumVerification { get; set; } = false;
+
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
   public bool IsWindowsElevationRequired => true;
@@ -70,7 +76,7 @@ public class GodotInstallCommand :
 
     var godotCompressedArchive =
       await godotRepo.DownloadGodot(
-        version, isDotnetVersion, log, token
+        version, isDotnetVersion, SkipChecksumVerification, log, token
       );
 
     var newInstallation =

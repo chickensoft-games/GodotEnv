@@ -83,6 +83,9 @@ public static class GodotEnv {
     var platform = GodotEnvironment.Create(
       os: fileClient.OS, fileClient: fileClient, computer: computer
     );
+
+    var checksumRepository = new GodotChecksumClient(networkClient, platform);
+
     var godotRepo = new GodotRepository(
       config: config,
       fileClient: fileClient,
@@ -90,7 +93,8 @@ public static class GodotEnv {
       zipClient: zipClient,
       platform: platform,
       environmentVariableClient: environmentVariableClient,
-      processRunner: processRunner
+      processRunner: processRunner,
+      checksumClient: checksumRepository
     );
 
     var godotContext = new GodotContext(
