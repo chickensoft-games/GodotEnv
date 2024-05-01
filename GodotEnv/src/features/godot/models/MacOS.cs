@@ -14,8 +14,15 @@ public class MacOS : Unix {
       )
     );
 
-  public override string GetInstallerNameSuffix(bool isDotnetVersion, SemanticVersion version) =>
-    $"{(isDotnetVersion ? "_mono" : "")}_{(int.Parse(version.Major) == 3 ? "osx" : "macos")}.universal";
+  public override string GetInstallerNameSuffix(bool isDotnetVersion, SemanticVersion version) {
+    var major = int.Parse(version.Major);
+    var minor = int.Parse(version.Minor);
+    var patch = int.Parse(version.Patch);
+    var hasUniversalSuffix = major > 3 || (major == 3 && minor > 3 && patch > 2);
+    var universalSuffix = hasUniversalSuffix ? ".universal" : ".64";
+
+    return $"{(isDotnetVersion ? "_mono" : "")}_{(major == 3 ? "osx" : "macos")}{universalSuffix}";
+  }
 
   public override void Describe(ILog log) => log.Info("🍏 Running on macOS");
 
