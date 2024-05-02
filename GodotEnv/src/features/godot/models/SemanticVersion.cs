@@ -57,15 +57,21 @@ public record SemanticVersion(
   public string LabelNoDots => Label.Replace(".", "");
 
   /// <summary>Reconstructed version string.</summary>
-  public string VersionString => $"{Major}.{Minor}.{Patch}" +
-    (Label != "" ? $"-{Label}" : "");
+  public string VersionString => Format(false, false);
 
   /// <summary>
-  /// Version string as Godot uses them (if Patch is zero, it isn't included).
+  /// Formats a Semantic version in different forms as various Godot locations
+  /// use them.
   /// </summary>
-  public string AsGodotVersionString => $"{Major}.{Minor}" +
-    (Patch != "0" ? $".{Patch}" : "") +
-    (Label != "" ? $"-{Label}" : "");
+  /// <param name="omitPatchIfZero">If true, a patch of 0 will be omitted.</param>
+  /// <param name="noDotsInLabel">If true, all dots will be removed from the label.</param>
+  /// <returns></returns>
+  public string Format(bool omitPatchIfZero, bool noDotsInLabel) {
+    var label = noDotsInLabel ? LabelNoDots : Label;
+    var patch = (omitPatchIfZero && Patch == "0") ? "" : $".{Patch}";
+
+    return $"{Major}.{Minor}{patch}" + (label != "" ? $"-{label}" : "");
+  }
 
   public override string ToString() =>
     $"Major({Major}).Minor({Minor}).Patch({Patch})-Label({Label})";

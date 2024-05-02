@@ -48,8 +48,8 @@ public class GodotChecksumClient(
   private IGodotEnvironment Platform { get; } = platform;
 
   private static string GetChecksumFileUrl(GodotCompressedArchive archive) {
-    var suffix = archive.Version.Label == string.Empty ? "-stable" : string.Empty;
-    var releaseFilename = $"godot-{archive.Version.AsGodotVersionString}{suffix}.json";
+    var suffix = archive.Version.LabelNoDots == string.Empty ? "-stable" : string.Empty;
+    var releaseFilename = $"godot-{archive.Version.Format(true, true)}{suffix}.json";
     return $"https://raw.githubusercontent.com/godotengine/godot-builds/main/releases/{releaseFilename}";
   }
 

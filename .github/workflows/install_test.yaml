@@ -102,6 +102,7 @@ jobs:
       matrix:
         # Also try windows-2019?
         os: [macos-latest, ubuntu-latest, windows-2019]
+        version: ["4.1.1", "4.3.0-dev.6"]
     defaults:
       run:
         # Use bash shells on all platforms.
@@ -128,7 +129,7 @@ jobs:
         run: |
           # Use tool to install Godot. Last line of output is the path to the
           # symlink that always points to the active version of Godot.
-          dotnet run -- godot install 4.1.1
+          dotnet run -- godot install ${{ matrix.version }}
 
       - name: 🤖 Check Godot Location
         working-directory: GodotEnv
@@ -174,6 +175,6 @@ jobs:
           echo "Before uninstall:"
           dotnet run -- godot list
           echo "Uninstalling..."
-          dotnet run -- godot uninstall 4.1.1
+          dotnet run -- godot uninstall ${{ matrix.version }}
           echo "After uninstall:"
           dotnet run -- godot list
