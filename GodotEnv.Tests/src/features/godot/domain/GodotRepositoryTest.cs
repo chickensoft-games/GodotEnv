@@ -1,15 +1,14 @@
-namespace Chickensoft.GodotEnv.Tests;
-
+namespace Chickensoft.GodotEnv.Tests.Features.Godot.Domain;
 
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Chickensoft.GodotEnv.Common.Clients;
+using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
+using Chickensoft.GodotEnv.Features.Godot.Domain;
+using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx.Infrastructure;
-using Common.Clients;
-using Common.Models;
 using Downloader;
-using Features.Godot.Domain;
-using Features.Godot.Models;
 using Moq;
 using Xunit;
 
@@ -48,6 +47,7 @@ public class GodotRepositoryTest {
       .Returns(Task.CompletedTask);
 
     var platform = new Mock<GodotEnvironment>(fileClient.Object, computer.Object);
+    var checksumClient = new Mock<IGodotChecksumClient>();
 
     var godotRepo = new GodotRepository(
       config: new ConfigFile { GodotInstallationsPath = "INSTALLATION_PATH" },
@@ -56,7 +56,8 @@ public class GodotRepositoryTest {
       zipClient: zipClient.Object,
       platform: platform.Object,
       environmentVariableClient: environmentVariableClient.Object,
-      processRunner: processRunner.Object
+      processRunner: processRunner.Object,
+      checksumClient: checksumClient.Object
     );
 
     var executionContext = new Mock<IExecutionContext>();

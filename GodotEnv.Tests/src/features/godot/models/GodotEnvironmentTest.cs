@@ -1,8 +1,8 @@
 namespace Chickensoft.GodotEnv.Tests.features.godot.models;
 
+using Chickensoft.GodotEnv.Features.Godot.Models;
 using Common.Clients;
 using Common.Utilities;
-using Features.Godot.Models;
 using Moq;
 using Shouldly;
 using Xunit;

@@ -88,6 +88,12 @@ public interface IGodotEnvironment {
   );
 
   /// <summary>
+  /// Gets the filename as which an installer is known.
+  public string GetInstallerFilename(
+    SemanticVersion version, bool isDotnetVersion
+  );
+
+  /// <summary>
   /// Outputs a description of the platform to the log.
   /// </summary>
   /// <param name="log">Output log.</param>
@@ -301,7 +307,7 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   }
 
   // Gets the filename of the Godot installation download for the platform.
-  private string GetInstallerFilename(
+  public string GetInstallerFilename(
     SemanticVersion version, bool isDotnetVersion
   ) => GetFilenameVersionString(version) + GetInstallerNameSuffix(isDotnetVersion, version) +
     ".zip";
