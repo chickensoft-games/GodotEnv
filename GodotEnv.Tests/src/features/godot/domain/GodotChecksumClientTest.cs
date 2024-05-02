@@ -27,6 +27,8 @@ public class GodotChecksumClientTest {
     yield return [new SemanticVersion("1", "0", "0"), false, GetChecksumFileUrl("1.0-stable")];
     yield return [new SemanticVersion("4", "0", "0", "alpha14"), false, GetChecksumFileUrl("4.0-alpha14")];
     yield return [new SemanticVersion("4", "2", "2", "rc1"), false, GetChecksumFileUrl("4.2.2-rc1")];
+    // GodotSharp nuget packages use a dot in the label, and this has to be supported as well.
+    yield return [new SemanticVersion("4", "3", "0", "dev.6"), false, GetChecksumFileUrl("4.3-dev6")];
   }
 
   [Theory]
