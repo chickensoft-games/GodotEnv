@@ -172,7 +172,7 @@ public class GodotRepository : IGodotRepository {
   // Regex for converting directory names back into version strings to see
   // what versions we have installed.
   public static readonly Regex DirectoryToVersionStringRegex = new(
-    @"godot_(dotnet_)?(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+)_?(?<label>[a-zA-Z]+_[\d]+)?",
+    @"godot_(dotnet_)?(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+)_?(?<label>[a-zA-Z]+_?[\d]+)?",
     RegexOptions.Compiled | RegexOptions.IgnoreCase
   );
 
