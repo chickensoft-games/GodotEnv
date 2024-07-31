@@ -31,6 +31,23 @@ GodotEnv is a .NET command line tool that runs on Windows, macOS, and Linux.
 dotnet tool install --global Chickensoft.GodotEnv
 ```
 
+If you encounter the error `No NuGet sources are defined or enabled`, add a Nuget source or enable one and try installing GodotEnv again.  
+
+[List](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-list-source) the current sources and see which are enabled.
+
+```sh
+dotnet nuget list source
+```
+
+If no sources are listed, [add a new one](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-add-source).
+```sh
+dotnet nuget add source https://api.nuget.org/v3/index.json -n nuget.org
+```
+Otherwise, make sure one is [enabled](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-enable-source).
+```sh
+dotnet nuget enable source <NAME>
+```
+
 GodotEnv uses the local `git` installation and other processes available from the shell, so make sure you've installed `git` and [configured your local shell environment][ssh-github] correctly.
 
 > ⧉ On Windows, certain operations may require administrator privileges, such as managing symlinks or editing certain files. GodotEnv should prompt you in these cases for your approval, and certain operations will cause a command line window to pop open for a moment before disappearing — this is normal.
