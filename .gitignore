@@ -33,3 +33,6 @@ GodotEnv.sln.DotSettings.user
 
 # File-based project format
 *.iws
+
+### Visual Studio ###
+.vs/

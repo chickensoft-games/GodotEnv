@@ -1,5 +1,6 @@
 namespace Chickensoft.GodotEnv.Tests.features.godot.models;
 
+using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 using Common.Clients;
 using Common.Utilities;
@@ -37,6 +38,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedWindowsDownloadUrl() {
+    fileClient.Setup(f => f.Processor).Returns(ProcessorType.other);
+
     var platform = new Windows(fileClient.Object, computer.Object);
 
     var downloadUrl = platform.GetDownloadUrl(version4, false, false);
@@ -48,6 +51,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedWindowsMonoDownloadUrl() {
+    fileClient.Setup(f => f.Processor).Returns(ProcessorType.other);
+
     var platform = new Windows(fileClient.Object, computer.Object);
 
     var downloadUrl = platform.GetDownloadUrl(version4, true, false);
@@ -55,6 +60,32 @@ public class GodotEnvironmentTest {
 
     downloadUrl = platform.GetDownloadUrl(version3, true, false);
     downloadUrl.ShouldBe(GetExpectedDownloadUrl(version3, "stable_mono_win64"));
+  }
+
+  [Fact]
+  public void GetsExpectedWindowsArmDownloadUrl() {
+    fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
+
+    var platform = new Windows(fileClient.Object, computer.Object);
+
+    var downloadUrl = platform.GetDownloadUrl(version4, false, false);
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_windows_arm64.exe.zip");
+
+    downloadUrl = platform.GetDownloadUrl(version3, false, false);
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}{version3.VersionString}-stable/Godot_v{version3.VersionString}-stable_windows_arm64.exe.zip");
+  }
+
+  [Fact]
+  public void GetsExpectedWindowsArmMonoDownloadUrl() {
+    fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
+
+    var platform = new Windows(fileClient.Object, computer.Object);
+
+    var downloadUrl = platform.GetDownloadUrl(version4, true, false);
+    downloadUrl.ShouldBe(GetExpectedDownloadUrl(version4, "stable_mono_windows_arm64"));
+
+    downloadUrl = platform.GetDownloadUrl(version3, true, false);
+    downloadUrl.ShouldBe(GetExpectedDownloadUrl(version3, "stable_mono_windows_arm64"));
   }
 
   [Fact]

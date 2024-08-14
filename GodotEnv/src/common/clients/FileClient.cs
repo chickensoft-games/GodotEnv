@@ -31,6 +31,9 @@ public interface IFileClient {
   /// <summary>The operating system type.</summary>
   OSType OS { get; }
 
+  /// <summary>The process architecture type.</summary>
+  ProcessorType Processor { get; }
+
   /// <summary>Path directory separator.</summary>
   char Separator { get; }
 
@@ -309,6 +312,7 @@ public class FileClient : IFileClient {
   public IProcessRunner ProcessRunner { get; }
   public OSFamily OSFamily { get; }
   public OSType OS { get; }
+  public ProcessorType Processor { get; }
   public char Separator { get; }
 
   // Shims for testing.
@@ -318,6 +322,12 @@ public class FileClient : IFileClient {
 
   public static Func<OSPlatform, bool> IsOSPlatform { get; set; } =
     IsOSPlatformDefault;
+
+  public static Architecture ProcessorArchitectureDefault { get; } =
+    RuntimeInformation.ProcessArchitecture;
+
+  public static Architecture ProcessorArchitecture { get; set; } =
+    ProcessorArchitectureDefault;
 
   public string UserDirectory => Path.TrimEndingDirectorySeparator(
     Environment.GetFolderPath(
@@ -353,6 +363,9 @@ public class FileClient : IFileClient {
         : IsOSPlatform(OSPlatform.Windows)
           ? OSType.Windows
           : OSType.Unknown;
+    Processor = ProcessorArchitecture == Architecture.Arm64
+      ? ProcessorType.arm64
+      : ProcessorType.other;
   }
 
   public string Sanitize(string path) =>
