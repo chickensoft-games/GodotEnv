@@ -38,7 +38,7 @@ public interface IAddonsFileRepository {
 public class AddonsFileRepository : IAddonsFileRepository {
   public IFileClient FileClient { get; }
 
-  private static readonly string[] possibleFilenames = ["addons.json", "addons.jsonc"];
+  private static readonly string[] _possibleFilenames = ["addons.json", "addons.jsonc"];
 
   public AddonsFileRepository(IFileClient fileClient) {
     FileClient = fileClient;
@@ -47,7 +47,7 @@ public class AddonsFileRepository : IAddonsFileRepository {
   public AddonsFile LoadAddonsFile(string projectPath, out string filename) =>
     FileClient.ReadJsonFile(
       projectPath: projectPath,
-      possibleFilenames: possibleFilenames,
+      possibleFilenames: _possibleFilenames,
       filename: out filename,
       defaultValue: new AddonsFile()
     );

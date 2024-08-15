@@ -568,7 +568,7 @@ public class FileClient : IFileClient {
   }
 
   public List<string> ReadLines(string path) =>
-    Files.File.ReadAllLines(path).ToList();
+    [.. Files.File.ReadAllLines(path)];
 
   public void WriteLines(string path, IEnumerable<string> lines) =>
     Files.File.WriteAllLines(path, lines);

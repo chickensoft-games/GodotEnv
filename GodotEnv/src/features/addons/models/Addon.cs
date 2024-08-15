@@ -33,7 +33,7 @@ public record Addon : Asset, IAddon {
   /// <inheritdoc />
   public string Subfolder { get; init; }
 
-  private static readonly char[] trimChars = ['/', '\\'];
+  private static readonly char[] _trimChars = ['/', '\\'];
 
   /// <summary>
   /// Create a new representation of a resolved addon.
@@ -55,7 +55,7 @@ public record Addon : Asset, IAddon {
   ) : base(url, checkout, source) {
     Name = name;
     AddonsFilePath = addonsFilePath;
-    Subfolder = subfolder.Trim(trimChars);
+    Subfolder = subfolder.Trim(_trimChars);
   }
 
   public override string ToString()

@@ -327,8 +327,7 @@ public partial class GodotRepository : IGodotRepository {
     return archive;
   }
 
-  private async Task VerifyArchiveChecksum(ILog log, GodotCompressedArchive archive)
-  {
+  private async Task VerifyArchiveChecksum(ILog log, GodotCompressedArchive archive) {
     try {
       log.Print("⏳ Verifying Checksum");
       await ChecksumClient.VerifyArchiveChecksum(archive);
@@ -589,7 +588,7 @@ public partial class GodotRepository : IGodotRepository {
       installations.Add(installation);
     }
 
-    return installations.OrderBy(i => i.VersionName).ToList();
+    return [.. installations.OrderBy(i => i.VersionName)];
   }
 
   public async Task<List<string>> GetRemoteVersionsList() {

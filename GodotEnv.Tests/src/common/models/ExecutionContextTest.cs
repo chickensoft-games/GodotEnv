@@ -10,8 +10,8 @@ using Xunit;
 public class ExecutionContextTest {
   private const string VERSION = "1.2.3";
   private const string WORKING_DIR = "/";
-  private readonly string[] _cliArgs = new string[] { "a", "b" };
-  private readonly string[] _commandArgs = new string[] { "c", "d" };
+  private readonly string[] _cliArgs = ["a", "b"];
+  private readonly string[] _commandArgs = ["c", "d"];
 
   [Fact]
   public void Initializes() {

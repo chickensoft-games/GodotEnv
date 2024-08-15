@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 
 // IMPORTANT: Allow us to test internal methods in our test project.
 [assembly: InternalsVisibleTo("Chickensoft.GodotEnv.Tests")]
@@ -11,7 +11,6 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Clients;
@@ -145,15 +144,15 @@ public static class GodotEnv {
     IAddonsContext addonsContext,
     IGodotContext godotContext
   ) {
-    List<string> cliArgs = new();
-    List<string> commandArgs = new();
+    List<string> cliArgs = [];
+    List<string> commandArgs = [];
 
     // VSCode doesn't break apart the prompt input string
     // into multiple arguments, so we'll do that if we're being
     // debugged from VSCode.
     var preprocessedArgs = args.ToList();
     if (args.Length == 2 && args[0] is "--debug") {
-      preprocessedArgs = ReadArgs(args[1]).ToList();
+      preprocessedArgs = [.. ReadArgs(args[1])];
     }
     // ------------------------------------------------------ //
 
@@ -178,8 +177,8 @@ public static class GodotEnv {
       .InformationalVersion;
 
     return new ExecutionContext(
-      CliArgs: cliArgs.ToArray(),
-      CommandArgs: commandArgs.ToArray(),
+      CliArgs: [.. cliArgs],
+      CommandArgs: [.. commandArgs],
       Version: version,
       WorkingDir: workingDir,
       Config: config,
@@ -263,7 +262,7 @@ public static class GodotEnv {
     if (currentArg.Length > 0 || hadQuote) {
       args.Add(currentArg.ToString());
     }
-    return args.ToArray();
+    return [.. args];
   }
 }
 
@@ -333,7 +332,7 @@ public class GodotEnvActivator : ITypeActivator {
       " ",
       argsList?.Skip(1)?.Select(
         arg => (arg?.Contains(' ') ?? false) ? $"\"{arg}\"" : arg
-      )?.ToList() ?? new List<string?>()
+      )?.ToList() ?? []
     );
 
     // Rerun the godotenv command with elevation in a new window
