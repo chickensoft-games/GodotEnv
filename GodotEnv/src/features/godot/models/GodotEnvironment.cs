@@ -227,7 +227,7 @@ public abstract class GodotEnvironment : IGodotEnvironment {
       },
       dirSelector: (dirInfo) => {
         // Don't look for debug executables.
-        var name = dirInfo.Name.ToLower();
+        var name = dirInfo.Name.ToLowerInvariant();
         if (name.Contains("debug") || name.EndsWith(".lproj")) {
           return Task.FromResult(false);
         }
@@ -319,8 +319,6 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   ) => GetFilenameVersionString(version) + (isDotnetVersion ? "_mono" : "") +
       "_export_templates.tpz";
 
-  private static Exception GetUnknownOSException() =>
-    new InvalidOperationException(
-      "🚨 Cannot create a platform an unknown operating system."
-    );
+  private static InvalidOperationException GetUnknownOSException() =>
+    new("🚨 Cannot create a platform an unknown operating system.");
 }

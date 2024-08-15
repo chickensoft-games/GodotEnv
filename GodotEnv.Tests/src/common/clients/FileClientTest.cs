@@ -159,8 +159,9 @@ public class FileClientTest {
     fs.Setup(fs => fs.Path).Returns(path.Object);
     path.Setup(path => path.DirectorySeparatorChar)
       .Returns('/');
+    var expectedArgs = new[] { "a", "b" };
     path.Setup(path => path.Combine(
-      It.Is<string[]>(args => args.SequenceEqual(new[] { "a", "b" })))
+      It.Is<string[]>(args => args.SequenceEqual(expectedArgs)))
     ).Returns("a/b");
 
     var computer = new Mock<IComputer>();
@@ -366,11 +367,11 @@ public class FileClientTest {
       fs, computer.Object, new Mock<IProcessRunner>().Object
     );
 
-    client.FileThatExists(new string[] { "0.txt", "b.txt", "a.txt" }, "/")
+    client.FileThatExists(["0.txt", "b.txt", "a.txt"], "/")
       .ShouldBe("/b.txt");
-    client.FileThatExists(new string[] { "0.txt", "a.txt", "b.txt" }, "/")
+    client.FileThatExists(["0.txt", "a.txt", "b.txt"], "/")
       .ShouldBe("/a.txt");
-    client.FileThatExists(new string[] { "0.txt", "1.txt" }, "/")
+    client.FileThatExists(["0.txt", "1.txt"], "/")
       .ShouldBeNull();
   }
 
@@ -462,7 +463,7 @@ public class FileClientTest {
 
     client.ReadJsonFile(
       "",
-      new string[] { "model_a.json", "model_b.json" },
+      ["model_a.json", "model_b.json"],
       out var filename,
       new TestJsonModel(name: "default")
     ).ShouldBe(new TestJsonModel(name: "test"));
@@ -484,7 +485,7 @@ public class FileClientTest {
     var e = Should.Throw<IOException>(
       () => client.ReadJsonFile(
         "",
-        new string[] { "model.json" },
+        ["model.json"],
         out var filename,
         new TestJsonModel(name: "default")
       )
@@ -507,7 +508,7 @@ public class FileClientTest {
     Should.Throw<IOException>(
       () => client.ReadJsonFile(
         "",
-        new string[] { "model.json", "model_a.json", "model_b.json" },
+        ["model.json", "model_a.json", "model_b.json"],
         out var filename,
         new TestJsonModel(name: "default")
       )
@@ -527,7 +528,7 @@ public class FileClientTest {
 
     client.ReadJsonFile(
       "",
-      new string[] { "model.json", "model_a.json", "model_b.json" },
+      ["model.json", "model_a.json", "model_b.json"],
       out var filename,
       new TestJsonModel(name: "default")
     ).ShouldBe(new TestJsonModel(name: "alternative"));
@@ -546,7 +547,7 @@ public class FileClientTest {
 
     client.ReadJsonFile(
       "",
-      new string[] { "model.json", "model_a.json", "model_b.json" },
+      ["model.json", "model_a.json", "model_b.json"],
       out var filename,
       new TestJsonModel(name: "default")
     ).ShouldBe(new TestJsonModel(name: "default"));

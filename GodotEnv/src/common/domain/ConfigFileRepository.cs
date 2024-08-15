@@ -35,7 +35,7 @@ public class ConfigFileRepository : IConfigFileRepository {
   public ConfigFile LoadConfigFile(out string filename) =>
     FileClient.ReadJsonFile(
       projectPath: FileClient.AppDataDirectory,
-      possibleFilenames: new string[] { Defaults.CONFIG_FILE_NAME },
+      possibleFilenames: [Defaults.CONFIG_FILE_NAME],
       filename: out filename,
       defaultValue: new ConfigFile()
     );

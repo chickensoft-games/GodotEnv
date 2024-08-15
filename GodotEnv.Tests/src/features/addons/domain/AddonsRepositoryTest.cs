@@ -13,7 +13,7 @@ using Shouldly;
 using Xunit;
 
 public class AddonsRepositoryTest {
-  private class Subject(
+  private sealed class Subject(
     IConsole console,
     Mock<IFileClient> client,
     Mock<ILog> log,

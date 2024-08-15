@@ -128,7 +128,7 @@ public interface IGodotRepository {
   );
 }
 
-public class GodotRepository : IGodotRepository {
+public partial class GodotRepository : IGodotRepository {
   public ConfigFile Config { get; }
   public IFileClient FileClient { get; }
   public INetworkClient NetworkClient { get; }
@@ -171,10 +171,7 @@ public class GodotRepository : IGodotRepository {
 
   // Regex for converting directory names back into version strings to see
   // what versions we have installed.
-  public static readonly Regex DirectoryToVersionStringRegex = new(
-    @"godot_(dotnet_)?(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+)_?(?<label>[a-zA-Z]+_?[\d]+)?",
-    RegexOptions.Compiled | RegexOptions.IgnoreCase
-  );
+  public static readonly Regex DirectoryToVersionStringRegex = directoryToVersionStringRegex();
 
   public GodotRepository(
     ConfigFile config,
@@ -684,4 +681,7 @@ public class GodotRepository : IGodotRepository {
     ($"godot_{(isDotnetVersion ? "dotnet_" : "")}" +
     $"{version.Major}_{version.Minor}_{version.Patch}_" +
     $"{LabelSanitized(version)}").Trim('_');
+
+  [GeneratedRegex(@"godot_(dotnet_)?(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+)_?(?<label>[a-zA-Z]+_?[\d]+)?", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
+  private static partial Regex directoryToVersionStringRegex();
 }
