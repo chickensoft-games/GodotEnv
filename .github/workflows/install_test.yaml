@@ -55,8 +55,10 @@ jobs:
           # Godot.
           GODOT_SYMLINK="$(dotnet run -- godot env path)"
 
+          echo "🕵️‍♂️ Godot symlink path: $GODOT_SYMLINK"
+
           # Make sure we can use Godot.
-          $GODOT_SYMLINK --version
+          "$GODOT_SYMLINK" --version
 
           echo "✅ Godot location is in path!"
 
@@ -138,8 +140,10 @@ jobs:
           # Godot.
           GODOT_SYMLINK="$(dotnet run -- godot env path)"
 
+          echo "🕵️‍♂️ Godot symlink path: $GODOT_SYMLINK"
+
           # Make sure we can use Godot.
-          $GODOT_SYMLINK --version
+          "$GODOT_SYMLINK" --version
 
           echo "✅ Godot location is in path!"
 
