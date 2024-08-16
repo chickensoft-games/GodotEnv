@@ -29,10 +29,10 @@ jobs:
         shell: bash
     steps:
       - name: 🧾 Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 💽 Setup .NET SDK
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           # Use the .NET SDK from global.json in the root of the repository.
           global-json-file: global.json
