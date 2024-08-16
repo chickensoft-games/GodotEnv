@@ -78,6 +78,7 @@ public class FileClientTest {
   [Fact]
   public void InitializesWindows() {
     FileClient.IsOSPlatform = (platform) => platform == OSPlatform.Windows;
+    FileClient.ProcessorArchitecture = Architecture.X64;
     var fs = GetFs('\\');
     var computer = new Mock<IComputer>();
     var client = new FileClient(
@@ -88,7 +89,7 @@ public class FileClientTest {
     client.OSFamily.ShouldBe(OSFamily.Windows);
     client.Separator.ShouldBe('\\');
     client.OS.ShouldBe(OSType.Windows);
-    client.Processor.ShouldBe(ProcessorType.arm64);
+    client.Processor.ShouldBe(ProcessorType.other);
     FileClient.IsOSPlatform = FileClient.IsOSPlatformDefault;
   }
 
