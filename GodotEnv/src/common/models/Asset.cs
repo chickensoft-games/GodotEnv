@@ -26,7 +26,7 @@ public enum AssetSource {
 /// <summary>
 /// Represents a resource accessed via a remote path, local path, or symlink.
 /// </summary>
-public interface IAsset {
+public partial interface IAsset {
   /// <summary>
   /// Asset path if <see cref="Source" /> is <see cref="AssetSource.Local" />
   /// or <see cref="AssetSource.Symlink" />. Otherwise, if
@@ -72,10 +72,10 @@ public interface IAsset {
   /// git repository url. <br />
   /// Credit: https://serverfault.com/a/917253
   /// </summary>
-  public static readonly Regex UrlRegex = new(
-    @"^((https?|ssh|git|ftps?|git\+ssh|git\+https):\/\/)?(([^\/@]+)@)?" +
-    @"([^\/:]+)[\/:]([^\/:]+)\/(.+).git\/?$"
-  );
+  public static readonly Regex UrlRegex = urlRegex();
+
+  [GeneratedRegex(@"^((https?|ssh|git|ftps?|git\+ssh|git\+https):\/\/)?(([^\/@]+)@)?([^\/:]+)[\/:]([^\/:]+)\/(.+).git\/?$")]
+  private static partial Regex urlRegex();
 }
 
 /// <summary>

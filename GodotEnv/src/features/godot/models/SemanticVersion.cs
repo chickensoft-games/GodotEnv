@@ -3,7 +3,7 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 using System;
 using System.Text.RegularExpressions;
 
-public record SemanticVersion(
+public partial record SemanticVersion(
   string Major, string Minor, string Patch, string Label = ""
 ) {
   // Borrowed from https://semver.org/
@@ -13,9 +13,7 @@ public record SemanticVersion(
   /// <br />
   /// Try it: https://regex101.com/r/vkijKf/1/
   /// </summary>
-  public static Regex SemanticVersionRegex { get; } = new(
-    @"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
-  );
+  public static Regex SemanticVersionRegex { get; } = semanticVersionRegex();
 
   /// <summary>
   /// Parses a string into a semantic version model using the official
@@ -75,4 +73,7 @@ public record SemanticVersion(
 
   public override string ToString() =>
     $"Major({Major}).Minor({Minor}).Patch({Patch})-Label({Label})";
+
+  [GeneratedRegex(@"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$")]
+  private static partial Regex semanticVersionRegex();
 }

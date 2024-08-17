@@ -13,7 +13,7 @@ using Shouldly;
 using Xunit;
 
 public class AddonsRepositoryTest {
-  private class Subject(
+  private sealed class Subject(
     IConsole console,
     Mock<IFileClient> client,
     Mock<ILog> log,
@@ -361,7 +361,7 @@ public class AddonsRepositoryTest {
     );
 
     cli.Runs(addonInstallPath, new ProcessResult(0), "git", "init");
-    cli.Runs(addonInstallPath, new ProcessResult(0), 
+    cli.Runs(addonInstallPath, new ProcessResult(0),
       "git", "config", "--local", "user.email", "godotenv@godotenv.com"
     );
     cli.Runs(addonInstallPath, new ProcessResult(0),

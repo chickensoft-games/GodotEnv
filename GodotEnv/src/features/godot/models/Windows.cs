@@ -24,7 +24,7 @@ public class Windows : GodotEnvironment {
     isDotnetVersion ? $"_mono_{ProcessorArchitecture}" : $"_{ProcessorArchitecture}.exe";
 
   public override Task<bool> IsExecutable(IShell shell, IFileInfo file) =>
-    Task.FromResult(file.Name.ToLower().EndsWith(".exe"));
+    Task.FromResult(file.Name.ToLowerInvariant().EndsWith(".exe"));
 
   public override void Describe(ILog log) => log.Info("⧉ Running on Windows");
 

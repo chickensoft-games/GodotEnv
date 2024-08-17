@@ -20,12 +20,11 @@ public partial class AddonsFileRepositoryTest {
 
     var value = new AddonsFile();
 
+    var expectedArgs = new[] { "addons.json", "addons.jsonc" };
     fileClient.Setup(client => client.ReadJsonFile(
       projectPath,
       It.Is<string[]>(
-        value => value.SequenceEqual(
-          new string[] { "addons.json", "addons.jsonc" }
-        )
+        value => value.SequenceEqual(expectedArgs)
       ),
       out filename,
       It.IsAny<AddonsFile>()

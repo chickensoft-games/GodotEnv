@@ -1,4 +1,4 @@
-namespace Chickensoft.GodotEnv.Tests.features.godot.domain;
+namespace Chickensoft.GodotEnv.Tests.Features.Godot.Domain;
 
 using System;
 using System.Collections.Generic;
@@ -14,9 +14,9 @@ using Moq;
 using Xunit;
 
 public class GodotChecksumClientTest {
-  private static readonly string GODOT_4_3_DEV_5_MACOS_CHECKSUM = "0fdd44c725980c463d86b14aeb47fc41a35ff9005e9df9a9c821168b21d60f845d80313e93c892565daadef04d02c6f6fbb6a9d9a26374db9caa8cd4d9354d7c";
+  private const string GODOT_4_3_DEV_5_MACOS_CHECKSUM = "0fdd44c725980c463d86b14aeb47fc41a35ff9005e9df9a9c821168b21d60f845d80313e93c892565daadef04d02c6f6fbb6a9d9a26374db9caa8cd4d9354d7c";
 
-  private static readonly string GODOT_ENV_STRING_CHECKSUM =
+  private const string GODOT_ENV_STRING_CHECKSUM =
     "3a2e1fa23f9e99ff976803d6fb1283707e015b7904040f604a6a10240c1eba138c6feed88e9ec5db72aee81c6f9b1eba99292e346eab054004e2427a4d4b39b8";
 
   private static string GetChecksumFileUrl(string version) =>
@@ -179,8 +179,7 @@ public class GodotChecksumClientTest {
     string godotReleaseJson;
     await using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)
                               ?? throw new FileNotFoundException("Failed to get test release JSON file.")) {
-      using (var reader = new StreamReader(stream))
-      {
+      using (var reader = new StreamReader(stream)) {
         godotReleaseJson = await reader.ReadToEndAsync();
       }
     }
@@ -191,8 +190,9 @@ public class GodotChecksumClientTest {
           It.IsAny<string>()
         ))
       .ReturnsAsync(() => {
-        var response = new HttpResponseMessage(HttpStatusCode.OK);
-        response.Content = new StringContent(godotReleaseJson);
+        var response = new HttpResponseMessage(HttpStatusCode.OK) {
+          Content = new StringContent(godotReleaseJson)
+        };
         return response;
       });
     return networkClient;
