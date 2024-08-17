@@ -190,7 +190,7 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
   }
 
   public bool IsShellSupported(string shellName) => FileClient.OS switch {
-    OSType.MacOS or OSType.Linux => SUPPORTED_UNIX_SHELLS.Contains(shellName.ToLower()),
+    OSType.MacOS or OSType.Linux => SUPPORTED_UNIX_SHELLS.Contains(shellName.ToLowerInvariant()),
     OSType.Windows => true,
     OSType.Unknown => false,
     _ => false,

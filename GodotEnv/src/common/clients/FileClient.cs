@@ -568,7 +568,7 @@ public class FileClient : IFileClient {
   }
 
   public List<string> ReadLines(string path) =>
-    Files.File.ReadAllLines(path).ToList();
+    [.. Files.File.ReadAllLines(path)];
 
   public void WriteLines(string path, IEnumerable<string> lines) =>
     Files.File.WriteAllLines(path, lines);
@@ -627,10 +627,10 @@ public class FileClient : IFileClient {
     var existingLines = ReadLines(filePath);
 
     var compareLines = existingLines
-      .Select(line => line.ToLower().Trim()).ToHashSet();
+      .Select(line => line.ToLowerInvariant().Trim()).ToHashSet();
 
     var newLines = lines.Where(
-      line => !compareLines.Contains(line.ToLower().Trim())
+      line => !compareLines.Contains(line.ToLowerInvariant().Trim())
     );
 
     WriteLines(filePath, existingLines.Concat(newLines));
@@ -640,7 +640,7 @@ public class FileClient : IFileClient {
     if (!Files.File.Exists(filePath)) { return ""; }
 
     foreach (var line in ReadLines(filePath)) {
-      if (line.Trim().ToLower().StartsWith(prefix.Trim().ToLower())) {
+      if (line.Trim().StartsWith(prefix.Trim(), StringComparison.InvariantCultureIgnoreCase)) {
         return line;
       }
     }

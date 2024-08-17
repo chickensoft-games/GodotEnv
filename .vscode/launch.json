@@ -6,7 +6,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/GodotEnv/bin/Debug/net6.0/Chickensoft.GodotEnv.dll",
+      "program": "${workspaceFolder}/GodotEnv/bin/Debug/net8.0/Chickensoft.GodotEnv.dll",
       "args": [
         "--debug",
         "${input:args}"

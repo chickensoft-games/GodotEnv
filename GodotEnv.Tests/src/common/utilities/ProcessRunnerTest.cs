@@ -9,7 +9,7 @@ public class ProcessRunnerTest {
   public async Task RunsProcessOnWindows() {
     var runner = new ProcessRunner();
     var result = await runner.Run(
-      Environment.CurrentDirectory, "cmd", new[] { "/c echo \"hello\"" }
+      Environment.CurrentDirectory, "cmd", ["/c echo \"hello\""]
     );
     result.ExitCode.ShouldBe(0);
     result.Succeeded.ShouldBe(true);
@@ -21,7 +21,7 @@ public class ProcessRunnerTest {
   public async Task RunsProcessOnMacLinux() {
     var runner = new ProcessRunner();
     var result = await runner.Run(
-      Environment.CurrentDirectory, "echo", new[] { "hello" }
+      Environment.CurrentDirectory, "echo", ["hello"]
     );
     result.ExitCode.ShouldBe(0);
     result.Succeeded.ShouldBe(true);

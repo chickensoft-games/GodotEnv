@@ -14,7 +14,7 @@ public class GodotInstallCommand :
   [CommandParameter(
     0,
     Name = "Version",
-    Validators = new System.Type[] { typeof(GodotVersionValidator) },
+    Validators = [typeof(GodotVersionValidator)],
     Description = "Godot version to install: e.g., 4.1.0-rc.2, 4.2.0, etc." +
       " No leading 'v'. Should match a version of GodotSharp: " +
       "https://www.nuget.org/packages/GodotSharp/"

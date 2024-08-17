@@ -1,4 +1,4 @@
-﻿namespace Chickensoft.GodotEnv.Features.Godot.Domain;
+namespace Chickensoft.GodotEnv.Features.Godot.Domain;
 
 using System;
 using System.Collections.Generic;
@@ -90,7 +90,7 @@ public class GodotChecksumClient(
   public async Task<string> ComputeChecksumOfArchive(GodotCompressedArchive archive) {
     using var sha512 = SHA512.Create();
     await using var filestream = File.OpenRead(Path.Join(archive.Path, archive.Filename));
-    return Convert.ToHexString(await sha512.ComputeHashAsync(filestream)).ToLower();
+    return Convert.ToHexString(await sha512.ComputeHashAsync(filestream)).ToLowerInvariant();
   }
 }
 

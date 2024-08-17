@@ -6,12 +6,11 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Utilities;
 
-public class ZipClientTerminal : IZipClient {
+public partial class ZipClientTerminal : IZipClient {
   public IComputer Computer { get; }
   public IFileSystem Files { get; }
 
-  public static readonly Regex NumFilesRegex =
-    new(@"\s*(?<numFiles>\d+)\s+files?");
+  public static readonly Regex NumFilesRegex = numFilesRegex();
 
   public ZipClientTerminal(IComputer computer, IFileSystem files) {
     Computer = computer;
@@ -50,4 +49,7 @@ public class ZipClientTerminal : IZipClient {
 
     log.Print($"🗜 Extracted {numEntries} / {numFiles} files in {sourceArchiveFileName}.");
   }
+
+  [GeneratedRegex(@"\s*(?<numFiles>\d+)\s+files?")]
+  private static partial Regex numFilesRegex();
 }

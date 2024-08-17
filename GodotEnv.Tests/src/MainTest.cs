@@ -10,7 +10,7 @@ public class MainTest {
   [Fact]
   public async Task CallsCliFx()
     => await Should.NotThrowAsync(
-      async () => await GodotEnv.Main(new string[] { "not-a-command" })
+      async () => await GodotEnv.Main(["not-a-command"])
     );
 
   [Fact]
@@ -24,8 +24,8 @@ public class MainTest {
       args, config, workingDir, addonsContext.Object,
       godotContext.Object
     );
-    context.CliArgs.ShouldBe(new string[] { "a" });
-    context.CommandArgs.ShouldBe(new string[] { "b" });
+    context.CliArgs.ShouldBe(["a"]);
+    context.CommandArgs.ShouldBe(["b"]);
     context.Config.ShouldBe(config);
     context.WorkingDir.ShouldBe(workingDir);
     context.Addons.ShouldBe(addonsContext.Object);
@@ -34,7 +34,7 @@ public class MainTest {
 }
 
 public class GodotEnvActivatorTest {
-  private class ITestCommand(IExecutionContext executionContext) :
+  private sealed class ITestCommand(IExecutionContext executionContext) :
     ICliCommand {
     public IExecutionContext ExecutionContext { get; } = executionContext;
   }
