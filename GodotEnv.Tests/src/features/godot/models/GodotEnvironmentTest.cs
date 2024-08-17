@@ -38,7 +38,7 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedWindowsDownloadUrl() {
-    fileClient.Setup(f => f.Processor).Returns(ProcessorType.other);
+    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.other);
 
     var platform = new Windows(_fileClient.Object, _computer.Object);
 
@@ -51,7 +51,7 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedWindowsMonoDownloadUrl() {
-    fileClient.Setup(f => f.Processor).Returns(ProcessorType.other);
+    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.other);
 
     var platform = new Windows(_fileClient.Object, _computer.Object);
 
@@ -64,28 +64,28 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedWindowsArmDownloadUrl() {
-    fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
+    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
 
-    var platform = new Windows(fileClient.Object, computer.Object);
+    var platform = new Windows(_fileClient.Object, _computer.Object);
 
-    var downloadUrl = platform.GetDownloadUrl(version4, false, false);
+    var downloadUrl = platform.GetDownloadUrl(_version4, false, false);
     downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_windows_arm64.exe.zip");
 
-    downloadUrl = platform.GetDownloadUrl(version3, false, false);
-    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}{version3.VersionString}-stable/Godot_v{version3.VersionString}-stable_windows_arm64.exe.zip");
+    downloadUrl = platform.GetDownloadUrl(_version3, false, false);
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}{_version3.VersionString}-stable/Godot_v{_version3.VersionString}-stable_windows_arm64.exe.zip");
   }
 
   [Fact]
   public void GetsExpectedWindowsArmMonoDownloadUrl() {
-    fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
+    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
 
-    var platform = new Windows(fileClient.Object, computer.Object);
+    var platform = new Windows(_fileClient.Object, _computer.Object);
 
-    var downloadUrl = platform.GetDownloadUrl(version4, true, false);
-    downloadUrl.ShouldBe(GetExpectedDownloadUrl(version4, "stable_mono_windows_arm64"));
+    var downloadUrl = platform.GetDownloadUrl(_version4, true, false);
+    downloadUrl.ShouldBe(GetExpectedDownloadUrl(_version4, "stable_mono_windows_arm64"));
 
-    downloadUrl = platform.GetDownloadUrl(version3, true, false);
-    downloadUrl.ShouldBe(GetExpectedDownloadUrl(version3, "stable_mono_windows_arm64"));
+    downloadUrl = platform.GetDownloadUrl(_version3, true, false);
+    downloadUrl.ShouldBe(GetExpectedDownloadUrl(_version3, "stable_mono_windows_arm64"));
   }
 
   [Fact]
