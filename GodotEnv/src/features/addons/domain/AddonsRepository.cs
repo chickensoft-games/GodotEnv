@@ -225,7 +225,10 @@ public class AddonsRepository(
     );
     await addonShell.Run("git", "add", "-A");
     await addonShell.Run(
-      "git", "commit", "-m", "Initial commit"
+      "git", "config", "--local", "commit.gpgsign", "false"
+    );
+    await addonShell.Run(
+      "git", "commit", "-m", "\"Initial commit\""
     );
   }
 
