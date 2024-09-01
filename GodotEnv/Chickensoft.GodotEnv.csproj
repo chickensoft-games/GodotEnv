@@ -11,7 +11,7 @@
     <CopyAllFiles>true</CopyAllFiles>
 
     <Title>GodotEnv</Title>
-    <Version>2.3.0</Version>
+    <Version>2.4.0</Version>
     <Description>Manage Godot versions and addons from the command line on Windows, macOS, and Linux.</Description>
     <Copyright>© 2022 Chickensoft Games</Copyright>
     <Company>Chickensoft</Company>
