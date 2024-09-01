@@ -370,7 +370,11 @@ public class AddonsRepositoryTest {
     cli.Runs(addonInstallPath, new ProcessResult(0), "git", "add", "-A");
     cli.Runs(
       addonInstallPath, new ProcessResult(0),
-      "git", "commit", "-m", "Initial commit"
+      "git", "config", "--local", "commit.gpgsign", "false"
+    );
+    cli.Runs(
+      addonInstallPath, new ProcessResult(0),
+      "git", "commit", "-m", "\"Initial commit\""
     );
 
     await repo.InstallAddonFromCache(addon, addon.Name);
