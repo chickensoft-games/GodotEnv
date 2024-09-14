@@ -12,7 +12,7 @@ using Chickensoft.LogicBlocks.Generator;
 [StateMachine]
 public partial class AddonsLogic : LogicBlockAsync<AddonsLogic.State> {
   public abstract record Input {
-    public readonly record struct Install(string ProjectPath, int? MaxDepth);
+    public readonly record struct Install(string ProjectPath, int? MaxDepth, string? AddonsFileName = null);
   }
 
   public abstract record State : StateLogic {
@@ -37,7 +37,7 @@ public partial class AddonsLogic : LogicBlockAsync<AddonsLogic.State> {
         do {
           var path = searchPaths.Dequeue();
           var addonsFile = addonsFileRepo.LoadAddonsFile(
-            path, out var addonsFilePath
+            path, out var addonsFilePath, input.AddonsFileName
           );
 
           foreach ((var addonName, var addonEntry) in addonsFile.Addons) {

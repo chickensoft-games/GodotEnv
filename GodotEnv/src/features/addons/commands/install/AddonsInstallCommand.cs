@@ -21,6 +21,13 @@ public class AddonsInstallCommand :
   )]
   public int? MaxDepth { get; init; }
 
+  [CommandOption(
+    "addons-file-name",
+    'a',
+    Description = "The file from to from which to install addons."
+  )]
+  public string? AddonsFileName { get; init; }
+
   // If we have any top-level addons that are symlinks, we know we're going
   // to need to elevate on Windows.
   public bool IsWindowsElevationRequired =>
@@ -54,7 +61,9 @@ public class AddonsInstallCommand :
 
     var state = await logic.Input(
       new AddonsLogic.Input.Install(
-        ProjectPath: ExecutionContext.WorkingDir, MaxDepth: MaxDepth
+        ProjectPath: ExecutionContext.WorkingDir,
+        MaxDepth: MaxDepth,
+        AddonsFileName: AddonsFileName
       )
     );
 

@@ -14,8 +14,10 @@ public interface IAddonsFileRepository {
   /// <param name="projectPath">Where to search for an addons file.</param>
   /// <param name="filename">Filename that was loaded, or the first of the
   /// possible addons file names.</param>
+  /// <param name="addonsFileName">Optional path to the addons file to load.
+  /// If unspecified will load "addons.jsonc" or "addons.json". </param>
   /// <returns>Loaded addons file (or an empty one).</returns>
-  AddonsFile LoadAddonsFile(string projectPath, out string filename);
+  AddonsFile LoadAddonsFile(string projectPath, out string filename, string? addonsFileName = null);
 
   /// <summary>
   /// Creates an addons configuration object that represents the configuration
@@ -44,10 +46,10 @@ public class AddonsFileRepository : IAddonsFileRepository {
     FileClient = fileClient;
   }
 
-  public AddonsFile LoadAddonsFile(string projectPath, out string filename) =>
+  public AddonsFile LoadAddonsFile(string projectPath, out string filename, string? addonsFileName = null) =>
     FileClient.ReadJsonFile(
       projectPath: projectPath,
-      possibleFilenames: _possibleFilenames,
+      possibleFilenames: addonsFileName == null ? _possibleFilenames : [addonsFileName],
       filename: out filename,
       defaultValue: new AddonsFile()
     );

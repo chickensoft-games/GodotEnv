@@ -55,4 +55,32 @@ public partial class AddonsFileRepositoryTest {
       fileClient.Object.Combine(projectPath, addonsFile.CacheRelativePath)
     );
   }
+
+  [Fact]
+  public void LoadsAddonsFileWhenCalledWithAddonsFileNameArgumentShouldLoadCorrectFile() {
+    var fileClient = new Mock<IFileClient>();
+    var repo = new AddonsFileRepository(fileClient.Object);
+
+    var projectPath = "/";
+    string filename;
+    var addonsFileName = "foobar.json";
+
+    var addonsFile = new AddonsFile();
+
+    var expectedArgs = new[] { addonsFileName };
+    fileClient.Setup(client => client.ReadJsonFile(
+      projectPath,
+      It.Is<string[]>(
+        value => value.SequenceEqual(expectedArgs)
+      ),
+      out filename,
+      It.IsAny<AddonsFile>()
+    )).Returns(addonsFile);
+
+    var result = repo.LoadAddonsFile(projectPath, out filename, addonsFileName);
+
+    fileClient.VerifyAll();
+
+    result.ShouldBe(addonsFile);
+  }
 }
