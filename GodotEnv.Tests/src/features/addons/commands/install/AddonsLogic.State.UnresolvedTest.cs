@@ -36,7 +36,7 @@ public class UnresolvedTest {
     addonsRepo.Setup(repo => repo.EnsureCacheAndAddonsDirectoriesExists());
 
     addonsFileRepo.Setup(repo => repo.LoadAddonsFile(
-      projectPath, out addonsFilePath
+      projectPath, out addonsFilePath, null
     )).Returns(addonsFile);
 
     var state = new AddonsLogic.State.Unresolved();
@@ -80,7 +80,7 @@ public class UnresolvedTest {
     addonsRepo.Setup(repo => repo.EnsureCacheAndAddonsDirectoriesExists());
 
     addonsFileRepo.Setup(repo => repo.LoadAddonsFile(
-      projectPath, out addonsFilePath
+      projectPath, out addonsFilePath, null
     )).Returns(addonsFile);
 
     addonsRepo.Setup(repo => repo.ResolveUrl(entry, addonsFilePath))
@@ -137,7 +137,7 @@ public class UnresolvedTest {
     addonsRepo.Setup(repo => repo.EnsureCacheAndAddonsDirectoriesExists());
 
     addonsFileRepo.Setup(repo => repo.LoadAddonsFile(
-      projectPath, out addonsFilePath
+      projectPath, out addonsFilePath, null
     )).Returns(addonsFile);
 
     addonsRepo.Setup(repo => repo.ResolveUrl(entry, addonsFilePath))
@@ -185,7 +185,7 @@ public class UnresolvedTest {
     var otherAddonsFilePath = "";
     addonsFileRepo
       .Setup(repo => repo.LoadAddonsFile(
-        pathToCachedAddon, out otherAddonsFilePath
+        pathToCachedAddon, out otherAddonsFilePath, null
       ))
       .Returns(otherAddonAddonsFile);
 
@@ -233,7 +233,7 @@ public class UnresolvedTest {
     addonsRepo.Setup(repo => repo.EnsureCacheAndAddonsDirectoriesExists());
 
     addonsFileRepo.Setup(repo => repo.LoadAddonsFile(
-      projectPath, out addonsFilePath
+      projectPath, out addonsFilePath, null
     )).Returns(addonsFile);
 
     addonsRepo.Setup(repo => repo.ResolveUrl(entry, addonsFilePath))
@@ -256,7 +256,7 @@ public class UnresolvedTest {
     var addonsAddonsFilePath = "";
     addonsFileRepo
       .Setup(repo => repo.LoadAddonsFile(
-        pathToCachedAddon, out addonsAddonsFilePath
+        pathToCachedAddon, out addonsAddonsFilePath, null
       )
     ).Returns(new AddonsFile());
 
