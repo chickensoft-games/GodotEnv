@@ -15,8 +15,8 @@ using Downloader;
 using Humanizer;
 using Newtonsoft.Json;
 
-public struct RemoteVersions {
-  public List<string> Versions { get; set; }
+public struct RemoteVersion {
+  public string Name { get; set; }
 }
 
 public interface IGodotRepository {
@@ -139,7 +139,7 @@ public partial class GodotRepository : IGodotRepository {
   }
   public IProcessRunner ProcessRunner { get; }
 
-  private const string GODOT_REMOTE_VERSIONS_URL = "https://api.nuget.org/v3-flatcontainer/godotsharp/index.json";
+  private const string GODOT_REMOTE_VERSIONS_URL = "https://api.github.com/repos/godotengine/godot-builds/contents/releases";
 
   private IGodotChecksumClient ChecksumClient { get; }
 
@@ -592,13 +592,31 @@ public partial class GodotRepository : IGodotRepository {
   }
 
   public async Task<List<string>> GetRemoteVersionsList() {
-    var response = await NetworkClient.WebRequestGetAsync(GODOT_REMOTE_VERSIONS_URL);
+    var response = await NetworkClient.WebRequestGetAsync(GODOT_REMOTE_VERSIONS_URL, true);
     response.EnsureSuccessStatusCode();
 
     var responseBody = await response.Content.ReadAsStringAsync();
-    var deserializedBody = JsonConvert.DeserializeObject<RemoteVersions>(responseBody);
+    var deserializedBody = JsonConvert.DeserializeObject<List<RemoteVersion>>(responseBody);
+    deserializedBody?.Reverse();
 
-    return deserializedBody.Versions;
+    var versions = new List<string>();
+    // format version name
+    for (var i = 0; i < deserializedBody?.Count; i++) {
+      var version = deserializedBody[i];
+      version.Name = version.Name.Replace("godot-", "").Replace(".json", "");
+
+      // limit versions to godot 3 and above
+      if (version.Name[0] == '2') {
+        break;
+      }
+
+      if (version.Name.IndexOf('.') == version.Name.LastIndexOf('.')) {
+        version.Name = version.Name.Insert(version.Name.IndexOf('-'), ".0");
+      }
+      versions.Add(version.Name);
+    }
+
+    return versions;
   }
 
   public async Task<bool> Uninstall(
