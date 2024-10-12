@@ -26,7 +26,7 @@ public interface INetworkClient {
     CancellationToken token
   );
 
-  public Task<HttpResponseMessage> WebRequestGetAsync(string url);
+  public Task<HttpResponseMessage> WebRequestGetAsync(string url, bool requestAgent = false);
 }
 
 public class NetworkClient : INetworkClient {
@@ -43,9 +43,11 @@ public class NetworkClient : INetworkClient {
     DownloadConfiguration = downloadConfiguration;
   }
 
-  public async Task<HttpResponseMessage> WebRequestGetAsync(string url) {
+  public async Task<HttpResponseMessage> WebRequestGetAsync(string url, bool requestAgent = false) {
     _client ??= new HttpClient();
-
+    if (requestAgent) {
+      _client.DefaultRequestHeaders.UserAgent.TryParseAdd("request");
+    }
     return await _client.GetAsync(url);
   }
 
