@@ -40,10 +40,13 @@ dotnet nuget list source
 ```
 
 If no sources are listed, [add a new one](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-add-source).
+
 ```sh
 dotnet nuget add source https://api.nuget.org/v3/index.json -n nuget.org
 ```
+
 Otherwise, make sure one is [enabled](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-enable-source).
+
 ```sh
 dotnet nuget enable source <NAME>
 ```
@@ -102,6 +105,11 @@ When installing a version of Godot, GodotEnv performs the following steps:
 - 🤐 Extracts Godot installation zip archive.
 - 📂 Activates the newly installed version by updating the symlink.
 - 🏝 Makes sure the user `GODOT` environment variable points to the active Godot version symlink.
+
+> [!IMPORTANT]
+> To run Godot, simply type `$GODOT` in a shell to execute the active version of Godot. The Godot executable should also be in your path after restarting your shell.
+>
+> **Windows users**: the first time you install Godot, you may need to log out and log back in on Windows for the `$GODOT` variable to be picked up by your shell and other applications.
 
 ### Listing Godot Versions
 
