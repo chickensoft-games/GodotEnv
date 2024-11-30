@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CliFx.Exceptions;
 using Downloader;
+using Humanizer;
 
 public interface INetworkClient {
   IDownloadService DownloadService { get; }
@@ -15,7 +16,7 @@ public interface INetworkClient {
     string url,
     string destinationDirectory,
     string filename,
-    IProgress<DownloadProgressChangedEventArgs> progress,
+    IProgress<DownloadProgress> progress,
     CancellationToken token
   );
 
@@ -28,6 +29,12 @@ public interface INetworkClient {
 
   public Task<HttpResponseMessage> WebRequestGetAsync(string url, bool requestAgent = false);
 }
+
+/// <summary>Download progress.</summary>
+/// <param name="Percent">Amount completed as a percent between 0 and
+/// 100.</param>
+/// <param name="Speed">Humanized bytes per second speed.</param>
+public readonly record struct DownloadProgress(int Percent, string Speed);
 
 public class NetworkClient : INetworkClient {
   public IDownloadService DownloadService { get; }
@@ -55,7 +62,7 @@ public class NetworkClient : INetworkClient {
     string url,
     string destinationDirectory,
     string filename,
-    IProgress<DownloadProgressChangedEventArgs> progress,
+    IProgress<DownloadProgress> progress,
     CancellationToken token
   ) {
     var download = DownloadBuilder
@@ -65,6 +72,9 @@ public class NetworkClient : INetworkClient {
       .WithFileName(filename)
       .WithConfiguration(DownloadConfiguration)
       .Build();
+
+    var lastPercent = 0d;
+    var threshold = 1d;
 
     token.Register(
       () => {
@@ -76,7 +86,17 @@ public class NetworkClient : INetworkClient {
 
     void internalProgress(
       object? sender, DownloadProgressChangedEventArgs args
-    ) => progress.Report(args);
+    ) {
+      var speed = args.BytesPerSecondSpeed;
+      var humanizedSpeed = speed.Bytes().Per(1.Seconds()).Humanize("#.##");
+      var percent = args.ProgressPercentage;
+      var p = (int)Math.Round(percent);
+
+      if (p - lastPercent >= threshold) {
+        lastPercent = p;
+        progress.Report(new(p, humanizedSpeed));
+      }
+    }
 
     void done(
       object? sender, System.ComponentModel.AsyncCompletedEventArgs args

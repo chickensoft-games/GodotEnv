@@ -68,6 +68,8 @@ public static class GodotEnv {
     );
     var addonsRepo = new AddonsRepository(
       fileClient: fileClient,
+      networkClient: networkClient,
+      zipClient: zipClient,
       computer: computer,
       config: addonsConfig,
       processRunner: processRunner

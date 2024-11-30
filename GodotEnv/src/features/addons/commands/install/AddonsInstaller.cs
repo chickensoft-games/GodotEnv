@@ -2,7 +2,9 @@ namespace Chickensoft.GodotEnv.Features.Addons.Commands;
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Addons.Domain;
 using Chickensoft.GodotEnv.Features.Addons.Models;
@@ -12,6 +14,9 @@ public interface IAddonsInstaller {
     string projectPath,
     int? maxDepth,
     Action<IReportableEvent> onReport,
+    Action<Addon, DownloadProgress> onDownload,
+    Action<Addon, double> onExtract,
+    CancellationToken token,
     string? addonsFileName = null
   );
 }
@@ -42,6 +47,9 @@ public class AddonsInstaller : IAddonsInstaller {
     string projectPath,
     int? maxDepth,
     Action<IReportableEvent> onReport,
+    Action<Addon, DownloadProgress> onDownload,
+    Action<Addon, double> onExtract,
+    CancellationToken token,
     string? addonsFileName = null
   ) {
 
@@ -119,7 +127,15 @@ public class AddonsInstaller : IAddonsInstaller {
           // For symlink'd addons, the path to the cached addon is just the
           // path to whatever the symlink points to.
           var pathToCachedAddon = await AddonsRepo.CacheAddon(
-            addon, cacheName
+            addon,
+            cacheName,
+            new Progress<DownloadProgress>(
+              (progress) => onDownload(addon, progress)
+            ),
+            new Progress<double>(
+              (progress) => onExtract(addon, progress)
+            ),
+            token
           );
 
           // Checkout correct branch.

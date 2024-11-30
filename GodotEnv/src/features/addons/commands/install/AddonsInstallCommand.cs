@@ -51,11 +51,20 @@ public class AddonsInstallCommand :
 
     var result = AddonsInstaller.Result.NotAttempted;
 
+    var token = console.RegisterCancellationHandler();
+
     try {
       result = await addonsInstaller.Install(
         projectPath: ExecutionContext.WorkingDir,
         maxDepth: MaxDepth,
         onReport: (@event) => @event.Report(log),
+        onDownload: (addon, progress) => log.PrintInPlace(
+          $"Downloading {addon.Name}... {progress.Percent} @ {progress.Speed}"
+        ),
+        onExtract: (addon, progress) => log.PrintInPlace(
+          $"Extracting {addon.Name}... {progress}"
+        ),
+        token,
         addonsFileName: AddonsFileName
       );
     }

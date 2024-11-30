@@ -1,6 +1,8 @@
 namespace Chickensoft.GodotEnv.Features.Addons.Domain;
 
+using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
@@ -9,6 +11,8 @@ using Chickensoft.GodotEnv.Features.Addons.Models;
 
 public interface IAddonsRepository {
   IFileClient FileClient { get; }
+  INetworkClient NetworkClient { get; }
+  IZipClient ZipClient { get; }
   AddonsConfiguration Config { get; }
   IComputer Computer { get; }
   IProcessRunner ProcessRunner { get; }
@@ -36,8 +40,16 @@ public interface IAddonsRepository {
   /// <param name="addon">Addon.</param>
   /// <param name="cacheName">Name of the directory in the cache to clone the
   /// addon to.</param>
-  /// <returns>Fully qualified path to the cached addon.</returns>
-  Task<string> CacheAddon(IAddon addon, string cacheName);
+  /// <param name="downloadProgress">Download progress callback.</param>
+  /// <param name="extractProgress">Zip extraction progress callback.</param>
+  /// <returns>Fully qualified path to the cached addon file.</returns>
+  Task<string> CacheAddon(
+    IAddon addon,
+    string cacheName,
+    IProgress<DownloadProgress> downloadProgress,
+    IProgress<double> extractProgress,
+    CancellationToken token
+  );
   /// <summary>
   /// Updates a cached addon by pulling the latest changes from the source
   /// repository and initializing or updating submodules.
@@ -82,18 +94,22 @@ public interface IAddonsRepository {
 
 public class AddonsRepository(
   IFileClient fileClient,
+  INetworkClient networkClient,
+  IZipClient zipClient,
   IComputer computer,
   AddonsConfiguration config,
   IProcessRunner processRunner
 ) : IAddonsRepository {
   public IFileClient FileClient { get; } = fileClient;
+  public INetworkClient NetworkClient { get; } = networkClient;
+  public IZipClient ZipClient { get; } = zipClient;
   public IComputer Computer { get; } = computer;
   public AddonsConfiguration Config { get; } = config;
   public IProcessRunner ProcessRunner { get; } = processRunner;
 
   public string ResolveUrl(IAsset asset, string path) {
     var url = asset.Url;
-    if (asset.IsRemote) { return url; }
+    if (asset.IsRemote || asset.IsZip) { return url; }
     // If the path containing the addons.json is a symlink, determine the
     // actual path containing the addons.json file. This allows addons
     // that have their own addons with relative paths to be relative to
@@ -119,28 +135,78 @@ public class AddonsRepository(
     }
   }
 
-  public async Task<string> CacheAddon(IAddon addon, string cacheName) {
+  public async Task<string> CacheAddon(
+    IAddon addon,
+    string cacheName,
+    IProgress<DownloadProgress> downloadProgress,
+    IProgress<double> extractProgress,
+    CancellationToken token
+  ) {
     if (addon.IsSymlink) {
+      // Symlink'd addon
+
       // Return what should be the resolved url: that is, what the symlink
       // is actually pointing to. Symlink addons are not cached.
       return FileClient.Combine(
         addon.Url, addon.Subfolder.TrimEnd(FileClient.Separator)
       );
     }
+
     var addonCachePath = FileClient.Combine(Config.CachePath, cacheName);
-    if (!FileClient.DirectoryExists(addonCachePath)) {
-      var addonsCacheShell = Computer.CreateShell(Config.CachePath);
-      await addonsCacheShell.Run(
-        "git", "clone", addon.Url, "--recurse-submodules", cacheName
+
+    if (addon.IsZip) {
+      // Remote zip file
+      var zipFilename = addon.Hash + ".zip";
+      var extractedDir = FileClient.Combine(addonCachePath, addon.Hash);
+
+      if (FileClient.DirectoryExists(extractedDir)) {
+        // Extracted zip file already exists
+        return extractedDir;
+      }
+
+      // Delete everything in the cache directory to clear any old files.
+      await FileClient.DeleteDirectory(addonCachePath);
+      FileClient.CreateDirectory(addonCachePath);
+
+      // Download the zip file
+      await NetworkClient.DownloadFileAsync(
+        addon.Url,
+        addonCachePath,
+        zipFilename,
+        downloadProgress,
+        token
+      );
+
+      var zipFilePath = FileClient.Combine(addonCachePath, zipFilename);
+
+      // Extract the zip file
+      await ZipClient.ExtractToDirectory(
+        zipFilePath,
+        extractedDir,
+        extractProgress
+      );
+
+      return extractedDir;
+    }
+    else {
+      // Local or remote git repository
+
+      if (!FileClient.DirectoryExists(addonCachePath)) {
+        var addonsCacheShell = Computer.CreateShell(Config.CachePath);
+        await addonsCacheShell.Run(
+          "git", "clone", addon.Url, "--recurse-submodules", cacheName
+        );
+      }
+
+      return FileClient.Combine(
+        addonCachePath, addon.Subfolder.TrimEnd(FileClient.Separator)
       );
     }
-    return FileClient.Combine(
-      addonCachePath, addon.Subfolder.TrimEnd(FileClient.Separator)
-    );
   }
 
   public async Task UpdateCache(IAddon addon, string cacheName) {
-    if (addon.IsSymlink) { return; }
+    if (addon.IsSymlink || addon.IsZip) { return; }
+
     var addonCachePath = FileClient.Combine(Config.CachePath, cacheName);
     var addonCacheShell = Computer.CreateShell(addonCachePath);
     await addonCacheShell.RunUnchecked("git", "clean", "-fdx");
@@ -152,7 +218,8 @@ public class AddonsRepository(
   }
 
   public async Task PrepareCache(IAddon addon, string cacheName) {
-    if (addon.IsSymlink) { return; }
+    if (addon.IsSymlink || addon.IsZip) { return; }
+
     var addonCachePath = FileClient.Combine(Config.CachePath, cacheName);
     var addonCacheShell = Computer.CreateShell(addonCachePath);
     await addonCacheShell.RunUnchecked("git", "clean", "-fdx");
@@ -196,7 +263,9 @@ public class AddonsRepository(
   }
 
   public async Task InstallAddonFromCache(IAddon addon, string cacheName) {
-    var addonCachePath = FileClient.Combine(Config.CachePath, cacheName);
+    var addonCachePath = addon.IsZip
+      ? FileClient.Combine(Config.CachePath, cacheName, addon.Hash)
+      : FileClient.Combine(Config.CachePath, cacheName);
     // copy addon from cache to installation location
     var projectShell = Computer.CreateShell(Config.ProjectPath);
     var copyFromPath = addonCachePath;

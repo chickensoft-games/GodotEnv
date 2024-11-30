@@ -21,7 +21,7 @@ public enum AssetSource {
   /// </summary>
   [JsonProperty("symlink")]
   Symlink = 2,
-  /// <summary>Asset is a zip file.</summary>
+  /// <summary>Asset is obtained via a url to compressed zip file.</summary>
   [JsonProperty("zip")]
   Zip = 3,
 }

@@ -11,11 +11,10 @@ using Chickensoft.GodotEnv.Common.Utilities;
 /// Zip client. Credit: https://stackoverflow.com/a/42436311
 /// </summary>
 public interface IZipClient {
-  Task ExtractToDirectory(
+  Task<int> ExtractToDirectory(
     string sourceArchiveFileName,
     string destinationDirectoryName,
-    IProgress<double> progress,
-    ILog log
+    IProgress<double> progress
   );
 }
 
@@ -34,11 +33,10 @@ public class ZipClient : IZipClient {
     Files = files;
   }
 
-  public Task ExtractToDirectory(
+  public Task<int> ExtractToDirectory(
     string sourceArchiveFileName,
     string destinationDirectoryName,
-    IProgress<double> progress,
-    ILog log
+    IProgress<double> progress
   ) {
     using var archive = ZipFileOpenRead(sourceArchiveFileName);
     var totalBytes = archive.Entries.Sum(e => e.Length);
@@ -62,8 +60,8 @@ public class ZipClient : IZipClient {
       using (var outputStream = Files.File.OpenWrite(fileName)) {
         var progressStream = new ProgressStream(
           outputStream,
-          new BasicProgress<int>((p) => { }),
-          new BasicProgress<int>(i => {
+          new Progress<int>((p) => { }),
+          new Progress<int>(i => {
             currentBytes += i;
             progress.Report(currentBytes / totalBytes);
           })
@@ -77,6 +75,6 @@ public class ZipClient : IZipClient {
       );
     }
 
-    return Task.CompletedTask;
+    return Task.FromResult(archive.Entries.Count);
   }
 }
