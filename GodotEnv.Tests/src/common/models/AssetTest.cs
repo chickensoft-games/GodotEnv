@@ -7,12 +7,8 @@ using Shouldly;
 using Xunit;
 
 public class AssetTest {
-  public class TestAsset(string url, string checkout, AssetSource source)
-    : IAsset {
-    public string Url { get; } = url;
-    public string Checkout { get; } = checkout;
-    public AssetSource Source { get; } = source;
-  }
+  public record TestAsset(string Url, string Checkout, AssetSource Source)
+    : Asset(Url, Checkout, Source);
 
   public const string URL = "git@github.com:chickensoft-games/GodotEnv.git";
   public const string CHECKOUT = "main";

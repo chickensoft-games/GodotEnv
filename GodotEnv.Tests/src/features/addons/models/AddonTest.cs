@@ -30,6 +30,8 @@ public class AddonTest {
     SUBFOLDER.ShouldBe(addon.Subfolder);
     CHECKOUT.ShouldBe(addon.Checkout);
     SOURCE.ShouldBe(addon.Source);
+
+    addon.Hash.ShouldBe("8AE58E07DBEB5E1A65ED608BFDFB7076");
   }
 
   [Fact]
