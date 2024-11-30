@@ -42,8 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Chickensoft.LogicBlocks" Version="4.2.1" />
-    <PackageReference Include="Chickensoft.LogicBlocks.Generator" Version="4.2.1" />
     <PackageReference Include="CliFx" Version="2.3.4" />
     <PackageReference Include="Downloader" Version="3.0.6" />
     <PackageReference Include="Humanizer" Version="2.14.1" />

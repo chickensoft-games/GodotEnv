@@ -1,7 +1,3 @@
-using System.Runtime.CompilerServices;
-
-// IMPORTANT: Allow us to test internal methods in our test project.
-[assembly: InternalsVisibleTo("Chickensoft.GodotEnv.Tests")]
 namespace Chickensoft.GodotEnv;
 
 using System;
@@ -29,21 +25,35 @@ public static class GodotEnv {
   public static async Task<int> Main(string[] args) {
     // App-wide dependencies
     var computer = new Computer();
+
     var processRunner = new ProcessRunner();
+
     var fileClient = new FileClient(new FileSystem(), computer, processRunner);
+
     var environmentClient = new EnvironmentClient();
+
     var configFileRepo = new ConfigFileRepository(fileClient);
+
     var config = configFileRepo.LoadConfigFile(out var _);
+
     var workingDir = Environment.CurrentDirectory;
+
     var networkClient = new NetworkClient(
       downloadService: new DownloadService(),
       downloadConfiguration: Defaults.DownloadConfiguration
     );
+
     IZipClient zipClient = (fileClient.OS == OSType.Windows)
       ? new ZipClient(fileClient.Files)
       : new ZipClientTerminal(computer, fileClient.Files);
+
     var environmentVariableClient =
-      new EnvironmentVariableClient(processRunner, fileClient, computer, environmentClient);
+      new EnvironmentVariableClient(
+        processRunner,
+        fileClient,
+        computer,
+        environmentClient
+      );
 
     // Addons feature dependencies
 
@@ -63,7 +73,7 @@ public static class GodotEnv {
       processRunner: processRunner
     );
     var addonGraph = new AddonGraph();
-    var addonsLogic = new AddonsLogic(
+    var addonsInstaller = new AddonsInstaller(
       addonsFileRepo: addonsFileRepo,
       addonsRepo: addonsRepo,
       addonGraph: addonGraph
@@ -75,7 +85,7 @@ public static class GodotEnv {
       AddonsConfig: addonsConfig,
       AddonsRepo: addonsRepo,
       AddonGraph: addonGraph,
-      AddonsLogic: addonsLogic
+      AddonsInstaller: addonsInstaller
     );
 
     // Godot feature dependencies

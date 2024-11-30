@@ -14,125 +14,179 @@ using Shouldly;
 using Xunit;
 
 public class AddonsInstallCommandTest {
+  private sealed class TestException : Exception {
+    public TestException(string message) : base(message) { }
+    public override string ToString() => Message;
+  }
+
   [Fact]
   public void Initializes() {
     var context = new Mock<IExecutionContext>();
     var command = new AddonsInstallCommand(context.Object);
 
-    Assert.Equal(context.Object, command.ExecutionContext);
+    command.ExecutionContext.ShouldBeSameAs(context.Object);
   }
 
-  [Fact]
-  public async Task Executes() {
+  private static AddonsInstallCommand BuildSubject(
+    out Mock<IAddonsInstaller> addonsInstaller,
+    out FakeInMemoryConsole console,
+    out ILog log
+  ) {
+    // Addons command operates at a high level of abstraction given the number
+    // of systems required to install addons, so we'll setup all the mocks here
+    // and provide access to the relevant mocks for testing via out vars.
+
     var context = new Mock<IExecutionContext>();
-    var console = new FakeInMemoryConsole();
-    var log = new Log(console); // Use real log to test colors in output
+    var fakeConsole = new FakeInMemoryConsole();
+    console = fakeConsole;
+
+    log = new Log(console); // Use real log to test colors in output
 
     var workingDir = "/";
 
-    context.Setup(context => context.CreateLog(console)).Returns(log);
+    context.Setup(context => context.CreateLog(fakeConsole)).Returns(log);
     context.Setup(context => context.WorkingDir).Returns(workingDir);
 
     var addonsFileRepo = new Mock<IAddonsFileRepository>();
     var addonGraph = new Mock<IAddonGraph>();
     var addonsRepo = new Mock<IAddonsRepository>();
     var fileClient = new Mock<IFileClient>();
-    var logic = new Mock<AddonsLogic>(
-      addonsFileRepo.Object, addonsRepo.Object, addonGraph.Object
-    );
-    addonsFileRepo.Setup(ctx => ctx.FileClient).Returns(fileClient.Object);
-    fileClient.Setup(ctx => ctx.OS).Returns(OSType.Linux);
+
+    addonsInstaller = new Mock<IAddonsInstaller>();
 
     var addonsContext = new Mock<IAddonsContext>();
     addonsContext.Setup(ctx => ctx.AddonsFileRepo)
       .Returns(addonsFileRepo.Object);
     addonsContext.Setup(ctx => ctx.AddonGraph).Returns(addonGraph.Object);
     addonsContext.Setup(ctx => ctx.AddonsRepo).Returns(addonsRepo.Object);
-    addonsContext.Setup(ctx => ctx.AddonsLogic).Returns(logic.Object);
+    addonsContext.Setup(ctx => ctx.AddonsInstaller)
+      .Returns(addonsInstaller.Object);
 
     context.Setup(context => context.Addons).Returns(addonsContext.Object);
 
-    var command = new AddonsInstallCommand(context.Object);
+    return new AddonsInstallCommand(context.Object);
+  }
 
-    var reportOutput = new AddonsLogic.Output.Report(
-      new ReportableEvent(log => log.Print("Reportable event"))
+  [Fact]
+  public async Task AddonsInstallCommandSucceedsWhenInstallerHasNoErrors() {
+    var command = BuildSubject(
+      out var addonsInstaller, out var console, out var log
     );
 
-    // Mock the binding's report output handler and invoke it to make sure it
-    // logs the report output.
-    var binding = new Mock<AddonsLogic.IBinding>();
-    binding
-      .Setup(binding => binding.Handle(
-        It.IsAny<Action<AddonsLogic.Output.Report>>()
-      ))
-      .Callback<Action<AddonsLogic.Output.Report>>(
-        action => action(reportOutput)
-      )
-      .Returns(binding.Object);
-
-    // Mock the binding's exception handler and invoke it to make sure it logs
-    // errors as expected.
-    var e = new InvalidOperationException("Test exception");
-    binding
-      .Setup(binding => binding.Catch(It.IsAny<Action<Exception>>()))
-      .Callback<Action<Exception>>(action => action(e))
-      .Returns(binding.Object);
-
-    binding
-      .Setup(binding => binding.Catch(It.IsAny<Action<Exception>>()))
-      .Callback((Action<Exception> action) => action(e))
-      .Returns(binding.Object);
-
-    logic.Setup(logic => logic.Bind()).Returns(binding.Object);
-
-    logic
-      .Setup(logic => logic.Input(It.IsAny<AddonsLogic.Input.Install>()))
-      .Returns(
-        Task.FromResult<AddonsLogic.State>(
-          new AddonsLogic.State.InstallationSucceeded()
+    addonsInstaller
+      .Setup(
+        i => i.Install(
+          It.IsAny<string>(),
+          It.IsAny<int?>(),
+          It.IsAny<Action<IReportableEvent>>(),
+          It.IsAny<string?>()
         )
-      );
+      )
+      .Returns(Task.FromResult(AddonsInstaller.Result.Succeeded));
 
     await command.ExecuteAsync(console);
 
-    logic.VerifyAll();
+    addonsInstaller.VerifyAll();
 
-    log.ToString().ShouldBe("""
-    Reportable event
+    log.ToString().ShouldBe(
+      """
+      [style fg="green"]✅ Addons installed successfully.
 
-    [style fg="red"]An error was encountered while attempting to install addons.
-
-    System.InvalidOperationException: Test exception
-
-    [/style]
-    """, StringCompareShould.IgnoreLineEndings);
-  }
-
-  [Fact]
-  public void CheckSuccessThrowsOnStateCannotBeResolved() {
-    var executionContext = new Mock<IExecutionContext>();
-    var fileClient = new Mock<IFileClient>();
-
-    var command = new AddonsInstallCommand(executionContext.Object);
-
-    var state = new AddonsLogic.State.CannotBeResolved();
-
-    Assert.Throws<CommandException>(
-      () => command.CheckSuccess(state)
+      [/style]
+      """,
+      StringCompareShould.IgnoreLineEndings
     );
   }
 
   [Fact]
-  public void CheckSuccessThrowsOnStateUnresolved() {
-    var executionContext = new Mock<IExecutionContext>();
-    var fileClient = new Mock<IFileClient>();
-
-    var command = new AddonsInstallCommand(executionContext.Object);
-
-    var state = new AddonsLogic.State.Unresolved();
-
-    Assert.Throws<CommandException>(
-      () => command.CheckSuccess(state)
+  public async Task AddonsInstallCommandFailsWhenInstallerHasErrors() {
+    var command = BuildSubject(
+      out var addonsInstaller, out var console, out var log
     );
+
+    var e = new TestException("An error occurred.");
+
+    addonsInstaller
+      .Setup(
+        i => i.Install(
+          It.IsAny<string>(),
+          It.IsAny<int?>(),
+          It.IsAny<Action<IReportableEvent>>(),
+          It.IsAny<string?>()
+        )
+      )
+      .Throws(e);
+
+    var ex = await Should.ThrowAsync<CommandException>(
+      async () => await command.ExecuteAsync(console)
+    );
+
+    ex.InnerException.ShouldBeSameAs(e);
+
+    addonsInstaller.VerifyAll();
+
+    log.ToString().ShouldBe(
+      """
+      [style fg="red"]An unknown error was encountered while attempting to install addons.
+
+      An error occurred.
+
+      [/style]
+      """,
+      StringCompareShould.IgnoreLineEndings
+    );
+  }
+
+
+  [Fact]
+  public void FinishThrowsExceptionOnCannotBeResolved() {
+    var log = new Mock<ILog>();
+
+    Should.Throw<CommandException>(
+      () => AddonsInstallCommand.Finish(
+        AddonsInstaller.Result.CannotBeResolved, log.Object
+      )
+    );
+
+    log.VerifyAll();
+  }
+
+  [Fact]
+  public void FinishThrowsExceptionOnNotAttempted() {
+    var log = new Mock<ILog>();
+
+    Should.Throw<CommandException>(
+      () => AddonsInstallCommand.Finish(
+        AddonsInstaller.Result.NotAttempted, log.Object
+      )
+    );
+
+    log.VerifyAll();
+  }
+
+  [Fact]
+  public void FinishOutputsSuccessOnSucceeded() {
+    var log = new Mock<ILog>();
+
+    AddonsInstallCommand.Finish(
+      AddonsInstaller.Result.Succeeded, log.Object
+    );
+
+    log.Verify(log => log.Success(It.IsAny<string>()));
+
+    log.VerifyAll();
+  }
+
+  [Fact]
+  public void FinishOutputsSuccessOnNothingToInstall() {
+    var log = new Mock<ILog>();
+
+    AddonsInstallCommand.Finish(
+      AddonsInstaller.Result.NothingToInstall, log.Object
+    );
+
+    log.Verify(log => log.Success(It.IsAny<string>()));
+
+    log.VerifyAll();
   }
 }
