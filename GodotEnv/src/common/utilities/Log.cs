@@ -14,7 +14,7 @@ public interface ILog {
   /// <param name="message">Error message.</param>
   void Err(object? message);
   /// <summary>Print an error message to the console in place.</summary>
-  /// <param name="message">Error message.</param>m>
+  /// <param name="message">Error message.</param>
   void ErrInPlace(object? message);
   /// <summary>Print a message to the console.</summary>
   /// <param name="message">Message.</param>
@@ -74,7 +74,6 @@ public class Log : ILog {
 
   public IConsole Console { get; }
 
-  public bool TestEnvironment { get; init; }
   private ConsoleWriter OutputConsole => Console.Output;
   private readonly StringBuilder _sb = new();
   private readonly ConsoleColor _defaultFgColor;
@@ -86,20 +85,12 @@ public class Log : ILog {
   // running an environment without an actual console. Redirected environments
   // cause errors when manipulating the cursor on Windows.
   public bool IsInRedirectedEnv =>
-    !TestEnvironment && (
-      Console.IsOutputRedirected ||
-      Console.IsErrorRedirected ||
-      Environment.GetEnvironmentVariable("CI") != null
-    );
+    Console.IsOutputRedirected || Console.IsErrorRedirected;
 
   public Log(IConsole console) {
     Console = console;
 
-
-    if (IsInRedirectedEnv) {
-      System.Console.Clear();
-    }
-    else {
+    if (!IsInRedirectedEnv) {
       console.ResetColor();
     }
 
@@ -152,10 +143,7 @@ public class Log : ILog {
   }
 
   public void Output(
-    object? message,
-    Action<IConsole> consoleStyle,
-    bool inPlace = false,
-    bool addExtraLine = true
+    object? message, Action<IConsole> consoleStyle, bool inPlace = false, bool addExtraLine = true
   ) {
     if (inPlace && IsInRedirectedEnv) {
       // Don't print in-place messages in a redirected environment, like
@@ -163,12 +151,8 @@ public class Log : ILog {
       return;
     }
     lock (Console) {
-      if (!IsInRedirectedEnv) {
-        // Set the new foreground and background colors.
-        // Don't want to do this in redirected environments
-        // (like GitHub action shells)
-        consoleStyle(Console);
-      }
+      // Set the new foreground and background colors.
+      consoleStyle(Console);
 
       if (
         (message is string str && str != "") ||
@@ -189,23 +173,12 @@ public class Log : ILog {
         OutputConsole.Write(message);
       }
       else {
-        if (IsInRedirectedEnv) {
-          System.Console.WriteLine(message);
-        }
-        else {
-          OutputConsole.WriteLine(message);
-        }
+        OutputConsole.WriteLine(message);
       }
       _sb.AppendLine(message?.ToString());
 
       if (addExtraLine) {
-        if (IsInRedirectedEnv) {
-          System.Console.WriteLine();
-        }
-        else {
-          OutputConsole.WriteLine();
-        }
-
+        OutputConsole.WriteLine();
         _sb.AppendLine();
       }
 
