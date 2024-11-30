@@ -12,53 +12,33 @@ public interface ILog {
   IConsole Console { get; }
   /// <summary>Print an error message to the console.</summary>
   /// <param name="message">Error message.</param>
-  /// <param name="inPlace">True to print without moving the cursor position.
-  /// </param>
   void Err(object? message);
   /// <summary>Print an error message to the console in place.</summary>
-  /// <param name="message">Error message.</param>
-  /// <param name="inPlace">True to print without moving the cursor position.
-  /// </param>
+  /// <param name="message">Error message.</param>m>
   void ErrInPlace(object? message);
   /// <summary>Print a message to the console.</summary>
   /// <param name="message">Message.</param>
-  /// <param name="inPlace">True to print without moving the cursor position.
-  /// </param>
   void Print(object? message);
   /// <summary>Print a message to the console in place.</summary>
   /// <param name="message">Message.</param>
-  /// <param name="inPlace">True to print without moving the cursor position.
-  /// </param>
   void PrintInPlace(object? message);
   /// <summary>Print an information message to the console.</summary>
   /// <param name="message">Informational message.</param>
-  /// <param name="inPlace">True to print without moving the cursor position.
-  /// </param>
   void Info(object? message);
   /// <summary>Print an information message to the console in place.</summary>
   /// <param name="message">Informational message.</param>
-  /// <param name="inPlace">True to print without moving the cursor position.
-  /// </param>
   void InfoInPlace(object? message);
   /// <summary>Print a success message to the console.</summary>
   /// <param name="message">Success message.</param>
-  /// <param name="inPlace">True to print without moving the cursor position.
-  /// </param>
   void Success(object? message);
   /// <summary>Print a success message to the console in place.</summary>
   /// <param name="message">Success message.</param>
-  /// <param name="inPlace">True to print without moving the cursor position.
-  /// </param>
   void SuccessInPlace(object? message);
   /// <summary>Print a warning message to the console.</summary>
   /// <param name="message">Warning message.</param>
-  /// <param name="inPlace">True to print without moving the cursor position.
-  /// </param>
   void Warn(object? message);
   /// <summary>Print a warning message to the console in place.</summary>
   /// <param name="message">Warning message.</param>
-  /// <param name="inPlace">True to print without moving the cursor position.
-  /// </param>
   void WarnInPlace(object? message);
   /// <summary>
   /// Clears the last written line of the console.
@@ -109,6 +89,7 @@ public class Log : ILog {
 
   public Log(IConsole console) {
     console.ResetColor();
+    console.Clear();
     _defaultFgColor = console.ForegroundColor;
     _defaultBgColor = console.BackgroundColor;
     _defaultStyle = new Style(_defaultFgColor, _defaultBgColor);
@@ -273,9 +254,8 @@ public class Log : ILog {
     return _sb.ToString();
   }
 
-  public static string GetColorName(int color) {
-    if (color == -1) { return "default"; }
-    return ((ConsoleColor)color)
-      .ToString().ToLower(CultureInfo.CurrentCulture);
-  }
+  public static string GetColorName(int color) => color == -1
+    ? "default"
+    : ((ConsoleColor)color)
+    .ToString().ToLower(CultureInfo.CurrentCulture);
 }
