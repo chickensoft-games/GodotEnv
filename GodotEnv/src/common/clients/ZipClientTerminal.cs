@@ -17,11 +17,10 @@ public partial class ZipClientTerminal : IZipClient {
     Files = files;
   }
 
-  public async Task ExtractToDirectory(
+  public async Task<int> ExtractToDirectory(
     string sourceArchiveFileName,
     string destinationDirectoryName,
-    IProgress<double> progress,
-    ILog log
+    IProgress<double> progress
   ) {
     var parentDir = Files.Path.GetDirectoryName(destinationDirectoryName)!;
     Files.Directory.CreateDirectory(parentDir);
@@ -33,21 +32,21 @@ public partial class ZipClientTerminal : IZipClient {
       NumFilesRegex.Match(stdOut.StandardOutput).Groups["numFiles"].Value
     );
 
-    var numEntries = 0d;
+    var numEntries = 0;
 
     await shell.RunWithUpdates(
       "unzip",
       (stdOutLine) => {
         if (stdOutLine.Contains("inflating:") || stdOutLine.Contains("creating:") || stdOutLine.Contains("extracting:")) {
           numEntries++;
-          progress.Report(numEntries / numFiles);
+          progress.Report((double)numEntries / numFiles);
         }
       },
       (stdErrLine) => { },
       "-o", sourceArchiveFileName, "-d", destinationDirectoryName
     );
 
-    log.Print($"🗜 Extracted {numEntries} / {numFiles} files in {sourceArchiveFileName}.");
+    return numEntries;
   }
 
   [GeneratedRegex(@"\s*(?<numFiles>\d+)\s+files?")]

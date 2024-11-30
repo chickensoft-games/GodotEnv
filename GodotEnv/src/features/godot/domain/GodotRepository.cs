@@ -11,8 +11,6 @@ using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
-using Downloader;
-using Humanizer;
 using Newtonsoft.Json;
 
 public struct RemoteVersion {
@@ -279,9 +277,6 @@ public partial class GodotRepository : IGodotRepository {
     log.Info($"📄 Cache filename: {cacheFilename}");
     log.Info($"💾 Compressed installer path: {compressedArchivePath}");
 
-    var lastPercent = 0d;
-    var threshold = 1d;
-
     log.PrintInPlace("🚀 Downloading Godot: 0%");
 
     try {
@@ -289,19 +284,12 @@ public partial class GodotRepository : IGodotRepository {
         url: downloadUrl,
         destinationDirectory: cacheDir,
         filename: cacheFilename,
-        new BasicProgress<DownloadProgressChangedEventArgs>((args) => {
-          var speed = args.BytesPerSecondSpeed;
-          var humanizedSpeed = speed.Bytes().Per(1.Seconds()).Humanize("#.##");
-          var percent = args.ProgressPercentage;
-          var p = Math.Round(percent);
-          if (p - lastPercent >= threshold) {
-            log.PrintInPlace(
-              $"🚀 Downloading Godot: {p}% at {humanizedSpeed}" +
-              "      "
-            );
-            lastPercent = p;
-          }
-        }),
+        new Progress<DownloadProgress>(
+          (progress) => log.PrintInPlace(
+            $"🚀 Downloading Godot: {progress.Percent}% at {progress.Speed}" +
+            "      "
+          )
+        ),
         token: token
       );
       log.Print("🚀 Downloaded Godot: 100%");
@@ -358,18 +346,17 @@ public partial class GodotRepository : IGodotRepository {
       FileClient.Combine(GodotInstallationsPath, archive.Name);
     var lastPercent = 0d;
 
-    await ZipClient.ExtractToDirectory(
+    var numFilesExtracted = await ZipClient.ExtractToDirectory(
       archivePath,
       destinationDirName,
-      new BasicProgress<double>((percent) => {
+      new Progress<double>((percent) => {
         var p = Math.Round(percent * 100);
         log.PrintInPlace($"🗜  Extracting Godot installation files: {p}%");
         lastPercent = p;
-      }),
-      log
+      })
     );
-
     log.Print("🚀 Extracting Godot installation files: 100%");
+    log.Print($"🗜 Extracted {numFilesExtracted} files in {archivePath}.");
     log.Success("🗜 Successfully extracted Godot to:");
     log.Info($"  {destinationDirName}");
     log.Print("");

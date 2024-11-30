@@ -1,6 +1,9 @@
 namespace Chickensoft.GodotEnv.Tests;
 
+using System;
+using System.Threading;
 using System.Threading.Tasks;
+using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Features.Addons.Commands;
 using Chickensoft.GodotEnv.Features.Addons.Domain;
@@ -39,7 +42,16 @@ public class AddonsInstallerTest {
       addonsFileRepo.Object, addonsRepo.Object, addonGraph.Object
     );
 
-    var result = await installer.Install(projectPath, null, (@event) => { });
+    var token = new CancellationToken();
+
+    var result = await installer.Install(
+      projectPath,
+      null,
+      (@event) => { },
+      (addon, progress) => { },
+      (addon, progress) => { },
+      token
+    );
 
     result.ShouldBe(AddonsInstaller.Result.NothingToInstall);
 
@@ -91,7 +103,16 @@ public class AddonsInstallerTest {
       addonsFileRepo.Object, addonsRepo.Object, addonGraph.Object
     );
 
-    var result = await installer.Install(projectPath, null, (@event) => { });
+    var token = new CancellationToken();
+
+    var result = await installer.Install(
+      projectPath,
+      null,
+      (@event) => { },
+      (addon, progress) => { },
+      (addon, progress) => { },
+      token
+    );
 
     result.ShouldBe(AddonsInstaller.Result.CannotBeResolved);
 
@@ -102,6 +123,7 @@ public class AddonsInstallerTest {
 
   [Fact]
   public async Task DeterminesCanonicalAddonCorrectly() {
+    var token = new CancellationToken();
     var addonsRepo = new Mock<IAddonsRepository>();
     var addonsFileRepo = new Mock<IAddonsFileRepository>();
     var addonGraph = new Mock<IAddonGraph>();
@@ -158,8 +180,16 @@ public class AddonsInstallerTest {
     var pathToCachedAddon = "/.addons/other_addon";
 
     addonsRepo
-      .Setup(repo => repo.CacheAddon(addon, cacheName))
-      .Returns(Task.FromResult(pathToCachedAddon));
+      .Setup(
+        repo => repo.CacheAddon(
+          addon,
+          cacheName,
+          It.IsAny<IProgress<DownloadProgress>>(),
+          It.IsAny<IProgress<double>>(),
+          token
+        )
+      )
+    .Returns(Task.FromResult(pathToCachedAddon));
 
     addonsRepo
       .Setup(repo => repo.PrepareCache(addon, cacheName))
@@ -180,7 +210,14 @@ public class AddonsInstallerTest {
       addonsFileRepo.Object, addonsRepo.Object, addonGraph.Object
     );
 
-    var result = await installer.Install(projectPath, null, (@event) => { });
+    var result = await installer.Install(
+      projectPath,
+      null,
+      (@event) => { },
+      (addon, progress) => { },
+      (addon, progress) => { },
+      token
+    );
 
     result.ShouldBe(AddonsInstaller.Result.Succeeded);
 
@@ -191,6 +228,7 @@ public class AddonsInstallerTest {
 
   [Fact]
   public async Task InstallsSymlinkAddon() {
+    var token = new CancellationToken();
     var addonsRepo = new Mock<IAddonsRepository>();
     var addonsFileRepo = new Mock<IAddonsFileRepository>();
     var addonGraph = new Mock<IAddonGraph>();
@@ -232,8 +270,16 @@ public class AddonsInstallerTest {
 
     var cacheName = addon.Name;
     var pathToCachedAddon = "/.addons/addon";
-    addonsRepo.Setup(repo => repo.CacheAddon(addon, addon.Name))
-      .Returns(Task.FromResult(pathToCachedAddon));
+    addonsRepo.Setup(
+      repo => repo.CacheAddon(
+        addon,
+        addon.Name,
+        It.IsAny<IProgress<DownloadProgress>>(),
+        It.IsAny<IProgress<double>>(),
+        token
+      )
+    )
+    .Returns(Task.FromResult(pathToCachedAddon));
 
     var addonsAddonsFilePath = "";
     addonsFileRepo
@@ -253,7 +299,14 @@ public class AddonsInstallerTest {
       addonsFileRepo.Object, addonsRepo.Object, addonGraph.Object
     );
 
-    var result = await installer.Install(projectPath, null, (@event) => { });
+    var result = await installer.Install(
+      projectPath,
+      null,
+      (@event) => { },
+      (addon, progress) => { },
+      (addon, progress) => { },
+      token
+    );
 
     result.ShouldBe(AddonsInstaller.Result.Succeeded);
 

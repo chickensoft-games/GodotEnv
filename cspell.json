@@ -12,6 +12,7 @@
     "gdenv",
     "globaltool",
     "godotenv",
+    "gpgsign",
     "imrp",
     "inheritdoc",
     "lcov",

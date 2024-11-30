@@ -1,5 +1,9 @@
 namespace Chickensoft.GodotEnv.Features.Addons.Models;
 
+using System;
+using System.Security.Cryptography;
+using System.Text;
+
 using Chickensoft.GodotEnv.Common.Models;
 
 public interface IAddon : IAsset {
@@ -10,15 +14,20 @@ public interface IAddon : IAsset {
   /// the addons installation path.
   /// </summary>
   string Name { get; }
+
   /// <summary>
   /// Fully qualified path to the addons configuration file which declared
   /// this addon.
   /// </summary>
   string AddonsFilePath { get; }
+
   /// <summary>
   /// Directory within the asset that should be considered the addon.
   /// </summary>
   string Subfolder { get; }
+
+  /// <summary>MD5 hash of the asset url.</summary>
+  string Hash { get; }
 }
 
 /// <summary>
@@ -28,10 +37,15 @@ public interface IAddon : IAsset {
 public record Addon : Asset, IAddon {
   /// <inheritdoc />
   public string Name { get; init; }
+
   /// <inheritdoc />
   public string AddonsFilePath { get; init; }
+
   /// <inheritdoc />
   public string Subfolder { get; init; }
+
+  /// <inheritdoc />
+  public string Hash { get; }
 
   private static readonly char[] _trimChars = ['/', '\\'];
 
@@ -56,6 +70,12 @@ public record Addon : Asset, IAddon {
     Name = name;
     AddonsFilePath = addonsFilePath;
     Subfolder = subfolder.Trim(_trimChars);
+
+#pragma warning disable CA5351 // insecure — just for id purposes
+    Hash = BitConverter.ToString(
+      MD5.HashData(Encoding.UTF8.GetBytes(Url))
+    ).Replace("-", "");
+#pragma warning restore CA5351
   }
 
   public override string ToString()

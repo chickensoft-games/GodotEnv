@@ -1,6 +1,8 @@
 namespace Chickensoft.GodotEnv.Tests;
 
+using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
@@ -16,6 +18,8 @@ public class AddonsRepositoryTest {
   private sealed class Subject(
     IConsole console,
     Mock<IFileClient> client,
+    Mock<INetworkClient> networkClient,
+    Mock<IZipClient> zipClient,
     Mock<ILog> log,
     Mock<IComputer> computer,
     AddonsConfiguration config,
@@ -23,6 +27,8 @@ public class AddonsRepositoryTest {
   ) {
     public IConsole Console { get; } = console;
     public Mock<IFileClient> Client { get; } = client;
+    public Mock<INetworkClient> NetworkClient { get; } = networkClient;
+    public Mock<IZipClient> ZipClient { get; } = zipClient;
     public Mock<ILog> Log { get; } = log;
     public Mock<IComputer> Computer { get; } = computer;
     public AddonsConfiguration Config { get; } = config;
@@ -44,6 +50,8 @@ public class AddonsRepositoryTest {
     // Keep tests shorter by using a helper method to build the test subject.
     var console = new FakeInMemoryConsole();
     var client = new Mock<IFileClient>();
+    var networkClient = new Mock<INetworkClient>();
+    var zipClient = new Mock<IZipClient>();
     var log = new Mock<ILog>();
     var computer = new Mock<IComputer>();
     var processRunner = new Mock<IProcessRunner>();
@@ -53,17 +61,26 @@ public class AddonsRepositoryTest {
         if (cli?.GetShell(path) is Mock<IShell> shell) {
           return shell.Object;
         }
-        throw new System.InvalidOperationException(
+        throw new InvalidOperationException(
           $"Mock shell not found for `{path}`. Please use a " +
           "ShellVerifier to create a mock shell for this directory and stub " +
           "the results of the processes that are expected to run."
         );
       });
     var config = new AddonsConfiguration(projectPath, addonsDir, cacheDir);
-    var repo = new AddonsRepository(client.Object, computer.Object, config, processRunner.Object);
+    var repo = new AddonsRepository(
+      client.Object,
+      networkClient.Object,
+      zipClient.Object,
+      computer.Object,
+      config,
+      processRunner.Object
+    );
     return new Subject(
       console: console,
       client: client,
+      networkClient: networkClient,
+      zipClient: zipClient,
       log: log,
       computer: computer,
       config: config,
@@ -142,7 +159,18 @@ public class AddonsRepositoryTest {
 
     client.Setup(c => c.Combine(addon.Url, addon.Subfolder)).Returns(expected);
 
-    var result = await repo.CacheAddon(addon, addon.Name);
+    var token = new CancellationToken();
+    var downloadProgress = new Mock<IProgress<DownloadProgress>>();
+    var extractProgress = new Mock<IProgress<double>>();
+
+    var result = await repo.CacheAddon(
+      addon,
+      addon.Name,
+      downloadProgress.Object,
+      extractProgress.Object,
+      token
+    );
+
     result.ShouldBe(expected);
 
     client.VerifyAll();
@@ -170,10 +198,117 @@ public class AddonsRepositoryTest {
       "git", "clone", addon.Url, "--recurse-submodules", addon.Name
     );
 
-    await repo.CacheAddon(addon, addon.Name);
+    var token = new CancellationToken();
+    var downloadProgress = new Mock<IProgress<DownloadProgress>>();
+    var extractProgress = new Mock<IProgress<double>>();
+
+    await repo.CacheAddon(
+      addon,
+      addon.Name,
+      downloadProgress.Object,
+      extractProgress.Object,
+      token
+    );
 
     client.VerifyAll();
     cli.VerifyAll();
+  }
+
+  [Fact]
+  public async Task CacheAddonReusesZipAddonCache() {
+    var addon = TestData.ZipAddon with { };
+
+    var addonsCachePath = CACHE_DIR + "/" + addon.Name;
+
+    var subject = BuildSubject();
+
+    var repo = subject.Repo;
+    var client = subject.Client;
+
+    var addonCachePath = CACHE_DIR + "/" + addon.Name;
+
+    client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
+
+    var extractedDir = addonCachePath + "/" + addon.Hash;
+    client.Setup(c => c.Combine(addonCachePath, addon.Hash)).Returns(extractedDir);
+    client.Setup(c => c.DirectoryExists(extractedDir)).Returns(true);
+
+    var token = new CancellationToken();
+    var downloadProgress = new Mock<IProgress<DownloadProgress>>();
+    var extractProgress = new Mock<IProgress<double>>();
+
+    await repo.CacheAddon(
+      addon,
+      addon.Name,
+      downloadProgress.Object,
+      extractProgress.Object,
+      token
+    );
+
+    client.VerifyAll();
+  }
+
+  [Fact]
+  public async Task CacheAddonCachesZipAddon() {
+    var addon = TestData.ZipAddon with { };
+
+    var addonsCachePath = CACHE_DIR + "/" + addon.Name;
+
+    var subject = BuildSubject();
+
+    var repo = subject.Repo;
+    var client = subject.Client;
+    var networkClient = subject.NetworkClient;
+    var zipClient = subject.ZipClient;
+
+    var addonCachePath = CACHE_DIR + "/" + addon.Name;
+
+    client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
+
+    var token = new CancellationToken();
+    var zipFileName = addon.Hash + ".zip";
+    var extractedDir = addonCachePath + "/" + addon.Hash;
+    var downloadProgress = new Mock<IProgress<DownloadProgress>>();
+    var extractProgress = new Mock<IProgress<double>>();
+
+    client.Setup(c => c.Combine(addonCachePath, addon.Hash)).Returns(extractedDir);
+    client.Setup(c => c.DirectoryExists(extractedDir)).Returns(false);
+
+    client.Setup(c => c.DeleteDirectory(addonCachePath));
+    client.Setup(c => c.CreateDirectory(addonCachePath));
+
+    networkClient
+      .Setup(nc => nc.DownloadFileAsync(
+        addon.Url,
+        addonCachePath,
+        zipFileName,
+        downloadProgress.Object,
+        token
+      ))
+      .Returns(Task.CompletedTask);
+
+    var zipFilePath = addonCachePath + "/" + zipFileName;
+    client.Setup(c => c.Combine(addonCachePath, zipFileName)).Returns(zipFilePath);
+
+    zipClient
+      .Setup(zc => zc.ExtractToDirectory(
+        zipFilePath,
+        extractedDir,
+        extractProgress.Object
+      ))
+      .Returns(Task.FromResult(1));
+
+    await repo.CacheAddon(
+      addon,
+      addon.Name,
+      downloadProgress.Object,
+      extractProgress.Object,
+      token
+    );
+
+    client.VerifyAll();
+    networkClient.VerifyAll();
+    zipClient.VerifyAll();
   }
 
   [Fact]
@@ -191,7 +326,17 @@ public class AddonsRepositoryTest {
     client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
     client.Setup(c => c.DirectoryExists(addonCachePath)).Returns(true);
 
-    await repo.CacheAddon(addon, addon.Name);
+    var token = new CancellationToken();
+    var downloadProgress = new Mock<IProgress<DownloadProgress>>();
+    var extractProgress = new Mock<IProgress<double>>();
+
+    await repo.CacheAddon(
+      addon,
+      addon.Name,
+      downloadProgress.Object,
+      extractProgress.Object,
+      token
+    );
 
     client.VerifyAll();
     cli.VerifyAll();
@@ -384,6 +529,24 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
+  public void GetCachedAddonPathDeterminesZipAddonCachePath() {
+
+    var subject = BuildSubject();
+    var client = subject.Client;
+    var addon = TestData.ZipAddon with { };
+
+    var cacheName = "test_addon";
+    var result = "cached_addon_path";
+
+    client.Setup(c => c.Combine(CACHE_DIR, cacheName, addon.Hash))
+      .Returns(result);
+
+    var cachedAddonPath = subject.Repo.GetCachedAddonPath(addon, cacheName);
+
+    cachedAddonPath.ShouldBe(result);
+  }
+
+  [Fact]
   public void InstallAddonWithSymlinkRejectsAddonsWithWrongSource() {
     var addon = TestData.Addon with { };
 
@@ -519,7 +682,6 @@ public class AddonsRepositoryTest {
     client.Setup(c => c.Combine(config.CachePath, cacheName))
       .Returns(addonCachePath);
 
-    // TODO:
     cli.RunsUnchecked(
       addonCachePath, new ProcessResult(0), "git", "clean", "-fdx"
     );
