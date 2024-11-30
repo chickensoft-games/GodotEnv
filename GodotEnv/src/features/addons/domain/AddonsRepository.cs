@@ -263,9 +263,7 @@ public class AddonsRepository(
   }
 
   public async Task InstallAddonFromCache(IAddon addon, string cacheName) {
-    var addonCachePath = addon.IsZip
-      ? FileClient.Combine(Config.CachePath, cacheName, addon.Hash)
-      : FileClient.Combine(Config.CachePath, cacheName);
+    var addonCachePath = GetCachedAddonPath(addon, cacheName);
     // copy addon from cache to installation location
     var projectShell = Computer.CreateShell(Config.ProjectPath);
     var copyFromPath = addonCachePath;
@@ -338,4 +336,9 @@ public class AddonsRepository(
       );
     }
   }
+
+  internal string GetCachedAddonPath(IAddon addon, string cacheName) =>
+    addon.IsZip
+      ? FileClient.Combine(Config.CachePath, cacheName, addon.Hash)
+      : FileClient.Combine(Config.CachePath, cacheName);
 }

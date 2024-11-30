@@ -28,4 +28,13 @@ public static class TestData {
     checkout: CHECKOUT,
     source: AssetSource.Symlink
   );
+
+  public static readonly Addon ZipAddon = new(
+    name: NAME,
+    addonsFilePath: ADDONS_FILE_PATH,
+    url: URL,
+    subfolder: SUBFOLDER,
+    checkout: "",
+    source: AssetSource.Zip
+  );
 }
