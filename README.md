@@ -79,7 +79,7 @@ GodotEnv can automatically manage Godot versions on your local machine for you.
 
 > 🙋‍♀️ Using GodotEnv to install Godot works best for local development. If you want to install Godot directly on a GitHub actions runner for CI/CD purposes, consider using Chickensoft's [setup-godot] action — it caches Godot installations between runs, installs the Godot export templates, and also works on Windows, macOS, and Ubuntu GitHub runners.
 
-### Installing Godot
+### ⬇️ Installing Godot
 
 To get started managing Godot versions with GodotEnv, you'll need to first instruct GodotEnv to install a version of Godot.
 
@@ -111,7 +111,7 @@ When installing a version of Godot, GodotEnv performs the following steps:
 >
 > **Windows users**: the first time you install Godot, you may need to log out and log back in on Windows for the `$GODOT` variable to be picked up by your shell and other applications.
 
-### Listing Godot Versions
+### 📝 Listing Godot Versions
 
 GodotEnv can show you a list of the Godot versions you have installed.
 
@@ -136,7 +136,7 @@ GodotEnv also supports showing a list of remote Godot versions available to inst
 godotenv godot list -r
 ```
 
-### Using a Different Godot Version
+### 👉 Using a Different Godot Version
 
 You can change the active version of Godot by instructing GodotEnv to update the symlink to one of the installed versions. By default, it only looks for the .NET-enabled version of Godot. To use a non-.NET version of Godot, specify `--no-dotnet`.
 
@@ -148,7 +148,7 @@ godotenv godot use 4.0.1
 godotenv godot use 4.0.1 --no-dotnet
 ```
 
-### Uninstalling a Godot Version
+### 🚫 Uninstalling a Godot Version
 
 Uninstalling works the same way as installing and switching versions does.
 
@@ -160,7 +160,7 @@ godotenv godot uninstall 4.0.1
 godotenv godot uninstall 4.0.1 --no-dotnet
 ```
 
-### Getting the Symlink Path
+### 🥸 Getting the Symlink Path
 
 GodotEnv can provide the path to the symlink that always points to the active version of Godot.
 
@@ -168,7 +168,7 @@ GodotEnv can provide the path to the symlink that always points to the active ve
 godotenv godot env path
 ```
 
-### Getting the Active Godot Version Path
+### 🚨 Getting the Active Godot Version Path
 
 GodotEnv will provide you with the path to the active version of Godot that the symlink it uses is currently pointing to.
 
@@ -176,7 +176,7 @@ GodotEnv will provide you with the path to the active version of Godot that the 
 godotenv godot env target
 ```
 
-### Getting and Setting the GODOT Environment Variable
+### 🏝️ Getting and Setting the GODOT Environment Variable
 
 You can use GodotEnv to set the `GODOT` user environment variable to the symlink that always points to the active version of Godot.
 
@@ -208,13 +208,13 @@ godotenv cache clear
 
 GodotEnv allows you to install [Godot addons][asset-library]. A Godot addon is a collection of Godot assets and/or scripts that can be copied into a project. [By convention][godot-addons-structure], these are stored in a folder named `addons` relative to your Godot project. Check out the [Dialogue Manager][godot-dialogue-manager] addon to see how a Godot addon itself is structured.
 
-Besides copying addons from remote sources, GodotEnv allows you to install addons from a local git repository or symlink to local directories on your machine so that you can develop an addon across multiple Godot projects.
+Besides copying addons from remote git repositories or zip files, GodotEnv allows you to install addons from a local git repository or symlink to local directories on your machine so that you can use an addon across multiple Godot projects while it is still in development.
 
 Using GodotEnv to manage addons can prevent some of the headaches that occur when using git submodules or manually managing symlinks.
 
 > Additionally, GodotEnv will check for accidental modifications made to addon content files before re-installing addons in your project to prevent overwriting changes you have made. It does this by turning non-symlinked addons into their own temporary git repositories and checking for changes before uninstalling them and reinstalling them.
 
-### When to Use Godot Addons
+### ℹ️ When to Use Godot Addons
 
 If you're using C#, you have two ways of sharing code: Godot addons and nuget packages. Each should be used in different scenarios.
 
@@ -224,7 +224,7 @@ If you're using C#, you have two ways of sharing code: Godot addons and nuget pa
 
 > If you're just sharing C# code between projects, you should use a nuget package or reference another .csproj locally. If you need to share scenes, resources, or any other type of files, use a Godot addon.
 
-#### Why use an addon manager for Godot?
+#### 🤔 Why use an addon manager for Godot?
 
 Managing addons in Godot projects has historically been somewhat problematic:
 
@@ -236,7 +236,7 @@ Managing addons in Godot projects has historically been somewhat problematic:
 
 Using an `addons.json` file allows developers to declare which addons their project needs, and then forget about how to get them. Whenever the addons.json file changes across branches, you can just simply reinstall the addons by running `godotenv addons install` and everything will "just work." Additionally, it's easy to see which addons have changed over time and across different branches — just check the git diff for the `addons.json` file.
 
-### Initializing GodotEnv in a Project
+### ✨ Initializing Addons in a Project
 
 GodotEnv needs to tell git to ignore your addons directory so that it can manage addons instead. Additionally, it will place a `.editorconfig` in your addons directory that will suppress C# code analysis warnings, since C# styles tend to vary drastically.
 
@@ -286,9 +286,9 @@ Finally, GodotEnv will create an example `addons.jsonc` file with the following 
 }
 ```
 
-### Installing Addons
+### 🪄 Installing Addons
 
-GodotEnv will install addons from symlinks, local paths, or remote git url's using the system shell. Please make sure you've configured git in your shell environment to use any desired credentials, since git will be used to clone local and remote repositories.
+GodotEnv uses the system shell to install addons from symlinks, local paths, and remote git url's and zip files. Please make sure you've configured `git` in your shell environment to use any desired credentials so it can clone any local and remote repositories you reference.
 
 ```shell
 godotenv addons install
@@ -323,7 +323,7 @@ Here's an example addons file that installs 3 addons, each from a different sour
 
 > ❗️ Each key in the `addons` dictionary above must be the directory name of the installed addon inside the project addons path. That is, if an addon repository contains its addon contents inside `addons/my_addon`, the name of the key for the addon in the addons file must be `my_addon`.
 
-### Local Addons
+### 🏠 Local Addons
 
 If you want to install an addon from a local path on your machine, your local addon must be a git repository. You can specify the `url` as a relative or absolute file path.
 
@@ -344,7 +344,7 @@ If you want to install an addon from a local path on your machine, your local ad
 }
 ```
 
-### Remote Addons
+### 🌎 Remote Addons
 
 GodotEnv can install addons from remote git repositories. Below is the addon specification for an addon from a remote git repository. The url can be any valid git remote url.
 
@@ -374,9 +374,9 @@ By default, GodotEnv assumes the addon `source` is `remote`, the `checkout` refe
 }
 ```
 
-### Symlink Addons
+### 🥸 Symlink Addons
 
-Finally, GodotEnv can "install" addons using symlinks. Addons installed with symlinks do not need to point to git repositories — instead, GodotEnv will create a folder which "points" to another folder on your file system using symbolic linking.
+GodotEnv can "install" addons using symlinks. Addons installed with symlinks do not need to point to git repositories — instead, GodotEnv will create a folder which "points" to another folder on your file system using symbolic linking.
 
 ```json
   "addons": {
@@ -398,7 +398,24 @@ Whenever a symlinked addon is modified, the changes will immediately appear in t
 
 > Using symlinks is a great way to include addons that are still in development across one or more projects.
 
-### Addons Configuration
+### 🗜️ Remote Zip File Addons
+
+GodotEnv can install addons from remote zip files. Simply provide a url to a zip file and GodotEnv will download it, extract it, and copy its contents to the addons directory.
+
+```json
+  "addons": {
+    "godot_jolt": {
+      "url": "https://github.com/godot-jolt/godot-jolt/releases/download/v0.14.0-stable/godot-jolt_v0.14.0-stable.zip",
+      "source": "zip",
+      "subfolder": "addons/godot-jolt"
+    }
+  }
+```
+
+> [!NOTE]
+> The addon description above installs the popular [Godot Jolt](https://github.com/godot-jolt/godot-jolt) physics engine.
+
+### ⚙️ Addons Configuration
 
 GodotEnv caches local and remote addons in the cache folder, configured above with the `cache` property in the `addons.json` file (the default is `.addons/`, relative to your project). You can safely delete this folder and GodotEnv will recreate it the next time it installs addons. Deleting the cache forces GodotEnv to re-download or copy everything on the next install.
 
@@ -410,13 +427,13 @@ GodotEnv will install addons into the directory specified by the `path` key in t
 >
 > Just run `godotenv addons install` after cloning your project or whenever your `addons.json` file changes!
 
-### Addons for Addons
+### 🎎 Addons for Addons
 
 An addon can itself contain an `addons.json` file that declares dependencies on other addons. When the addon is cached during addon resolution, GodotEnv checks to see if it also contains an `addons.json` file. If it does, GodotEnv will add its dependencies to the queue and continue addon resolution. If GodotEnv detects a potential conflict, it will output warnings that explain any potential pitfalls that might occur with the current configuration.
 
 GodotEnv uses a flat dependency graph that is reminiscent of tools like [bower]. In general, GodotEnv tries to be extremely forgiving and helpful, especially if you try to include addons in incompatible configurations. GodotEnv will display warnings and errors as clearly as possible to help you resolve any potential conflicting scenarios that may arise.
 
-## Contribution
+## 🤗 Contribution
 
 If you want to contribute, please check out [`CONTRIBUTING.md`](/CONTRIBUTING.md)!
 
