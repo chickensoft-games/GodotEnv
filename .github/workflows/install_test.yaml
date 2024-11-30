@@ -18,8 +18,7 @@ jobs:
       # Don't cancel other runners if one fails.
       fail-fast: false
       matrix:
-        # Also try windows-2019?
-        os: [ macos-latest, ubuntu-latest, windows-2019 ]
+        os: [macos-latest, ubuntu-latest, windows-latest]
     defaults:
       run:
         # Use bash shells on all platforms.
@@ -46,14 +45,15 @@ jobs:
         run: |
           # Use tool to install Godot. Last line of output is the path to the
           # symlink that always points to the active version of Godot.
-          dotnet run -- godot install 3.5.3
+          dotnet run --no-build -- godot install 3.5.3
 
       - name: 🤖 Check Godot Location
         working-directory: GodotEnv
         run: |
           # Get path to the symlink that always points to the active version of
           # Godot.
-          GODOT_SYMLINK="$(dotnet run -- godot env path)"
+          dotnet run --no-build -- godot env path > godot_path.txt
+          GODOT_SYMLINK=$(<godot_path.txt)
 
           echo "🕵️‍♂️ Godot symlink path: $GODOT_SYMLINK"
 
@@ -131,14 +131,15 @@ jobs:
         run: |
           # Use tool to install Godot. Last line of output is the path to the
           # symlink that always points to the active version of Godot.
-          dotnet run -- godot install ${{ matrix.version }}
+          dotnet run --no-build -- godot install ${{ matrix.version }}
 
       - name: 🤖 Check Godot Location
         working-directory: GodotEnv
         run: |
           # Get path to the symlink that always points to the active version of
           # Godot.
-          GODOT_SYMLINK="$(dotnet run -- godot env path)"
+          dotnet run --no-build -- godot env path > godot_path.txt
+          GODOT_SYMLINK=$(<godot_path.txt)
 
           echo "🕵️‍♂️ Godot symlink path: $GODOT_SYMLINK"
 
@@ -150,7 +151,7 @@ jobs:
       - name: 🌴 Set GODOT System Environment Variable
         working-directory: GodotEnv
         run: |
-          dotnet run -- godot env setup
+          dotnet run --no-build -- godot env setup
 
       - name: 🧪 Verify GODOT System Environment Variable
         working-directory: GodotEnv

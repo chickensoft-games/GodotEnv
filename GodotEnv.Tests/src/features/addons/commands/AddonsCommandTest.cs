@@ -14,7 +14,8 @@ public class AddonsCommandTest {
   public async Task Executes() {
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
-    var log = new Log(console); // Use real log to test colors in output
+    // Use real log to test colors in output
+    var log = new Log(console) { TestEnvironment = true };
 
     context.Setup(context => context.CreateLog(console)).Returns(log);
 

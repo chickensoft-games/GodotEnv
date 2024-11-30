@@ -11,13 +11,13 @@ using Xunit;
 
 public sealed class LogTest : IDisposable {
 
-  private readonly OutputTestFakeInMemoryConsole _console = new ();
+  private readonly OutputTestFakeInMemoryConsole _console = new();
 
   public void Dispose() => _console.Dispose();
 
   [Fact]
   public void Prints() {
-    Log log = new(_console);
+    Log log = new(_console) { TestEnvironment = true };
 
     log.Print("Hello, world!");
 
@@ -26,7 +26,7 @@ public sealed class LogTest : IDisposable {
 
   [Fact]
   public void PrintsInfo() {
-    Log log = new(_console);
+    Log log = new(_console) { TestEnvironment = true };
 
     log.Info("Hello, world!");
 
@@ -35,7 +35,7 @@ public sealed class LogTest : IDisposable {
 
   [Fact]
   public void PrintsWarning() {
-    Log log = new(_console);
+    Log log = new(_console) { TestEnvironment = true };
 
     log.Warn("Hello, world!");
 
@@ -44,7 +44,7 @@ public sealed class LogTest : IDisposable {
 
   [Fact]
   public void PrintsErr() {
-    Log log = new(_console);
+    Log log = new(_console) { TestEnvironment = true };
 
     log.Err("Hello, world!");
 
@@ -53,7 +53,7 @@ public sealed class LogTest : IDisposable {
 
   [Fact]
   public void PrintsSuccess() {
-    Log log = new(_console);
+    Log log = new(_console) { TestEnvironment = true };
 
     log.Success("Hello, world!");
 
@@ -68,7 +68,7 @@ public sealed class LogTest : IDisposable {
 
   [Fact]
   public void OutputsCorrectStyleChanges() {
-    Log log = new(_console);
+    Log log = new(_console) { TestEnvironment = true };
 
     log.Print("A");
     log.Print("");
@@ -106,7 +106,7 @@ public sealed class LogTest : IDisposable {
 
   [Fact]
   public void OutputsNull() {
-    Log log = new(_console);
+    Log log = new(_console) { TestEnvironment = true };
 
     log.Print(null);
     log.Info(null);
@@ -120,7 +120,7 @@ public sealed class LogTest : IDisposable {
 
   [Fact]
   public void OutputsObject() {
-    Log log = new(_console);
+    Log log = new(_console) { TestEnvironment = true };
 
     log.Print(new { Hello = "world" });
 

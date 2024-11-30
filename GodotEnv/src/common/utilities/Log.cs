@@ -74,6 +74,7 @@ public class Log : ILog {
 
   public IConsole Console { get; }
 
+  public bool TestEnvironment { get; init; }
   private ConsoleWriter OutputConsole => Console.Output;
   private readonly StringBuilder _sb = new();
   private readonly ConsoleColor _defaultFgColor;
@@ -85,16 +86,27 @@ public class Log : ILog {
   // running an environment without an actual console. Redirected environments
   // cause errors when manipulating the cursor on Windows.
   public bool IsInRedirectedEnv =>
-    Console.IsOutputRedirected || Console.IsErrorRedirected;
+    !TestEnvironment && (
+      Console.IsOutputRedirected ||
+      Console.IsErrorRedirected ||
+      Environment.GetEnvironmentVariable("CI") != null
+    );
 
   public Log(IConsole console) {
-    console.ResetColor();
-    console.Clear();
+    Console = console;
+
+
+    if (IsInRedirectedEnv) {
+      System.Console.Clear();
+    }
+    else {
+      console.ResetColor();
+    }
+
     _defaultFgColor = console.ForegroundColor;
     _defaultBgColor = console.BackgroundColor;
     _defaultStyle = new Style(_defaultFgColor, _defaultBgColor);
     _styles.Push(_defaultStyle);
-    Console = console;
   }
 
   public void Print(object? message) => Output(
@@ -140,7 +152,10 @@ public class Log : ILog {
   }
 
   public void Output(
-    object? message, Action<IConsole> consoleStyle, bool inPlace = false, bool addExtraLine = true
+    object? message,
+    Action<IConsole> consoleStyle,
+    bool inPlace = false,
+    bool addExtraLine = true
   ) {
     if (inPlace && IsInRedirectedEnv) {
       // Don't print in-place messages in a redirected environment, like
@@ -148,8 +163,12 @@ public class Log : ILog {
       return;
     }
     lock (Console) {
-      // Set the new foreground and background colors.
-      consoleStyle(Console);
+      if (!IsInRedirectedEnv) {
+        // Set the new foreground and background colors.
+        // Don't want to do this in redirected environments
+        // (like GitHub action shells)
+        consoleStyle(Console);
+      }
 
       if (
         (message is string str && str != "") ||
@@ -170,12 +189,23 @@ public class Log : ILog {
         OutputConsole.Write(message);
       }
       else {
-        OutputConsole.WriteLine(message);
+        if (IsInRedirectedEnv) {
+          System.Console.WriteLine(message);
+        }
+        else {
+          OutputConsole.WriteLine(message);
+        }
       }
       _sb.AppendLine(message?.ToString());
 
       if (addExtraLine) {
-        OutputConsole.WriteLine();
+        if (IsInRedirectedEnv) {
+          System.Console.WriteLine();
+        }
+        else {
+          OutputConsole.WriteLine();
+        }
+
         _sb.AppendLine();
       }
 
@@ -211,7 +241,7 @@ public class Log : ILog {
             ? $" bg=\"{GetColorName((int)bg)}\""
             : ""
       ).Append(']'
-);
+    );
     _styles.Push(consoleStyle);
   }
 

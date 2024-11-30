@@ -40,7 +40,8 @@ public class AddonsInstallCommandTest {
     var fakeConsole = new FakeInMemoryConsole();
     console = fakeConsole;
 
-    log = new Log(console); // Use real log to test colors in output
+    // Use real log to test colors in output
+    log = new Log(console) { TestEnvironment = true };
 
     var workingDir = "/";
 
