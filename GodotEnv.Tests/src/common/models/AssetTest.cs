@@ -1,3 +1,5 @@
+// Use concrete types when possible for improved performance
+#pragma warning disable CA1859
 namespace Chickensoft.GodotEnv.Tests;
 
 using Chickensoft.GodotEnv.Common.Models;
@@ -44,3 +46,4 @@ public class AssetTest {
     asset.IsSymlink.ShouldBeTrue();
   }
 }
+#pragma warning restore CA1859

@@ -15,7 +15,7 @@ using Xunit;
 public class GodotRepositoryTest {
   [Fact]
   public async Task AddOrUpdateGodotEnvVariable() {
-    var WORKING_DIR = ".";
+    var workingDir = ".";
     var godotVar = "GODOT";
 
     var computer = new Mock<IComputer>();
@@ -29,7 +29,7 @@ public class GodotRepositoryTest {
           ? OSType.Windows
           : OSType.Unknown);
 
-    fileClient.Setup(fc => fc.AppDataDirectory).Returns(WORKING_DIR);
+    fileClient.Setup(fc => fc.AppDataDirectory).Returns(workingDir);
 
     // GodotBinPath
     fileClient.Setup(fc => fc.Combine(fileClient.Object.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_NAME))

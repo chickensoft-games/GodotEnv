@@ -23,7 +23,7 @@ public partial class ZipClientTerminal : IZipClient {
     IProgress<double> progress,
     ILog log
   ) {
-    var parentDir = Files.Path.GetDirectoryName(destinationDirectoryName);
+    var parentDir = Files.Path.GetDirectoryName(destinationDirectoryName)!;
     Files.Directory.CreateDirectory(parentDir);
     var shell = Computer.CreateShell(parentDir);
 

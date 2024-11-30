@@ -158,7 +158,7 @@ public class FileClientTest {
     var dif = new Mock<IDirectoryInfoFactory>();
     var di = new Mock<IDirectoryInfo>();
     fs.Setup(fs => fs.DirectoryInfo).Returns(dif.Object);
-    dif.Setup(dif => dif.FromDirectoryName(path)).Returns(di.Object);
+    dif.Setup(dif => dif.New(path)).Returns(di.Object);
     di.Setup(di => di.LinkTarget).Returns(pathToTarget);
 
     client.DirectorySymlinkTarget(path).ShouldBe(pathToTarget);
@@ -236,7 +236,7 @@ public class FileClientTest {
     var dif = new Mock<IDirectoryInfoFactory>();
     var di = new Mock<IDirectoryInfo>();
     fs.Setup(fs => fs.DirectoryInfo).Returns(dif.Object);
-    dif.Setup(dif => dif.FromDirectoryName(path)).Returns(di.Object);
+    dif.Setup(dif => dif.New(path)).Returns(di.Object);
     di.Setup(di => di.LinkTarget).Returns(pathToTarget);
 
     client.IsDirectorySymlink(path).ShouldBe(true);
