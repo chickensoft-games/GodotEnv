@@ -1,6 +1,5 @@
 namespace Chickensoft.GodotEnv.Tests;
 
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Features.Addons.Commands;
@@ -10,10 +9,10 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class UnresolvedTest {
+public class AddonsInstallerTest {
   [Fact]
   public void CanGoOn() =>
-    AddonsLogic.State.Unresolved.CanGoOn(false, 1, 1, 1).ShouldBeFalse();
+    AddonsInstaller.CanGoOn(false, 1, 1, 1).ShouldBeFalse();
 
   [Fact]
   public async Task DoesNothingIfNothingToInstall() {
@@ -22,12 +21,9 @@ public class UnresolvedTest {
     var addonGraph = new Mock<IAddonGraph>();
 
     var projectPath = "/";
-    var input = new AddonsLogic.Input.Install(
-      ProjectPath: projectPath, MaxDepth: null
-    );
 
     var addonsFile = new AddonsFile(
-      addons: new() { },
+      addons: [],
       cacheRelativePath: ".addons",
       pathRelativePath: "addons"
     );
@@ -39,14 +35,13 @@ public class UnresolvedTest {
       projectPath, out addonsFilePath, null
     )).Returns(addonsFile);
 
-    var state = new AddonsLogic.State.Unresolved();
-    var context = state.CreateFakeContext();
+    var installer = new AddonsInstaller(
+      addonsFileRepo.Object, addonsRepo.Object, addonGraph.Object
+    );
 
-    context.Set(addonsRepo.Object);
-    context.Set(addonsFileRepo.Object);
-    context.Set(addonGraph.Object);
+    var result = await installer.Install(projectPath, null, (@event) => { });
 
-    var nextState = await state.On(input);
+    result.ShouldBe(AddonsInstaller.Result.NothingToInstall);
 
     addonsRepo.VerifyAll();
     addonsFileRepo.VerifyAll();
@@ -60,9 +55,6 @@ public class UnresolvedTest {
     var addonGraph = new Mock<IAddonGraph>();
 
     var projectPath = "/";
-    var input = new AddonsLogic.Input.Install(
-      ProjectPath: projectPath, MaxDepth: null
-    );
 
     var entry = new AddonsFileEntry(
       url: "https://github.com/chickensoft-games/addon"
@@ -95,15 +87,13 @@ public class UnresolvedTest {
     addonGraph.Setup(graph => graph.Add(addon))
       .Returns(graphResult);
 
-    var state = new AddonsLogic.State.Unresolved();
-    var context = state.CreateFakeContext();
-    context.Set(addonsRepo.Object);
-    context.Set(addonsFileRepo.Object);
-    context.Set(addonGraph.Object);
+    var installer = new AddonsInstaller(
+      addonsFileRepo.Object, addonsRepo.Object, addonGraph.Object
+    );
 
-    var nextState = await state.On(input);
+    var result = await installer.Install(projectPath, null, (@event) => { });
 
-    nextState.ShouldBeOfType<AddonsLogic.State.CannotBeResolved>();
+    result.ShouldBe(AddonsInstaller.Result.CannotBeResolved);
 
     addonsRepo.VerifyAll();
     addonsFileRepo.VerifyAll();
@@ -117,9 +107,6 @@ public class UnresolvedTest {
     var addonGraph = new Mock<IAddonGraph>();
 
     var projectPath = "/";
-    var input = new AddonsLogic.Input.Install(
-      ProjectPath: projectPath, MaxDepth: null
-    );
 
     var entry = new AddonsFileEntry(
       url: "https://github.com/chickensoft-games/addon"
@@ -160,7 +147,7 @@ public class UnresolvedTest {
 
     var graphResult = new AddonResolvedButMightConflict(
       Addon: addon,
-      Conflicts: new List<IAddon> { otherAddon },
+      Conflicts: [otherAddon],
       CanonicalAddon: otherAddon
     );
 
@@ -189,16 +176,13 @@ public class UnresolvedTest {
       ))
       .Returns(otherAddonAddonsFile);
 
-    var state = new AddonsLogic.State.Unresolved();
+    var installer = new AddonsInstaller(
+      addonsFileRepo.Object, addonsRepo.Object, addonGraph.Object
+    );
 
-    var context = state.CreateFakeContext();
-    context.Set(addonsRepo.Object);
-    context.Set(addonsFileRepo.Object);
-    context.Set(addonGraph.Object);
+    var result = await installer.Install(projectPath, null, (@event) => { });
 
-    var nextState = await state.On(input);
-
-    nextState.ShouldBeOfType<AddonsLogic.State.InstallationSucceeded>();
+    result.ShouldBe(AddonsInstaller.Result.Succeeded);
 
     addonsRepo.VerifyAll();
     addonsFileRepo.VerifyAll();
@@ -212,9 +196,7 @@ public class UnresolvedTest {
     var addonGraph = new Mock<IAddonGraph>();
 
     var projectPath = "/";
-    var input = new AddonsLogic.Input.Install(
-      ProjectPath: projectPath, MaxDepth: null
-    );
+
 
     var entry = new AddonsFileEntry(
       url: "/symlink_addon/addon",
@@ -267,15 +249,13 @@ public class UnresolvedTest {
     addonsRepo
       .Setup(repo => repo.InstallAddonWithSymlink(It.IsAny<IAddon>()));
 
-    var state = new AddonsLogic.State.Unresolved();
-    var context = state.CreateFakeContext();
-    context.Set(addonsRepo.Object);
-    context.Set(addonsFileRepo.Object);
-    context.Set(addonGraph.Object);
+    var installer = new AddonsInstaller(
+      addonsFileRepo.Object, addonsRepo.Object, addonGraph.Object
+    );
 
-    var nextState = await state.On(input);
+    var result = await installer.Install(projectPath, null, (@event) => { });
 
-    nextState.ShouldBeOfType<AddonsLogic.State.InstallationSucceeded>();
+    result.ShouldBe(AddonsInstaller.Result.Succeeded);
 
     addonsRepo.VerifyAll();
     addonsFileRepo.VerifyAll();

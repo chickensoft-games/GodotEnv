@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
+using Chickensoft.GodotEnv.Common.Utilities;
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Exceptions;
@@ -41,47 +42,59 @@ public class AddonsInstallCommand :
 
   public async ValueTask ExecuteAsync(IConsole console) {
     var log = ExecutionContext.CreateLog(console);
-    var addonsFileRepo = ExecutionContext.Addons.AddonsFileRepo;
-    var addonsRepo = ExecutionContext.Addons.AddonsRepo;
-    var logic = ExecutionContext.Addons.AddonsLogic;
 
-    var binding = logic.Bind();
+    var addons = ExecutionContext.Addons;
 
-    binding
-      .Handle<AddonsLogic.Output.Report>(output => {
-        output.Event.Report(log);
-        log.Print("");
-      })
-      .Catch<Exception>((e) => {
-        log.Err("An error was encountered while attempting to install addons.");
-        log.Print("");
-        log.Err(e.ToString());
-        log.Print("");
-      });
+    var addonsFileRepo = addons.AddonsFileRepo;
+    var addonsRepo = addons.AddonsRepo;
+    var addonsInstaller = addons.AddonsInstaller;
 
-    var state = await logic.Input(
-      new AddonsLogic.Input.Install(
-        ProjectPath: ExecutionContext.WorkingDir,
-        MaxDepth: MaxDepth,
-        AddonsFileName: AddonsFileName
-      )
-    );
+    var result = AddonsInstaller.Result.NotAttempted;
 
-    CheckSuccess(state);
-  }
-
-  internal void CheckSuccess(AddonsLogic.State state) {
-    if (state is AddonsLogic.State.CannotBeResolved) {
-      throw new CommandException(
-        "Could not resolve addons. Please address any errors and try again.",
-        1
+    try {
+      result = await addonsInstaller.Install(
+        projectPath: ExecutionContext.WorkingDir,
+        maxDepth: MaxDepth,
+        onReport: (@event) => @event.Report(log),
+        addonsFileName: AddonsFileName
       );
     }
-    else if (state is AddonsLogic.State.Unresolved) {
-      throw new CommandException(
-        "Could not resolve addons. Please address any errors and try again.",
-        2
+    catch (Exception e) {
+      log.Err(
+        "An unknown error was encountered while attempting to install " +
+        "addons."
       );
+      log.Print("");
+      log.Err(e.ToString());
+      log.Print("");
+
+      throw new CommandException(
+        "Could not install addons. Please address any errors shown above " +
+        "and try again.",
+        1,
+        innerException: e
+      );
+    }
+
+    Finish(result, log);
+  }
+
+  internal static void Finish(AddonsInstaller.Result result, ILog log) {
+    switch (result) {
+      case AddonsInstaller.Result.Succeeded:
+        log.Success("✅ Addons installed successfully.");
+        break;
+      case AddonsInstaller.Result.NothingToInstall:
+        log.Success("✅ No addons to install.");
+        break;
+      case AddonsInstaller.Result.CannotBeResolved:
+      case AddonsInstaller.Result.NotAttempted:
+      default:
+        throw new CommandException(
+          "Could not install addons. Please address any errors shown above " +
+          "and try again.",
+          1
+        );
     }
   }
 }

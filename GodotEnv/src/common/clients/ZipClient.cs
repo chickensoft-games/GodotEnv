@@ -56,7 +56,7 @@ public class ZipClient : IZipClient {
         continue;
       }
 
-      Files.Directory.CreateDirectory(Files.Path.GetDirectoryName(fileName));
+      Files.Directory.CreateDirectory(Files.Path.GetDirectoryName(fileName)!);
 
       using (var inputStream = entry.Open())
       using (var outputStream = Files.File.OpenWrite(fileName)) {

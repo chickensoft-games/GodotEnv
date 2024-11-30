@@ -390,19 +390,19 @@ public class FileClient : IFileClient {
   public string Combine(params string[] paths) => Files.Path.Combine(paths);
 
   public string DirectorySymlinkTarget(string symlinkPath)
-    => Files.DirectoryInfo.FromDirectoryName(symlinkPath).LinkTarget;
+    => Files.DirectoryInfo.New(symlinkPath).LinkTarget!;
 
   public string FileSymlinkTarget(string symlinkPath)
-    => Files.FileInfo.FromFileName(symlinkPath).LinkTarget;
+    => Files.FileInfo.New(symlinkPath).LinkTarget!;
 
   public void CreateDirectory(string path)
     => Files.Directory.CreateDirectory(path);
 
   public string GetParentDirectoryPath(string path) =>
-    Files.Path.GetDirectoryName(path);
+    Files.Path.GetDirectoryName(path)!;
 
   public string GetParentDirectoryName(string path) =>
-    Files.DirectoryInfo.FromDirectoryName(path).Name;
+    Files.DirectoryInfo.New(path).Name;
 
   public async Task CreateSymlink(string path, string pathToTarget) {
     // See what kind of symlink we're dealing with by checking the target.
@@ -450,10 +450,10 @@ public class FileClient : IFileClient {
   }
 
   public bool IsDirectorySymlink(string path)
-    => Files.DirectoryInfo.FromDirectoryName(path).LinkTarget != null;
+    => Files.DirectoryInfo.New(path).LinkTarget != null;
 
   public bool IsFileSymlink(string path)
-    => Files.FileInfo.FromFileName(path).LinkTarget != null;
+    => Files.FileInfo.New(path).LinkTarget != null;
 
   public async Task DeleteDirectory(string path) {
     if (!DirectoryExists(path)) { return; }
@@ -471,7 +471,7 @@ public class FileClient : IFileClient {
 
     if (OS == OSType.Windows) {
       var parentDirectory = GetParentDirectoryPath(path);
-      var directoryInfo = Files.DirectoryInfo.FromDirectoryName(path);
+      var directoryInfo = Files.DirectoryInfo.New(path);
 
       // Delete files inside directory using command prompt to prevent
       // C# permissions issues.
@@ -536,7 +536,7 @@ public class FileClient : IFileClient {
   public bool DirectoryExists(string path) => Files.Directory.Exists(path);
 
   public IEnumerable<IDirectoryInfo> GetSubdirectories(string dir) =>
-    Files.DirectoryInfo.FromDirectoryName(dir).EnumerateDirectories();
+    Files.DirectoryInfo.New(dir).EnumerateDirectories();
 
   public T ReadJsonFile<T>(string path) where T : notnull {
     var contents = Files.File.ReadAllText(path);
@@ -599,7 +599,7 @@ public class FileClient : IFileClient {
     Action<IDirectoryInfo, string> onDirectory,
     string indent = ""
   ) {
-    var dirInfo = Files.DirectoryInfo.FromDirectoryName(dir);
+    var dirInfo = Files.DirectoryInfo.New(dir);
     if (!dirInfo.Exists) {
       throw new DirectoryNotFoundException(
         $"Directory not found: {dirInfo.FullName}"

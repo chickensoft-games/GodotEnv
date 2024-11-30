@@ -10,7 +10,7 @@ public record AddonsContext(
   AddonsConfiguration AddonsConfig,
   IAddonsRepository AddonsRepo,
   IAddonGraph AddonGraph,
-  AddonsLogic AddonsLogic
+  IAddonsInstaller AddonsInstaller
 ) : IAddonsContext;
 
 /// <summary>Addons feature dependencies.</summary>
@@ -31,5 +31,5 @@ public interface IAddonsContext {
   IAddonGraph AddonGraph { get; }
 
   /// <summary>Addons state logic.</summary>
-  AddonsLogic AddonsLogic { get; }
+  IAddonsInstaller AddonsInstaller { get; }
 }

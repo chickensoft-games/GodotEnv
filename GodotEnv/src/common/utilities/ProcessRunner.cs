@@ -2,10 +2,8 @@ namespace Chickensoft.GodotEnv.Common.Utilities;
 
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using CliWrap;
@@ -102,8 +100,7 @@ public class ProcessRunner : IProcessRunner {
     // doesn't have admin rights
     bool shouldElevate = !UACHelper.UACHelper.IsElevated;
 
-    Process process = UACHelper.UACHelper.StartElevated(new ProcessStartInfo()
-    {
+    Process process = UACHelper.UACHelper.StartElevated(new ProcessStartInfo() {
       FileName = exe,
       Arguments = args,
       UseShellExecute = shouldElevate,
