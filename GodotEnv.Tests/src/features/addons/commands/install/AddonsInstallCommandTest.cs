@@ -7,6 +7,7 @@ using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Addons.Commands;
 using Chickensoft.GodotEnv.Features.Addons.Domain;
+using Chickensoft.GodotEnv.Features.Addons.Models;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
 using Moq;
@@ -80,6 +81,9 @@ public class AddonsInstallCommandTest {
           It.IsAny<string>(),
           It.IsAny<int?>(),
           It.IsAny<Action<IReportableEvent>>(),
+          It.IsAny<Action<Addon, DownloadProgress>>(),
+          It.IsAny<Action<Addon, double>>(),
+          It.IsAny<System.Threading.CancellationToken>(),
           It.IsAny<string?>()
         )
       )
@@ -113,6 +117,9 @@ public class AddonsInstallCommandTest {
           It.IsAny<string>(),
           It.IsAny<int?>(),
           It.IsAny<Action<IReportableEvent>>(),
+          It.IsAny<Action<Addon, DownloadProgress>>(),
+          It.IsAny<Action<Addon, double>>(),
+          It.IsAny<System.Threading.CancellationToken>(),
           It.IsAny<string?>()
         )
       )

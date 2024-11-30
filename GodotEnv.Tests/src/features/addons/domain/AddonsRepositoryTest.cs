@@ -1,6 +1,8 @@
 namespace Chickensoft.GodotEnv.Tests;
 
+using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
@@ -44,6 +46,8 @@ public class AddonsRepositoryTest {
     // Keep tests shorter by using a helper method to build the test subject.
     var console = new FakeInMemoryConsole();
     var client = new Mock<IFileClient>();
+    var networkClient = new Mock<INetworkClient>();
+    var zipClient = new Mock<IZipClient>();
     var log = new Mock<ILog>();
     var computer = new Mock<IComputer>();
     var processRunner = new Mock<IProcessRunner>();
@@ -53,14 +57,21 @@ public class AddonsRepositoryTest {
         if (cli?.GetShell(path) is Mock<IShell> shell) {
           return shell.Object;
         }
-        throw new System.InvalidOperationException(
+        throw new InvalidOperationException(
           $"Mock shell not found for `{path}`. Please use a " +
           "ShellVerifier to create a mock shell for this directory and stub " +
           "the results of the processes that are expected to run."
         );
       });
     var config = new AddonsConfiguration(projectPath, addonsDir, cacheDir);
-    var repo = new AddonsRepository(client.Object, computer.Object, config, processRunner.Object);
+    var repo = new AddonsRepository(
+      client.Object,
+      networkClient.Object,
+      zipClient.Object,
+      computer.Object,
+      config,
+      processRunner.Object
+    );
     return new Subject(
       console: console,
       client: client,
@@ -142,7 +153,18 @@ public class AddonsRepositoryTest {
 
     client.Setup(c => c.Combine(addon.Url, addon.Subfolder)).Returns(expected);
 
-    var result = await repo.CacheAddon(addon, addon.Name);
+    var token = new CancellationToken();
+    var downloadProgress = new Mock<IProgress<DownloadProgress>>();
+    var extractProgress = new Mock<IProgress<double>>();
+
+    var result = await repo.CacheAddon(
+      addon,
+      addon.Name,
+      downloadProgress.Object,
+      extractProgress.Object,
+      token
+    );
+
     result.ShouldBe(expected);
 
     client.VerifyAll();
@@ -170,7 +192,17 @@ public class AddonsRepositoryTest {
       "git", "clone", addon.Url, "--recurse-submodules", addon.Name
     );
 
-    await repo.CacheAddon(addon, addon.Name);
+    var token = new CancellationToken();
+    var downloadProgress = new Mock<IProgress<DownloadProgress>>();
+    var extractProgress = new Mock<IProgress<double>>();
+
+    await repo.CacheAddon(
+      addon,
+      addon.Name,
+      downloadProgress.Object,
+      extractProgress.Object,
+      token
+    );
 
     client.VerifyAll();
     cli.VerifyAll();
@@ -191,7 +223,17 @@ public class AddonsRepositoryTest {
     client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
     client.Setup(c => c.DirectoryExists(addonCachePath)).Returns(true);
 
-    await repo.CacheAddon(addon, addon.Name);
+    var token = new CancellationToken();
+    var downloadProgress = new Mock<IProgress<DownloadProgress>>();
+    var extractProgress = new Mock<IProgress<double>>();
+
+    await repo.CacheAddon(
+      addon,
+      addon.Name,
+      downloadProgress.Object,
+      extractProgress.Object,
+      token
+    );
 
     client.VerifyAll();
     cli.VerifyAll();
