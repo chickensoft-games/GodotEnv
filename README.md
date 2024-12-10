@@ -286,6 +286,13 @@ Finally, GodotEnv will create an example `addons.jsonc` file with the following 
 }
 ```
 
+Here are some notes explaining the info fields within each addon:
+
+- `url` : The link or file system path pointing to the addon source.
+- `source` : The source type used by this addon, can be `remote`, `local`, or `symlink`.
+- `checkout` : The branch or tag to use when installing from a Git repository.
+- `subfolder` : The folder path within the addon repository to install from. The default value is `/` which installs all files from the source.
+
 ### 🪄 Installing Addons
 
 GodotEnv uses the system shell to install addons from symlinks, local paths, and remote git url's and zip files. Please make sure you've configured `git` in your shell environment to use any desired credentials so it can clone any local and remote repositories you reference.
@@ -294,7 +301,7 @@ GodotEnv uses the system shell to install addons from symlinks, local paths, and
 godotenv addons install
 ```
 
-When you run the addon installation command in GodotEnv, it looks in the **current working directory of your shell** for an `addons.json` or [`addons.jsonc`[jsonc] file. The addons file tells GodotEnv what addons should be installed in a project.  
+When you run the addon installation command in GodotEnv, it looks in the **current working directory of your shell** for an `addons.json` or `addons.jsonc` [jsonc] file. The addons file tells GodotEnv what addons should be installed in a project.
 
 Here's an example addons file that installs 3 addons, each from a different source (remote git repository, local git repository, and symlink).
 
@@ -346,7 +353,7 @@ If you want to install an addon from a local path on your machine, your local ad
 
 ### 🌎 Remote Addons
 
-GodotEnv can install addons from remote git repositories. Below is the addon specification for an addon from a remote git repository. The url can be any valid git remote url.
+GodotEnv can install addons from remote git repositories. Below is the addon specification for an addon from a remote git repository. The url can be any valid git remote url, and the subfolder specifies which folder within the addon repository will be copied into your project.
 
 ```json
 {
@@ -359,7 +366,7 @@ GodotEnv can install addons from remote git repositories. Below is the addon spe
 }
 ```
 
-By default, GodotEnv assumes the addon `source` is `remote`, the `checkout` reference is `main`, and the `subfolder` to install is the root `/` of the repository. If you need to customize any of those fields, you can override the default values:
+By default, GodotEnv assumes the addon `source` is `remote`, the `checkout` reference is `main`, and the `subfolder` to install is the root `/` of the addon repository. If you need to customize any of those fields, you can override the default values:
 
 ```json
 {
