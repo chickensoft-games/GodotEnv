@@ -276,13 +276,8 @@ public class AddonsRepository(
     // https://unix.stackexchange.com/a/178095
     copyFromPath = copyFromPath.TrimEnd(FileClient.Separator) +
       FileClient.Separator;
-    // Verify that full path with subfolder exists
-    if (!FileClient.DirectoryExists(copyFromPath)) {
-      throw new IOException(
-        $"Repository folder `{copyFromPath}` does not exist in addon \"{addon.Name}\" cache." +
-        "Please ensure subfolder points to a valid folder or use `/` to copy from addon root."
-      );
-    }
+    // Perform an error check on the subfolder directory
+    ValidateSubfolder(copyFromPath, addon.Name);
     var addonInstallPath = FileClient.Combine(Config.AddonsPath, addon.Name)
       .TrimEnd(FileClient.Separator) + FileClient.Separator;
     // copy files from addon cache to addon dir, excluding git folders.
@@ -340,6 +335,16 @@ public class AddonsRepository(
     catch {
       throw new IOException(
         $"Failed to create symlink for addon \"{addon.Name}\"."
+      );
+    }
+  }
+
+  internal void ValidateSubfolder(string subfolderPath, string addonName) {
+    // Verify that full path with subfolder exists
+    if (!FileClient.DirectoryExists(subfolderPath)) {
+      throw new IOException(
+        $"Repository folder `{subfolderPath}` does not exist in addon \"{addonName}\" cache. " +
+        "Please ensure subfolder points to a valid folder or use `/` to copy from addon root."
       );
     }
   }

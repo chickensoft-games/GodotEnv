@@ -480,6 +480,7 @@ public class AddonsRepositoryTest {
     var addonCachePath = CACHE_DIR + "/" + addon.Name;
     var copyFromPath = addonCachePath + "/" + addon.Subfolder;
     var addonInstallPath = ADDONS_DIR + "/" + addon.Name + "/";
+    var subfolderWithSeparatorPath = copyFromPath + "/";
 
     var cli = new ShellVerifier(addonCachePath, PROJECT_PATH, addonInstallPath);
     var subject = BuildSubject(cli: cli);
@@ -493,6 +494,8 @@ public class AddonsRepositoryTest {
 
     client.Setup(c => c.Combine(addonCachePath, addon.Subfolder))
       .Returns(copyFromPath);
+
+    client.Setup(c => c.DirectoryExists(subfolderWithSeparatorPath)).Returns(true);
 
     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name))
       .Returns(addonInstallPath);
@@ -526,6 +529,25 @@ public class AddonsRepositoryTest {
 
     client.VerifyAll();
     cli.VerifyAll();
+  }
+
+  [Fact]
+  public void TestValidateSubfolderThrowsIfNoDirectory() {
+    var addon = TestData.Addon with { };
+    var addonCachePath = CACHE_DIR + "/" + addon.Name;
+    var copyFromPath = addonCachePath + "/" + addon.Subfolder;
+    var subfolderWithSeparatorPath = copyFromPath + "/";
+
+    var subject = BuildSubject();
+
+    var repo = subject.Repo;
+    var client = subject.Client;
+
+    client.Setup(c => c.DirectoryExists(subfolderWithSeparatorPath)).Returns(false);
+
+    Should.Throw<IOException>(() => repo.ValidateSubfolder(subfolderWithSeparatorPath, addon.Name));
+
+    client.VerifyAll();
   }
 
   [Fact]
