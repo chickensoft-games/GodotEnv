@@ -63,29 +63,51 @@ public class GodotEnvironmentTest {
   }
 
   [Fact]
-  public void GetsExpectedWindowsArmDownloadUrl() {
+  public void GetsExpectedWindowsArmDownloadUrlForOlderVersions() {
     _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
 
     var platform = new Windows(_fileClient.Object, _computer.Object);
 
     var downloadUrl = platform.GetDownloadUrl(_version4, false, false);
-    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_windows_arm64.exe.zip");
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_win64.exe.zip");
 
     downloadUrl = platform.GetDownloadUrl(_version3, false, false);
-    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}{_version3.VersionString}-stable/Godot_v{_version3.VersionString}-stable_windows_arm64.exe.zip");
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}{_version3.VersionString}-stable/Godot_v{_version3.VersionString}-stable_win64.exe.zip");
   }
 
   [Fact]
-  public void GetsExpectedWindowsArmMonoDownloadUrl() {
+  public void GetsExpectedWindowsArmMonoDownloadUrlForOlderVersions() {
     _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
 
     var platform = new Windows(_fileClient.Object, _computer.Object);
 
     var downloadUrl = platform.GetDownloadUrl(_version4, true, false);
-    downloadUrl.ShouldBe(GetExpectedDownloadUrl(_version4, "stable_mono_windows_arm64"));
+    downloadUrl.ShouldBe(GetExpectedDownloadUrl(_version4, "stable_mono_win64"));
 
     downloadUrl = platform.GetDownloadUrl(_version3, true, false);
-    downloadUrl.ShouldBe(GetExpectedDownloadUrl(_version3, "stable_mono_windows_arm64"));
+    downloadUrl.ShouldBe(GetExpectedDownloadUrl(_version3, "stable_mono_win64"));
+  }
+
+  [Fact]
+  public void GetExpectedWindowsArmDownloadUrlForNewerVersions() {
+    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
+
+    var platform = new Windows(_fileClient.Object, _computer.Object);
+    var firstKnownWinArmVersion = new SemanticVersion("4", "3", "0");
+
+    var downloadUrl = platform.GetDownloadUrl(firstKnownWinArmVersion, false, false);
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.3-stable/Godot_v4.3-stable_windows_arm64.exe.zip");
+  }
+
+  [Fact]
+  public void GetExpectedWindowsArmMonoDownloadUrlForNewerVersions() {
+    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
+
+    var platform = new Windows(_fileClient.Object, _computer.Object);
+    var firstKnownWinArmVersion = new SemanticVersion("4", "3", "0");
+
+    var downloadUrl = platform.GetDownloadUrl(firstKnownWinArmVersion, true, false);
+    downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.3-stable/Godot_v4.3-stable_mono_windows_arm64.zip");
   }
 
   [Fact]
