@@ -13,7 +13,7 @@ Ensure you have installed the [correct .NET version](https://dotnet.microsoft.co
 To run (but not debug) the tool locally, you can run the following from the `GodotEnv` folder:
 
 ```sh
-dotnet build
+dotnet run --
 dotnet run -- --help
 ```
 
