@@ -10,18 +10,27 @@ public class Windows : GodotEnvironment {
   public Windows(IFileClient fileClient, IComputer computer)
     : base(fileClient, computer) { }
 
-  private string ProcessorArchitecture =>
-    FileClient.Processor == ProcessorType.arm64
-      ? "windows_arm64"
-      : "win64";
+  private static readonly (int major, int minor) _firstKnownArmVersion = (4, 3);
+
+  private string GetProcessorArchitecture(SemanticVersion version) {
+    var noKnownArmVersion = int.TryParse(version.Major, out var major)
+                            && int.TryParse(version.Minor, out var minor)
+                            && (major < _firstKnownArmVersion.major || minor < _firstKnownArmVersion.minor);
+
+    if (noKnownArmVersion || FileClient.Processor != ProcessorType.arm64) {
+      return "win64";
+    }
+
+    return "windows_arm64";
+  }
 
   public override string ExportTemplatesBasePath =>
     FileClient.GetFullPath(
       FileClient.Combine(FileClient.UserDirectory, "\\AppData\\Roaming\\Godot")
     );
 
-  public override string GetInstallerNameSuffix(bool isDotnetVersion, SemanticVersion version) =>
-    isDotnetVersion ? $"_mono_{ProcessorArchitecture}" : $"_{ProcessorArchitecture}.exe";
+  public override string GetInstallerNameSuffix(bool isDotnetVersion, SemanticVersion version)
+    => isDotnetVersion ? $"_mono_{GetProcessorArchitecture(version)}" : $"_{GetProcessorArchitecture(version)}.exe";
 
   public override Task<bool> IsExecutable(IShell shell, IFileInfo file) =>
     Task.FromResult(file.Name.ToLowerInvariant().EndsWith(".exe"));
@@ -33,13 +42,13 @@ public class Windows : GodotEnvironment {
   ) {
     var fsVersionString = GetFilenameVersionString(version);
     var name = fsVersionString +
-      $"{(isDotnetVersion ? "_mono" : "")}_{ProcessorArchitecture}.exe";
+      $"{(isDotnetVersion ? "_mono" : "")}_{GetProcessorArchitecture(version)}.exe";
 
     // Both versions extract to a folder. The dotnet folder name is different
     // from the non-dotnet folder name :P
 
     if (isDotnetVersion) {
-      return FileClient.Combine(fsVersionString + $"_mono_{ProcessorArchitecture}", name);
+      return FileClient.Combine(fsVersionString + $"_mono_{GetProcessorArchitecture(version)}", name);
     }
 
     // There is no subfolder for non-dotnet versions.
@@ -50,6 +59,6 @@ public class Windows : GodotEnvironment {
     SemanticVersion version,
     bool isDotnetVersion
   ) => FileClient.Combine(
-    GetFilenameVersionString(version) + $"_mono_{ProcessorArchitecture}", "GodotSharp"
+    GetFilenameVersionString(version) + $"_mono_{GetProcessorArchitecture(version)}", "GodotSharp"
   );
 }
