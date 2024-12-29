@@ -75,7 +75,7 @@ public class AddonsInstaller : IAddonsInstaller {
         // Resolve addon's url. For remote addons, the url is unchanged.
         // For local symlink addons, the actual path is resolved.
         // For normal local addons, the path is fully qualified.
-        var url = AddonsRepo.ResolveUrl(addonEntry, addonsFilePath);
+        var url = AddonsRepo.ResolveUrl(addonEntry, path);
 
         // Converts the addon entry in an addons.json file to an addon model
         // that contains additional information about the addon, like its
