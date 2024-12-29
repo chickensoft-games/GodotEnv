@@ -87,7 +87,7 @@ public class AddonsInstallerTest {
       projectPath, out addonsFilePath, null
     )).Returns(addonsFile);
 
-    addonsRepo.Setup(repo => repo.ResolveUrl(entry, addonsFilePath))
+    addonsRepo.Setup(repo => repo.ResolveUrl(entry, projectPath))
       .Returns(entry.Url);
 
     var addon = entry.ToAddon(
@@ -149,7 +149,7 @@ public class AddonsInstallerTest {
       projectPath, out addonsFilePath, null
     )).Returns(addonsFile);
 
-    addonsRepo.Setup(repo => repo.ResolveUrl(entry, addonsFilePath))
+    addonsRepo.Setup(repo => repo.ResolveUrl(entry, projectPath))
       .Returns(entry.Url);
 
     var addon = entry.ToAddon(
@@ -256,7 +256,7 @@ public class AddonsInstallerTest {
       projectPath, out addonsFilePath, null
     )).Returns(addonsFile);
 
-    addonsRepo.Setup(repo => repo.ResolveUrl(entry, addonsFilePath))
+    addonsRepo.Setup(repo => repo.ResolveUrl(entry, projectPath))
       .Returns(entry.Url);
 
     var addon = entry.ToAddon(
