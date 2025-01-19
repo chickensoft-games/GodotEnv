@@ -43,7 +43,7 @@ public interface ILog {
   /// <summary>
   /// Clears the last written line of the console.
   /// </summary>
-  void ClearLastLine();
+  void ClearCurrentLine();
 }
 
 /// <summary>
@@ -125,13 +125,13 @@ public class Log : ILog {
     message, Styles.Error, true, false
   );
   public void Success(object? message) => Output(
-    message, Styles.Success, false
+    message, Styles.Success, false, false
   );
   public void SuccessInPlace(object? message) => Output(
-    message, Styles.Success, true
+    message, Styles.Success, true, false
   );
 
-  public void ClearLastLine() {
+  public void ClearCurrentLine() {
     if (IsInRedirectedEnv) { return; }
     lock (Console) {
       Console.CursorLeft = 0;
@@ -186,6 +186,7 @@ public class Log : ILog {
         Console.CursorLeft = left;
         Console.CursorTop = top;
       }
+      // OutputConsole.Flush();
     }
   }
 

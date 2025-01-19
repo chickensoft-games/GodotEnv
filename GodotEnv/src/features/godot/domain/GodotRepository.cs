@@ -225,13 +225,13 @@ public partial class GodotRepository : IGodotRepository {
     ILog log,
     CancellationToken token
   ) {
-    log.Info("⬇ Downloading Godot...");
+    log.Info("⬇ Preparing to download Godot...");
 
     var downloadUrl = Platform.GetDownloadUrl(
       version, isDotnetVersion, isTemplate: false
     );
 
-    log.Info($"🌏 Godot download url: {downloadUrl}");
+    log.Print($"🌏 Godot download url: {downloadUrl}");
 
     var fsName = GetVersionFsName(version, isDotnetVersion);
     // Tux server packages use .zip for everything.
@@ -255,38 +255,35 @@ public partial class GodotRepository : IGodotRepository {
     );
 
     if (downloadedFileExists && didFinishAnyPreviousDownload) {
-      log.Info("📦 Existing compressed Godot installation archive found.");
-      log.Print($"  {compressedArchivePath}");
-      log.Print("");
-      log.Success("✅ Using previous download instead.");
+      log.Print($"📦 Found needed archives in cache: {compressedArchivePath}");
+      log.Success("📚 Skipping download.");
       log.Print("");
       log.Print("If you want to force a download to occur,");
-      log.Print("use the following command to clear the downloads cache.");
+      log.Print("use the following command to clear the downloads cache:");
       log.Print("");
-      log.Info("  godotenv godot cache clear");
+      log.Print("    godotenv godot cache clear");
       log.Print("");
       return archive;
     }
 
     log.Info("🧼 Cleaning up...");
     if (didFinishAnyPreviousDownload) {
-      log.Print($"🗑 Deleting {didFinishDownloadFilePath}");
+      log.Info($"🗑 Deleting {didFinishDownloadFilePath}");
       await FileClient.DeleteFile(didFinishDownloadFilePath);
     }
 
     if (downloadedFileExists) {
-      log.Print($"🗑 Deleting {compressedArchivePath}");
+      log.Info($"🗑 Deleting {compressedArchivePath}");
       await FileClient.DeleteFile(compressedArchivePath);
     }
-    log.Info("✨ All clean!");
+    log.Success("✨ All clean!");
 
     FileClient.CreateDirectory(cacheDir);
 
-    log.Info($"🗄 Cache path: {cacheDir}");
-    log.Info($"📄 Cache filename: {cacheFilename}");
-    log.Info($"💾 Compressed installer path: {compressedArchivePath}");
+    log.Print($"🗄 Cache path: {cacheDir}");
+    log.Print($"📄 Cache filename: {cacheFilename}");
+    log.Print($"💾 Compressed installer path: {compressedArchivePath}");
 
-    log.PrintInPlace("🚀 Downloading Godot: 0%");
 
     try {
       await NetworkClient.DownloadFileAsync(
@@ -294,17 +291,18 @@ public partial class GodotRepository : IGodotRepository {
         destinationDirectory: cacheDir,
         filename: cacheFilename,
         new Progress<DownloadProgress>(
-          (progress) => log.PrintInPlace(
+          (progress) => log.InfoInPlace(
             $"🚀 Downloading Godot: {progress.Percent}% at {progress.Speed}" +
             "      "
           )
         ),
         token: token
       );
-      log.Print("🚀 Downloaded Godot: 100%");
+      log.Print("");  // Force new line after download progress as the cursor remains in the previously line.
+      log.ClearCurrentLine();
     }
     catch (Exception) {
-      log.ClearLastLine();
+      log.ClearCurrentLine();
       log.Err("🛑 Aborting Godot installation.");
       throw;
     }
@@ -313,12 +311,11 @@ public partial class GodotRepository : IGodotRepository {
       await VerifyArchiveChecksum(log, archive);
     }
     else {
-      log.Print($"⚠️ Skipping checksum verification due to command-line flag!");
+      log.Info($"⚠️ Skipping checksum verification due to command-line flag!");
     }
 
     FileClient.CreateFile(didFinishDownloadFilePath, "done");
 
-    log.Print("");
     log.Success("✅ Godot successfully downloaded.");
 
     return archive;
@@ -326,22 +323,23 @@ public partial class GodotRepository : IGodotRepository {
 
   private async Task VerifyArchiveChecksum(ILog log, GodotCompressedArchive archive) {
     try {
-      log.Print("⏳ Verifying Checksum");
+      log.InfoInPlace("⏳ Verifying Checksum.");
       await ChecksumClient.VerifyArchiveChecksum(archive);
-      log.Print("✅ Checksum verified");
+      log.ClearCurrentLine();
+      log.Success("✅ Checksum verified.");
     }
     catch (ChecksumMismatchException ex) {
-      log.Print($"⚠️⚠️⚠️ Checksum of downloaded file does not match the one published by Godot!");
-      log.Print($"⚠️⚠️⚠️ {ex.Message}");
-      log.Print($"⚠️⚠️⚠️ You SHOULD NOT proceed with installation!");
-      log.Print($"⚠️⚠️⚠️ If you have a very good reason, this check can be skipped via --unsafe-skip-checksum-verification.");
+      log.Warn($"⚠️ Checksum of downloaded file does not match the one published by Godot!");
+      log.Warn($"⚠️ {ex.Message}");
+      log.Warn($"⚠️ You SHOULD NOT proceed with installation!");
+      log.Warn($"⚠️ If you have a very good reason, this check can be skipped via '--unsafe-skip-checksum-verification'.");
       log.Err("🛑 Aborting Godot installation.");
       throw;
     }
     catch (MissingChecksumException) {
-      log.Print($"⚠️ No Godot-published checksum found for the downloaded file.");
-      log.Print($"⚠️ For Godot versions below 3.2.2-beta1, this is expected as none have been published as of 2024-05-01.");
-      log.Print($"⚠️ If you still want to proceed with the installation, this check can be skipped via --unsafe-skip-checksum-verification.");
+      log.Warn($"⚠️ No Godot-published checksum found for the downloaded file.");
+      log.Warn($"⚠️ For Godot versions below 3.2.2-beta1, this is expected as none have been published as of 2024-05-01.");
+      log.Warn($"⚠️ If you still want to proceed with the installation, this check can be skipped via '--unsafe-skip-checksum-verification'.");
       log.Err("🛑 Aborting Godot installation.");
       throw;
     }
@@ -353,21 +351,19 @@ public partial class GodotRepository : IGodotRepository {
     var archivePath = FileClient.Combine(archive.Path, archive.Filename);
     var destinationDirName =
       FileClient.Combine(GodotInstallationsPath, archive.Name);
-    var lastPercent = 0d;
 
     var numFilesExtracted = await ZipClient.ExtractToDirectory(
       archivePath,
       destinationDirName,
       new Progress<double>((percent) => {
         var p = Math.Round(percent * 100);
-        log.PrintInPlace($"🗜  Extracting Godot installation files: {p}%");
-        lastPercent = p;
+        log.InfoInPlace($"🗜 Extracting Godot: {p}%" + "    ");
       })
     );
-    log.Print("🚀 Extracting Godot installation files: 100%");
-    log.Print($"🗜 Extracted {numFilesExtracted} files in {archivePath}.");
-    log.Success("🗜 Successfully extracted Godot to:");
-    log.Info($"  {destinationDirName}");
+    log.Print(""); // New line after progress.
+    log.ClearCurrentLine();
+    log.Print($"    Destination: {destinationDirName}");
+    log.Success($"✅ Extracted {numFilesExtracted} file(s).");
     log.Print("");
 
     var execPath = GetExecutionPath(
@@ -398,7 +394,7 @@ public partial class GodotRepository : IGodotRepository {
     }
 
     log.Info("📝 Updating Godot symlink.");
-    log.Print($"    Linking Godot {GodotSymlinkPath} -> ${installation.ExecutionPath}");
+    // log.Print($"    Linking Godot: {GodotSymlinkPath} -> {installation.ExecutionPath}");
     // Create or update the symlink to the new version of Godot.
     switch (FileClient.OS) {
       case OSType.Linux:
@@ -421,17 +417,18 @@ public partial class GodotRepository : IGodotRepository {
       var godotSharpPath = GetGodotSharpPath(
         installation.Path, installation.Version, installation.IsDotnetVersion
       );
-      log.Print($"    Linking Godot {GodotSharpSymlinkPath} -> ${godotSharpPath}");
+      // log.Print($"    Linking GodotSharp: {GodotSharpSymlinkPath} -> {godotSharpPath}");
       await FileClient.CreateSymlink(
         GodotSharpSymlinkPath, godotSharpPath
       );
     }
 
     if (!FileClient.FileExists(installation.ExecutionPath)) {
-      log.Err("🛑 Execution path does not seem to be correct. Am I okay?");
-      log.Err("Please help fix me by opening an issue or pull request on Github!");
+      log.Err("🛑 Execution path does not seem to be correct. Is it good?");
+      log.Err("Please help me fix it by opening an issue or pull request on Github!");
     }
 
+    log.Print($"    🔗 Godot link: {GodotSymlinkPath} -> {installation.ExecutionPath}");
     log.Success("✅ Godot symlink updated.");
     log.Print("");
   }
@@ -511,7 +508,7 @@ public partial class GodotRepository : IGodotRepository {
       default:
         break;
     }
-    log.Print("✅ Godot desktop shortcut created.");
+    log.Success("✅ Godot desktop shortcut created.");
     log.Print("");
   }
 
@@ -525,29 +522,27 @@ public partial class GodotRepository : IGodotRepository {
       log.Warn($"Defaulting changes to {EnvironmentVariableClient.UserShell} profile ('{EnvironmentVariableClient.UserShellRcFilePath}').");
     }
 
-    log.Print("");
     log.Info($"📝 Adding or updating the {godotVar} environment variable.");
-    log.Print("");
 
     EnvironmentVariableClient.SetUserEnv(godotVar, godotSymlinkPath);
 
-    log.Success($"Successfully updated the {godotVar} environment variable.");
+    log.Success($"✅ Successfully updated the {godotVar} environment variable.");
+    log.Print("");
 
     log.Info($"📝 Updating the {Defaults.PATH_ENV_VAR_NAME} environment variable to include godot's binary.");
-    log.Print("");
 
     await EnvironmentVariableClient.AppendToUserEnv(Defaults.PATH_ENV_VAR_NAME, GodotBinPath);
 
-    log.Success($"Successfully updated the {Defaults.PATH_ENV_VAR_NAME} environment variable to include.");
+    log.Success($"✅ Successfully updated the {Defaults.PATH_ENV_VAR_NAME} environment variable to include.");
     log.Print("");
 
     switch (FileClient.OS) {
       case OSType.MacOS:
       case OSType.Linux:
-        log.Warn("You may need to restart your shell or run the following ");
-        log.Warn("to get the updated environment variable value:");
+        log.Warn("You may need to restart your shell or run the following");
+        log.Warn("command to update the GODOT environment variable value:");
         log.Print("");
-        log.Info($"    source {EnvironmentVariableClient.UserShellRcFilePath}");
+        log.Print($"        source {EnvironmentVariableClient.UserShellRcFilePath}");
         log.Print("");
         break;
       case OSType.Windows:
