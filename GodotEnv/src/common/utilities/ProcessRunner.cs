@@ -100,6 +100,8 @@ public class ProcessRunner : IProcessRunner {
     // doesn't have admin rights
     bool shouldElevate = !UACHelper.UACHelper.IsElevated;
 
+    // Console.WriteLine($"cmd '{exe}', args '{args}'");
+
     Process process = UACHelper.UACHelper.StartElevated(new ProcessStartInfo() {
       FileName = exe,
       Arguments = args,

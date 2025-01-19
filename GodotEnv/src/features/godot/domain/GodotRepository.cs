@@ -87,6 +87,15 @@ public interface IGodotRepository {
   Task UpdateGodotSymlink(GodotInstallation installation, ILog log);
 
   /// <summary>
+  /// Updates (or creates if non-existent) the desktop shortcut pointing to the newly created symlink.
+  ///
+  /// Promotes integration with the desktop environment.
+  /// </summary>
+  /// <param name="installation">Godot installation.</param>
+  /// <param name="log">Output log.</param>
+  Task UpdateDesktopShortcut(GodotInstallation installation, ILog log);
+
+  /// <summary>
   /// Adds (or updates) the GODOT user environment variable to point to the
   /// symlink which points to the active version of Godot. Updates the user's PATH
   /// to include the 'bin' folder containing the godot symlink.
@@ -388,22 +397,31 @@ public partial class GodotRepository : IGodotRepository {
       FileClient.CreateDirectory(GodotBinPath);
     }
 
+    log.Info("📝 Updating Godot symlink.");
+    log.Print($"    Linking Godot {GodotSymlinkPath} -> ${installation.ExecutionPath}");
     // Create or update the symlink to the new version of Godot.
-    await FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
-    await CreateShortcuts(installation);
+    switch (FileClient.OS) {
+      case OSType.Linux:
+      case OSType.MacOS:
+        await FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
+        break;
+      // NOTE: Windows demands the file extension to be in the name.
+      case OSType.Windows: {
+          var hardLinkPath = $"{GodotSymlinkPath}.exe";
+          await FileClient.CreateSymlink(hardLinkPath, installation.ExecutionPath);
+        }
+        break;
+      case OSType.Unknown:
+      default:
+        break;
+    }
 
     if (installation.IsDotnetVersion) {
       // Update GodotSharp symlinks
       var godotSharpPath = GetGodotSharpPath(
         installation.Path, installation.Version, installation.IsDotnetVersion
       );
-
-      log.Print("");
-      log.Print(
-        $"🔗 Linking GodotSharp {GodotSharpSymlinkPath} -> " +
-        $"{godotSharpPath}"
-      );
-
+      log.Print($"    Linking Godot {GodotSharpSymlinkPath} -> ${godotSharpPath}");
       await FileClient.CreateSymlink(
         GodotSharpSymlinkPath, godotSharpPath
       );
@@ -414,17 +432,12 @@ public partial class GodotRepository : IGodotRepository {
       log.Err("Please help fix me by opening an issue or pull request on Github!");
     }
 
-    log.Print("✅ Godot symlink updated.");
-    log.Print("");
-    log.Info($"{GodotSymlinkPath} -> {installation.ExecutionPath}");
-    log.Print("");
-    log.Info("Godot symlink path:");
-    log.Print("");
-    log.Print(GodotSymlinkPath);
+    log.Success("✅ Godot symlink updated.");
     log.Print("");
   }
 
-  public async Task CreateShortcuts(GodotInstallation installation) {
+  public async Task UpdateDesktopShortcut(GodotInstallation installation, ILog log) {
+    log.Info("📝 Updating Godot desktop shortcut.");
     switch (FileClient.OS) {
       case OSType.MacOS: {
           var appFilePath = FileClient.Files.Directory.GetDirectories(installation.Path).First();
@@ -476,13 +489,14 @@ public partial class GodotRepository : IGodotRepository {
           var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
           var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
 
-          if (FileClient.FileExists(hardLinkPath)) {
-            await FileClient.DeleteFile(hardLinkPath);
-          }
+          // if (FileClient.FileExists(hardLinkPath)) {
+          //   await FileClient.DeleteFile(hardLinkPath);
+          // }
 
-          await FileClient.ProcessRunner.RunElevatedOnWindows(
-            "cmd.exe", $"/c mklink /H \"{hardLinkPath}\" \"{installation.ExecutionPath}\""
-          );
+          // await FileClient.CreateSymlink(hardLinkPath, installation.ExecutionPath);
+          // await FileClient.ProcessRunner.RunElevatedOnWindows(
+          //   "cmd.exe", $"/c mklink /H \"{hardLinkPath}\" \"{installation.ExecutionPath}\""
+          // );
 
           var command = string.Join(";",
             "$ws = New-Object -ComObject (\"WScript.Shell\")",
@@ -497,6 +511,8 @@ public partial class GodotRepository : IGodotRepository {
       default:
         break;
     }
+    log.Print("✅ Godot desktop shortcut created.");
+    log.Print("");
   }
 
   public async Task AddOrUpdateGodotEnvVariable(ILog log) {

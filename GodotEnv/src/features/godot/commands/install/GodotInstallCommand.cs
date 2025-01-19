@@ -84,6 +84,8 @@ public class GodotInstallCommand :
 
     await godotRepo.UpdateGodotSymlink(newInstallation, log);
 
+    await godotRepo.UpdateDesktopShortcut(newInstallation, log);
+
     await godotRepo.AddOrUpdateGodotEnvVariable(log);
 
     log.Print(godotRepo.GodotSymlinkPath);
