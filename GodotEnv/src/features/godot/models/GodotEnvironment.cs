@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
+using global::GodotEnv.Common.Utilities;
 
 public interface IGodotEnvironment {
   /// <summary>
@@ -15,6 +16,15 @@ public interface IGodotEnvironment {
   IFileClient FileClient { get; }
 
   IComputer Computer { get; }
+
+  // /// <summary>The operating system family.</summary>
+  // OSFamily OSFamily { get; }
+
+  // /// <summary>The operating system type.</summary>
+  // OSType OS { get; }
+
+  // /// <summary>The process architecture type.</summary>
+  // CPUArch CPUArch { get; }
 
   /// <summary>
   /// Godot export template installation directory base path on the local
@@ -125,18 +135,20 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   public const string GODOT_URL_PREFIX =
     "https://github.com/godotengine/godot-builds/releases/download/";
 
+  // public OSFamily OSFamily { get; }
+  // public OSType OS { get; }
+  // public CPUArch CPUArch { get; }
+
   /// <summary>
   /// Creates a platform for the given OS.
   /// </summary>
-  /// <param name="os">OS Type.</param>
   /// <param name="fileClient">File client.</param>
   /// <param name="computer">Computer.</param>
   /// <returns>Platform instance.</returns>
   /// <exception cref="InvalidOperationException" />
-  public static GodotEnvironment Create(
-    OSType os, IFileClient fileClient, IComputer computer
+  public static GodotEnvironment Create(IFileClient fileClient, IComputer computer
   ) =>
-    os switch {
+    SystemInfo.OS switch {
       OSType.Windows => new Windows(fileClient, computer),
       OSType.MacOS => new MacOS(fileClient, computer),
       OSType.Linux => new Linux(fileClient, computer),
@@ -147,6 +159,24 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   protected GodotEnvironment(IFileClient fileClient, IComputer computer) {
     FileClient = fileClient;
     Computer = computer;
+
+    // OS = IsOSPlatform(OSPlatform.OSX)
+    //   ? OSType.MacOS
+    //   : IsOSPlatform(OSPlatform.Linux)
+    //     ? OSType.Linux
+    //     : IsOSPlatform(OSPlatform.Windows)
+    //       ? OSType.Windows
+    //       : OSType.Unknown;
+
+    // OSFamily = OS == OSType.Windows ? OSFamily.Windows : OSFamily.Unix;
+
+    // CPUArch = RuntimeInformation.ProcessArchitecture switch {
+    //   Architecture.X64 => CPUArch.X64,
+    //   Architecture.X86 => CPUArch.X86,
+    //   Architecture.Arm64 => CPUArch.Arm64,
+    //   Architecture.Arm => CPUArch.Arm,
+    //   _ => CPUArch.Other,
+    // };
   }
 
   public IFileClient FileClient { get; }
@@ -321,4 +351,17 @@ public abstract class GodotEnvironment : IGodotEnvironment {
 
   private static InvalidOperationException GetUnknownOSException() =>
     new("🚨 Cannot create a platform an unknown operating system.");
+
+  //   public static Func<OSPlatform, bool> IsOSPlatformDefault { get; } =
+  // RuntimeInformation.IsOSPlatform;
+
+  //   public static Func<OSPlatform, bool> IsOSPlatform { get; set; } =
+  //     IsOSPlatformDefault;
+
+  // public static Architecture CPUArchDefault { get; } =
+  //   RuntimeInformation.ProcessArchitecture;
+
+  // public static Architecture ProcessorArchitecture { get; set; } =
+  //   CPUArchDefault;
+
 }

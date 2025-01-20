@@ -46,6 +46,7 @@ public class GodotInstallCommand :
     var godotRepo = ExecutionContext.Godot.GodotRepo;
     var platform = ExecutionContext.Godot.Platform;
 
+    // var log = ExecutionContext.CreateLog(console, ExecutionContext.Godot.Platform);
     var log = ExecutionContext.CreateLog(console);
     var token = console.RegisterCancellationHandler();
 

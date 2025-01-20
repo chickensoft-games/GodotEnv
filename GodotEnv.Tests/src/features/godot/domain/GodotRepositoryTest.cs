@@ -21,13 +21,13 @@ public class GodotRepositoryTest {
     var computer = new Mock<IComputer>();
     var processRunner = new Mock<IProcessRunner>();
     var fileClient = new Mock<IFileClient>();
-    fileClient.Setup(fc => fc.OS).Returns(FileClient.IsOSPlatform(OSPlatform.OSX)
-      ? OSType.MacOS
-      : FileClient.IsOSPlatform(OSPlatform.Linux)
-        ? OSType.Linux
-        : FileClient.IsOSPlatform(OSPlatform.Windows)
-          ? OSType.Windows
-          : OSType.Unknown);
+    // fileClient.Setup(fc => fc.OS).Returns(FileClient.IsOSPlatform(OSPlatform.OSX)
+    //   ? OSType.MacOS
+    //   : FileClient.IsOSPlatform(OSPlatform.Linux)
+    //     ? OSType.Linux
+    //     : FileClient.IsOSPlatform(OSPlatform.Windows)
+    //       ? OSType.Windows
+    //       : OSType.Unknown);
 
     fileClient.Setup(fc => fc.AppDataDirectory).Returns(workingDir);
 

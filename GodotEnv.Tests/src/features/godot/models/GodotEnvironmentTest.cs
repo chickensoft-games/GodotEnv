@@ -38,7 +38,7 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedWindowsDownloadUrl() {
-    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.other);
+    _fileClient.Setup(f => f.Processor).Returns(CPUArch.other);
 
     var platform = new Windows(_fileClient.Object, _computer.Object);
 
@@ -51,7 +51,7 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedWindowsMonoDownloadUrl() {
-    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.other);
+    _fileClient.Setup(f => f.Processor).Returns(CPUArch.other);
 
     var platform = new Windows(_fileClient.Object, _computer.Object);
 
@@ -64,7 +64,7 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedWindowsArmDownloadUrlForOlderVersions() {
-    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
+    _fileClient.Setup(f => f.Processor).Returns(CPUArch.arm64);
 
     var platform = new Windows(_fileClient.Object, _computer.Object);
 
@@ -77,7 +77,7 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedWindowsArmMonoDownloadUrlForOlderVersions() {
-    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
+    _fileClient.Setup(f => f.Processor).Returns(CPUArch.arm64);
 
     var platform = new Windows(_fileClient.Object, _computer.Object);
 
@@ -90,7 +90,7 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetExpectedWindowsArmDownloadUrlForNewerVersions() {
-    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
+    _fileClient.Setup(f => f.Processor).Returns(CPUArch.arm64);
 
     var platform = new Windows(_fileClient.Object, _computer.Object);
     var firstKnownWinArmVersion = new SemanticVersion("4", "3", "0");
@@ -101,7 +101,7 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetExpectedWindowsArmMonoDownloadUrlForNewerVersions() {
-    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
+    _fileClient.Setup(f => f.Processor).Returns(CPUArch.arm64);
 
     var platform = new Windows(_fileClient.Object, _computer.Object);
     var firstKnownWinArmVersion = new SemanticVersion("4", "3", "0");

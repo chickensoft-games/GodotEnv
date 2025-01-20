@@ -20,11 +20,15 @@ using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx;
 using CliFx.Infrastructure;
 using Downloader;
+using global::GodotEnv.Common.Utilities;
 
 public static class GodotEnv {
   public static async Task<int> Main(string[] args) {
     // App-wide dependencies
     var computer = new Computer();
+
+    // TODO: Make global static class (singleton) with System info that are readonly.
+    // This will solve the cicle dependency problem (fileclient <-> godotEnvironment).
 
     var processRunner = new ProcessRunner();
 
@@ -43,7 +47,7 @@ public static class GodotEnv {
       downloadConfiguration: Defaults.DownloadConfiguration
     );
 
-    IZipClient zipClient = (fileClient.OS == OSType.Windows)
+    IZipClient zipClient = (SystemInfo.OS == OSType.Windows)
       ? new ZipClient(fileClient.Files)
       : new ZipClientTerminal(computer, fileClient.Files);
 
@@ -91,9 +95,7 @@ public static class GodotEnv {
     );
 
     // Godot feature dependencies
-    var platform = GodotEnvironment.Create(
-      os: fileClient.OS, fileClient: fileClient, computer: computer
-    );
+    var platform = GodotEnvironment.Create(fileClient: fileClient, computer: computer);
 
     var checksumRepository = new GodotChecksumClient(networkClient, platform);
 
@@ -139,7 +141,7 @@ public static class GodotEnv {
       )
       .AddCommandsFromThisAssembly()
       .UseTypeActivator(
-        new GodotEnvActivator(context, fileClient.OS)
+        new GodotEnvActivator(context, SystemInfo.OS)
       )
       .Build().RunAsync(context.CliArgs);
 

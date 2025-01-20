@@ -1,6 +1,7 @@
 namespace Chickensoft.GodotEnv.Common.Models;
 
 using Chickensoft.GodotEnv.Common.Utilities;
+using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx.Infrastructure;
 
 /// <summary>
@@ -32,6 +33,7 @@ public interface IExecutionContext {
   /// <param name="console">Output console.</param>
   /// <returns>Log.</returns>
   ILog CreateLog(IConsole console);
+  // ILog CreateLog(IConsole console, IGodotEnvironment environment);
 }
 
 public record ExecutionContext(
@@ -44,4 +46,5 @@ public record ExecutionContext(
   IGodotContext Godot
 ) : IExecutionContext {
   public ILog CreateLog(IConsole console) => new Log(console);
+  // public ILog CreateLog(IConsole console, IGodotEnvironment environment) => new Log(console, environment);
 }

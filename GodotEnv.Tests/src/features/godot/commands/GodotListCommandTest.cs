@@ -26,10 +26,10 @@ public sealed class GodotListCommandTest : IDisposable {
     _godotContext = new Mock<IGodotContext>();
     _godotRepo = new Mock<IGodotRepository>();
     _console = new FakeInMemoryConsole();
-    _log = new Log(_console);
 
     _godotContext.SetupGet(c => c.GodotRepo).Returns(_godotRepo.Object);
     _context.SetupGet(context => context.Godot).Returns(_godotContext.Object);
+    _log = new Log(_console);
     _context.Setup(context => context.CreateLog(_console)).Returns(_log);
   }
 

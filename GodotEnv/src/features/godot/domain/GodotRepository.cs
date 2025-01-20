@@ -11,6 +11,7 @@ using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
+using global::GodotEnv.Common.Utilities;
 using Newtonsoft.Json;
 
 public struct RemoteVersion {
@@ -396,7 +397,7 @@ public partial class GodotRepository : IGodotRepository {
     log.Info("📝 Updating Godot symlink.");
     // log.Print($"    Linking Godot: {GodotSymlinkPath} -> {installation.ExecutionPath}");
     // Create or update the symlink to the new version of Godot.
-    switch (FileClient.OS) {
+    switch (SystemInfo.OS) {
       case OSType.Linux:
       case OSType.MacOS:
         await FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
@@ -435,7 +436,7 @@ public partial class GodotRepository : IGodotRepository {
 
   public async Task UpdateDesktopShortcut(GodotInstallation installation, ILog log) {
     log.Info("📝 Updating Godot desktop shortcut.");
-    switch (FileClient.OS) {
+    switch (SystemInfo.OS) {
       case OSType.MacOS: {
           var appFilePath = FileClient.Files.Directory.GetDirectories(installation.Path).First();
           var applicationsPath = FileClient.Combine(FileClient.UserDirectory, "Applications", "Godot.app");
@@ -536,7 +537,7 @@ public partial class GodotRepository : IGodotRepository {
     log.Success($"✅ Successfully updated the {Defaults.PATH_ENV_VAR_NAME} environment variable to include.");
     log.Print("");
 
-    switch (FileClient.OS) {
+    switch (SystemInfo.OS) {
       case OSType.MacOS:
       case OSType.Linux:
         log.Warn("You may need to restart your shell or run the following");
