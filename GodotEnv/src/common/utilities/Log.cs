@@ -232,7 +232,7 @@ public class Log : ILog {
     internal static Action<IConsole> Info
       => static (console) => {
         console.ResetColor();
-        console.ForegroundColor = ConsoleColor.DarkBlue;
+        console.ForegroundColor = ConsoleColor.Cyan;
       };
     internal static Action<IConsole> Error
       => static (console) => {
