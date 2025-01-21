@@ -154,10 +154,15 @@ public class Log : ILog {
       // Set the new foreground and background colors.
       consoleStyle(Console);
 
-      if (
-        (message is string str && str != "") ||
-        message is not string and not null
-      ) {
+      if (message is string str && str != "") {
+        if (SystemInfo.OS == OSType.Windows) {
+          // Remove emoji from message.
+          str = RemoveNonANSICharacters(str);
+          message = str;
+        }
+        UpdateStyle();
+      }
+      else if (message is not string and not null) {
         UpdateStyle();
       }
 
@@ -186,9 +191,22 @@ public class Log : ILog {
         Console.CursorLeft = left;
         Console.CursorTop = top;
       }
-      // OutputConsole.Flush();
+      OutputConsole.Flush();
     }
   }
+
+  /// <summary>
+  /// Removes non-ASCII chars from string. If matches, tries to remove 1 whitespace at the end.
+  /// </summary>
+  /// <remarks>
+  /// About Windows cmd encoding see: https://stackoverflow.com/a/75788701/8903027
+  /// </remarks>
+  /// <param name="str"></param>
+  /// <returns>Processed string.</returns>
+  private static string RemoveNonANSICharacters(string str) => ANSIOnlyRegex().Replace(str, "");
+
+  [GeneratedRegex(@"[^\x00-\x7F][ ]?")]
+  private static partial Regex ANSIOnlyRegex();
 
   public void UpdateStyle() {
     var style = new Style(Console.ForegroundColor, Console.BackgroundColor);
