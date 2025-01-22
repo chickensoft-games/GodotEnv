@@ -15,7 +15,9 @@ public class GodotCommand : ICommand, ICliCommand {
   }
 
   public ValueTask ExecuteAsync(IConsole console) {
-    var log = ExecutionContext.CreateLog(console);
+    var systemInfo = ExecutionContext.Godot.Platform.SystemInfo;
+
+    var log = ExecutionContext.CreateLog(systemInfo, console);
     var output = console.Output;
     log.Print("");
     log.Warn("Please use a subcommand to manage Godot installations.");

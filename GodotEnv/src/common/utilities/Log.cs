@@ -11,14 +11,9 @@ using global::GodotEnv.Common.Utilities;
 
 /// <summary>CLI log interface.</summary>
 public interface ILog {
+  ISystemInfo SystemInfo { get; }
   /// <summary>CLI command console.</summary>
   IConsole Console { get; }
-  // IGodotEnvironment GodotEnvironment { get; }
-
-  // /// <summary>Creates a log using the specified console.</summary>
-  // /// <param name="console">Output console.</param>
-  // /// <returns>Log.</returns>
-  // ILog Create(IConsole console);
   /// <summary>Print an error message to the console.</summary>
   /// <param name="message">Error message.</param>
   void Err(object? message);
@@ -81,10 +76,9 @@ public partial class Log : ILog {
     ConsoleColor Foreground, ConsoleColor Background
   );
 
+  public ISystemInfo SystemInfo { get; }
+
   public IConsole Console { get; }
-  // public IExecutionContext ExecutionContext { get; }
-  // public IFileClient FileClient { get; }
-  // public IGodotEnvironment GodotEnvironment { get; }
 
   private ConsoleWriter OutputConsole => Console.Output;
   private readonly StringBuilder _sb = new();
@@ -99,10 +93,9 @@ public partial class Log : ILog {
   public bool IsInRedirectedEnv =>
     Console.IsOutputRedirected || Console.IsErrorRedirected;
 
-  public Log(IConsole console) {
-    // public Log(IConsole console, IGodotEnvironment godotEnvironment) {
+  public Log(ISystemInfo systemInfo, IConsole console) {
+    SystemInfo = systemInfo;
     Console = console;
-    // GodotEnvironment = godotEnvironment;
 
     if (!IsInRedirectedEnv) {
       console.ResetColor();

@@ -3,6 +3,7 @@ namespace Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx.Infrastructure;
+using global::GodotEnv.Common.Utilities;
 
 /// <summary>
 /// Execution context created by the app before any commands are run. Execution
@@ -32,7 +33,7 @@ public interface IExecutionContext {
   /// <summary>Creates a log using the specified console.</summary>
   /// <param name="console">Output console.</param>
   /// <returns>Log.</returns>
-  ILog CreateLog(IConsole console);
+  ILog CreateLog(ISystemInfo systemInfo, IConsole console);
   // ILog CreateLog(IConsole console, IGodotEnvironment environment);
 }
 
@@ -45,6 +46,6 @@ public record ExecutionContext(
   IAddonsContext Addons,
   IGodotContext Godot
 ) : IExecutionContext {
-  public ILog CreateLog(IConsole console) => new Log(console);
+  public ILog CreateLog(ISystemInfo systemInfo, IConsole console) => new Log(systemInfo, console);
   // public ILog CreateLog(IConsole console, IGodotEnvironment environment) => new Log(console, environment);
 }

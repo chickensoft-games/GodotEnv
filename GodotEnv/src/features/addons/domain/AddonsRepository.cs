@@ -11,6 +11,7 @@ using Chickensoft.GodotEnv.Features.Addons.Models;
 using global::GodotEnv.Common.Utilities;
 
 public interface IAddonsRepository {
+  ISystemInfo SystemInfo { get; }
   IFileClient FileClient { get; }
   INetworkClient NetworkClient { get; }
   IZipClient ZipClient { get; }
@@ -94,6 +95,7 @@ public interface IAddonsRepository {
 }
 
 public class AddonsRepository(
+  ISystemInfo systemInfo,
   IFileClient fileClient,
   INetworkClient networkClient,
   IZipClient zipClient,
@@ -101,6 +103,8 @@ public class AddonsRepository(
   AddonsConfiguration config,
   IProcessRunner processRunner
 ) : IAddonsRepository {
+
+  public ISystemInfo SystemInfo { get; } = systemInfo;
   public IFileClient FileClient { get; } = fileClient;
   public INetworkClient NetworkClient { get; } = networkClient;
   public IZipClient ZipClient { get; } = zipClient;

@@ -25,14 +25,13 @@ using global::GodotEnv.Common.Utilities;
 public static class GodotEnv {
   public static async Task<int> Main(string[] args) {
     // App-wide dependencies
-    var computer = new Computer();
+    var systemInfo = new SystemInfo();
 
-    // TODO: Make global static class (singleton) with System info that are readonly.
-    // This will solve the cicle dependency problem (fileclient <-> godotEnvironment).
+    var computer = new Computer();
 
     var processRunner = new ProcessRunner();
 
-    var fileClient = new FileClient(new FileSystem(), computer, processRunner);
+    var fileClient = new FileClient(systemInfo, new FileSystem(), computer, processRunner);
 
     var environmentClient = new EnvironmentClient();
 
@@ -47,12 +46,13 @@ public static class GodotEnv {
       downloadConfiguration: Defaults.DownloadConfiguration
     );
 
-    IZipClient zipClient = (SystemInfo.OS == OSType.Windows)
+    IZipClient zipClient = (systemInfo.OS == OSType.Windows)
       ? new ZipClient(fileClient.Files)
       : new ZipClientTerminal(computer, fileClient.Files);
 
     var environmentVariableClient =
       new EnvironmentVariableClient(
+        systemInfo,
         processRunner,
         fileClient,
         computer,
@@ -71,6 +71,7 @@ public static class GodotEnv {
       addonsFile: mainAddonsFile
     );
     var addonsRepo = new AddonsRepository(
+      systemInfo: systemInfo,
       fileClient: fileClient,
       networkClient: networkClient,
       zipClient: zipClient,
@@ -95,11 +96,12 @@ public static class GodotEnv {
     );
 
     // Godot feature dependencies
-    var platform = GodotEnvironment.Create(fileClient: fileClient, computer: computer);
+    var platform = GodotEnvironment.Create(systemInfo: systemInfo, fileClient: fileClient, computer: computer);
 
     var checksumRepository = new GodotChecksumClient(networkClient, platform);
 
     var godotRepo = new GodotRepository(
+      systemInfo: systemInfo,
       config: config,
       fileClient: fileClient,
       networkClient: networkClient,
@@ -141,7 +143,7 @@ public static class GodotEnv {
       )
       .AddCommandsFromThisAssembly()
       .UseTypeActivator(
-        new GodotEnvActivator(context, SystemInfo.OS)
+        new GodotEnvActivator(context, systemInfo.OS)
       )
       .Build().RunAsync(context.CliArgs);
 

@@ -19,7 +19,8 @@ public class GodotEnvTargetCommand : ICommand, ICliCommand {
   }
 
   public async ValueTask ExecuteAsync(IConsole console) {
-    var log = ExecutionContext.CreateLog(console);
+    var systemInfo = ExecutionContext.Godot.Platform.SystemInfo;
+    var log = ExecutionContext.CreateLog(systemInfo, console);
     var godotRepo = ExecutionContext.Godot.GodotRepo;
 
     log.Print(godotRepo.GodotSymlinkTarget);

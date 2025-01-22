@@ -8,8 +8,8 @@ using Chickensoft.GodotEnv.Common.Utilities;
 using global::GodotEnv.Common.Utilities;
 
 public class Windows : GodotEnvironment {
-  public Windows(IFileClient fileClient, IComputer computer)
-    : base(fileClient, computer) { }
+  public Windows(ISystemInfo systemInfo, IFileClient fileClient, IComputer computer)
+    : base(systemInfo, fileClient, computer) { }
 
   private static readonly (int major, int minor) _firstKnownArmVersion = (4, 3);
 

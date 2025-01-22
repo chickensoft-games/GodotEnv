@@ -10,6 +10,7 @@ using Chickensoft.GodotEnv.Common.Utilities;
 using global::GodotEnv.Common.Utilities;
 
 public interface IGodotEnvironment {
+  ISystemInfo SystemInfo { get; }
   /// <summary>
   /// File client used by the platform to manipulate file paths.
   /// </summary>
@@ -146,17 +147,18 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   /// <param name="computer">Computer.</param>
   /// <returns>Platform instance.</returns>
   /// <exception cref="InvalidOperationException" />
-  public static GodotEnvironment Create(IFileClient fileClient, IComputer computer
+  public static GodotEnvironment Create(ISystemInfo systemInfo, IFileClient fileClient, IComputer computer
   ) =>
-    SystemInfo.OS switch {
-      OSType.Windows => new Windows(fileClient, computer),
-      OSType.MacOS => new MacOS(fileClient, computer),
-      OSType.Linux => new Linux(fileClient, computer),
+    systemInfo.OS switch {
+      OSType.Windows => new Windows(systemInfo, fileClient, computer),
+      OSType.MacOS => new MacOS(systemInfo, fileClient, computer),
+      OSType.Linux => new Linux(systemInfo, fileClient, computer),
       OSType.Unknown => throw GetUnknownOSException(),
       _ => throw GetUnknownOSException()
     };
 
-  protected GodotEnvironment(IFileClient fileClient, IComputer computer) {
+  protected GodotEnvironment(ISystemInfo systemInfo, IFileClient fileClient, IComputer computer) {
+    SystemInfo = systemInfo;
     FileClient = fileClient;
     Computer = computer;
 
@@ -178,6 +180,8 @@ public abstract class GodotEnvironment : IGodotEnvironment {
     //   _ => CPUArch.Other,
     // };
   }
+
+  public ISystemInfo SystemInfo { get; }
 
   public IFileClient FileClient { get; }
   public IComputer Computer { get; }

@@ -19,6 +19,7 @@ public struct RemoteVersion {
 }
 
 public interface IGodotRepository {
+  ISystemInfo SystemInfo { get; }
   ConfigFile Config { get; }
   IFileClient FileClient { get; }
   INetworkClient NetworkClient { get; }
@@ -137,6 +138,7 @@ public interface IGodotRepository {
 }
 
 public partial class GodotRepository : IGodotRepository {
+  public ISystemInfo SystemInfo { get; }
   public ConfigFile Config { get; }
   public IFileClient FileClient { get; }
   public INetworkClient NetworkClient { get; }
@@ -182,6 +184,7 @@ public partial class GodotRepository : IGodotRepository {
   public static readonly Regex DirectoryToVersionStringRegex = directoryToVersionStringRegex();
 
   public GodotRepository(
+    ISystemInfo systemInfo,
     ConfigFile config,
     IFileClient fileClient,
     INetworkClient networkClient,
@@ -191,6 +194,7 @@ public partial class GodotRepository : IGodotRepository {
     IProcessRunner processRunner,
     IGodotChecksumClient checksumClient
   ) {
+    SystemInfo = systemInfo;
     Config = config;
     FileClient = fileClient;
     NetworkClient = networkClient;

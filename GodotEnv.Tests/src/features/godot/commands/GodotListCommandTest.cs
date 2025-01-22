@@ -6,31 +6,39 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Features.Addons.Commands;
 using Chickensoft.GodotEnv.Features.Godot.Domain;
+using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx.Infrastructure;
 using Common.Models;
 using Common.Utilities;
+using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
 
 public sealed class GodotListCommandTest : IDisposable {
 
+  private readonly MockSystemInfo _systemInfo;
   private readonly Mock<IExecutionContext> _context;
   private readonly Mock<IGodotContext> _godotContext;
+  private readonly Mock<IGodotEnvironment> _environment;
   private readonly Mock<IGodotRepository> _godotRepo;
   private readonly FakeInMemoryConsole _console;
   private readonly Log _log;
 
   public GodotListCommandTest() {
+    _systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
     _context = new Mock<IExecutionContext>();
     _godotContext = new Mock<IGodotContext>();
+    _environment = new Mock<IGodotEnvironment>();
     _godotRepo = new Mock<IGodotRepository>();
     _console = new FakeInMemoryConsole();
 
+    _environment.Setup(env => env.SystemInfo).Returns(_systemInfo);
     _godotContext.SetupGet(c => c.GodotRepo).Returns(_godotRepo.Object);
+    _godotContext.Setup(c => c.Platform).Returns(_environment.Object);
     _context.SetupGet(context => context.Godot).Returns(_godotContext.Object);
-    _log = new Log(_console);
-    _context.Setup(context => context.CreateLog(_console)).Returns(_log);
+    _log = new Log(_systemInfo, _console);
+    _context.Setup(context => context.CreateLog(_systemInfo, _console)).Returns(_log);
   }
 
   public void Dispose() => _console.Dispose();

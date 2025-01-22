@@ -3,6 +3,7 @@ namespace Chickensoft.GodotEnv.Tests;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using CliFx.Infrastructure;
+using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -38,6 +39,7 @@ public class ExecutionContextTest {
     executionContext.Godot.ShouldBe(godot);
 
     executionContext
-      .CreateLog(new FakeInMemoryConsole()).ShouldBeAssignableTo<ILog>();
+      .CreateLog(new MockSystemInfo(OSType.Linux, CPUArch.X64), new FakeInMemoryConsole())
+      .ShouldBeAssignableTo<ILog>();
   }
 }

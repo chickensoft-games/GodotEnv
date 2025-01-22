@@ -22,10 +22,11 @@ public class GodotCacheClearCommand :
   }
 
   public async ValueTask ExecuteAsync(IConsole console) {
+    var systemInfo = ExecutionContext.Godot.Platform.SystemInfo;
     var godotRepo = ExecutionContext.Godot.GodotRepo;
     var platform = ExecutionContext.Godot.Platform;
 
-    var log = ExecutionContext.CreateLog(console);
+    var log = ExecutionContext.CreateLog(systemInfo, console);
 
     log.Print("");
     log.Info("Clearing Godot installation cache...");
