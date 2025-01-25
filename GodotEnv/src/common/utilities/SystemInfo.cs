@@ -29,8 +29,6 @@ public class SystemInfo : ISystemInfo {
             : OSType.Unknown;
   }
 
-  // public OSFamily OsFamily { get; }
-
   public CPUArch CPUArch => CPUArchProxy switch {
     Architecture.X64 => CPUArch.X64,
     Architecture.X86 => CPUArch.X86,

@@ -18,15 +18,6 @@ public interface IGodotEnvironment {
 
   IComputer Computer { get; }
 
-  // /// <summary>The operating system family.</summary>
-  // OSFamily OSFamily { get; }
-
-  // /// <summary>The operating system type.</summary>
-  // OSType OS { get; }
-
-  // /// <summary>The process architecture type.</summary>
-  // CPUArch CPUArch { get; }
-
   /// <summary>
   /// Godot export template installation directory base path on the local
   /// machine.
@@ -136,10 +127,6 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   public const string GODOT_URL_PREFIX =
     "https://github.com/godotengine/godot-builds/releases/download/";
 
-  // public OSFamily OSFamily { get; }
-  // public OSType OS { get; }
-  // public CPUArch CPUArch { get; }
-
   /// <summary>
   /// Creates a platform for the given OS.
   /// </summary>
@@ -161,24 +148,6 @@ public abstract class GodotEnvironment : IGodotEnvironment {
     SystemInfo = systemInfo;
     FileClient = fileClient;
     Computer = computer;
-
-    // OS = IsOSPlatform(OSPlatform.OSX)
-    //   ? OSType.MacOS
-    //   : IsOSPlatform(OSPlatform.Linux)
-    //     ? OSType.Linux
-    //     : IsOSPlatform(OSPlatform.Windows)
-    //       ? OSType.Windows
-    //       : OSType.Unknown;
-
-    // OSFamily = OS == OSType.Windows ? OSFamily.Windows : OSFamily.Unix;
-
-    // CPUArch = RuntimeInformation.ProcessArchitecture switch {
-    //   Architecture.X64 => CPUArch.X64,
-    //   Architecture.X86 => CPUArch.X86,
-    //   Architecture.Arm64 => CPUArch.Arm64,
-    //   Architecture.Arm => CPUArch.Arm,
-    //   _ => CPUArch.Other,
-    // };
   }
 
   public ISystemInfo SystemInfo { get; }
@@ -355,17 +324,5 @@ public abstract class GodotEnvironment : IGodotEnvironment {
 
   private static InvalidOperationException GetUnknownOSException() =>
     new("🚨 Cannot create a platform an unknown operating system.");
-
-  //   public static Func<OSPlatform, bool> IsOSPlatformDefault { get; } =
-  // RuntimeInformation.IsOSPlatform;
-
-  //   public static Func<OSPlatform, bool> IsOSPlatform { get; set; } =
-  //     IsOSPlatformDefault;
-
-  // public static Architecture CPUArchDefault { get; } =
-  //   RuntimeInformation.ProcessArchitecture;
-
-  // public static Architecture ProcessorArchitecture { get; set; } =
-  //   CPUArchDefault;
 
 }

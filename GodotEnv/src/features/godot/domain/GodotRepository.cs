@@ -491,15 +491,6 @@ public partial class GodotRepository : IGodotRepository {
           var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
           var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
 
-          // if (FileClient.FileExists(hardLinkPath)) {
-          //   await FileClient.DeleteFile(hardLinkPath);
-          // }
-
-          // await FileClient.CreateSymlink(hardLinkPath, installation.ExecutionPath);
-          // await FileClient.ProcessRunner.RunElevatedOnWindows(
-          //   "cmd.exe", $"/c mklink /H \"{hardLinkPath}\" \"{installation.ExecutionPath}\""
-          // );
-
           var command = string.Join(";",
             "$ws = New-Object -ComObject (\"WScript.Shell\")",
             $"$s = $ws.CreateShortcut(\"{applicationsPath}\")",
