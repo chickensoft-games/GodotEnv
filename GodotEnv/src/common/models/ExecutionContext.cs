@@ -25,6 +25,8 @@ public interface IExecutionContext {
 
   /// <summary>App configuration settings.</summary>
   ConfigFile Config { get; }
+  /// <summary>System information.</summary>
+  ISystemInfo SystemInfo { get; }
   /// <summary>Addons context.</summary>
   IAddonsContext Addons { get; }
   /// <summary>Godot context.</summary>
@@ -33,8 +35,7 @@ public interface IExecutionContext {
   /// <summary>Creates a log using the specified console.</summary>
   /// <param name="console">Output console.</param>
   /// <returns>Log.</returns>
-  ILog CreateLog(ISystemInfo systemInfo, IConsole console);
-  // ILog CreateLog(IConsole console, IGodotEnvironment environment);
+  ILog CreateLog(IConsole console);
 }
 
 public record ExecutionContext(
@@ -43,9 +44,9 @@ public record ExecutionContext(
   string Version,
   string WorkingDir,
   ConfigFile Config,
+  ISystemInfo SystemInfo,
   IAddonsContext Addons,
   IGodotContext Godot
 ) : IExecutionContext {
-  public ILog CreateLog(ISystemInfo systemInfo, IConsole console) => new Log(systemInfo, console);
-  // public ILog CreateLog(IConsole console, IGodotEnvironment environment) => new Log(console, environment);
+  public ILog CreateLog(IConsole console) => new Log(SystemInfo, console);
 }

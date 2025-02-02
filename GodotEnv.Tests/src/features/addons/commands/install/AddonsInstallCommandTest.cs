@@ -51,8 +51,8 @@ public class AddonsInstallCommandTest {
 
     var workingDir = "/";
 
-    context.Setup(context => context.Godot.Platform.SystemInfo).Returns(systemInfo.Object);
-    context.Setup(context => context.CreateLog(systemInfo.Object, fakeConsole)).Returns(log);
+    context.Setup(context => context.SystemInfo).Returns(systemInfo.Object);
+    context.Setup(context => context.CreateLog(fakeConsole)).Returns(log);
     context.Setup(context => context.WorkingDir).Returns(workingDir);
 
     var addonsFileRepo = new Mock<IAddonsFileRepository>();

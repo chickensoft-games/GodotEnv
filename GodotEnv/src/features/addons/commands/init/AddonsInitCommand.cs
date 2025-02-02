@@ -22,9 +22,7 @@ public class AddonsInitCommand : ICommand, ICliCommand {
   }
 
   public async ValueTask ExecuteAsync(IConsole console) {
-    var systemInfo = ExecutionContext.Godot.Platform.SystemInfo;
-
-    var log = ExecutionContext.CreateLog(systemInfo, console);
+    var log = ExecutionContext.CreateLog(console);
     var repo = ExecutionContext.Addons.AddonsFileRepo;
 
     log.Print("");

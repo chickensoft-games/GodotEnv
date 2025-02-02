@@ -40,11 +40,10 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
   }
 
   public async ValueTask ExecuteAsync(IConsole console) {
-    var systemInfo = ExecutionContext.Godot.Platform.SystemInfo;
     var godotRepo = ExecutionContext.Godot.GodotRepo;
     var platform = ExecutionContext.Godot.Platform;
 
-    var log = ExecutionContext.CreateLog(systemInfo, console);
+    var log = ExecutionContext.CreateLog(console);
     var output = console.Output;
 
     var version = SemanticVersion.Parse(RawVersion);

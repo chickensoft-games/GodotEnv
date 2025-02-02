@@ -18,8 +18,8 @@ public class AddonsCommandTest {
     var console = new FakeInMemoryConsole();
     var log = new Log(systemInfo, console); // Use real log to test colors in output
 
-    context.Setup(ctx => ctx.Godot.Platform.SystemInfo).Returns(systemInfo);
-    context.Setup(ctx => ctx.CreateLog(systemInfo, console)).Returns(log);
+    context.Setup(ctx => ctx.SystemInfo).Returns(systemInfo);
+    context.Setup(ctx => ctx.CreateLog(console)).Returns(log);
 
     var addonCommand = new AddonsCommand(context.Object);
     await addonCommand.ExecuteAsync(console);

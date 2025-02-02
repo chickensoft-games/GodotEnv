@@ -43,11 +43,10 @@ public class GodotInstallCommand :
   }
 
   public async ValueTask ExecuteAsync(IConsole console) {
-    var systemInfo = ExecutionContext.Godot.Platform.SystemInfo;
     var godotRepo = ExecutionContext.Godot.GodotRepo;
     var platform = ExecutionContext.Godot.Platform;
 
-    var log = ExecutionContext.CreateLog(systemInfo, console);
+    var log = ExecutionContext.CreateLog(console);
     var token = console.RegisterCancellationHandler();
 
     var version = SemanticVersion.Parse(RawVersion);

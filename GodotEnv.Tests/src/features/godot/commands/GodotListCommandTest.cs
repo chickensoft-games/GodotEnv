@@ -38,7 +38,7 @@ public sealed class GodotListCommandTest : IDisposable {
     _godotContext.Setup(c => c.Platform).Returns(_environment.Object);
     _context.SetupGet(context => context.Godot).Returns(_godotContext.Object);
     _log = new Log(_systemInfo, _console);
-    _context.Setup(context => context.CreateLog(_systemInfo, _console)).Returns(_log);
+    _context.Setup(context => context.CreateLog(_console)).Returns(_log);
   }
 
   public void Dispose() => _console.Dispose();

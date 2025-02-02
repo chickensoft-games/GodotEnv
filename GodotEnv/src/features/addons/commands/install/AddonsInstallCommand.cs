@@ -41,9 +41,7 @@ public class AddonsInstallCommand :
   }
 
   public async ValueTask ExecuteAsync(IConsole console) {
-    var systemInfo = ExecutionContext.Godot.Platform.SystemInfo;
-
-    var log = ExecutionContext.CreateLog(systemInfo, console);
+    var log = ExecutionContext.CreateLog(console);
 
     var addons = ExecutionContext.Addons;
 

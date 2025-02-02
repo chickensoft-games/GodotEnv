@@ -8,5 +8,6 @@ public enum OSFamily {
   Windows = 0,
   /// <summary>Unix.</summary>
   Unix = 1,
+  /// <summary>Unknown.</summary>
   Unknown = 2,
 }

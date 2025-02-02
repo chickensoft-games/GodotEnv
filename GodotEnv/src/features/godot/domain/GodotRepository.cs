@@ -422,7 +422,6 @@ public partial class GodotRepository : IGodotRepository {
       var godotSharpPath = GetGodotSharpPath(
         installation.Path, installation.Version, installation.IsDotnetVersion
       );
-      // log.Print($"    Linking GodotSharp: {GodotSharpSymlinkPath} -> {godotSharpPath}");
       await FileClient.CreateSymlink(
         GodotSharpSymlinkPath, godotSharpPath
       );

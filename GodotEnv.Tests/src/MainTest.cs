@@ -2,6 +2,7 @@ namespace Chickensoft.GodotEnv.Tests;
 
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
+using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -18,10 +19,11 @@ public class MainTest {
     var config = new ConfigFile();
     var args = new string[] { "a", "--", "b" };
     var workingDir = "/";
+    var systemInfo = new Mock<ISystemInfo>();
     var addonsContext = new Mock<IAddonsContext>();
     var godotContext = new Mock<IGodotContext>();
     var context = GodotEnv.CreateExecutionContext(
-      args, config, workingDir, addonsContext.Object,
+      args, config, workingDir, systemInfo.Object, addonsContext.Object,
       godotContext.Object
     );
     context.CliArgs.ShouldBe(["a"]);

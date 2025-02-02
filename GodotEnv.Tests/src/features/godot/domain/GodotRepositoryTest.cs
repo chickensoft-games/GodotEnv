@@ -60,7 +60,7 @@ public class GodotRepositoryTest {
     var console = new FakeInMemoryConsole();
     var log = new Mock<ILog>(); // Use real log to test colors in output
 
-    executionContext.Setup(context => context.CreateLog(systemInfo, console)).Returns(log.Object);
+    executionContext.Setup(context => context.CreateLog(console)).Returns(log.Object);
 
     await godotRepo.AddOrUpdateGodotEnvVariable(log.Object);
 

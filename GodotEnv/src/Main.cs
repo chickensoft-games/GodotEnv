@@ -123,6 +123,7 @@ public static class GodotEnv {
       args: args,
       config: config,
       workingDir: workingDir,
+      systemInfo: systemInfo,
       addonsContext: addonsContext,
       godotContext: godotContext
     );
@@ -157,6 +158,7 @@ public static class GodotEnv {
     string[] args,
     ConfigFile config,
     string workingDir,
+    ISystemInfo systemInfo,
     IAddonsContext addonsContext,
     IGodotContext godotContext
   ) {
@@ -198,6 +200,7 @@ public static class GodotEnv {
       Version: version,
       WorkingDir: workingDir,
       Config: config,
+      SystemInfo: systemInfo,
       Addons: addonsContext,
       Godot: godotContext
     );

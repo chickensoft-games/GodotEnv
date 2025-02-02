@@ -19,9 +19,7 @@ public class GodotEnvGetCommand : ICommand, ICliCommand {
   }
 
   public async ValueTask ExecuteAsync(IConsole console) {
-    var systemInfo = ExecutionContext.Godot.Platform.SystemInfo;
-
-    var log = ExecutionContext.CreateLog(systemInfo, console);
+    var log = ExecutionContext.CreateLog(console);
     var godotRepo = ExecutionContext.Godot.GodotRepo;
 
     var godotEnvVar = await godotRepo.GetGodotEnvVariable();

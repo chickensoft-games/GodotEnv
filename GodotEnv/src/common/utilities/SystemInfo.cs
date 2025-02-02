@@ -4,6 +4,9 @@ using System;
 using System.Runtime.InteropServices;
 using Chickensoft.GodotEnv.Common.Models;
 
+/// <summary>
+/// Imutable system information (OS, CPU architecture, ...).
+/// </summary>
 public interface ISystemInfo {
   public OSType OS { get; }
 
