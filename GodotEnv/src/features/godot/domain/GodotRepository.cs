@@ -441,12 +441,12 @@ public partial class GodotRepository : IGodotRepository {
     log.Info("📝 Updating Godot desktop shortcut.");
     switch (SystemInfo.OS) {
       case OSType.MacOS: {
-          var appFilePath = FileClient.Files.Directory.GetDirectories(installation.Path).First();
-          var applicationsPath = FileClient.Combine(FileClient.UserDirectory, "Applications", "Godot.app");
-          await FileClient.DeleteDirectory(applicationsPath);
-          await FileClient.CreateSymlinkRecursively(applicationsPath, appFilePath);
-          break;
-        }
+        var appFilePath = FileClient.Files.Directory.GetDirectories(installation.Path).First();
+        var applicationsPath = FileClient.Combine(FileClient.UserDirectory, "Applications", "Godot.app");
+        await FileClient.DeleteDirectory(applicationsPath);
+        await FileClient.CreateSymlinkRecursively(applicationsPath, appFilePath);
+        break;
+      }
 
       case OSType.Linux:
         var userApplicationsPath = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "applications");
@@ -463,90 +463,70 @@ public partial class GodotRepository : IGodotRepository {
 
         // https://github.com/godotengine/godot/blob/master/misc/dist/linux/org.godotengine.Godot.desktop
         FileClient.CreateFile(FileClient.Combine(userApplicationsPath, "Godot.desktop"),
-        $"""
-          [Desktop Entry]
-          Name=Godot Engine
-          GenericName=Libre game engine
-          GenericName[el]=Ελεύθερη μηχανή παιχνιδιού
-          GenericName[fr]=Moteur de jeu libre
-          GenericName[zh_CN]=自由的游戏引擎
-          Comment=Multi-platform 2D and 3D game engine with a feature-rich editor
-          Comment[el]=2D και 3D μηχανή παιχνιδιού πολλαπλών πλατφορμών με επεξεργαστή πλούσιο σε χαρακτηριστικά
-          Comment[fr]=Moteur de jeu 2D et 3D multiplateforme avec un éditeur riche en fonctionnalités
-          Comment[zh_CN]=多平台 2D 和 3D 游戏引擎，带有功能丰富的编辑器
-          Exec={GodotSymlinkPath} %f
-          Icon=godot
-          Terminal=false
-          PrefersNonDefaultGPU=true
-          Type=Application
-          MimeType=application/x-godot-project;
-          Categories=Development;IDE;
-          StartupWMClass=Godot
-          """);
+          $"""
+           [Desktop Entry]
+           Name=Godot Engine
+           GenericName=Libre game engine
+           GenericName[el]=Ελεύθερη μηχανή παιχνιδιού
+           GenericName[fr]=Moteur de jeu libre
+           GenericName[zh_CN]=自由的游戏引擎
+           Comment=Multi-platform 2D and 3D game engine with a feature-rich editor
+           Comment[el]=2D και 3D μηχανή παιχνιδιού πολλαπλών πλατφορμών με επεξεργαστή πλούσιο σε χαρακτηριστικά
+           Comment[fr]=Moteur de jeu 2D et 3D multiplateforme avec un éditeur riche en fonctionnalités
+           Comment[zh_CN]=多平台 2D 和 3D 游戏引擎，带有功能丰富的编辑器
+           Exec={GodotSymlinkPath} %f
+           Icon=godot
+           Terminal=false
+           PrefersNonDefaultGPU=true
+           Type=Application
+           MimeType=application/x-godot-project;
+           Categories=Development;IDE;
+           StartupWMClass=Godot
+           """);
         break;
 
       case OSType.Windows: {
-          var hardLinkPath = $"{GodotSymlinkPath}.exe";
-          var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
-          var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
+        var hardLinkPath = $"{GodotSymlinkPath}.exe";
+        var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+        var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
 
-          var command = string.Join(";",
-            "$ws = New-Object -ComObject (\"WScript.Shell\")",
-            $"$s = $ws.CreateShortcut(\"{applicationsPath}\")",
-            $"$s.TargetPath = \"{hardLinkPath}\"",
-            "$s.save();"
-          );
-          await FileClient.ProcessRunner.Run(".", "powershell", ["-c", command]);
-          break;
-        }
+        var command = string.Join(";",
+          "$ws = New-Object -ComObject (\"WScript.Shell\")",
+          $"$s = $ws.CreateShortcut(\"{applicationsPath}\")",
+          $"$s.TargetPath = \"{hardLinkPath}\"",
+          "$s.save();"
+        );
+        await FileClient.ProcessRunner.Run(".", "powershell", ["-c", command]);
+        break;
+      }
       case OSType.Unknown:
       default:
         break;
     }
+
     log.Success("✅ Godot desktop shortcut created.");
     log.Print("");
   }
 
   public async Task AddOrUpdateGodotEnvVariable(ILog log) {
-    var godotSymlinkPath = GodotSymlinkPath;
-    var godotVar = Defaults.GODOT_ENV_VAR_NAME;
-    var userShellRaw = await EnvironmentVariableClient.GetUserDefaultShell();
+    log.Info("📝 Updating GodotEnv environment variables.");
 
-    if (!EnvironmentVariableClient.IsDefaultShellSupported) {
-      log.Warn($"Your shell '{userShellRaw}' is not supported.");
-      log.Warn($"Defaulting changes to {EnvironmentVariableClient.UserShell} profile ('{EnvironmentVariableClient.UserShellRcFilePath}').");
-    }
+    await EnvironmentVariableClient.UpdateGodotEnvEnvironment(GodotSymlinkPath, GodotBinPath);
 
-    log.Info($"📝 Adding or updating the {godotVar} environment variable.");
-
-    EnvironmentVariableClient.SetUserEnv(godotVar, godotSymlinkPath);
-
-    log.Success($"✅ Successfully updated the {godotVar} environment variable.");
+    log.Success($"✅ Success.");
+    log.Print("");
+    log.Warn("Please, restart your shell to update the environment variables.");
     log.Print("");
 
-    log.Info($"📝 Updating the {Defaults.PATH_ENV_VAR_NAME} environment variable to include godot's binary.");
-
-    await EnvironmentVariableClient.AppendToUserEnv(Defaults.PATH_ENV_VAR_NAME, GodotBinPath);
-
-    log.Success($"✅ Successfully updated the {Defaults.PATH_ENV_VAR_NAME} environment variable to include.");
-    log.Print("");
-
-    switch (SystemInfo.OS) {
-      case OSType.MacOS:
-      case OSType.Linux:
-        log.Warn("You may need to restart your shell or run the following");
-        log.Warn("command to update the GODOT environment variable value:");
-        log.Print("");
-        log.Print($"        source {EnvironmentVariableClient.UserShellRcFilePath}");
-        log.Print("");
-        break;
-      case OSType.Windows:
-        log.Warn("You may need to restart your shell.");
-        log.Print("");
-        break;
-      case OSType.Unknown:
-      default:
-        break;
+    if (SystemInfo.OSFamily == OSFamily.Unix) {
+      log.Warn(
+        $"""
+           GodotEnv patches the shell initialization files and POSIX compatible shells should work
+           out of the box (bash, zsh). You may need to manually export the GODOT env-var and update PATH
+           if your shell isn't a POSIX compatible one (i.e., fish). Take a look into
+           '{FileClient.Combine(FileClient.AppDataDirectory, "env")}' file for inspiration.
+         """);
+      log.Print("");
     }
   }
 

@@ -4,145 +4,46 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Chickensoft.GodotEnv.Common.Models;
-using Chickensoft.GodotEnv.Common.Utilities;
 using global::GodotEnv.Common.Utilities;
+using Models;
+using Utilities;
 
 public interface IEnvironmentVariableClient {
   public ISystemInfo SystemInfo { get; }
+
+  /// <summary>
+  /// Retrieves the environment variable for the current user.
+  /// </summary>
+  /// <param name="name">Environment variable name.</param>
+  /// <returns></returns>
   Task<string> GetUserEnv(string name);
-  void SetUserEnv(string name, string value);
-  Task AppendToUserEnv(string name, string value);
+
   /// <summary>
-  /// Retrieves user's default shell directly from the system
-  /// <returns>Shell name.</returns>
+  /// Adjusts the user-env variables to contain the Godot version managed GodotEnv.
+  ///
+  /// Updates (or creates) the user-wide GODOT environment containing the symlink path, which points to the active
+  /// version of Godot. Also, PATH is updated prepending the Godot symlink path. This integration in UNIX shells is done
+  /// via ~/.config/godotenv/env file, which is sourced in the user's shell initialization files.
   /// </summary>
-  Task<string> GetUserDefaultShell();
-  /// <summary>
-  /// Check if a given shell name is supported.
-  /// </summary>
-  /// <param name="shellName">Shell name.</param>
-  bool IsShellSupported(string shellName);
-  /// <summary>
-  /// Checks if user's default shell is supported.
-  /// It's expected that the supported shells have a 'rc' config file.
-  /// </summary>
-  bool IsDefaultShellSupported { get; }
-  /// <summary>
-  /// The user's default shell.
-  /// Defaulted to 'zsh' on MacOS, 'bash' on Linux and an empty string on Windows.
-  /// </summary>
-  string UserShell { get; }
-  /// <summary>
-  /// The path to the user's shell rc file.
-  /// </summary>
-  string UserShellRcFilePath { get; }
+  /// <param name="godotSymlinkPath">Path to the Godot bin symlink to be updated/created.</param>
+  /// <param name="godotBinPath">Path to the Godot binary.</param>
+  /// <returns></returns>
+  Task UpdateGodotEnvEnvironment(string godotSymlinkPath, string godotBinPath);
 }
 
 public class EnvironmentVariableClient : IEnvironmentVariableClient {
-  public const string USER_SHELL_COMMAND_MAC = "dscl . -read /Users/$USER UserShell";
-  public const string USER_SHELL_COMMAND_LINUX = "getent passwd $USER";
-  public static readonly string[] SUPPORTED_UNIX_SHELLS = ["bash", "zsh"];
-
   public ISystemInfo SystemInfo { get; }
   public IProcessRunner ProcessRunner { get; }
   public IFileClient FileClient { get; }
   public IComputer Computer { get; }
-  public IEnvironmentClient EnvironmentClient { get; }
-
-  public bool IsDefaultShellSupported {
-    get {
-      var task = GetUserDefaultShell();
-      task.Wait();
-      var userShell = task.Result;
-      return IsShellSupported(userShell);
-    }
-  }
-
-  private string? _userShell;
-  public string UserShell {
-    get {
-      if (!string.IsNullOrEmpty(_userShell)) {
-        return _userShell;
-      }
-      var task = GetUserDefaultShell();
-      task.Wait();
-      _userShell = task.Result;
-
-      var defaultShellOS = SystemInfo.OS switch {
-        OSType.MacOS => "zsh",
-        OSType.Linux => "bash",
-        OSType.Windows or OSType.Unknown or _ => string.Empty,
-      };
-
-      _userShell = IsShellSupported(_userShell) ? _userShell : defaultShellOS;
-      return _userShell;
-    }
-  }
-
-  public string UserShellRcFilePath => UserShell.Length > 0 ? FileClient.Combine(FileClient.UserDirectory, $".{UserShell}rc") : string.Empty;
 
   public EnvironmentVariableClient(
-    ISystemInfo systemInfo, IProcessRunner processRunner, IFileClient fileClient, IComputer computer, IEnvironmentClient environmentClient
+    ISystemInfo systemInfo, IProcessRunner processRunner, IFileClient fileClient, IComputer computer
   ) {
     SystemInfo = systemInfo;
     ProcessRunner = processRunner;
     FileClient = fileClient;
     Computer = computer;
-    EnvironmentClient = environmentClient;
-  }
-
-  public void SetUserEnv(string name, string value) {
-    switch (SystemInfo.OS) {
-      case OSType.Windows:
-        EnvironmentClient.SetEnvironmentVariable(
-          name, value, EnvironmentVariableTarget.User
-        );
-        break;
-      case OSType.MacOS:
-      case OSType.Linux: {
-          FileClient.AddLinesToFileIfNotPresent(
-            UserShellRcFilePath, $"export {name}=\"{value}\""
-          );
-          break;
-        }
-      case OSType.Unknown:
-      default:
-        break;
-    }
-  }
-
-  public async Task AppendToUserEnv(string name, string value) {
-    var shell = Computer.CreateShell(FileClient.AppDataDirectory);
-
-    switch (SystemInfo.OS) {
-      case OSType.Windows:
-        var currentValue = await GetUserEnv(name);
-
-        // On Windows Path, each segment is separated by ';'. We use this to split the string into tokens.
-        var tokens = currentValue.Split(';').ToList();
-        // Filter tokens keeping the ones that are different from the 'value' that we are trying to add.
-        tokens = tokens.Where(t => !t.Contains(value, StringComparison.OrdinalIgnoreCase)).ToList();
-
-        // Lambda function that receive a List<string> of tokens.
-        // For each string of length > 0, concatenate each one with ';' between then.
-        string concatenateWindowsPaths(List<string> tokens) => tokens.FindAll(t => t.Length > 0).Aggregate((a, b) => a + ';' + b);
-
-        // Insert at the beginning.
-        tokens.Insert(0, value);
-        SetUserEnv(name, concatenateWindowsPaths(tokens));
-        break;
-      // In case the path assigned to existing variable changes, the previous one will remain in the file but with lower priority.
-      case OSType.MacOS:
-      case OSType.Linux:
-        FileClient.AddLinesToFileIfNotPresent(
-          UserShellRcFilePath, $"export {name}=\"{value}:${name}\""
-        );
-        break;
-      case OSType.Unknown:
-      default:
-        break;
-    }
   }
 
   public async Task<string> GetUserEnv(string name) {
@@ -150,15 +51,19 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
 
     switch (SystemInfo.OS) {
       case OSType.Windows:
-        return Task.FromResult(EnvironmentClient.GetEnvironmentVariable(
+        return Task.FromResult(GetEnvironmentVariableOnWindows(
           name, EnvironmentVariableTarget.User
         ) ?? "").Result;
-      // It's important to use the user's default shell to get the env-var value here.
-      // Note the use of the '-i' flag to initialize an interactive shell. Properly loading '<shell>'rc file.
       case OSType.MacOS:
       case OSType.Linux: {
+          var envFilePath = FileClient.Combine(FileClient.AppDataDirectory, "env");
+          if (!FileClient.FileExists(envFilePath)) {
+            return "";
+          }
+          // NOTE: 'sh' shell for maximum portability. 'envFilePath' is sourced
+          // to apply the GodotEnv's shell patch.
           var processResult = await shell.Run(
-            $"{UserShell}", ["-ic", $"echo ${name}"]
+            "sh", ["-c", $". \"{envFilePath}\"; echo ${name}"]
           );
           return processResult.StandardOutput;
         }
@@ -168,35 +73,105 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
     }
   }
 
-  public async Task<string> GetUserDefaultShell() {
-    var shell = Computer.CreateShell(FileClient.AppDataDirectory);
+  private void SetUserEnvOnWindows(string name, string value) {
+    SetEnvironmentVariableOnWindows(
+      name, value, EnvironmentVariableTarget.User
+    );
+  }
 
+  // Using the .NET API seems to work only on Windows.
+  private string? GetEnvironmentVariableOnWindows(string name, EnvironmentVariableTarget target) =>
+    GetEnvironmentVariableOnWindowsProxy(name, target);
+  // Shim for testing.
+  public Func<string, EnvironmentVariableTarget, string?> GetEnvironmentVariableOnWindowsProxy { get; set; } = Environment.GetEnvironmentVariable;
+
+  // Using the .NET API seems to work only on Windows.
+  private void SetEnvironmentVariableOnWindows(string name, string value, EnvironmentVariableTarget target) =>
+    SetEnvironmentVariableOnWindowsProxy(name, value, target);
+  public Action<string, string, EnvironmentVariableTarget> SetEnvironmentVariableOnWindowsProxy { get; set; } = Environment.SetEnvironmentVariable;
+
+  public async Task UpdateGodotEnvEnvironment(string godotSymlinkPath, string godotBinPath) {
     switch (SystemInfo.OS) {
-      case OSType.MacOS: {
-          var processResult = await shell.Run(
-            "sh", ["-c", USER_SHELL_COMMAND_MAC]
-          );
-          var shellName = processResult.StandardOutput.TrimEnd(Environment.NewLine.ToCharArray());
-          return shellName.Split('/').Last();
-        }
-      case OSType.Linux: {
-          var processResult = await shell.Run(
-            "sh", ["-c", USER_SHELL_COMMAND_LINUX]
-          );
-          var shellName = processResult.StandardOutput.TrimEnd(Environment.NewLine.ToCharArray());
-          return shellName.Split('/').Last();
-        }
       case OSType.Windows:
+        SetUserEnvOnWindows(Defaults.GODOT_ENV_VAR_NAME, godotSymlinkPath);
+        await AppendToUserEnvOnWindows(Defaults.PATH_ENV_VAR_NAME, godotBinPath);
+        break;
+      case OSType.MacOS:
+      case OSType.Linux:
+        UpdateEnvFileOnUnix(godotSymlinkPath, godotBinPath);
+        break;
       case OSType.Unknown:
       default:
-        return string.Empty;
+        break;
     }
   }
 
-  public bool IsShellSupported(string shellName) => SystemInfo.OS switch {
-    OSType.MacOS or OSType.Linux => SUPPORTED_UNIX_SHELLS.Contains(shellName.ToLowerInvariant()),
-    OSType.Windows => true,
-    OSType.Unknown => false,
-    _ => false,
-  };
+  private void UpdateEnvFileOnUnix(string godotSymlinkPath, string godotBinPath) {
+    // Replace home full path by '$HOME' to make it more portable.
+    var godotBinPathDynamic = godotBinPath.Replace(FileClient.UserDirectory, "$HOME");
+    var godotSymlinkPathDynamic = godotSymlinkPath.Replace(FileClient.UserDirectory, "$HOME");
+
+    // Create file '~/.config/godotenv/env' (AppDataDirectory/env)
+    var envFilePath = FileClient.Combine(FileClient.AppDataDirectory, "env");
+    // Console.WriteLine($"{nameof(EnvironmentVariableClient)} envFilePath: {envFilePath}");
+    if (FileClient.FileExists(envFilePath)) {
+      FileClient.DeleteFile(envFilePath);
+    }
+
+    FileClient.CreateFile(envFilePath,
+      $$"""
+        #!/bin/sh
+        # godotenv shell setup (Updates PATH, and defines {{Defaults.GODOT_ENV_VAR_NAME}} environment variable)
+
+        # affix colons on either side of $PATH to simplify matching
+        case ":${PATH}:" in
+            *:"{{godotBinPathDynamic}}":*)
+                ;;
+            *)
+                # Prepending path making it the highest in priority.
+                export PATH="{{godotBinPathDynamic}}:$PATH"
+                ;;
+        esac
+
+        if [ -z "${{{Defaults.GODOT_ENV_VAR_NAME}}:-}" ]; then  # If variable not defined or empty.
+            export {{Defaults.GODOT_ENV_VAR_NAME}}="{{godotSymlinkPathDynamic}}"
+        fi
+
+        """);
+    // Console.WriteLine($"{nameof(EnvironmentVariableClient)} envFile content:\n{File.ReadAllText(envFilePath)}");
+
+    // Update shell initialization files to source the godotenv's env file.
+    var envFilePathDynamic = envFilePath.Replace(FileClient.UserDirectory, "$HOME");
+    var cmd = $". \"{envFilePathDynamic}\" # Added by GodotEnv\n";
+
+    // We expect the shell initialization files to exist, so, this being the case, we just patch them.
+    var shellFilesToUpdate = new[] {
+      $"{FileClient.UserDirectory}/.profile", $"{FileClient.UserDirectory}/.bashrc",
+      $"{FileClient.UserDirectory}/.zshenv",
+    };
+    foreach (var filePath in shellFilesToUpdate) {
+      // Console.WriteLine($"shellFile: {filePath}");
+      if (!FileClient.FileExists(filePath)) { continue; }
+
+      // Console.WriteLine($"Updating shell file '{filePath}'...");
+      FileClient.AddLinesToFileIfNotPresent(filePath, cmd);
+    }
+  }
+
+  private async Task AppendToUserEnvOnWindows(string name, string value) {
+    var currentValue = await GetUserEnv(name);
+    // On Windows Path, each segment is separated by ';'. We use this to split the string into tokens.
+    var tokens = currentValue.Split(';').ToList();
+    // Filter tokens keeping the ones that are different from the 'value' that we are trying to add.
+    tokens = tokens.Where(t => !t.Contains(value, StringComparison.OrdinalIgnoreCase)).ToList();
+
+    // Lambda function that receive a List<string> of tokens.
+    // For each string of length > 0, concatenate each one with ';' between then.
+    string concatenateWindowsPaths(List<string> tokens) =>
+      tokens.FindAll(t => t.Length > 0).Aggregate((a, b) => a + ';' + b);
+
+    // Insert at the beginning.
+    tokens.Insert(0, value);
+    SetUserEnvOnWindows(name, concatenateWindowsPaths(tokens));
+  }
 }

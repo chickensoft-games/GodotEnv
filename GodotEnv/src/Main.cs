@@ -33,8 +33,6 @@ public static class GodotEnv {
 
     var fileClient = new FileClient(systemInfo, new FileSystem(), computer, processRunner);
 
-    var environmentClient = new EnvironmentClient();
-
     var configFileRepo = new ConfigFileRepository(fileClient);
 
     var config = configFileRepo.LoadConfigFile(out var _);
@@ -55,8 +53,7 @@ public static class GodotEnv {
         systemInfo,
         processRunner,
         fileClient,
-        computer,
-        environmentClient
+        computer
       );
 
     // Addons feature dependencies
