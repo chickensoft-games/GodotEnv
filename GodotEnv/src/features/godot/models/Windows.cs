@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
+using global::GodotEnv.Common.Utilities;
 
 public class Windows : GodotEnvironment {
-  public Windows(IFileClient fileClient, IComputer computer)
-    : base(fileClient, computer) { }
+  public Windows(ISystemInfo systemInfo, IFileClient fileClient, IComputer computer)
+    : base(systemInfo, fileClient, computer) { }
 
   private static readonly (int major, int minor) _firstKnownArmVersion = (4, 3);
 
@@ -17,7 +18,7 @@ public class Windows : GodotEnvironment {
                             && int.TryParse(version.Minor, out var minor)
                             && (major < _firstKnownArmVersion.major || minor < _firstKnownArmVersion.minor);
 
-    if (noKnownArmVersion || FileClient.Processor != ProcessorType.arm64) {
+    if (noKnownArmVersion || SystemInfo.CPUArch != CPUArch.Arm64) {
       return "win64";
     }
 

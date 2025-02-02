@@ -4,6 +4,7 @@ using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 using Common.Clients;
 using Common.Utilities;
+using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -16,7 +17,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedMacDownloadUrl() {
-    var platform = new MacOS(_fileClient.Object, _computer.Object);
+    var systemInfo = new MockSystemInfo(OSType.MacOS, CPUArch.Arm64);
+    var platform = new MacOS(systemInfo, _fileClient.Object, _computer.Object);
 
     var downloadUrl = platform.GetDownloadUrl(_version4, false, false);
     downloadUrl.ShouldBe(GetExpectedDownloadUrl(_version4, "stable_macos.universal"));
@@ -27,7 +29,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedMacMonoDownloadUrl() {
-    var platform = new MacOS(_fileClient.Object, _computer.Object);
+    var systemInfo = new MockSystemInfo(OSType.MacOS, CPUArch.Arm64);
+    var platform = new MacOS(systemInfo, _fileClient.Object, _computer.Object);
 
     var downloadUrl = platform.GetDownloadUrl(_version4, true, false);
     downloadUrl.ShouldBe(GetExpectedDownloadUrl(_version4, "stable_mono_macos.universal"));
@@ -38,9 +41,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedWindowsDownloadUrl() {
-    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.other);
-
-    var platform = new Windows(_fileClient.Object, _computer.Object);
+    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
+    var platform = new Windows(systemInfo, _fileClient.Object, _computer.Object);
 
     var downloadUrl = platform.GetDownloadUrl(_version4, false, false);
     downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_win64.exe.zip");
@@ -51,9 +53,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedWindowsMonoDownloadUrl() {
-    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.other);
-
-    var platform = new Windows(_fileClient.Object, _computer.Object);
+    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
+    var platform = new Windows(systemInfo, _fileClient.Object, _computer.Object);
 
     var downloadUrl = platform.GetDownloadUrl(_version4, true, false);
     downloadUrl.ShouldBe(GetExpectedDownloadUrl(_version4, "stable_mono_win64"));
@@ -64,9 +65,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedWindowsArmDownloadUrlForOlderVersions() {
-    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
-
-    var platform = new Windows(_fileClient.Object, _computer.Object);
+    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.Arm64);
+    var platform = new Windows(systemInfo, _fileClient.Object, _computer.Object);
 
     var downloadUrl = platform.GetDownloadUrl(_version4, false, false);
     downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_win64.exe.zip");
@@ -77,9 +77,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedWindowsArmMonoDownloadUrlForOlderVersions() {
-    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
-
-    var platform = new Windows(_fileClient.Object, _computer.Object);
+    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.Arm64);
+    var platform = new Windows(systemInfo, _fileClient.Object, _computer.Object);
 
     var downloadUrl = platform.GetDownloadUrl(_version4, true, false);
     downloadUrl.ShouldBe(GetExpectedDownloadUrl(_version4, "stable_mono_win64"));
@@ -90,9 +89,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetExpectedWindowsArmDownloadUrlForNewerVersions() {
-    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
-
-    var platform = new Windows(_fileClient.Object, _computer.Object);
+    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.Arm64);
+    var platform = new Windows(systemInfo, _fileClient.Object, _computer.Object);
     var firstKnownWinArmVersion = new SemanticVersion("4", "3", "0");
 
     var downloadUrl = platform.GetDownloadUrl(firstKnownWinArmVersion, false, false);
@@ -101,9 +99,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetExpectedWindowsArmMonoDownloadUrlForNewerVersions() {
-    _fileClient.Setup(f => f.Processor).Returns(ProcessorType.arm64);
-
-    var platform = new Windows(_fileClient.Object, _computer.Object);
+    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.Arm64);
+    var platform = new Windows(systemInfo, _fileClient.Object, _computer.Object);
     var firstKnownWinArmVersion = new SemanticVersion("4", "3", "0");
 
     var downloadUrl = platform.GetDownloadUrl(firstKnownWinArmVersion, true, false);
@@ -112,7 +109,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedLinuxDownloadUrl() {
-    var platform = new Linux(_fileClient.Object, _computer.Object);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var platform = new Linux(systemInfo, _fileClient.Object, _computer.Object);
 
     var downloadUrl = platform.GetDownloadUrl(_version4, false, false);
     downloadUrl.ShouldBe(GetExpectedDownloadUrl(_version4, "stable_linux.x86_64"));
@@ -123,7 +121,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedLinuxMonoDownloadUrl() {
-    var platform = new Linux(_fileClient.Object, _computer.Object);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var platform = new Linux(systemInfo, _fileClient.Object, _computer.Object);
 
     var downloadUrl = platform.GetDownloadUrl(_version4, true, false);
     downloadUrl.ShouldBe(GetExpectedDownloadUrl(_version4, "stable_mono_linux_x86_64"));
@@ -134,7 +133,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedTemplatesDownloadUrl() {
-    var platform = new MacOS(_fileClient.Object, _computer.Object);
+    var systemInfo = new MockSystemInfo(OSType.MacOS, CPUArch.Arm64);
+    var platform = new MacOS(systemInfo, _fileClient.Object, _computer.Object);
     var downloadUrl = platform.GetDownloadUrl(_version4, false, true);
 
     downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_export_templates.tpz");
@@ -142,7 +142,8 @@ public class GodotEnvironmentTest {
 
   [Fact]
   public void GetsExpectedTemplatesMonoDownloadUrl() {
-    var platform = new MacOS(_fileClient.Object, _computer.Object);
+    var systemInfo = new MockSystemInfo(OSType.MacOS, CPUArch.Arm64);
+    var platform = new MacOS(systemInfo, _fileClient.Object, _computer.Object);
     var downloadUrl = platform.GetDownloadUrl(_version4, true, true);
 
     downloadUrl.ShouldBe($"{GodotEnvironment.GODOT_URL_PREFIX}4.1.2-stable/Godot_v4.1.2-stable_mono_export_templates.tpz");

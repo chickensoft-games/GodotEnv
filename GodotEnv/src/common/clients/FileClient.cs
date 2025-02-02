@@ -5,15 +5,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
+using global::GodotEnv.Common.Utilities;
 using Newtonsoft.Json;
 
 /// <summary>File client interface.</summary>
 public interface IFileClient {
+  public ISystemInfo SystemInfo { get; }
+
   /// <summary>Underlying file system interface used by the client.</summary>
   IFileSystem Files { get; }
 
@@ -24,15 +26,6 @@ public interface IFileClient {
   /// Process runner. Used on Windows to perform elevated file operations.
   /// </summary>
   IProcessRunner ProcessRunner { get; }
-
-  /// <summary>The operating system family.</summary>
-  OSFamily OSFamily { get; }
-
-  /// <summary>The operating system type.</summary>
-  OSType OS { get; }
-
-  /// <summary>The process architecture type.</summary>
-  ProcessorType Processor { get; }
 
   /// <summary>Path directory separator.</summary>
   char Separator { get; }
@@ -307,27 +300,14 @@ public interface IFileClient {
 
 /// <summary>File system operations client.</summary>
 public class FileClient : IFileClient {
+  public ISystemInfo SystemInfo { get; }
   public IFileSystem Files { get; }
   public IComputer Computer { get; }
   public IProcessRunner ProcessRunner { get; }
-  public OSFamily OSFamily { get; }
-  public OSType OS { get; }
-  public ProcessorType Processor { get; }
+  // public OSFamily OSFamily { get; }
+  // public OSType OS { get; }
+  // public ProcessorType Processor { get; }
   public char Separator { get; }
-
-  // Shims for testing.
-
-  public static Func<OSPlatform, bool> IsOSPlatformDefault { get; } =
-    RuntimeInformation.IsOSPlatform;
-
-  public static Func<OSPlatform, bool> IsOSPlatform { get; set; } =
-    IsOSPlatformDefault;
-
-  public static Architecture ProcessorArchitectureDefault { get; } =
-    RuntimeInformation.ProcessArchitecture;
-
-  public static Architecture ProcessorArchitecture { get; set; } =
-    ProcessorArchitectureDefault;
 
   public string UserDirectory => Path.TrimEndingDirectorySeparator(
     Environment.GetFolderPath(
@@ -346,26 +326,12 @@ public class FileClient : IFileClient {
     Defaults.BIN_NAME
   );
 
-  public FileClient(
-    IFileSystem fs, IComputer computer, IProcessRunner processRunner
-  ) {
+  public FileClient(ISystemInfo systemInfo, IFileSystem fs, IComputer computer, IProcessRunner processRunner) {
+    SystemInfo = systemInfo;
     Files = fs;
     Computer = computer;
     ProcessRunner = processRunner;
     Separator = Files.Path.DirectorySeparatorChar;
-    OSFamily = Separator == '\\'
-      ? OSFamily.Windows
-      : OSFamily.Unix;
-    OS = IsOSPlatform(OSPlatform.OSX)
-      ? OSType.MacOS
-      : IsOSPlatform(OSPlatform.Linux)
-        ? OSType.Linux
-        : IsOSPlatform(OSPlatform.Windows)
-          ? OSType.Windows
-          : OSType.Unknown;
-    Processor = ProcessorArchitecture == Architecture.Arm64
-      ? ProcessorType.arm64
-      : ProcessorType.other;
   }
 
   public string Sanitize(string path) =>
@@ -419,10 +385,12 @@ public class FileClient : IFileClient {
     }
 
     // On Windows, elevated privileges are required to manage symlinks
-    if (OS == OSType.Windows) {
-      var dirFlag = isDirectory ? "/d " : "";
+    if (SystemInfo.OS == OSType.Windows) {
+      // If it's not a dir, creates a hardlink to the file.
+      var dirFlag = isDirectory ? "/D" : "/H";
+      // var dirFlag = isDirectory ? "/D " : "";
       await ProcessRunner.RunElevatedOnWindows(
-        "cmd.exe", $"/c mklink {dirFlag}\"{path}\" \"{pathToTarget}\""
+        "cmd.exe", $"/c mklink {dirFlag} \"{path}\" \"{pathToTarget}\""
       );
       return;
     }
@@ -459,7 +427,7 @@ public class FileClient : IFileClient {
     if (!DirectoryExists(path)) { return; }
 
     if (IsDirectorySymlink(path)) {
-      if (OS == OSType.Windows) {
+      if (SystemInfo.OS == OSType.Windows) {
         await ProcessRunner.RunElevatedOnWindows(
           "cmd.exe", $"/c rmdir \"{path}\""
         );
@@ -469,7 +437,7 @@ public class FileClient : IFileClient {
       return;
     }
 
-    if (OS == OSType.Windows) {
+    if (SystemInfo.OS == OSType.Windows) {
       var parentDirectory = GetParentDirectoryPath(path);
       var directoryInfo = Files.DirectoryInfo.New(path);
 
@@ -492,7 +460,7 @@ public class FileClient : IFileClient {
   }
 
   public async Task DeleteFile(string path) {
-    if (IsFileSymlink(path) && OS == OSType.Windows) {
+    if (IsFileSymlink(path) && SystemInfo.OS == OSType.Windows) {
       await ProcessRunner.RunElevatedOnWindows("cmd.exe", $"/c del \"{path}\"");
       return;
     }
@@ -500,7 +468,7 @@ public class FileClient : IFileClient {
   }
 
   public async Task CopyBulk(IShell shell, string source, string destination) {
-    if (OSFamily == OSFamily.Windows) {
+    if (SystemInfo.OSFamily == OSFamily.Windows) {
       var result = await shell.RunUnchecked(
         "robocopy", source, destination, "/e", "/xd", ".git"
       );

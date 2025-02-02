@@ -4,10 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
+using Chickensoft.GodotEnv.Common.Models;
 using CliFx.Infrastructure;
+using global::GodotEnv.Common.Utilities;
 
 /// <summary>CLI log interface.</summary>
 public interface ILog {
+  ISystemInfo SystemInfo { get; }
   /// <summary>CLI command console.</summary>
   IConsole Console { get; }
   /// <summary>Print an error message to the console.</summary>
@@ -43,7 +47,7 @@ public interface ILog {
   /// <summary>
   /// Clears the last written line of the console.
   /// </summary>
-  void ClearLastLine();
+  void ClearCurrentLine();
 }
 
 /// <summary>
@@ -67,10 +71,12 @@ public record ReportableEvent : IReportableEvent {
   public void Report(ILog log) => Action(log);
 }
 
-public class Log : ILog {
+public partial class Log : ILog {
   private record Style(
     ConsoleColor Foreground, ConsoleColor Background
   );
+
+  public ISystemInfo SystemInfo { get; }
 
   public IConsole Console { get; }
 
@@ -87,7 +93,8 @@ public class Log : ILog {
   public bool IsInRedirectedEnv =>
     Console.IsOutputRedirected || Console.IsErrorRedirected;
 
-  public Log(IConsole console) {
+  public Log(ISystemInfo systemInfo, IConsole console) {
+    SystemInfo = systemInfo;
     Console = console;
 
     if (!IsInRedirectedEnv) {
@@ -125,13 +132,13 @@ public class Log : ILog {
     message, Styles.Error, true, false
   );
   public void Success(object? message) => Output(
-    message, Styles.Success, false
+    message, Styles.Success, false, false
   );
   public void SuccessInPlace(object? message) => Output(
-    message, Styles.Success, true
+    message, Styles.Success, true, false
   );
 
-  public void ClearLastLine() {
+  public void ClearCurrentLine() {
     if (IsInRedirectedEnv) { return; }
     lock (Console) {
       Console.CursorLeft = 0;
@@ -154,10 +161,15 @@ public class Log : ILog {
       // Set the new foreground and background colors.
       consoleStyle(Console);
 
-      if (
-        (message is string str && str != "") ||
-        message is not string and not null
-      ) {
+      if (message is string str && str != "") {
+        if (SystemInfo.OS == OSType.Windows) {
+          // Remove emoji from message.
+          str = RemoveNonANSICharacters(str);
+          message = str;
+        }
+        UpdateStyle();
+      }
+      else if (message is not string and not null) {
         UpdateStyle();
       }
 
@@ -186,8 +198,22 @@ public class Log : ILog {
         Console.CursorLeft = left;
         Console.CursorTop = top;
       }
+      OutputConsole.Flush();
     }
   }
+
+  /// <summary>
+  /// Removes non-ASCII chars from string. If matches, tries to remove 1 whitespace at the end.
+  /// </summary>
+  /// <remarks>
+  /// About Windows cmd encoding see: https://stackoverflow.com/a/75788701/8903027
+  /// </remarks>
+  /// <param name="str"></param>
+  /// <returns>Processed string.</returns>
+  private static string RemoveNonANSICharacters(string str) => ANSIOnlyRegex().Replace(str, "");
+
+  [GeneratedRegex(@"[^\x00-\x7F][ ]?")]
+  private static partial Regex ANSIOnlyRegex();
 
   public void UpdateStyle() {
     var style = new Style(Console.ForegroundColor, Console.BackgroundColor);
@@ -231,7 +257,7 @@ public class Log : ILog {
     internal static Action<IConsole> Info
       => static (console) => {
         console.ResetColor();
-        console.ForegroundColor = ConsoleColor.DarkBlue;
+        console.ForegroundColor = ConsoleColor.Cyan;
       };
     internal static Action<IConsole> Error
       => static (console) => {

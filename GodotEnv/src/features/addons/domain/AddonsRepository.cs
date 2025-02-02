@@ -8,8 +8,10 @@ using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Addons.Models;
+using global::GodotEnv.Common.Utilities;
 
 public interface IAddonsRepository {
+  ISystemInfo SystemInfo { get; }
   IFileClient FileClient { get; }
   INetworkClient NetworkClient { get; }
   IZipClient ZipClient { get; }
@@ -93,6 +95,7 @@ public interface IAddonsRepository {
 }
 
 public class AddonsRepository(
+  ISystemInfo systemInfo,
   IFileClient fileClient,
   INetworkClient networkClient,
   IZipClient zipClient,
@@ -100,6 +103,8 @@ public class AddonsRepository(
   AddonsConfiguration config,
   IProcessRunner processRunner
 ) : IAddonsRepository {
+
+  public ISystemInfo SystemInfo { get; } = systemInfo;
   public IFileClient FileClient { get; } = fileClient;
   public INetworkClient NetworkClient { get; } = networkClient;
   public IZipClient ZipClient { get; } = zipClient;
@@ -240,7 +245,7 @@ public class AddonsRepository(
     );
     if (status.StandardOutput.Length == 0) {
       // Installed addon is unmodified by the user, free to delete.
-      if (FileClient.OSFamily == OSFamily.Windows) {
+      if (SystemInfo.OSFamily == OSFamily.Windows) {
         // On windows, delete files using command prompt (since C# fails
         // to delete .git folders using .net file api's)
         // TODO: Use FileClient.DeleteDirectory() on windows

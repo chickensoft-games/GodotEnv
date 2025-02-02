@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
+using global::GodotEnv.Common.Utilities;
 
 public interface IGodotEnvironment {
+  ISystemInfo SystemInfo { get; }
   /// <summary>
   /// File client used by the platform to manipulate file paths.
   /// </summary>
@@ -128,26 +130,27 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   /// <summary>
   /// Creates a platform for the given OS.
   /// </summary>
-  /// <param name="os">OS Type.</param>
   /// <param name="fileClient">File client.</param>
   /// <param name="computer">Computer.</param>
   /// <returns>Platform instance.</returns>
   /// <exception cref="InvalidOperationException" />
-  public static GodotEnvironment Create(
-    OSType os, IFileClient fileClient, IComputer computer
+  public static GodotEnvironment Create(ISystemInfo systemInfo, IFileClient fileClient, IComputer computer
   ) =>
-    os switch {
-      OSType.Windows => new Windows(fileClient, computer),
-      OSType.MacOS => new MacOS(fileClient, computer),
-      OSType.Linux => new Linux(fileClient, computer),
+    systemInfo.OS switch {
+      OSType.Windows => new Windows(systemInfo, fileClient, computer),
+      OSType.MacOS => new MacOS(systemInfo, fileClient, computer),
+      OSType.Linux => new Linux(systemInfo, fileClient, computer),
       OSType.Unknown => throw GetUnknownOSException(),
       _ => throw GetUnknownOSException()
     };
 
-  protected GodotEnvironment(IFileClient fileClient, IComputer computer) {
+  protected GodotEnvironment(ISystemInfo systemInfo, IFileClient fileClient, IComputer computer) {
+    SystemInfo = systemInfo;
     FileClient = fileClient;
     Computer = computer;
   }
+
+  public ISystemInfo SystemInfo { get; }
 
   public IFileClient FileClient { get; }
   public IComputer Computer { get; }
@@ -321,4 +324,5 @@ public abstract class GodotEnvironment : IGodotEnvironment {
 
   private static InvalidOperationException GetUnknownOSException() =>
     new("🚨 Cannot create a platform an unknown operating system.");
+
 }

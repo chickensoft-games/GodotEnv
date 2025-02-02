@@ -4,7 +4,9 @@
 namespace Chickensoft.GodotEnv.Tests;
 
 using System;
+using Common.Models;
 using Common.Utilities;
+using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -17,7 +19,8 @@ public sealed class LogTest : IDisposable {
 
   [Fact]
   public void Prints() {
-    Log log = new(_console);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    Log log = new(systemInfo, _console);
 
     log.Print("Hello, world!");
 
@@ -26,7 +29,8 @@ public sealed class LogTest : IDisposable {
 
   [Fact]
   public void PrintsInfo() {
-    Log log = new(_console);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    Log log = new(systemInfo, _console);
 
     log.Info("Hello, world!");
 
@@ -35,7 +39,8 @@ public sealed class LogTest : IDisposable {
 
   [Fact]
   public void PrintsWarning() {
-    Log log = new(_console);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    Log log = new(systemInfo, _console);
 
     log.Warn("Hello, world!");
 
@@ -44,7 +49,8 @@ public sealed class LogTest : IDisposable {
 
   [Fact]
   public void PrintsErr() {
-    Log log = new(_console);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    Log log = new(systemInfo, _console);
 
     log.Err("Hello, world!");
 
@@ -53,11 +59,12 @@ public sealed class LogTest : IDisposable {
 
   [Fact]
   public void PrintsSuccess() {
-    Log log = new(_console);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    Log log = new(systemInfo, _console);
 
     log.Success("Hello, world!");
 
-    _console.ReadOutputString().ShouldBe("Hello, world!\n\n");
+    _console.ReadOutputString().ShouldBe("Hello, world!\n");
   }
 
   [Fact]
@@ -67,8 +74,42 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
+  public void OutputStringWithEmojisOnUnix() {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    Log log = new(systemInfo, _console);
+
+    log.Print("✅ Installed successfully.");
+
+    var debugLog = log.ToString();
+
+    debugLog.ShouldBe(
+      """
+      ✅ Installed successfully.
+
+      """, StringCompareShould.IgnoreLineEndings);
+  }
+
+  [Fact]
+  public void OutputStringWithEmojisOnWindows() {
+    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
+    Log log = new(systemInfo, _console);
+
+    log.Print("✅ Installed successfully.");
+
+    var debugLog = log.ToString();
+
+    // NOTE: Should remove emoji from string.
+    debugLog.ShouldBe(
+      """
+      Installed successfully.
+
+      """, StringCompareShould.IgnoreLineEndings);
+  }
+
+  [Fact]
   public void OutputsCorrectStyleChanges() {
-    Log log = new(_console);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    Log log = new(systemInfo, _console);
 
     log.Print("A");
     log.Print("");
@@ -84,7 +125,7 @@ public sealed class LogTest : IDisposable {
     log.Err("E");
     log.Success("F");
 
-    _console.ReadOutputString().ShouldBe("A\n\nB\n\nC\nD\n\nE\nF\n\n");
+    _console.ReadOutputString().ShouldBe("A\n\nB\n\nC\nD\n\nE\nF\n");
 
     var debugLog = log.ToString();
 
@@ -92,21 +133,21 @@ public sealed class LogTest : IDisposable {
       """
         A
 
-        [style fg="darkblue"]B
+        [style fg="cyan"]B
 
         [/style][style fg="yellow"]C
         [/style][style bg="green"]D
 
         [/style][style fg="red"]E
         [/style][style fg="green"]F
-
         [/style]
         """, StringCompareShould.IgnoreLineEndings);
   }
 
   [Fact]
   public void OutputsNull() {
-    Log log = new(_console);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    Log log = new(systemInfo, _console);
 
     log.Print(null);
     log.Info(null);
@@ -120,7 +161,8 @@ public sealed class LogTest : IDisposable {
 
   [Fact]
   public void OutputsObject() {
-    Log log = new(_console);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    Log log = new(systemInfo, _console);
 
     log.Print(new { Hello = "world" });
 

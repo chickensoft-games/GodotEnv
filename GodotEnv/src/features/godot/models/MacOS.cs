@@ -2,10 +2,11 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Utilities;
+using global::GodotEnv.Common.Utilities;
 
 public class MacOS : Unix {
-  public MacOS(IFileClient fileClient, IComputer computer)
-    : base(fileClient, computer) { }
+  public MacOS(ISystemInfo systemInfo, IFileClient fileClient, IComputer computer)
+    : base(systemInfo, fileClient, computer) { }
 
   public override string ExportTemplatesBasePath =>
     FileClient.GetFullPath(

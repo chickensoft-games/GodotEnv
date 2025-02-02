@@ -9,6 +9,7 @@ using Chickensoft.GodotEnv.Features.Godot.Domain;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx.Infrastructure;
 using Downloader;
+using global::GodotEnv.Common.Utilities;
 using Moq;
 using Xunit;
 
@@ -18,16 +19,10 @@ public class GodotRepositoryTest {
     var workingDir = ".";
     var godotVar = "GODOT";
 
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
     var computer = new Mock<IComputer>();
     var processRunner = new Mock<IProcessRunner>();
     var fileClient = new Mock<IFileClient>();
-    fileClient.Setup(fc => fc.OS).Returns(FileClient.IsOSPlatform(OSPlatform.OSX)
-      ? OSType.MacOS
-      : FileClient.IsOSPlatform(OSPlatform.Linux)
-        ? OSType.Linux
-        : FileClient.IsOSPlatform(OSPlatform.Windows)
-          ? OSType.Windows
-          : OSType.Unknown);
 
     fileClient.Setup(fc => fc.AppDataDirectory).Returns(workingDir);
 
@@ -46,10 +41,11 @@ public class GodotRepositoryTest {
     environmentVariableClient.Setup(evc => evc.AppendToUserEnv(It.IsAny<string>(), It.IsAny<string>()))
       .Returns(Task.CompletedTask);
 
-    var platform = new Mock<GodotEnvironment>(fileClient.Object, computer.Object);
+    var platform = new Mock<GodotEnvironment>(systemInfo, fileClient.Object, computer.Object);
     var checksumClient = new Mock<IGodotChecksumClient>();
 
     var godotRepo = new GodotRepository(
+      systemInfo: systemInfo,
       config: new ConfigFile { GodotInstallationsPath = "INSTALLATION_PATH" },
       fileClient: fileClient.Object,
       networkClient: networkClient.Object,

@@ -3,6 +3,7 @@ namespace Chickensoft.GodotEnv.Tests;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using CliFx.Infrastructure;
+using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -16,6 +17,7 @@ public class ExecutionContextTest {
   [Fact]
   public void Initializes() {
     var config = new ConfigFile();
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
     var addons = new Mock<IAddonsContext>().Object;
     var godot = new Mock<IGodotContext>().Object;
 
@@ -24,6 +26,7 @@ public class ExecutionContextTest {
       CommandArgs: _commandArgs,
       Version: VERSION,
       WorkingDir: WORKING_DIR,
+      SystemInfo: systemInfo,
       Config: config,
       Addons: addons,
       Godot: godot
@@ -33,11 +36,13 @@ public class ExecutionContextTest {
     executionContext.CommandArgs.ShouldBe(_commandArgs);
     executionContext.Version.ShouldBe(VERSION);
     executionContext.WorkingDir.ShouldBe(WORKING_DIR);
+    executionContext.SystemInfo.ShouldBe(systemInfo);
     executionContext.Config.ShouldBe(config);
     executionContext.Addons.ShouldBe(addons);
     executionContext.Godot.ShouldBe(godot);
 
     executionContext
-      .CreateLog(new FakeInMemoryConsole()).ShouldBeAssignableTo<ILog>();
+      .CreateLog(new FakeInMemoryConsole())
+      .ShouldBeAssignableTo<ILog>();
   }
 }

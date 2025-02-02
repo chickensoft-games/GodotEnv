@@ -30,7 +30,7 @@ public class GodotCacheClearCommand :
     log.Print("");
     log.Info("Clearing Godot installation cache...");
     log.Print("");
-    ExecutionContext.Godot.GodotRepo.ClearCache();
+    godotRepo.ClearCache();
     log.Success("Godot installation cache cleared.");
     log.Print("");
 

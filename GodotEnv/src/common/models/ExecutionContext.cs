@@ -1,7 +1,9 @@
 namespace Chickensoft.GodotEnv.Common.Models;
 
 using Chickensoft.GodotEnv.Common.Utilities;
+using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx.Infrastructure;
+using global::GodotEnv.Common.Utilities;
 
 /// <summary>
 /// Execution context created by the app before any commands are run. Execution
@@ -23,6 +25,8 @@ public interface IExecutionContext {
 
   /// <summary>App configuration settings.</summary>
   ConfigFile Config { get; }
+  /// <summary>System information.</summary>
+  ISystemInfo SystemInfo { get; }
   /// <summary>Addons context.</summary>
   IAddonsContext Addons { get; }
   /// <summary>Godot context.</summary>
@@ -40,8 +44,9 @@ public record ExecutionContext(
   string Version,
   string WorkingDir,
   ConfigFile Config,
+  ISystemInfo SystemInfo,
   IAddonsContext Addons,
   IGodotContext Godot
 ) : IExecutionContext {
-  public ILog CreateLog(IConsole console) => new Log(console);
+  public ILog CreateLog(IConsole console) => new Log(SystemInfo, console);
 }

@@ -2,10 +2,11 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Utilities;
+using global::GodotEnv.Common.Utilities;
 
 public class Linux : Unix {
-  public Linux(IFileClient fileClient, IComputer computer)
-    : base(fileClient, computer) { }
+  public Linux(ISystemInfo systemInfo, IFileClient fileClient, IComputer computer)
+    : base(systemInfo, fileClient, computer) { }
 
   public override string ExportTemplatesBasePath => FileClient.Combine(
     FileClient.UserDirectory, ".local/share/godot"

@@ -11,6 +11,7 @@ using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
+using global::GodotEnv.Common.Utilities;
 using Newtonsoft.Json;
 
 public struct RemoteVersion {
@@ -18,6 +19,7 @@ public struct RemoteVersion {
 }
 
 public interface IGodotRepository {
+  ISystemInfo SystemInfo { get; }
   ConfigFile Config { get; }
   IFileClient FileClient { get; }
   INetworkClient NetworkClient { get; }
@@ -87,6 +89,15 @@ public interface IGodotRepository {
   Task UpdateGodotSymlink(GodotInstallation installation, ILog log);
 
   /// <summary>
+  /// Updates (or creates if non-existent) the desktop shortcut pointing to the newly created symlink.
+  ///
+  /// Promotes integration with the desktop environment.
+  /// </summary>
+  /// <param name="installation">Godot installation.</param>
+  /// <param name="log">Output log.</param>
+  Task UpdateDesktopShortcut(GodotInstallation installation, ILog log);
+
+  /// <summary>
   /// Adds (or updates) the GODOT user environment variable to point to the
   /// symlink which points to the active version of Godot. Updates the user's PATH
   /// to include the 'bin' folder containing the godot symlink.
@@ -127,6 +138,7 @@ public interface IGodotRepository {
 }
 
 public partial class GodotRepository : IGodotRepository {
+  public ISystemInfo SystemInfo { get; }
   public ConfigFile Config { get; }
   public IFileClient FileClient { get; }
   public INetworkClient NetworkClient { get; }
@@ -172,6 +184,7 @@ public partial class GodotRepository : IGodotRepository {
   public static readonly Regex DirectoryToVersionStringRegex = directoryToVersionStringRegex();
 
   public GodotRepository(
+    ISystemInfo systemInfo,
     ConfigFile config,
     IFileClient fileClient,
     INetworkClient networkClient,
@@ -181,6 +194,7 @@ public partial class GodotRepository : IGodotRepository {
     IProcessRunner processRunner,
     IGodotChecksumClient checksumClient
   ) {
+    SystemInfo = systemInfo;
     Config = config;
     FileClient = fileClient;
     NetworkClient = networkClient;
@@ -216,13 +230,13 @@ public partial class GodotRepository : IGodotRepository {
     ILog log,
     CancellationToken token
   ) {
-    log.Info("⬇ Downloading Godot...");
+    log.Info("⬇ Preparing to download Godot...");
 
     var downloadUrl = Platform.GetDownloadUrl(
       version, isDotnetVersion, isTemplate: false
     );
 
-    log.Info($"🌏 Godot download url: {downloadUrl}");
+    log.Print($"🌏 Godot download url: {downloadUrl}");
 
     var fsName = GetVersionFsName(version, isDotnetVersion);
     // Tux server packages use .zip for everything.
@@ -246,38 +260,35 @@ public partial class GodotRepository : IGodotRepository {
     );
 
     if (downloadedFileExists && didFinishAnyPreviousDownload) {
-      log.Info("📦 Existing compressed Godot installation archive found.");
-      log.Print($"  {compressedArchivePath}");
-      log.Print("");
-      log.Success("✅ Using previous download instead.");
+      log.Print($"📦 Found needed archives in cache: {compressedArchivePath}");
+      log.Success("📚 Skipping download.");
       log.Print("");
       log.Print("If you want to force a download to occur,");
-      log.Print("use the following command to clear the downloads cache.");
+      log.Print("use the following command to clear the downloads cache:");
       log.Print("");
-      log.Info("  godotenv godot cache clear");
+      log.Print("    godotenv godot cache clear");
       log.Print("");
       return archive;
     }
 
     log.Info("🧼 Cleaning up...");
     if (didFinishAnyPreviousDownload) {
-      log.Print($"🗑 Deleting {didFinishDownloadFilePath}");
+      log.Info($"🗑 Deleting {didFinishDownloadFilePath}");
       await FileClient.DeleteFile(didFinishDownloadFilePath);
     }
 
     if (downloadedFileExists) {
-      log.Print($"🗑 Deleting {compressedArchivePath}");
+      log.Info($"🗑 Deleting {compressedArchivePath}");
       await FileClient.DeleteFile(compressedArchivePath);
     }
-    log.Info("✨ All clean!");
+    log.Success("✨ All clean!");
 
     FileClient.CreateDirectory(cacheDir);
 
-    log.Info($"🗄 Cache path: {cacheDir}");
-    log.Info($"📄 Cache filename: {cacheFilename}");
-    log.Info($"💾 Compressed installer path: {compressedArchivePath}");
+    log.Print($"🗄 Cache path: {cacheDir}");
+    log.Print($"📄 Cache filename: {cacheFilename}");
+    log.Print($"💾 Compressed installer path: {compressedArchivePath}");
 
-    log.PrintInPlace("🚀 Downloading Godot: 0%");
 
     try {
       await NetworkClient.DownloadFileAsync(
@@ -285,17 +296,18 @@ public partial class GodotRepository : IGodotRepository {
         destinationDirectory: cacheDir,
         filename: cacheFilename,
         new Progress<DownloadProgress>(
-          (progress) => log.PrintInPlace(
+          (progress) => log.InfoInPlace(
             $"🚀 Downloading Godot: {progress.Percent}% at {progress.Speed}" +
             "      "
           )
         ),
         token: token
       );
-      log.Print("🚀 Downloaded Godot: 100%");
+      log.Print("");  // Force new line after download progress as the cursor remains in the previously line.
+      log.ClearCurrentLine();
     }
     catch (Exception) {
-      log.ClearLastLine();
+      log.ClearCurrentLine();
       log.Err("🛑 Aborting Godot installation.");
       throw;
     }
@@ -304,12 +316,11 @@ public partial class GodotRepository : IGodotRepository {
       await VerifyArchiveChecksum(log, archive);
     }
     else {
-      log.Print($"⚠️ Skipping checksum verification due to command-line flag!");
+      log.Info($"⚠️ Skipping checksum verification due to command-line flag!");
     }
 
     FileClient.CreateFile(didFinishDownloadFilePath, "done");
 
-    log.Print("");
     log.Success("✅ Godot successfully downloaded.");
 
     return archive;
@@ -317,22 +328,23 @@ public partial class GodotRepository : IGodotRepository {
 
   private async Task VerifyArchiveChecksum(ILog log, GodotCompressedArchive archive) {
     try {
-      log.Print("⏳ Verifying Checksum");
+      log.InfoInPlace("⏳ Verifying Checksum.");
       await ChecksumClient.VerifyArchiveChecksum(archive);
-      log.Print("✅ Checksum verified");
+      log.ClearCurrentLine();
+      log.Success("✅ Checksum verified.");
     }
     catch (ChecksumMismatchException ex) {
-      log.Print($"⚠️⚠️⚠️ Checksum of downloaded file does not match the one published by Godot!");
-      log.Print($"⚠️⚠️⚠️ {ex.Message}");
-      log.Print($"⚠️⚠️⚠️ You SHOULD NOT proceed with installation!");
-      log.Print($"⚠️⚠️⚠️ If you have a very good reason, this check can be skipped via --unsafe-skip-checksum-verification.");
+      log.Warn($"⚠️ Checksum of downloaded file does not match the one published by Godot!");
+      log.Warn($"⚠️ {ex.Message}");
+      log.Warn($"⚠️ You SHOULD NOT proceed with installation!");
+      log.Warn($"⚠️ If you have a very good reason, this check can be skipped via '--unsafe-skip-checksum-verification'.");
       log.Err("🛑 Aborting Godot installation.");
       throw;
     }
     catch (MissingChecksumException) {
-      log.Print($"⚠️ No Godot-published checksum found for the downloaded file.");
-      log.Print($"⚠️ For Godot versions below 3.2.2-beta1, this is expected as none have been published as of 2024-05-01.");
-      log.Print($"⚠️ If you still want to proceed with the installation, this check can be skipped via --unsafe-skip-checksum-verification.");
+      log.Warn($"⚠️ No Godot-published checksum found for the downloaded file.");
+      log.Warn($"⚠️ For Godot versions below 3.2.2-beta1, this is expected as none have been published as of 2024-05-01.");
+      log.Warn($"⚠️ If you still want to proceed with the installation, this check can be skipped via '--unsafe-skip-checksum-verification'.");
       log.Err("🛑 Aborting Godot installation.");
       throw;
     }
@@ -344,21 +356,19 @@ public partial class GodotRepository : IGodotRepository {
     var archivePath = FileClient.Combine(archive.Path, archive.Filename);
     var destinationDirName =
       FileClient.Combine(GodotInstallationsPath, archive.Name);
-    var lastPercent = 0d;
 
     var numFilesExtracted = await ZipClient.ExtractToDirectory(
       archivePath,
       destinationDirName,
       new Progress<double>((percent) => {
         var p = Math.Round(percent * 100);
-        log.PrintInPlace($"🗜  Extracting Godot installation files: {p}%");
-        lastPercent = p;
+        log.InfoInPlace($"🗜 Extracting Godot: {p}%" + "    ");
       })
     );
-    log.Print("🚀 Extracting Godot installation files: 100%");
-    log.Print($"🗜 Extracted {numFilesExtracted} files in {archivePath}.");
-    log.Success("🗜 Successfully extracted Godot to:");
-    log.Info($"  {destinationDirName}");
+    log.Print(""); // New line after progress.
+    log.ClearCurrentLine();
+    log.Print($"    Destination: {destinationDirName}");
+    log.Success($"✅ Extracted {numFilesExtracted} file(s).");
     log.Print("");
 
     var execPath = GetExecutionPath(
@@ -388,44 +398,48 @@ public partial class GodotRepository : IGodotRepository {
       FileClient.CreateDirectory(GodotBinPath);
     }
 
+    log.Info("📝 Updating Godot symlink.");
+    // log.Print($"    Linking Godot: {GodotSymlinkPath} -> {installation.ExecutionPath}");
     // Create or update the symlink to the new version of Godot.
-    await FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
-    await CreateShortcuts(installation);
+    switch (SystemInfo.OS) {
+      case OSType.Linux:
+      case OSType.MacOS:
+        await FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
+        break;
+      // NOTE: Windows demands the file extension to be in the name.
+      case OSType.Windows: {
+          var hardLinkPath = $"{GodotSymlinkPath}.exe";
+          await FileClient.CreateSymlink(hardLinkPath, installation.ExecutionPath);
+        }
+        break;
+      case OSType.Unknown:
+      default:
+        break;
+    }
 
     if (installation.IsDotnetVersion) {
       // Update GodotSharp symlinks
       var godotSharpPath = GetGodotSharpPath(
         installation.Path, installation.Version, installation.IsDotnetVersion
       );
-
-      log.Print("");
-      log.Print(
-        $"🔗 Linking GodotSharp {GodotSharpSymlinkPath} -> " +
-        $"{godotSharpPath}"
-      );
-
       await FileClient.CreateSymlink(
         GodotSharpSymlinkPath, godotSharpPath
       );
     }
 
     if (!FileClient.FileExists(installation.ExecutionPath)) {
-      log.Err("🛑 Execution path does not seem to be correct. Am I okay?");
-      log.Err("Please help fix me by opening an issue or pull request on Github!");
+      log.Err("🛑 Execution path does not seem to be correct. Is it good?");
+      log.Err("Please help me fix it by opening an issue or pull request on Github!");
     }
 
-    log.Print("✅ Godot symlink updated.");
-    log.Print("");
-    log.Info($"{GodotSymlinkPath} -> {installation.ExecutionPath}");
-    log.Print("");
-    log.Info("Godot symlink path:");
-    log.Print("");
-    log.Print(GodotSymlinkPath);
+    log.Print($"    🔗 Godot link: {GodotSymlinkPath} -> {installation.ExecutionPath}");
+    log.Success("✅ Godot symlink updated.");
     log.Print("");
   }
 
-  public async Task CreateShortcuts(GodotInstallation installation) {
-    switch (FileClient.OS) {
+  public async Task UpdateDesktopShortcut(GodotInstallation installation, ILog log) {
+    log.Info("📝 Updating Godot desktop shortcut.");
+    switch (SystemInfo.OS) {
       case OSType.MacOS: {
           var appFilePath = FileClient.Files.Directory.GetDirectories(installation.Path).First();
           var applicationsPath = FileClient.Combine(FileClient.UserDirectory, "Applications", "Godot.app");
@@ -476,14 +490,6 @@ public partial class GodotRepository : IGodotRepository {
           var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
           var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
 
-          if (FileClient.FileExists(hardLinkPath)) {
-            await FileClient.DeleteFile(hardLinkPath);
-          }
-
-          await FileClient.ProcessRunner.RunElevatedOnWindows(
-            "cmd.exe", $"/c mklink /H \"{hardLinkPath}\" \"{installation.ExecutionPath}\""
-          );
-
           var command = string.Join(";",
             "$ws = New-Object -ComObject (\"WScript.Shell\")",
             $"$s = $ws.CreateShortcut(\"{applicationsPath}\")",
@@ -497,6 +503,8 @@ public partial class GodotRepository : IGodotRepository {
       default:
         break;
     }
+    log.Success("✅ Godot desktop shortcut created.");
+    log.Print("");
   }
 
   public async Task AddOrUpdateGodotEnvVariable(ILog log) {
@@ -509,29 +517,27 @@ public partial class GodotRepository : IGodotRepository {
       log.Warn($"Defaulting changes to {EnvironmentVariableClient.UserShell} profile ('{EnvironmentVariableClient.UserShellRcFilePath}').");
     }
 
-    log.Print("");
     log.Info($"📝 Adding or updating the {godotVar} environment variable.");
-    log.Print("");
 
     EnvironmentVariableClient.SetUserEnv(godotVar, godotSymlinkPath);
 
-    log.Success($"Successfully updated the {godotVar} environment variable.");
+    log.Success($"✅ Successfully updated the {godotVar} environment variable.");
+    log.Print("");
 
     log.Info($"📝 Updating the {Defaults.PATH_ENV_VAR_NAME} environment variable to include godot's binary.");
-    log.Print("");
 
     await EnvironmentVariableClient.AppendToUserEnv(Defaults.PATH_ENV_VAR_NAME, GodotBinPath);
 
-    log.Success($"Successfully updated the {Defaults.PATH_ENV_VAR_NAME} environment variable to include.");
+    log.Success($"✅ Successfully updated the {Defaults.PATH_ENV_VAR_NAME} environment variable to include.");
     log.Print("");
 
-    switch (FileClient.OS) {
+    switch (SystemInfo.OS) {
       case OSType.MacOS:
       case OSType.Linux:
-        log.Warn("You may need to restart your shell or run the following ");
-        log.Warn("to get the updated environment variable value:");
+        log.Warn("You may need to restart your shell or run the following");
+        log.Warn("command to update the GODOT environment variable value:");
         log.Print("");
-        log.Info($"    source {EnvironmentVariableClient.UserShellRcFilePath}");
+        log.Print($"        source {EnvironmentVariableClient.UserShellRcFilePath}");
         log.Print("");
         break;
       case OSType.Windows:

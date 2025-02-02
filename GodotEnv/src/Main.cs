@@ -20,15 +20,18 @@ using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx;
 using CliFx.Infrastructure;
 using Downloader;
+using global::GodotEnv.Common.Utilities;
 
 public static class GodotEnv {
   public static async Task<int> Main(string[] args) {
     // App-wide dependencies
+    var systemInfo = new SystemInfo();
+
     var computer = new Computer();
 
     var processRunner = new ProcessRunner();
 
-    var fileClient = new FileClient(new FileSystem(), computer, processRunner);
+    var fileClient = new FileClient(systemInfo, new FileSystem(), computer, processRunner);
 
     var environmentClient = new EnvironmentClient();
 
@@ -43,12 +46,13 @@ public static class GodotEnv {
       downloadConfiguration: Defaults.DownloadConfiguration
     );
 
-    IZipClient zipClient = (fileClient.OS == OSType.Windows)
+    IZipClient zipClient = (systemInfo.OS == OSType.Windows)
       ? new ZipClient(fileClient.Files)
       : new ZipClientTerminal(computer, fileClient.Files);
 
     var environmentVariableClient =
       new EnvironmentVariableClient(
+        systemInfo,
         processRunner,
         fileClient,
         computer,
@@ -67,6 +71,7 @@ public static class GodotEnv {
       addonsFile: mainAddonsFile
     );
     var addonsRepo = new AddonsRepository(
+      systemInfo: systemInfo,
       fileClient: fileClient,
       networkClient: networkClient,
       zipClient: zipClient,
@@ -91,13 +96,12 @@ public static class GodotEnv {
     );
 
     // Godot feature dependencies
-    var platform = GodotEnvironment.Create(
-      os: fileClient.OS, fileClient: fileClient, computer: computer
-    );
+    var platform = GodotEnvironment.Create(systemInfo: systemInfo, fileClient: fileClient, computer: computer);
 
     var checksumRepository = new GodotChecksumClient(networkClient, platform);
 
     var godotRepo = new GodotRepository(
+      systemInfo: systemInfo,
       config: config,
       fileClient: fileClient,
       networkClient: networkClient,
@@ -119,6 +123,7 @@ public static class GodotEnv {
       args: args,
       config: config,
       workingDir: workingDir,
+      systemInfo: systemInfo,
       addonsContext: addonsContext,
       godotContext: godotContext
     );
@@ -139,7 +144,7 @@ public static class GodotEnv {
       )
       .AddCommandsFromThisAssembly()
       .UseTypeActivator(
-        new GodotEnvActivator(context, fileClient.OS)
+        new GodotEnvActivator(context, systemInfo.OS)
       )
       .Build().RunAsync(context.CliArgs);
 
@@ -153,6 +158,7 @@ public static class GodotEnv {
     string[] args,
     ConfigFile config,
     string workingDir,
+    ISystemInfo systemInfo,
     IAddonsContext addonsContext,
     IGodotContext godotContext
   ) {
@@ -194,6 +200,7 @@ public static class GodotEnv {
       Version: version,
       WorkingDir: workingDir,
       Config: config,
+      SystemInfo: systemInfo,
       Addons: addonsContext,
       Godot: godotContext
     );

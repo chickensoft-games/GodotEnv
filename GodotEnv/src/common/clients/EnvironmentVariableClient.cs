@@ -6,8 +6,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
+using global::GodotEnv.Common.Utilities;
 
 public interface IEnvironmentVariableClient {
+  public ISystemInfo SystemInfo { get; }
   Task<string> GetUserEnv(string name);
   void SetUserEnv(string name, string value);
   Task AppendToUserEnv(string name, string value);
@@ -42,6 +44,7 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
   public const string USER_SHELL_COMMAND_LINUX = "getent passwd $USER";
   public static readonly string[] SUPPORTED_UNIX_SHELLS = ["bash", "zsh"];
 
+  public ISystemInfo SystemInfo { get; }
   public IProcessRunner ProcessRunner { get; }
   public IFileClient FileClient { get; }
   public IComputer Computer { get; }
@@ -66,7 +69,7 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
       task.Wait();
       _userShell = task.Result;
 
-      var defaultShellOS = FileClient.OS switch {
+      var defaultShellOS = SystemInfo.OS switch {
         OSType.MacOS => "zsh",
         OSType.Linux => "bash",
         OSType.Windows or OSType.Unknown or _ => string.Empty,
@@ -80,8 +83,9 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
   public string UserShellRcFilePath => UserShell.Length > 0 ? FileClient.Combine(FileClient.UserDirectory, $".{UserShell}rc") : string.Empty;
 
   public EnvironmentVariableClient(
-    IProcessRunner processRunner, IFileClient fileClient, IComputer computer, IEnvironmentClient environmentClient
+    ISystemInfo systemInfo, IProcessRunner processRunner, IFileClient fileClient, IComputer computer, IEnvironmentClient environmentClient
   ) {
+    SystemInfo = systemInfo;
     ProcessRunner = processRunner;
     FileClient = fileClient;
     Computer = computer;
@@ -89,7 +93,7 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
   }
 
   public void SetUserEnv(string name, string value) {
-    switch (FileClient.OS) {
+    switch (SystemInfo.OS) {
       case OSType.Windows:
         EnvironmentClient.SetEnvironmentVariable(
           name, value, EnvironmentVariableTarget.User
@@ -111,7 +115,7 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
   public async Task AppendToUserEnv(string name, string value) {
     var shell = Computer.CreateShell(FileClient.AppDataDirectory);
 
-    switch (FileClient.OS) {
+    switch (SystemInfo.OS) {
       case OSType.Windows:
         var currentValue = await GetUserEnv(name);
 
@@ -121,7 +125,7 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
         tokens = tokens.Where(t => !t.Contains(value, StringComparison.OrdinalIgnoreCase)).ToList();
 
         // Lambda function that receive a List<string> of tokens.
-        // For each string of length > 0, concatenate each one with ';' between then. 
+        // For each string of length > 0, concatenate each one with ';' between then.
         string concatenateWindowsPaths(List<string> tokens) => tokens.FindAll(t => t.Length > 0).Aggregate((a, b) => a + ';' + b);
 
         // Insert at the beginning.
@@ -144,7 +148,7 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
   public async Task<string> GetUserEnv(string name) {
     var shell = Computer.CreateShell(FileClient.AppDataDirectory);
 
-    switch (FileClient.OS) {
+    switch (SystemInfo.OS) {
       case OSType.Windows:
         return Task.FromResult(EnvironmentClient.GetEnvironmentVariable(
           name, EnvironmentVariableTarget.User
@@ -167,7 +171,7 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
   public async Task<string> GetUserDefaultShell() {
     var shell = Computer.CreateShell(FileClient.AppDataDirectory);
 
-    switch (FileClient.OS) {
+    switch (SystemInfo.OS) {
       case OSType.MacOS: {
           var processResult = await shell.Run(
             "sh", ["-c", USER_SHELL_COMMAND_MAC]
@@ -189,7 +193,7 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
     }
   }
 
-  public bool IsShellSupported(string shellName) => FileClient.OS switch {
+  public bool IsShellSupported(string shellName) => SystemInfo.OS switch {
     OSType.MacOS or OSType.Linux => SUPPORTED_UNIX_SHELLS.Contains(shellName.ToLowerInvariant()),
     OSType.Windows => true,
     OSType.Unknown => false,
