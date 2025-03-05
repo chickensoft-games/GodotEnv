@@ -31,7 +31,7 @@ GodotEnv is a .NET command line tool that runs on Windows, macOS, and Linux.
 dotnet tool install --global Chickensoft.GodotEnv
 ```
 
-If you encounter the error `No NuGet sources are defined or enabled`, add a Nuget source or enable one and try installing GodotEnv again.  
+If you encounter the error `No NuGet sources are defined or enabled`, add a Nuget source or enable one and try installing GodotEnv again.
 
 [List](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-list-source) the current sources and see which are enabled.
 
@@ -201,7 +201,7 @@ godotenv godot env get
 GodotEnv caches the Godot installation zip archives it downloads in a cache folder. You can ask GodotEnv to clear the cache folder for you.
 
 ```sh
-godotenv cache clear
+godotenv godot cache clear
 ```
 
 ## 🔌 Addon Management
