@@ -15,7 +15,7 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 public record GodotCompressedArchive(
   string Name,
   string Filename,
-  SemanticVersion Version,
+  GodotVersion Version,
   bool IsDotnetVersion,
   string Path
 ) {

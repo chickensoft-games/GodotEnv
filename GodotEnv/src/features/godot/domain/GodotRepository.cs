@@ -49,7 +49,7 @@ public interface IGodotRepository {
   /// version of Godot. Null to search for either.</param>
   /// <returns>Godot installation, or null if none found.</returns>
   GodotInstallation? GetInstallation(
-    SemanticVersion version, bool? isDotnetVersion = null
+    GodotVersion version, bool? isDotnetVersion = null
   );
 
   /// <summary>
@@ -63,7 +63,7 @@ public interface IGodotRepository {
   /// <returns>The fully resolved / absolute path of the Godot installation zip
   /// file for the Platform.</returns>
   Task<GodotCompressedArchive> DownloadGodot(
-      SemanticVersion version,
+      GodotVersion version,
       bool isDotnetVersion,
       bool skipChecksumVerification,
       ILog log,
@@ -89,9 +89,8 @@ public interface IGodotRepository {
   Task UpdateGodotSymlink(GodotInstallation installation, ILog log);
 
   /// <summary>
-  /// Updates (or creates if non-existent) the desktop shortcut pointing to the newly created symlink.
-  ///
-  /// Promotes integration with the desktop environment.
+  /// <para>Updates (or creates if non-existent) the desktop shortcut pointing to the newly created symlink.</para>
+  /// <para>Promotes integration with the desktop environment.</para>
   /// </summary>
   /// <param name="installation">Godot installation.</param>
   /// <param name="log">Output log.</param>
@@ -115,8 +114,12 @@ public interface IGodotRepository {
   /// <summary>
   /// Get the list of installed Godot versions.
   /// </summary>
-  /// <returns>List of semantic versions.</returns>
-  List<GodotInstallation> GetInstallationsList();
+  /// <param name="installations">The list of installed versions.</param>
+  /// <param name="unrecognizedDirectories">
+  /// A list of directories in the installation directory that were not
+  /// recognized as Godot versions.
+  /// </param>
+  void GetInstallationsList(out List<GodotInstallation> installations, out List<string> unrecognizedDirectories);
 
   /// <summary>
   /// Get the list of available Godot versions.
@@ -133,7 +136,7 @@ public interface IGodotRepository {
   /// <returns>True if successful, false if installation doesn't exist.
   /// </returns>
   Task<bool> Uninstall(
-    SemanticVersion version, bool isDotnetVersion, ILog log
+    GodotVersion version, bool isDotnetVersion, ILog log
   );
 }
 
@@ -179,10 +182,6 @@ public partial class GodotRepository : IGodotRepository {
     GodotSymlinkPath
   );
 
-  // Regex for converting directory names back into version strings to see
-  // what versions we have installed.
-  public static readonly Regex DirectoryToVersionStringRegex = directoryToVersionStringRegex();
-
   public GodotRepository(
     ISystemInfo systemInfo,
     ConfigFile config,
@@ -206,7 +205,7 @@ public partial class GodotRepository : IGodotRepository {
   }
 
   public GodotInstallation? GetInstallation(
-    SemanticVersion version, bool? isDotnetVersion = null
+    GodotVersion version, bool? isDotnetVersion = null
   ) {
     if (isDotnetVersion is bool isDotnet) {
       return ReadInstallation(version, isDotnet);
@@ -224,7 +223,7 @@ public partial class GodotRepository : IGodotRepository {
   }
 
   public async Task<GodotCompressedArchive> DownloadGodot(
-    SemanticVersion version,
+    GodotVersion version,
     bool isDotnetVersion,
     bool skipChecksumVerification,
     ILog log,
@@ -289,7 +288,6 @@ public partial class GodotRepository : IGodotRepository {
     log.Print($"📄 Cache filename: {cacheFilename}");
     log.Print($"💾 Compressed installer path: {compressedArchivePath}");
 
-
     try {
       await NetworkClient.DownloadFileAsync(
         url: downloadUrl,
@@ -316,7 +314,7 @@ public partial class GodotRepository : IGodotRepository {
       await VerifyArchiveChecksum(log, archive);
     }
     else {
-      log.Info($"⚠️ Skipping checksum verification due to command-line flag!");
+      log.Info("⚠️ Skipping checksum verification due to command-line flag!");
     }
 
     FileClient.CreateFile(didFinishDownloadFilePath, "done");
@@ -334,17 +332,17 @@ public partial class GodotRepository : IGodotRepository {
       log.Success("✅ Checksum verified.");
     }
     catch (ChecksumMismatchException ex) {
-      log.Warn($"⚠️ Checksum of downloaded file does not match the one published by Godot!");
+      log.Warn("⚠️ Checksum of downloaded file does not match the one published by Godot!");
       log.Warn($"⚠️ {ex.Message}");
-      log.Warn($"⚠️ You SHOULD NOT proceed with installation!");
-      log.Warn($"⚠️ If you have a very good reason, this check can be skipped via '--unsafe-skip-checksum-verification'.");
+      log.Warn("⚠️ You SHOULD NOT proceed with installation!");
+      log.Warn("⚠️ If you have a very good reason, this check can be skipped via '--unsafe-skip-checksum-verification'.");
       log.Err("🛑 Aborting Godot installation.");
       throw;
     }
     catch (MissingChecksumException) {
-      log.Warn($"⚠️ No Godot-published checksum found for the downloaded file.");
-      log.Warn($"⚠️ For Godot versions below 3.2.2-beta1, this is expected as none have been published as of 2024-05-01.");
-      log.Warn($"⚠️ If you still want to proceed with the installation, this check can be skipped via '--unsafe-skip-checksum-verification'.");
+      log.Warn("⚠️ No Godot-published checksum found for the downloaded file.");
+      log.Warn("⚠️ For Godot versions below 3.2.2-beta1, this is expected as none have been published as of 2024-05-01.");
+      log.Warn("⚠️ If you still want to proceed with the installation, this check can be skipped via '--unsafe-skip-checksum-verification'.");
       log.Err("🛑 Aborting Godot installation.");
       throw;
     }
@@ -441,12 +439,12 @@ public partial class GodotRepository : IGodotRepository {
     log.Info("📝 Updating Godot desktop shortcut.");
     switch (SystemInfo.OS) {
       case OSType.MacOS: {
-        var appFilePath = FileClient.Files.Directory.GetDirectories(installation.Path).First();
-        var applicationsPath = FileClient.Combine(FileClient.UserDirectory, "Applications", "Godot.app");
-        await FileClient.DeleteDirectory(applicationsPath);
-        await FileClient.CreateSymlinkRecursively(applicationsPath, appFilePath);
-        break;
-      }
+          var appFilePath = FileClient.Files.Directory.GetDirectories(installation.Path).First();
+          var applicationsPath = FileClient.Combine(FileClient.UserDirectory, "Applications", "Godot.app");
+          await FileClient.DeleteDirectory(applicationsPath);
+          await FileClient.CreateSymlinkRecursively(applicationsPath, appFilePath);
+          break;
+        }
 
       case OSType.Linux:
         var userApplicationsPath = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "applications");
@@ -486,19 +484,19 @@ public partial class GodotRepository : IGodotRepository {
         break;
 
       case OSType.Windows: {
-        var hardLinkPath = $"{GodotSymlinkPath}.exe";
-        var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
-        var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
+          var hardLinkPath = $"{GodotSymlinkPath}.exe";
+          var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+          var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
 
-        var command = string.Join(";",
-          "$ws = New-Object -ComObject (\"WScript.Shell\")",
-          $"$s = $ws.CreateShortcut(\"{applicationsPath}\")",
-          $"$s.TargetPath = \"{hardLinkPath}\"",
-          "$s.save();"
-        );
-        await FileClient.ProcessRunner.Run(".", "powershell", ["-c", command]);
-        break;
-      }
+          var command = string.Join(";",
+            "$ws = New-Object -ComObject (\"WScript.Shell\")",
+            $"$s = $ws.CreateShortcut(\"{applicationsPath}\")",
+            $"$s.TargetPath = \"{hardLinkPath}\"",
+            "$s.save();"
+          );
+          await FileClient.ProcessRunner.Run(".", "powershell", ["-c", command]);
+          break;
+        }
       case OSType.Unknown:
       default:
         break;
@@ -513,7 +511,7 @@ public partial class GodotRepository : IGodotRepository {
 
     await EnvironmentVariableClient.UpdateGodotEnvEnvironment(GodotSymlinkPath, GodotBinPath);
 
-    log.Success($"✅ Success.");
+    log.Success("✅ Success.");
     log.Print("");
     log.Warn("Please, restart your shell to update the environment variables.");
     log.Print("");
@@ -532,36 +530,29 @@ public partial class GodotRepository : IGodotRepository {
 
   public async Task<string> GetGodotEnvVariable() => await EnvironmentVariableClient.GetUserEnv(Defaults.GODOT_ENV_VAR_NAME);
 
-  public List<GodotInstallation> GetInstallationsList() {
-    var installations = new List<GodotInstallation>();
+  public void GetInstallationsList(out List<GodotInstallation> installations, out List<string> unrecognizedDirectories) {
+    installations = [];
+    unrecognizedDirectories = [];
 
     if (!FileClient.DirectoryExists(GodotInstallationsPath)) {
-      return installations;
+      return;
     }
 
     foreach (var dir in FileClient.GetSubdirectories(GodotInstallationsPath)) {
-      var name = dir.Name;
-
-      var versionParts = DirectoryToVersionStringRegex.Match(name);
-      var versionString = $"{versionParts.Groups["major"].Value}." +
-        $"{versionParts.Groups["minor"].Value}." +
-        $"{versionParts.Groups["patch"].Value}";
-
-      var isDotnetVersion = dir.Name.Contains("dotnet");
-
-      var label = versionParts.Groups.ContainsKey("label") ?
-        versionParts.Groups["label"].Value : "";
-      if (!string.IsNullOrWhiteSpace(label)) {
-        versionString += $"-{label.Replace("_", ".")}";
+      DirectoryToVersion(dir.Name, out var version, out var isDotnetVersion);
+      if (version is null) {
+        unrecognizedDirectories.Add(dir.Name);
       }
-      var version = SemanticVersion.Parse(versionString);
-
-      var installation = GetInstallation(version, isDotnetVersion)!;
-
-      installations.Add(installation);
+      else {
+        // NOTE: seems to be an assumption that if we see the directory, we can
+        // definitely get the installation. Unsure if that's accurate.
+        var installation = GetInstallation(version, isDotnetVersion)!;
+        installations.Add(installation);
+      }
     }
 
-    return [.. installations.OrderBy(i => i.VersionName)];
+    installations = [.. installations.OrderBy(static i => i.VersionName)];
+    unrecognizedDirectories = [.. unrecognizedDirectories.Order()];
   }
 
   public async Task<List<string>> GetRemoteVersionsList() {
@@ -593,7 +584,7 @@ public partial class GodotRepository : IGodotRepository {
   }
 
   public async Task<bool> Uninstall(
-    SemanticVersion version, bool isDotnetVersion, ILog log
+    GodotVersion version, bool isDotnetVersion, ILog log
   ) {
     var potentialInstallation = GetInstallation(version, isDotnetVersion);
 
@@ -621,7 +612,7 @@ public partial class GodotRepository : IGodotRepository {
   }
 
   private string GetExecutionPath(
-    string installationPath, SemanticVersion version, bool isDotnetVersion
+    string installationPath, GodotVersion version, bool isDotnetVersion
   ) =>
   FileClient.Combine(
     installationPath,
@@ -629,14 +620,14 @@ public partial class GodotRepository : IGodotRepository {
   );
 
   private string GetGodotSharpPath(
-    string installationPath, SemanticVersion version, bool isDotnetVersion
+    string installationPath, GodotVersion version, bool isDotnetVersion
   ) => FileClient.Combine(
     installationPath,
     Platform.GetRelativeGodotSharpPath(version, isDotnetVersion)
   );
 
   private GodotInstallation? ReadInstallation(
-    SemanticVersion version, bool isDotnetVersion
+    GodotVersion version, bool isDotnetVersion
   ) {
     var directoryName = GetVersionFsName(version, isDotnetVersion);
     var symlinkTarget = GodotSymlinkTarget;
@@ -662,16 +653,42 @@ public partial class GodotRepository : IGodotRepository {
     );
   }
 
-  private string LabelSanitized(SemanticVersion version) =>
-    FileClient.Sanitize(version.Label).Replace(".", "_");
-
-  private string GetVersionFsName(
-    SemanticVersion version, bool isDotnetVersion
+  internal string GetVersionFsName(
+    GodotVersion version, bool isDotnetVersion
   ) =>
-    ($"godot_{(isDotnetVersion ? "dotnet_" : "")}" +
-    $"{version.Major}_{version.Minor}_{version.Patch}_" +
-    $"{LabelSanitized(version)}").Trim('_');
+    $"godot_{(isDotnetVersion ? "dotnet_" : "")}" +
+      FileClient.Sanitize(version.GodotVersionString())
+        .Replace(".", "_")
+        .Replace("-", "_");
 
-  [GeneratedRegex(@"godot_(dotnet_)?(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+)_?(?<label>[a-zA-Z]+_?[\d]+)?", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
-  private static partial Regex directoryToVersionStringRegex();
+  internal void DirectoryToVersion(string directory,
+                                   out GodotVersion? version,
+                                   out bool isDotnet) {
+    var versionParts = DirectoryToVersionStringRegex().Match(directory);
+    if (!versionParts.Success) {
+      version = null;
+      isDotnet = false;
+      return;
+    }
+
+    var versionString = $"{versionParts.Groups["major"].Value}." +
+      $"{versionParts.Groups["minor"].Value}";
+    if (versionParts.Groups["patch"].Value.Length > 0) {
+      versionString += $".{versionParts.Groups["patch"].Value[..^1]}";
+    }
+
+    var label = versionParts.Groups["label"].Value;
+    if (label.Length == 0) {
+      label = "stable";
+    }
+    versionString += $"-{label.Replace("_", ".")}";
+
+    isDotnet = directory.Contains("dotnet");
+    version = GodotVersion.ParseGodotVersion(versionString);
+  }
+
+  // Regex for converting directory names back into version strings to see
+  // what versions we have installed.
+  [GeneratedRegex(@"godot_(dotnet_)?(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+_)?(?<label>[a-z]+[\d]+)?")]
+  private static partial Regex DirectoryToVersionStringRegex();
 }

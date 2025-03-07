@@ -17,7 +17,7 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 public record GodotInstallation(
   string Name,
   bool IsActiveVersion,
-  SemanticVersion Version,
+  GodotVersion Version,
   bool IsDotnetVersion,
   string Path,
   string ExecutionPath
@@ -35,6 +35,6 @@ public record GodotInstallation(
   /// <summary>
   /// Name shown when listing Godot versions installed.
   /// </summary>
-  public string VersionName => Version.VersionString +
+  public string VersionName => Version.GodotVersionString() +
     (IsDotnetVersion ? " dotnet" : " not-dotnet");
 }

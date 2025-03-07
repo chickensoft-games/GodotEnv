@@ -40,19 +40,18 @@ public interface IGodotEnvironment {
   /// false otherwise.</param>
   /// <param name="version">Godot version.</param>
   /// <returns>Godot filename suffix.</returns>
-  string GetInstallerNameSuffix(bool isDotnetVersion, SemanticVersion version);
+  string GetInstallerNameSuffix(bool isDotnetVersion, GodotVersion version);
 
   /// <summary>
   /// Computes the local path where the Godot export templates should be
   /// installed.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  /// <param name="platform">Platform.</param>
   /// <param name="isDotnetVersion">True if referencing the .NET version of Godot.
   /// </param>
   /// <returns>Local path to where the Godot export templates should be
   /// installed.</returns>
-  string GetExportTemplatesLocalPath(SemanticVersion version, bool isDotnetVersion);
+  string GetExportTemplatesLocalPath(GodotVersion version, bool isDotnetVersion);
 
   /// <summary>
   /// Should return true if the given file is likely to be executable.
@@ -77,22 +76,27 @@ public interface IGodotEnvironment {
   /// Computes the Godot download url.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  /// <param name="platform">Platform.</param>
-  /// <param name="isDotnetVersion">True if referencing the .NET version of Godot.
+  /// <param name="isDotnetVersion">
+  /// True if referencing the .NET version of Godot.
   /// </param>
   /// <param name="isTemplate">True if computing the download url to the
   /// export templates, false to compute the download url to the Godot
   /// application.</param>
   string GetDownloadUrl(
-    SemanticVersion version,
+    GodotVersion version,
     bool isDotnetVersion,
     bool isTemplate
   );
 
   /// <summary>
   /// Gets the filename as which an installer is known.
+  /// </summary>
+  /// <param name="version">Godot version.</param>
+  /// <param name="isDotnetVersion">
+  /// True if referencing the .NET version of Godot.
+  /// </param>
   public string GetInstallerFilename(
-    SemanticVersion version, bool isDotnetVersion
+    GodotVersion version, bool isDotnetVersion
   );
 
   /// <summary>
@@ -109,7 +113,7 @@ public interface IGodotEnvironment {
   /// <param name="isDotnetVersion">Dotnet version indicator.</param>
   /// <returns>Relative path.</returns>
   string GetRelativeExtractedExecutablePath(
-    SemanticVersion version, bool isDotnetVersion
+    GodotVersion version, bool isDotnetVersion
   );
 
   /// <summary>
@@ -119,7 +123,7 @@ public interface IGodotEnvironment {
   /// <param name="version">Godot version.</param>
   /// <param name="isDotnetVersion">Dotnet version indicator.</param>
   /// <returns>Path to the GodotSharp directory.</returns>
-  string GetRelativeGodotSharpPath(SemanticVersion version, bool isDotnetVersion);
+  string GetRelativeGodotSharpPath(GodotVersion version, bool isDotnetVersion);
 }
 
 public abstract class GodotEnvironment : IGodotEnvironment {
@@ -130,6 +134,7 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   /// <summary>
   /// Creates a platform for the given OS.
   /// </summary>
+  /// <param name="systemInfo"></param>
   /// <param name="fileClient">File client.</param>
   /// <param name="computer">Computer.</param>
   /// <returns>Platform instance.</returns>
@@ -156,14 +161,14 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   public IComputer Computer { get; }
 
   public abstract string ExportTemplatesBasePath { get; }
-  public abstract string GetInstallerNameSuffix(bool isDotnetVersion, SemanticVersion version);
+  public abstract string GetInstallerNameSuffix(bool isDotnetVersion, GodotVersion version);
   public abstract void Describe(ILog log);
   public abstract Task<bool> IsExecutable(IShell shell, IFileInfo file);
   public abstract string GetRelativeExtractedExecutablePath(
-    SemanticVersion version, bool isDotnetVersion
+    GodotVersion version, bool isDotnetVersion
   );
   public abstract string GetRelativeGodotSharpPath(
-    SemanticVersion version,
+    GodotVersion version,
     bool isDotnetVersion
   );
 
@@ -173,25 +178,10 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   ) => true;
 
   public string GetExportTemplatesLocalPath(
-    SemanticVersion version, bool isDotnetVersion
+    GodotVersion version, bool isDotnetVersion
   ) {
-    var major = version.Major;
-    var minor = version.Minor;
-    var patch = version.Patch;
-    var label = version.Label;
-
-    var folderName = $"{major}.{minor}";
-
-    if (patch is not "" and not "0") {
-      folderName += $".{patch}";
-    }
-
-    if (label != "") {
-      folderName += $".{label}";
-    }
-    else {
-      folderName += ".stable";
-    }
+    // To get a ".label" suffix instead of "-label"
+    var folderName = version.GodotVersionString().Replace('-', '.');
 
     if (isDotnetVersion) {
       folderName += ".mono";
@@ -250,27 +240,11 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   }
 
   public string GetDownloadUrl(
-    SemanticVersion version,
+    GodotVersion version,
     bool isDotnetVersion,
     bool isTemplate
   ) {
-    var major = version.Major;
-    var minor = version.Minor;
-    var patch = version.Patch;
-    // Remove dots from label.
-    var label = version.LabelNoDots;
-
-    var url = $"{GODOT_URL_PREFIX + major}.{minor}";
-    if (patch is not "" and not "0") {
-      url += $".{patch}";
-    }
-
-    if (label != string.Empty) {
-      url += $"-{label}/";
-    }
-    else {
-      url += "-stable/";
-    }
+    var url = $"{GODOT_URL_PREFIX}{version.GodotVersionString()}/";
 
     // Godot application download url.
     if (!isTemplate) {
@@ -282,47 +256,22 @@ public abstract class GodotEnvironment : IGodotEnvironment {
       url + GetExportTemplatesInstallerFilename(version, isDotnetVersion);
   }
 
-  protected static string GetFilenameVersionString(SemanticVersion version) {
-    var major = version.Major;
-    var minor = version.Minor;
-    var patch = version.Patch;
-    // Remove dots from label.
-    var label = version.LabelNoDots;
-
-    var filename = GODOT_FILENAME_PREFIX + major;
-
-    if (minor != "") {
-      filename += $".{minor}";
-    }
-
-    if (patch is not "" and not "0") {
-      filename += $".{patch}";
-    }
-
-    if (label != "") {
-      filename += $"-{label}";
-    }
-    else {
-      filename += "-stable";
-    }
-
-    return filename;
-  }
+  protected static string GetFilenameVersionString(GodotVersion version) =>
+    GODOT_FILENAME_PREFIX + version.GodotVersionString();
 
   // Gets the filename of the Godot installation download for the platform.
   public string GetInstallerFilename(
-    SemanticVersion version, bool isDotnetVersion
+    GodotVersion version, bool isDotnetVersion
   ) => GetFilenameVersionString(version) + GetInstallerNameSuffix(isDotnetVersion, version) +
     ".zip";
 
   // Gets the filename of the Godot export templates installation download for
   // the platform.
   private static string GetExportTemplatesInstallerFilename(
-    SemanticVersion version, bool isDotnetVersion
+    GodotVersion version, bool isDotnetVersion
   ) => GetFilenameVersionString(version) + (isDotnetVersion ? "_mono" : "") +
       "_export_templates.tpz";
 
   private static InvalidOperationException GetUnknownOSException() =>
     new("🚨 Cannot create a platform an unknown operating system.");
-
 }

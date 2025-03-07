@@ -13,7 +13,7 @@ public class Windows : GodotEnvironment {
 
   private static readonly (int major, int minor) _firstKnownArmVersion = (4, 3);
 
-  private string GetProcessorArchitecture(SemanticVersion version) {
+  private string GetProcessorArchitecture(GodotVersion version) {
     var noKnownArmVersion = int.TryParse(version.Major, out var major)
                             && int.TryParse(version.Minor, out var minor)
                             && (major < _firstKnownArmVersion.major || minor < _firstKnownArmVersion.minor);
@@ -30,7 +30,7 @@ public class Windows : GodotEnvironment {
       FileClient.Combine(FileClient.UserDirectory, "\\AppData\\Roaming\\Godot")
     );
 
-  public override string GetInstallerNameSuffix(bool isDotnetVersion, SemanticVersion version)
+  public override string GetInstallerNameSuffix(bool isDotnetVersion, GodotVersion version)
     => isDotnetVersion ? $"_mono_{GetProcessorArchitecture(version)}" : $"_{GetProcessorArchitecture(version)}.exe";
 
   public override Task<bool> IsExecutable(IShell shell, IFileInfo file) =>
@@ -39,7 +39,7 @@ public class Windows : GodotEnvironment {
   public override void Describe(ILog log) => log.Info("⧉ Running on Windows");
 
   public override string GetRelativeExtractedExecutablePath(
-    SemanticVersion version, bool isDotnetVersion
+    GodotVersion version, bool isDotnetVersion
   ) {
     var fsVersionString = GetFilenameVersionString(version);
     var name = fsVersionString +
@@ -57,7 +57,7 @@ public class Windows : GodotEnvironment {
   }
 
   public override string GetRelativeGodotSharpPath(
-    SemanticVersion version,
+    GodotVersion version,
     bool isDotnetVersion
   ) => FileClient.Combine(
     GetFilenameVersionString(version) + $"_mono_{GetProcessorArchitecture(version)}", "GodotSharp"
