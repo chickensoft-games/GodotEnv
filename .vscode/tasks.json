@@ -36,6 +36,24 @@
         "${workspaceFolder}/GodotEnv/Chickensoft.GodotEnv.csproj"
       ],
       "problemMatcher": "$msCompile"
-    }
+    },
+    {
+      "label": "test",
+      "group": "test",
+      "command": "dotnet",
+      "type": "shell",
+      "args": [
+        "test"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": "$msCompile"
+    },
   ]
 }
