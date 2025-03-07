@@ -141,7 +141,6 @@
   "omnisharp.enableMsBuildLoadProjectsOnDemand": false,
   "omnisharp.enableRoslynAnalyzers": true,
   "omnisharp.maxFindSymbolsItems": 3000,
-  "omnisharp.organizeImportsOnFormat": true,
   "omnisharp.useModernNet": true,
   // Remove these if you're happy with your terminal profiles.
   "terminal.integrated.defaultProfile.windows": "Git Bash",
@@ -163,5 +162,6 @@
     }
   },
   "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true,
-  "dotnet.defaultSolution": "GodotEnv.sln"
+  "dotnet.defaultSolution": "GodotEnv.sln",
+  "dotnet.formatting.organizeImportsOnFormat": true
 }
