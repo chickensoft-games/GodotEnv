@@ -52,6 +52,11 @@ public partial record GodotVersion {
     return versionString;
   }
 
+  public static GodotVersion? Parse(string version) {
+    var result = ParseGodotVersion(version);
+    return result ?? ParseGodotSharpVersion(version);
+  }
+
   public static GodotVersion? ParseGodotVersion(string version) {
     var match = GodotVersionStringRegex().Match(version);
     if (!match.Success) {
