@@ -7,7 +7,6 @@
       "type": "process",
       "args": [
         "build",
-        "${workspaceFolder}/GodotEnv/Chickensoft.GodotEnv.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
       ],
