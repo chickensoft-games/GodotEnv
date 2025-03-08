@@ -48,7 +48,9 @@ public class GodotChecksumClient(
   private IGodotEnvironment Platform { get; } = platform;
 
   private static string GetChecksumFileUrl(GodotCompressedArchive archive) {
-    var releaseFilename = $"godot-{archive.Version.GodotVersionString()}.json";
+    // We need to be sure this will be a release-style version string to get the right URL
+    var versionConverter = new ReleaseVersionStringConverter();
+    var releaseFilename = $"godot-{versionConverter.VersionString(archive.Version)}.json";
     return $"https://raw.githubusercontent.com/godotengine/godot-builds/main/releases/{releaseFilename}";
   }
 

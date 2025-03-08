@@ -29,7 +29,7 @@ public class GodotListCommand : ICommand, ICliCommand {
     );
     foreach (var installation in installations) {
       var activeTag = installation.IsActiveVersion ? " *" : "";
-      log.Print(installation.VersionName + activeTag);
+      log.Print(godotRepo.InstallationVersionName(installation) + activeTag);
     }
     foreach (var unrecognized in unrecognizedDirectories) {
       log.Warn("Unrecognized subfolder in Godot installation directory (may be a non-conforming version identifier):");

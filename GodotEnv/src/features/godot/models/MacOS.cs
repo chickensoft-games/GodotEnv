@@ -5,24 +5,19 @@ using Chickensoft.GodotEnv.Common.Utilities;
 using global::GodotEnv.Common.Utilities;
 
 public class MacOS : Unix {
-  public MacOS(ISystemInfo systemInfo, IFileClient fileClient, IComputer computer)
-    : base(systemInfo, fileClient, computer) { }
-
-  public override string ExportTemplatesBasePath =>
-    FileClient.GetFullPath(
-      FileClient.Combine(
-        FileClient.UserDirectory, "/Library/Application Support/Godot/"
-      )
-    );
+  public MacOS(
+    ISystemInfo systemInfo,
+    IFileClient fileClient,
+    IComputer computer,
+    IVersionStringConverter versionStringConverter
+  )
+    : base(systemInfo, fileClient, computer, versionStringConverter) { }
 
   public override string GetInstallerNameSuffix(bool isDotnetVersion, GodotVersion version) {
-    var major = int.Parse(version.Major);
-    var minor = int.Parse(version.Minor);
-    var patch = int.Parse(version.Patch);
-    var hasUniversalSuffix = major > 3 || (major == 3 && minor > 3 && patch > 2);
+    var hasUniversalSuffix = version.Major > 3 || (version.Major == 3 && version.Minor > 3 && version.Patch > 2);
     var universalSuffix = hasUniversalSuffix ? ".universal" : ".64";
 
-    return $"{(isDotnetVersion ? "_mono" : "")}_{(major == 3 ? "osx" : "macos")}{universalSuffix}";
+    return $"{(isDotnetVersion ? "_mono" : "")}_{(version.Major == 3 ? "osx" : "macos")}{universalSuffix}";
   }
 
   public override void Describe(ILog log) => log.Info("🍏 Running on macOS");

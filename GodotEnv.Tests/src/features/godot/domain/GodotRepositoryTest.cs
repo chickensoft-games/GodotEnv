@@ -41,8 +41,11 @@ public class GodotRepositoryTest {
     environmentVariableClient.Setup(evc => evc.UpdateGodotEnvEnvironment(It.IsAny<string>(), It.IsAny<string>()))
       .Returns(Task.CompletedTask);
 
-    var platform = new Mock<GodotEnvironment>(systemInfo, fileClient.Object, computer.Object);
+    var platformVersionStringConverter = new Mock<IVersionStringConverter>();
+    var platform = new Mock<GodotEnvironment>(systemInfo, fileClient.Object, computer.Object, platformVersionStringConverter.Object);
     var checksumClient = new Mock<IGodotChecksumClient>();
+
+    var versionStringConverter = new Mock<IVersionStringConverter>();
 
     var godotRepo = new GodotRepository(
       systemInfo: systemInfo,
@@ -53,7 +56,8 @@ public class GodotRepositoryTest {
       platform: platform.Object,
       environmentVariableClient: environmentVariableClient.Object,
       processRunner: processRunner.Object,
-      checksumClient: checksumClient.Object
+      checksumClient: checksumClient.Object,
+      versionStringConverter: versionStringConverter.Object
     );
 
     var executionContext = new Mock<IExecutionContext>();
@@ -86,8 +90,13 @@ public class GodotRepositoryTest {
     var networkClient = new Mock<NetworkClient>(new Mock<DownloadService>().Object, Defaults.DownloadConfiguration);
     var zipClient = new Mock<ZipClient>(fileClient.Object.Files);
     var environmentVariableClient = new Mock<IEnvironmentVariableClient>();
-    var platform = new Mock<GodotEnvironment>(systemInfo, fileClient.Object, computer.Object);
+
+    var fileVersionStringConverter = new ReleaseVersionStringConverter();
+    var platform = new Mock<GodotEnvironment>(systemInfo, fileClient.Object, computer.Object, fileVersionStringConverter);
+
     var checksumClient = new Mock<IGodotChecksumClient>();
+    var versionStringConverter = new Mock<IVersionStringConverter>();
+
     var godotRepo = new GodotRepository(
       systemInfo: systemInfo,
       config: new ConfigFile { GodotInstallationsPath = "INSTALLATION_PATH" },
@@ -97,10 +106,11 @@ public class GodotRepositoryTest {
       platform: platform.Object,
       environmentVariableClient: environmentVariableClient.Object,
       processRunner: processRunner.Object,
-      checksumClient: checksumClient.Object
+      checksumClient: checksumClient.Object,
+      versionStringConverter: versionStringConverter.Object
     );
 
-    var version = GodotVersion.ParseGodotVersion(godotVersionString)!;
+    var version = fileVersionStringConverter.ParseVersion(godotVersionString)!;
     godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(version, true), out var reconstructedDotnetVersion, out var isDotnetVersionDotnet);
     Assert.Equal(version, reconstructedDotnetVersion);
     Assert.True(isDotnetVersionDotnet);

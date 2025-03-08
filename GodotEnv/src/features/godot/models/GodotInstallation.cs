@@ -31,10 +31,4 @@ public record GodotInstallation(
       "path": "{{Path}}"
     }
     """;
-
-  /// <summary>
-  /// Name shown when listing Godot versions installed.
-  /// </summary>
-  public string VersionName => Version.GodotVersionString() +
-    (IsDotnetVersion ? " dotnet" : " not-dotnet");
 }

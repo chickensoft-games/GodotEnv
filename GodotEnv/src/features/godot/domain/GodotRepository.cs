@@ -27,6 +27,7 @@ public interface IGodotRepository {
   IEnvironmentVariableClient EnvironmentVariableClient { get; }
   IGodotEnvironment Platform { get; }
   IProcessRunner ProcessRunner { get; }
+  IVersionStringConverter VersionStringConverter { get; }
   string GodotInstallationsPath { get; }
   string GodotCachePath { get; }
   string GodotSymlinkPath { get; }
@@ -51,6 +52,12 @@ public interface IGodotRepository {
   GodotInstallation? GetInstallation(
     GodotVersion version, bool? isDotnetVersion = null
   );
+
+  /// <summary>
+  /// Name shown when listing Godot versions installed.
+  /// </summary>
+  /// <param name="installation">Installation whose version will be shown.</param>
+  string InstallationVersionName(GodotInstallation installation);
 
   /// <summary>
   /// Downloads the specified version of Godot.
@@ -162,6 +169,8 @@ public partial class GodotRepository : IGodotRepository {
 
   private IGodotChecksumClient ChecksumClient { get; }
 
+  public IVersionStringConverter VersionStringConverter { get; }
+
   public string GodotInstallationsPath => FileClient.Combine(
     FileClient.AppDataDirectory,
     Defaults.GODOT_PATH,
@@ -188,6 +197,7 @@ public partial class GodotRepository : IGodotRepository {
     GodotSymlinkPath
   );
 
+  // TODO: Rely on platform to provide our file version-name conversion
   public GodotRepository(
     ISystemInfo systemInfo,
     ConfigFile config,
@@ -197,7 +207,8 @@ public partial class GodotRepository : IGodotRepository {
     IGodotEnvironment platform,
     IEnvironmentVariableClient environmentVariableClient,
     IProcessRunner processRunner,
-    IGodotChecksumClient checksumClient
+    IGodotChecksumClient checksumClient,
+    IVersionStringConverter versionStringConverter
   ) {
     SystemInfo = systemInfo;
     Config = config;
@@ -208,6 +219,7 @@ public partial class GodotRepository : IGodotRepository {
     EnvironmentVariableClient = environmentVariableClient;
     ProcessRunner = processRunner;
     ChecksumClient = checksumClient;
+    VersionStringConverter = versionStringConverter;
   }
 
   public GodotInstallation? GetInstallation(
@@ -220,6 +232,10 @@ public partial class GodotRepository : IGodotRepository {
     return ReadInstallation(version, isDotnetVersion: true) ??
       ReadInstallation(version, isDotnetVersion: false);
   }
+
+  public string InstallationVersionName(GodotInstallation installation) =>
+    VersionStringConverter.VersionString(installation.Version) +
+      (installation.IsDotnetVersion ? " dotnet" : " not-dotnet");
 
   public void ClearCache() {
     if (FileClient.DirectoryExists(GodotCachePath)) {
@@ -565,7 +581,7 @@ public partial class GodotRepository : IGodotRepository {
       }
     }
 
-    installations = [.. installations.OrderBy(static i => i.VersionName)];
+    installations = [.. installations.OrderBy(InstallationVersionName)];
     unrecognizedDirectories = [.. unrecognizedDirectories.Order()];
     failedGodotInstallations = [.. failedGodotInstallations.Order()];
   }
@@ -672,7 +688,7 @@ public partial class GodotRepository : IGodotRepository {
     GodotVersion version, bool isDotnetVersion
   ) =>
     $"godot_{(isDotnetVersion ? "dotnet_" : "")}" +
-      FileClient.Sanitize(version.GodotVersionString())
+      FileClient.Sanitize(Platform.VersionStringConverter.VersionString(version))
         .Replace(".", "_")
         .Replace("-", "_");
 
@@ -701,7 +717,7 @@ public partial class GodotRepository : IGodotRepository {
     versionString += $"-{label.Replace("_", ".")}";
 
     isDotnet = directory.Contains("dotnet");
-    version = GodotVersion.ParseGodotVersion(versionString);
+    version = Platform.VersionStringConverter.ParseVersion(versionString);
   }
 
   // Regex for converting directory names back into version strings to see

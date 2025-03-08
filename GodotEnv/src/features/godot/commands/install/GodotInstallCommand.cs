@@ -14,10 +14,9 @@ public class GodotInstallCommand :
   [CommandParameter(
     0,
     Name = "Version",
-    // Validator allows us to null-forgive the parsing operation below
     Validators = [typeof(GodotVersionValidator)],
     Description = "Godot version to install: e.g., 4.1.0-rc.2, 4.2.0, etc." +
-      " No leading 'v'. Should match a version of Godot " +
+      " Should match a version of Godot " +
       "(https://github.com/godotengine/godot-builds/tags) or GodotSharp " +
       "(https://www.nuget.org/packages/GodotSharp/)"
   )]
@@ -51,8 +50,8 @@ public class GodotInstallCommand :
     var log = ExecutionContext.CreateLog(console);
     var token = console.RegisterCancellationHandler();
 
-    // Only safe to null-forgive because we're using the validator on RawVersion
-    var version = GodotVersion.Parse(RawVersion)!;
+    // We know this won't throw because the validator okayed it
+    var version = godotRepo.VersionStringConverter.ParseVersion(RawVersion);
     var isDotnetVersion = !NoDotnet;
 
     var godotInstallationsPath = godotRepo.GodotInstallationsPath;

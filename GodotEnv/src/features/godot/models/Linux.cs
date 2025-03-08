@@ -5,12 +5,13 @@ using Chickensoft.GodotEnv.Common.Utilities;
 using global::GodotEnv.Common.Utilities;
 
 public class Linux : Unix {
-  public Linux(ISystemInfo systemInfo, IFileClient fileClient, IComputer computer)
-    : base(systemInfo, fileClient, computer) { }
-
-  public override string ExportTemplatesBasePath => FileClient.Combine(
-    FileClient.UserDirectory, ".local/share/godot"
-  );
+  public Linux(
+    ISystemInfo systemInfo,
+    IFileClient fileClient,
+    IComputer computer,
+    IVersionStringConverter versionStringConverter
+  )
+    : base(systemInfo, fileClient, computer, versionStringConverter) { }
 
   public override string GetInstallerNameSuffix(bool isDotnetVersion, GodotVersion version) {
     var (platformName, architecture) = GetPlatformNameAndArchitecture(version);
@@ -53,7 +54,7 @@ public class Linux : Unix {
     var architecture = "x86_64";
     var platformName = "linux";
 
-    if (int.TryParse(version.Major, out var parsedVersion) && parsedVersion == 3) {
+    if (version.Major == 3) {
       architecture = "64";
       platformName = "x11";
     }

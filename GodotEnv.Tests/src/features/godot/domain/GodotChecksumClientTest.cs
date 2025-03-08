@@ -23,11 +23,11 @@ public class GodotChecksumClientTest {
     $"https://raw.githubusercontent.com/godotengine/godot-builds/main/releases/godot-{version}.json";
 
   public static IEnumerable<object[]> CorrectChecksumUrlRequestedTestData() {
-    yield return [new GodotVersion("1", "2", "3", "stable", ""), false, GetChecksumFileUrl("1.2.3-stable")];
-    yield return [new GodotVersion("1", "0", "0", "stable", ""), false, GetChecksumFileUrl("1.0-stable")];
-    yield return [new GodotVersion("4", "0", "0", "alpha14", "alpha.14"), false, GetChecksumFileUrl("4.0-alpha14")];
-    yield return [new GodotVersion("4", "2", "2", "rc1", "rc.1"), false, GetChecksumFileUrl("4.2.2-rc1")];
-    yield return [new GodotVersion("4", "3", "0", "dev6", "dev.6"), false, GetChecksumFileUrl("4.3-dev6")];
+    yield return [new GodotVersion(1, 2, 3, "stable", -1), false, GetChecksumFileUrl("1.2.3-stable")];
+    yield return [new GodotVersion(1, 0, 0, "stable", -1), false, GetChecksumFileUrl("1.0-stable")];
+    yield return [new GodotVersion(4, 0, 0, "alpha", 14), false, GetChecksumFileUrl("4.0-alpha14")];
+    yield return [new GodotVersion(4, 2, 2, "rc", 1), false, GetChecksumFileUrl("4.2.2-rc1")];
+    yield return [new GodotVersion(4, 3, 0, "dev", 6), false, GetChecksumFileUrl("4.3-dev6")];
   }
 
   [Theory]
@@ -99,7 +99,7 @@ public class GodotChecksumClientTest {
     var archive = new GodotCompressedArchive(
       string.Empty,
       string.Empty,
-      new GodotVersion("4", "3", "0", "dev5", "dev.5"),
+      new GodotVersion(4, 3, 0, "dev", 5),
       isDotnetVersion,
       string.Empty
     );
@@ -133,7 +133,7 @@ public class GodotChecksumClientTest {
     var archive = new GodotCompressedArchive(
       string.Empty,
       downloadFileName,
-      new GodotVersion("1", "1", "0", "stable", ""),
+      new GodotVersion(1, 1, 0, "stable", -1),
       false,
       string.Empty
     );
@@ -206,7 +206,7 @@ public class GodotChecksumClientTest {
       var dummyArchive = new GodotCompressedArchive(
         "TestFilename",
         Path.GetFileName(tempFileName),
-        new GodotVersion("1", "0", "0", "stable", ""),
+        new GodotVersion(1, 0, 0, "stable", -1),
         true,
         Path.GetDirectoryName(tempFileName) ?? "/"
       );
@@ -246,7 +246,7 @@ public class GodotChecksumClientTest {
       var archive = new GodotCompressedArchive(
         string.Empty,
         archiveFileName,
-        new GodotVersion("4", "3", "0", "dev5", "dev.5"),
+        new GodotVersion(4, 3, 0, "dev", 5),
         false,
         Path.GetDirectoryName(archivePath) ?? "/"
       );

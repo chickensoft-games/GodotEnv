@@ -92,8 +92,16 @@ public static class GodotEnv {
       AddonsInstaller: addonsInstaller
     );
 
+    var fileVersionStringConverter = new ReleaseVersionStringConverter();
+    var ioVersionStringConverter = new IOVersionStringConverter();
+
     // Godot feature dependencies
-    var platform = GodotEnvironment.Create(systemInfo: systemInfo, fileClient: fileClient, computer: computer);
+    var platform = GodotEnvironment.Create(
+      systemInfo: systemInfo,
+      fileClient: fileClient,
+      computer: computer,
+      versionStringConverter: fileVersionStringConverter
+    );
 
     var checksumRepository = new GodotChecksumClient(networkClient, platform);
 
@@ -106,7 +114,8 @@ public static class GodotEnv {
       platform: platform,
       environmentVariableClient: environmentVariableClient,
       processRunner: processRunner,
-      checksumClient: checksumRepository
+      checksumClient: checksumRepository,
+      versionStringConverter: ioVersionStringConverter
     );
 
     var godotContext = new GodotContext(
@@ -286,8 +295,6 @@ public static class GodotEnv {
 /// Custom type activator for CliFx. Creates commands by passing in the
 /// execution context.
 /// </summary>
-/// <param name="context">Execution context.</param>
-/// <param name="processRunner">Process runner.</param>
 public class GodotEnvActivator : ITypeActivator {
   public IExecutionContext ExecutionContext { get; }
   public OSType OS { get; }
@@ -347,7 +354,7 @@ public class GodotEnvActivator : ITypeActivator {
     var args = string.Join(
       " ",
       argsList?.Skip(1)?.Select(
-        arg => (arg?.Contains(' ') ?? false) ? $"\"{arg}\"" : arg
+        static arg => (arg?.Contains(' ') ?? false) ? $"\"{arg}\"" : arg
       )?.ToList() ?? []
     );
 
