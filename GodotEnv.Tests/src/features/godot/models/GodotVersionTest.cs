@@ -61,7 +61,7 @@ public partial class GodotVersionTest {
   [InlineData("1.0-rc.1")]
   [InlineData("1.0.0-rc1")]
   public void RejectionOfInvalidSharpVersionNumbers(string invalidVersionNumber) =>
-    GodotVersion.ParseGodotSharpVersion(invalidVersionNumber).ShouldBeNull();
+    GodotVersion.ParseSharpVersion(invalidVersionNumber).ShouldBeNull();
 
   public static IEnumerable<object[]> CorrectParsingOfValidGodotVersionsTestData() {
     yield return ["1.2.3-stable", new GodotVersion("1", "2", "3", "stable", "")];
@@ -91,7 +91,7 @@ public partial class GodotVersionTest {
   [Theory]
   [MemberData(nameof(CorrectParsingOfValidSharpVersionsTestData))]
   public void CorrectParsingOfValidSharpVersions(string toParse, GodotVersion expected) {
-    var parsed = GodotVersion.ParseGodotSharpVersion(toParse);
+    var parsed = GodotVersion.ParseSharpVersion(toParse);
     Assert.Equal(expected, parsed);
   }
 
@@ -119,5 +119,5 @@ public partial class GodotVersionTest {
   [Theory]
   [MemberData(nameof(CorrectSharpVersionStringFormattingTestData))]
   public void CorrectVersionStringFormatting(GodotVersion toFormat, string expected) =>
-    Assert.Equal(expected, toFormat.GodotSharpVersionString());
+    Assert.Equal(expected, toFormat.SharpVersionString());
 }

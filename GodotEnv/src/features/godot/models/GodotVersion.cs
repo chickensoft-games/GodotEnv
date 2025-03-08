@@ -9,9 +9,9 @@ public partial record GodotVersion {
   public string Minor { get; }
   public string Patch { get; }
   public string GodotLabel { get; }
-  public string GodotSharpLabel { get; }
+  public string SharpLabel { get; }
 
-  internal GodotVersion(string major, string minor, string patch, string godotLabel, string godotSharpLabel) {
+  internal GodotVersion(string major, string minor, string patch, string godotLabel, string sharpLabel) {
     if (!IsNumeric(major)) {
       throw new ArgumentException($"Major number is not numeric: {major}");
     }
@@ -24,15 +24,15 @@ public partial record GodotVersion {
     if (!GodotLabelRegex().Match(godotLabel).Success) {
       throw new ArgumentException($"Godot version label is invalid: ${godotLabel}");
     }
-    if (godotSharpLabel.Length > 0 && !SharpLabelRegex().Match(godotSharpLabel).Success) {
-      throw new ArgumentException($"GodotSharp version label is invalid: ${godotSharpLabel}");
+    if (sharpLabel.Length > 0 && !SharpLabelRegex().Match(sharpLabel).Success) {
+      throw new ArgumentException($"GodotSharp version label is invalid: ${sharpLabel}");
     }
 
     Major = major;
     Minor = minor;
     Patch = patch;
     GodotLabel = godotLabel;
-    GodotSharpLabel = godotSharpLabel;
+    SharpLabel = sharpLabel;
   }
 
   public string GodotVersionString() {
@@ -44,17 +44,17 @@ public partial record GodotVersion {
     return result;
   }
 
-  public string GodotSharpVersionString() {
+  public string SharpVersionString() {
     var versionString = string.Join(".", Major, Minor, Patch);
-    if (GodotSharpLabel.Length > 0) {
-      versionString += $"-{GodotSharpLabel}";
+    if (SharpLabel.Length > 0) {
+      versionString += $"-{SharpLabel}";
     }
     return versionString;
   }
 
   public static GodotVersion? Parse(string version) {
     var result = ParseGodotVersion(version);
-    return result ?? ParseGodotSharpVersion(version);
+    return result ?? ParseSharpVersion(version);
   }
 
   public static GodotVersion? ParseGodotVersion(string version) {
@@ -71,8 +71,8 @@ public partial record GodotVersion {
     return new GodotVersion(major, minor, patch, label, SharpLabelFromGodotLabel(label));
   }
 
-  public static GodotVersion? ParseGodotSharpVersion(string version) {
-    var match = GodotSharpVersionStringRegex().Match(version);
+  public static GodotVersion? ParseSharpVersion(string version) {
+    var match = SharpVersionStringRegex().Match(version);
     if (!match.Success) {
       return null;
     }
@@ -140,5 +140,5 @@ public partial record GodotVersion {
   // Fails on one published GodotSharp version string, 4.0.0-alpha17
   //   (no dot separator)
   [GeneratedRegex(@"^(\d+)\.(\d+)\.(\d+)(-[a-z]+\.\d+)?$")]
-  public static partial Regex GodotSharpVersionStringRegex();
+  public static partial Regex SharpVersionStringRegex();
 }
