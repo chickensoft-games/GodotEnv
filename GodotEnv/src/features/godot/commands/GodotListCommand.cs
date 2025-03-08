@@ -22,7 +22,11 @@ public class GodotListCommand : ICommand, ICliCommand {
   }
 
   private static void ListLocalVersions(ILog log, IGodotRepository godotRepo) {
-    godotRepo.GetInstallationsList(out var installations, out var unrecognizedDirectories);
+    godotRepo.GetInstallationsList(
+      out var installations,
+      out var unrecognizedDirectories,
+      out var failedInstallations
+    );
     foreach (var installation in installations) {
       var activeTag = installation.IsActiveVersion ? " *" : "";
       log.Print(installation.VersionName + activeTag);
@@ -30,6 +34,10 @@ public class GodotListCommand : ICommand, ICliCommand {
     foreach (var unrecognized in unrecognizedDirectories) {
       log.Warn("Unrecognized subfolder in Godot installation directory (may be a non-conforming version identifier):");
       log.Warn($"  {unrecognized}");
+    }
+    foreach (var failedInstallation in failedInstallations) {
+      log.Err("Installation directory matches Godot version but failed to load:");
+      log.Err($"  {failedInstallation}");
     }
   }
 

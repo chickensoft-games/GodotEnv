@@ -116,10 +116,16 @@ public interface IGodotRepository {
   /// </summary>
   /// <param name="installations">The list of installed versions.</param>
   /// <param name="unrecognizedDirectories">
-  /// A list of directories in the installation directory that were not
+  /// A list of subdirectories in the installation directory that were not
   /// recognized as Godot versions.
   /// </param>
-  void GetInstallationsList(out List<GodotInstallation> installations, out List<string> unrecognizedDirectories);
+  /// <param name="failedGodotInstallations">
+  /// A list of subdirectories in the installation directory that matched
+  /// Godot versions, but could not be loaded as installations.
+  /// </param>
+  void GetInstallationsList(out List<GodotInstallation> installations,
+                            out List<string> unrecognizedDirectories,
+                            out List<string> failedGodotInstallations);
 
   /// <summary>
   /// Get the list of available Godot versions.
@@ -530,9 +536,14 @@ public partial class GodotRepository : IGodotRepository {
 
   public async Task<string> GetGodotEnvVariable() => await EnvironmentVariableClient.GetUserEnv(Defaults.GODOT_ENV_VAR_NAME);
 
-  public void GetInstallationsList(out List<GodotInstallation> installations, out List<string> unrecognizedDirectories) {
+  public void GetInstallationsList(
+    out List<GodotInstallation> installations,
+    out List<string> unrecognizedDirectories,
+    out List<string> failedGodotInstallations
+  ) {
     installations = [];
     unrecognizedDirectories = [];
+    failedGodotInstallations = [];
 
     if (!FileClient.DirectoryExists(GodotInstallationsPath)) {
       return;
@@ -544,15 +555,19 @@ public partial class GodotRepository : IGodotRepository {
         unrecognizedDirectories.Add(dir.Name);
       }
       else {
-        // NOTE: seems to be an assumption that if we see the directory, we can
-        // definitely get the installation. Unsure if that's accurate.
-        var installation = GetInstallation(version, isDotnetVersion)!;
-        installations.Add(installation);
+        var installation = GetInstallation(version, isDotnetVersion);
+        if (installation is null) {
+          failedGodotInstallations.Add(dir.Name);
+        }
+        else {
+          installations.Add(installation);
+        }
       }
     }
 
     installations = [.. installations.OrderBy(static i => i.VersionName)];
     unrecognizedDirectories = [.. unrecognizedDirectories.Order()];
+    failedGodotInstallations = [.. failedGodotInstallations.Order()];
   }
 
   public async Task<List<string>> GetRemoteVersionsList() {
@@ -661,9 +676,11 @@ public partial class GodotRepository : IGodotRepository {
         .Replace(".", "_")
         .Replace("-", "_");
 
-  internal void DirectoryToVersion(string directory,
-                                   out GodotVersion? version,
-                                   out bool isDotnet) {
+  internal void DirectoryToVersion(
+    string directory,
+    out GodotVersion? version,
+    out bool isDotnet
+  ) {
     var versionParts = DirectoryToVersionStringRegex().Match(directory);
     if (!versionParts.Success) {
       version = null;
