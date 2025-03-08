@@ -17,8 +17,8 @@ public class GodotVersionValidator : BindingValidator<string> {
     else if (str.StartsWith('v')) {
       return Error("Version should not start with 'v'.");
     }
-    else if (!SemanticVersion.IsValid(str)) {
-      return Error($"Version '{str}' is not a valid semantic version.");
+    else if (GodotVersion.Parse(str) is null) {
+      return Error($"Version '{str}' is not a valid Godot or GodotSharp version.");
     }
     else {
       return Ok();

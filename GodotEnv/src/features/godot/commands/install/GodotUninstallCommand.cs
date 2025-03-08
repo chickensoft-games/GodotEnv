@@ -19,10 +19,12 @@ public class GodotUninstallCommand :
   [CommandParameter(
   0,
   Name = "Version",
-  Validators = new System.Type[] { typeof(GodotVersionValidator) },
+    // Validator allows us to null-forgive the parsing operation below
+    Validators = [typeof(GodotVersionValidator)],
   Description = "Godot version to install: e.g., 4.1.0-rc.2, 4.2.0, etc." +
-    " No leading 'v'. Should match a version of GodotSharp: " +
-    "https://www.nuget.org/packages/GodotSharp/"
+      " No leading 'v'. Should match a version of Godot " +
+      "(https://github.com/godotengine/godot-builds/tags) or GodotSharp " +
+      "(https://www.nuget.org/packages/GodotSharp/)"
 )]
   public string RawVersion { get; set; } = default!;
 
@@ -45,15 +47,16 @@ public class GodotUninstallCommand :
 
     var log = ExecutionContext.CreateLog(console);
 
-    var version = SemanticVersion.Parse(RawVersion);
+    // Only safe to null-forgive because we're using the validator on RawVersion
+    var version = GodotVersion.Parse(RawVersion)!;
     var isDotnetVersion = !NoDotnet;
 
     log.Print("");
     if (await godotRepo.Uninstall(version, isDotnetVersion, log)) {
-      log.Success($"Godot {version.VersionString} uninstalled.");
+      log.Success($"Godot {version.GodotVersionString()} uninstalled.");
     }
     else {
-      log.Err($"Godot {version.VersionString} not found.");
+      log.Err($"Godot {version.GodotVersionString()} not found.");
     }
     log.Print("");
   }

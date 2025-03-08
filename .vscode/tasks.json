@@ -7,7 +7,6 @@
       "type": "process",
       "args": [
         "build",
-        "${workspaceFolder}/GodotEnv/Chickensoft.GodotEnv.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
       ],
@@ -36,6 +35,24 @@
         "${workspaceFolder}/GodotEnv/Chickensoft.GodotEnv.csproj"
       ],
       "problemMatcher": "$msCompile"
-    }
+    },
+    {
+      "label": "test",
+      "group": "test",
+      "command": "dotnet",
+      "type": "shell",
+      "args": [
+        "test"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": "$msCompile"
+    },
   ]
 }

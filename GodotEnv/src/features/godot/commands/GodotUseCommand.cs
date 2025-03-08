@@ -19,10 +19,12 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
   [CommandParameter(
     0,
     Name = "Version",
-    Validators = new System.Type[] { typeof(GodotVersionValidator) },
+    // Validator allows us to null-forgive the parsing operation below
+    Validators = [typeof(GodotVersionValidator)],
     Description = "Godot version to install: e.g., 4.1.0-rc.2, 4.2.0, etc." +
-      " No leading 'v'. Should match a version of GodotSharp: " +
-      "https://www.nuget.org/packages/GodotSharp/"
+      " No leading 'v'. Should match a version of Godot " +
+      "(https://github.com/godotengine/godot-builds/tags) or GodotSharp " +
+      "(https://www.nuget.org/packages/GodotSharp/)"
   )]
   public string RawVersion { get; set; } = default!;
 
@@ -46,7 +48,8 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
     var log = ExecutionContext.CreateLog(console);
     var output = console.Output;
 
-    var version = SemanticVersion.Parse(RawVersion);
+    // Only safe to null-forgive because we're using the validator on RawVersion
+    var version = GodotVersion.Parse(RawVersion)!;
     var isDotnetVersion = !NoDotnet;
 
     var noDotnetFlag = isDotnetVersion ? "" : " --no-dotnet";
@@ -58,10 +61,10 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
 
     if (potentialInstallation is not GodotInstallation installation) {
       log.Print("");
-      log.Warn($"Godot version {version.VersionString} is not installed.");
+      log.Warn($"Godot version {version.GodotVersionString()} is not installed.");
       log.Print("To install this version of Godot, run:");
       log.Print("");
-      log.Success($"    godotenv godot install {version.VersionString}{noDotnetFlag}");
+      log.Success($"    godotenv godot install {version.GodotVersionString()}{noDotnetFlag}");
       log.Print("");
 
       return;

@@ -12,7 +12,7 @@ public class Linux : Unix {
     FileClient.UserDirectory, ".local/share/godot"
   );
 
-  public override string GetInstallerNameSuffix(bool isDotnetVersion, SemanticVersion version) {
+  public override string GetInstallerNameSuffix(bool isDotnetVersion, GodotVersion version) {
     var (platformName, architecture) = GetPlatformNameAndArchitecture(version);
 
     return isDotnetVersion ? $"_mono_{platformName}_{architecture}" : $"_{platformName}.{architecture}";
@@ -21,7 +21,7 @@ public class Linux : Unix {
   public override void Describe(ILog log) => log.Info("🐧 Running on Linux");
 
   public override string GetRelativeExtractedExecutablePath(
-    SemanticVersion version, bool isDotnetVersion
+    GodotVersion version, bool isDotnetVersion
   ) {
     var fsVersionString = GetFilenameVersionString(version);
     var nameSuffix = GetInstallerNameSuffix(isDotnetVersion, version);
@@ -40,7 +40,7 @@ public class Linux : Unix {
   }
 
   public override string GetRelativeGodotSharpPath(
-    SemanticVersion version,
+    GodotVersion version,
     bool isDotnetVersion
   ) => FileClient.Combine(
       GetFilenameVersionString(version) + GetInstallerNameSuffix(isDotnetVersion, version),
@@ -48,7 +48,7 @@ public class Linux : Unix {
     );
 
   private static (string platformName, string architecture) GetPlatformNameAndArchitecture(
-    SemanticVersion version
+    GodotVersion version
   ) {
     var architecture = "x86_64";
     var platformName = "linux";
