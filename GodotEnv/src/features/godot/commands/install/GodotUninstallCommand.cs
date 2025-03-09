@@ -2,7 +2,6 @@ namespace Chickensoft.GodotEnv.Features.Godot.Commands;
 
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
-using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Infrastructure;
@@ -17,12 +16,13 @@ public class GodotUninstallCommand :
   public IExecutionContext ExecutionContext { get; set; }
 
   [CommandParameter(
-  0,
-  Name = "Version",
-  Validators = new System.Type[] { typeof(GodotVersionValidator) },
-  Description = "Godot version to install: e.g., 4.1.0-rc.2, 4.2.0, etc." +
-    " No leading 'v'. Should match a version of GodotSharp: " +
-    "https://www.nuget.org/packages/GodotSharp/"
+    0,
+    Name = "Version",
+    Validators = [typeof(GodotVersionValidator)],
+    Description = "Godot version to install: e.g., 4.1.0-rc.2, 4.2.0, etc." +
+      " Should match a version of Godot " +
+      "(https://github.com/godotengine/godot-builds/tags) or GodotSharp " +
+      "(https://www.nuget.org/packages/GodotSharp/)"
 )]
   public string RawVersion { get; set; } = default!;
 
@@ -42,18 +42,20 @@ public class GodotUninstallCommand :
   public async ValueTask ExecuteAsync(IConsole console) {
     var godotRepo = ExecutionContext.Godot.GodotRepo;
     var platform = ExecutionContext.Godot.Platform;
+    var versionConverter = godotRepo.VersionStringConverter;
 
     var log = ExecutionContext.CreateLog(console);
 
-    var version = SemanticVersion.Parse(RawVersion);
+    // We know this won't throw because the validator okayed it
+    var version = versionConverter.ParseVersion(RawVersion);
     var isDotnetVersion = !NoDotnet;
 
     log.Print("");
     if (await godotRepo.Uninstall(version, isDotnetVersion, log)) {
-      log.Success($"Godot {version.VersionString} uninstalled.");
+      log.Success($"Godot {versionConverter.VersionString(version)} uninstalled.");
     }
     else {
-      log.Err($"Godot {version.VersionString} not found.");
+      log.Err($"Godot {versionConverter.VersionString(version)} not found.");
     }
     log.Print("");
   }

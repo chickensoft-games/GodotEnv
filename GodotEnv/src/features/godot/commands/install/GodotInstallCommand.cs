@@ -16,8 +16,9 @@ public class GodotInstallCommand :
     Name = "Version",
     Validators = [typeof(GodotVersionValidator)],
     Description = "Godot version to install: e.g., 4.1.0-rc.2, 4.2.0, etc." +
-      " No leading 'v'. Should match a version of GodotSharp: " +
-      "https://www.nuget.org/packages/GodotSharp/"
+      " Should match a version of Godot " +
+      "(https://github.com/godotengine/godot-builds/tags) or GodotSharp " +
+      "(https://www.nuget.org/packages/GodotSharp/)"
   )]
   public string RawVersion { get; set; } = default!;
 
@@ -32,7 +33,7 @@ public class GodotInstallCommand :
     "unsafe-skip-checksum-verification",
     Description = "UNSAFE! Specify to skip checksum verification."
   )]
-  public bool SkipChecksumVerification { get; set; } = false;
+  public bool SkipChecksumVerification { get; set; }
 
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
@@ -49,7 +50,8 @@ public class GodotInstallCommand :
     var log = ExecutionContext.CreateLog(console);
     var token = console.RegisterCancellationHandler();
 
-    var version = SemanticVersion.Parse(RawVersion);
+    // We know this won't throw because the validator okayed it
+    var version = godotRepo.VersionStringConverter.ParseVersion(RawVersion);
     var isDotnetVersion = !NoDotnet;
 
     var godotInstallationsPath = godotRepo.GodotInstallationsPath;

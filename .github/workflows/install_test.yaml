@@ -104,7 +104,7 @@ jobs:
       matrix:
         # Also try windows-2019?
         os: [macos-latest, ubuntu-latest, windows-2019]
-        version: ["4.1.1", "4.4.0-beta.1"]
+        version: ["4.1.1", "4.4.0-beta.1", "4.0.1-stable"]
     defaults:
       run:
         # Use bash shells on all platforms.

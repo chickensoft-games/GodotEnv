@@ -1,27 +1,28 @@
 namespace Chickensoft.GodotEnv.Features.Godot.Commands;
 
+using System;
 using Chickensoft.GodotEnv.Common.Models;
-using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx.Extensibility;
 
 /// <summary>
 /// Validates a Godot version argument.
 /// </summary>
 public class GodotVersionValidator : BindingValidator<string> {
-  public GodotVersionValidator(IExecutionContext _) { }
+  public IExecutionContext ExecutionContext { get; }
+  public GodotVersionValidator(IExecutionContext context) {
+    ExecutionContext = context;
+  }
 
   public override BindingValidationError? Validate(string? value) {
     if (value is not string str) {
       return Error("Version cannot be null.");
     }
-    else if (str.StartsWith('v')) {
-      return Error("Version should not start with 'v'.");
+    try {
+      ExecutionContext.Godot.GodotRepo.VersionStringConverter.ParseVersion(str);
     }
-    else if (!SemanticVersion.IsValid(str)) {
-      return Error($"Version '{str}' is not a valid semantic version.");
+    catch (Exception ex) {
+      return Error($"Version '{str}' is invalid: {ex.Message}.");
     }
-    else {
-      return Ok();
-    }
+    return Ok();
   }
 }

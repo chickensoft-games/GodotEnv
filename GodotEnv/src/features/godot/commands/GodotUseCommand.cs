@@ -19,10 +19,11 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
   [CommandParameter(
     0,
     Name = "Version",
-    Validators = new System.Type[] { typeof(GodotVersionValidator) },
+    Validators = [typeof(GodotVersionValidator)],
     Description = "Godot version to install: e.g., 4.1.0-rc.2, 4.2.0, etc." +
-      " No leading 'v'. Should match a version of GodotSharp: " +
-      "https://www.nuget.org/packages/GodotSharp/"
+      " Should match a version of Godot " +
+      "(https://github.com/godotengine/godot-builds/tags) or GodotSharp " +
+      "(https://www.nuget.org/packages/GodotSharp/)"
   )]
   public string RawVersion { get; set; } = default!;
 
@@ -42,11 +43,13 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
   public async ValueTask ExecuteAsync(IConsole console) {
     var godotRepo = ExecutionContext.Godot.GodotRepo;
     var platform = ExecutionContext.Godot.Platform;
+    var versionConverter = godotRepo.VersionStringConverter;
 
     var log = ExecutionContext.CreateLog(console);
     var output = console.Output;
 
-    var version = SemanticVersion.Parse(RawVersion);
+    // We know this won't throw because the validator okayed it
+    var version = versionConverter.ParseVersion(RawVersion);
     var isDotnetVersion = !NoDotnet;
 
     var noDotnetFlag = isDotnetVersion ? "" : " --no-dotnet";
@@ -58,10 +61,10 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
 
     if (potentialInstallation is not GodotInstallation installation) {
       log.Print("");
-      log.Warn($"Godot version {version.VersionString} is not installed.");
+      log.Warn($"Godot version {versionConverter.VersionString(version)} is not installed.");
       log.Print("To install this version of Godot, run:");
       log.Print("");
-      log.Success($"    godotenv godot install {version.VersionString}{noDotnetFlag}");
+      log.Success($"    godotenv godot install {versionConverter.VersionString(version)}{noDotnetFlag}");
       log.Print("");
 
       return;
@@ -70,7 +73,7 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
     await godotRepo.UpdateGodotSymlink(installation, log);
 
     log.Print("");
-    log.Success($"Godot version `{installation.VersionName}` is now active.");
+    log.Success($"Godot version `{godotRepo.InstallationVersionName(installation)}` is now active.");
     log.Print("");
     log.Info("Please make sure your GODOT environment variable is set to the ");
     log.Info("symlink pointing to the current version of Godot:");

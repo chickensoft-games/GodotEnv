@@ -23,18 +23,17 @@ public class GodotChecksumClientTest {
     $"https://raw.githubusercontent.com/godotengine/godot-builds/main/releases/godot-{version}.json";
 
   public static IEnumerable<object[]> CorrectChecksumUrlRequestedTestData() {
-    yield return [new SemanticVersion("1", "2", "3"), false, GetChecksumFileUrl("1.2.3-stable")];
-    yield return [new SemanticVersion("1", "0", "0"), false, GetChecksumFileUrl("1.0-stable")];
-    yield return [new SemanticVersion("4", "0", "0", "alpha14"), false, GetChecksumFileUrl("4.0-alpha14")];
-    yield return [new SemanticVersion("4", "2", "2", "rc1"), false, GetChecksumFileUrl("4.2.2-rc1")];
-    // GodotSharp nuget packages use a dot in the label, and this has to be supported as well.
-    yield return [new SemanticVersion("4", "3", "0", "dev.6"), false, GetChecksumFileUrl("4.3-dev6")];
+    yield return [new GodotVersion(1, 2, 3, "stable", -1), false, GetChecksumFileUrl("1.2.3-stable")];
+    yield return [new GodotVersion(1, 0, 0, "stable", -1), false, GetChecksumFileUrl("1.0-stable")];
+    yield return [new GodotVersion(4, 0, 0, "alpha", 14), false, GetChecksumFileUrl("4.0-alpha14")];
+    yield return [new GodotVersion(4, 2, 2, "rc", 1), false, GetChecksumFileUrl("4.2.2-rc1")];
+    yield return [new GodotVersion(4, 3, 0, "dev", 6), false, GetChecksumFileUrl("4.3-dev6")];
   }
 
   [Theory]
   [MemberData(nameof(CorrectChecksumUrlRequestedTestData))]
   public async Task CorrectChecksumUrlRequested(
-    SemanticVersion version,
+    GodotVersion version,
     bool isDotNetVersion,
     string expectedChecksumUrl
   ) {
@@ -88,7 +87,6 @@ public class GodotChecksumClientTest {
     ];
   }
 
-
   [Theory]
   [MemberData(nameof(CorrectlyParsedJsonTestData))]
   public async void CorrectlyParsedJson(
@@ -101,15 +99,15 @@ public class GodotChecksumClientTest {
     var archive = new GodotCompressedArchive(
       string.Empty,
       string.Empty,
-      new SemanticVersion("4", "3", "0", "dev5"),
+      new GodotVersion(4, 3, 0, "dev", 5),
       isDotnetVersion,
       string.Empty
     );
 
     var platform = new Mock<IGodotEnvironment>();
     platform.Setup(
-      platform => platform.GetInstallerFilename(
-        It.IsAny<SemanticVersion>(),
+      static platform => platform.GetInstallerFilename(
+        It.IsAny<GodotVersion>(),
         It.IsAny<bool>()
       )
     ).Returns(filename);
@@ -135,7 +133,7 @@ public class GodotChecksumClientTest {
     var archive = new GodotCompressedArchive(
       string.Empty,
       downloadFileName,
-      new SemanticVersion("1", "1", "0"),
+      new GodotVersion(1, 1, 0, "stable", -1),
       false,
       string.Empty
     );
@@ -143,7 +141,7 @@ public class GodotChecksumClientTest {
     var platform = new Mock<IGodotEnvironment>();
     platform.Setup(
       platform => platform.GetInstallerFilename(
-        It.IsAny<SemanticVersion>(),
+        It.IsAny<GodotVersion>(),
         It.IsAny<bool>()
       )
     ).Returns(downloadFileName);
@@ -160,16 +158,18 @@ public class GodotChecksumClientTest {
 
     Assert.Equal(ex.Message, $"File checksum for {downloadFileName} not present");
     Assert.Equal(ex2.Message, $"File checksum for {downloadFileName} not present");
-
   }
 
   /// <summary>
+  /// <para>
   /// Creates a new Mock instance of INetworkClient that returns a JSON response
   /// with the contents of a given embedded resource in the data directory to any
   /// request.
-  ///
+  /// </para>
+  /// <para>
   /// If you want to add another resource, you will have to configure it to be an
   /// embedded resource.
+  /// </para>
   /// </summary>
   /// <param name="responseFilename">Filename from data directory whose </param>
   /// <returns>A INetworkClient returning the JSON contents to any request.</returns>
@@ -178,10 +178,9 @@ public class GodotChecksumClientTest {
     var resourceName = $"Chickensoft.GodotEnv.Tests.src.features.godot.domain.data.{responseFilename}";
     string godotReleaseJson;
     await using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)
-                              ?? throw new FileNotFoundException("Failed to get test release JSON file.")) {
-      using (var reader = new StreamReader(stream)) {
-        godotReleaseJson = await reader.ReadToEndAsync();
-      }
+                              ?? throw new FileNotFoundException("Failed to get test release JSON file."))
+    using (var reader = new StreamReader(stream)) {
+      godotReleaseJson = await reader.ReadToEndAsync();
     }
 
     var networkClient = new Mock<INetworkClient>();
@@ -189,11 +188,8 @@ public class GodotChecksumClientTest {
         client => client.WebRequestGetAsync(
           It.IsAny<string>(), false
         ))
-      .ReturnsAsync(() => {
-        var response = new HttpResponseMessage(HttpStatusCode.OK) {
-          Content = new StringContent(godotReleaseJson)
-        };
-        return response;
+      .ReturnsAsync(() => new HttpResponseMessage(HttpStatusCode.OK) {
+        Content = new StringContent(godotReleaseJson)
       });
     return networkClient;
   }
@@ -210,7 +206,7 @@ public class GodotChecksumClientTest {
       var dummyArchive = new GodotCompressedArchive(
         "TestFilename",
         Path.GetFileName(tempFileName),
-        new SemanticVersion("1", "0", "0"),
+        new GodotVersion(1, 0, 0, "stable", -1),
         true,
         Path.GetDirectoryName(tempFileName) ?? "/"
       );
@@ -250,7 +246,7 @@ public class GodotChecksumClientTest {
       var archive = new GodotCompressedArchive(
         string.Empty,
         archiveFileName,
-        new SemanticVersion("4", "3", "0", "dev5"),
+        new GodotVersion(4, 3, 0, "dev", 5),
         false,
         Path.GetDirectoryName(archivePath) ?? "/"
       );
@@ -258,7 +254,7 @@ public class GodotChecksumClientTest {
       var platform = new Mock<IGodotEnvironment>();
       platform.Setup(
         platform => platform.GetInstallerFilename(
-          It.IsAny<SemanticVersion>(),
+          It.IsAny<GodotVersion>(),
           It.IsAny<bool>()
         )
       ).Returns(archiveFileName);

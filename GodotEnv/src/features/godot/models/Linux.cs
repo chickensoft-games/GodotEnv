@@ -5,14 +5,15 @@ using Chickensoft.GodotEnv.Common.Utilities;
 using global::GodotEnv.Common.Utilities;
 
 public class Linux : Unix {
-  public Linux(ISystemInfo systemInfo, IFileClient fileClient, IComputer computer)
-    : base(systemInfo, fileClient, computer) { }
+  public Linux(
+    ISystemInfo systemInfo,
+    IFileClient fileClient,
+    IComputer computer,
+    IVersionStringConverter versionStringConverter
+  )
+    : base(systemInfo, fileClient, computer, versionStringConverter) { }
 
-  public override string ExportTemplatesBasePath => FileClient.Combine(
-    FileClient.UserDirectory, ".local/share/godot"
-  );
-
-  public override string GetInstallerNameSuffix(bool isDotnetVersion, SemanticVersion version) {
+  public override string GetInstallerNameSuffix(bool isDotnetVersion, GodotVersion version) {
     var (platformName, architecture) = GetPlatformNameAndArchitecture(version);
 
     return isDotnetVersion ? $"_mono_{platformName}_{architecture}" : $"_{platformName}.{architecture}";
@@ -21,7 +22,7 @@ public class Linux : Unix {
   public override void Describe(ILog log) => log.Info("🐧 Running on Linux");
 
   public override string GetRelativeExtractedExecutablePath(
-    SemanticVersion version, bool isDotnetVersion
+    GodotVersion version, bool isDotnetVersion
   ) {
     var fsVersionString = GetFilenameVersionString(version);
     var nameSuffix = GetInstallerNameSuffix(isDotnetVersion, version);
@@ -40,7 +41,7 @@ public class Linux : Unix {
   }
 
   public override string GetRelativeGodotSharpPath(
-    SemanticVersion version,
+    GodotVersion version,
     bool isDotnetVersion
   ) => FileClient.Combine(
       GetFilenameVersionString(version) + GetInstallerNameSuffix(isDotnetVersion, version),
@@ -48,12 +49,12 @@ public class Linux : Unix {
     );
 
   private static (string platformName, string architecture) GetPlatformNameAndArchitecture(
-    SemanticVersion version
+    GodotVersion version
   ) {
     var architecture = "x86_64";
     var platformName = "linux";
 
-    if (int.TryParse(version.Major, out var parsedVersion) && parsedVersion == 3) {
+    if (version.Major == 3) {
       architecture = "64";
       platformName = "x11";
     }
