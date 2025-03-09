@@ -18,12 +18,12 @@ public partial class ReleaseVersionStringConverterTest {
   [InlineData("1.0.1-label")]
   [InlineData("1.0-rc.1")]
   [InlineData("1.0.0-rc1")]
-  public void RejectionOfInvalidGodotVersionNumbers(string invalidVersionNumber) {
+  public void RejectionOfInvalidReleaseVersionNumbers(string invalidVersionNumber) {
     var converter = new ReleaseVersionStringConverter();
     Assert.Throws<ArgumentException>(() => converter.ParseVersion(invalidVersionNumber));
   }
 
-  public static IEnumerable<object[]> CorrectParsingOfValidGodotVersionsTestData() {
+  public static IEnumerable<object[]> CorrectParsingOfValidReleaseVersionsTestData() {
     yield return ["1.2.3-stable", new GodotVersion(1, 2, 3, "stable", -1)];
     yield return ["0.2.3-stable", new GodotVersion(0, 2, 3, "stable", -1)];
     yield return ["1.0-stable", new GodotVersion(1, 0, 0, "stable", -1)];
@@ -33,14 +33,14 @@ public partial class ReleaseVersionStringConverterTest {
   }
 
   [Theory]
-  [MemberData(nameof(CorrectParsingOfValidGodotVersionsTestData))]
-  public void CorrectParsingOfValidGodotVersions(string toParse, GodotVersion expected) {
+  [MemberData(nameof(CorrectParsingOfValidReleaseVersionsTestData))]
+  public void CorrectParsingOfValidReleaseVersions(string toParse, GodotVersion expected) {
     var converter = new ReleaseVersionStringConverter();
     var parsed = converter.ParseVersion(toParse);
     Assert.Equal(expected, parsed);
   }
 
-  public static IEnumerable<object[]> CorrectGodotVersionStringFormattingTestData() {
+  public static IEnumerable<object[]> CorrectReleaseVersionStringFormattingTestData() {
     yield return [new GodotVersion(0, 0, 1, "stable", -1), "0.0.1-stable"];
     yield return [new GodotVersion(1, 2, 0, "stable", -1), "1.2-stable"];
     yield return [new GodotVersion(1, 2, 3, "stable", -1), "1.2.3-stable"];
@@ -49,8 +49,8 @@ public partial class ReleaseVersionStringConverterTest {
   }
 
   [Theory]
-  [MemberData(nameof(CorrectGodotVersionStringFormattingTestData))]
-  public void CorrectGodotVersionStringFormatting(GodotVersion toFormat, string expected) {
+  [MemberData(nameof(CorrectReleaseVersionStringFormattingTestData))]
+  public void CorrectReleaseVersionStringFormatting(GodotVersion toFormat, string expected) {
     var converter = new ReleaseVersionStringConverter();
     Assert.Equal(expected, converter.VersionString(toFormat));
   }
