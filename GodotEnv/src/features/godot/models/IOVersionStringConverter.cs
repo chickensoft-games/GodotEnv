@@ -7,7 +7,7 @@ public partial class IOVersionStringConverter : IVersionStringConverter {
   private readonly SharpVersionStringConverter _sharpConverter = new();
 
   public GodotVersion ParseVersion(string version) {
-    var trimmedVersion = TrimLeadingV(version);
+    var trimmedVersion = version.TrimStart('v');
     Exception releaseEx = null!;
     try {
       return _releaseConverter.ParseVersion(trimmedVersion);
@@ -25,7 +25,4 @@ public partial class IOVersionStringConverter : IVersionStringConverter {
 
   public string VersionString(GodotVersion version)
     => _releaseConverter.VersionString(version);
-
-  public static string TrimLeadingV(string version)
-    => version[0] == 'v' ? version[1..] : version;
 }
