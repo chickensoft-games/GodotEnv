@@ -597,18 +597,22 @@ public partial class GodotRepository : IGodotRepository {
     var versions = new List<string>();
     // format version name
     for (var i = 0; i < deserializedBody?.Count; i++) {
-      var version = deserializedBody[i];
-      version.Name = version.Name.Replace("godot-", "").Replace(".json", "");
+      var deserializedVersion = deserializedBody[i];
+      deserializedVersion.Name = deserializedVersion.Name.Replace("godot-", "").Replace(".json", "");
 
       // limit versions to godot 3 and above
-      if (version.Name[0] == '2') {
+      if (deserializedVersion.Name[0] == '2') {
         break;
       }
 
-      if (version.Name.IndexOf('.') == version.Name.LastIndexOf('.')) {
-        version.Name = version.Name.Insert(version.Name.IndexOf('-'), ".0");
+      try {
+        // Version strings coming from remote will (mostly) be in release style
+        var version = new ReleaseVersionStringConverter().ParseVersion(deserializedVersion.Name);
+        // Output in our preferred format so the user has a consistent picture of versioning
+        versions.Add(VersionStringConverter.VersionString(version));
       }
-      versions.Add(version.Name);
+      // Discard remote versions that aren't canonical, like "3.2-alpha0-unofficial"
+      catch (ArgumentException) { }
     }
 
     return versions;
