@@ -62,7 +62,7 @@ public interface IFileClient {
   /// </summary>
   /// <param name="symlinkPath">Path of the symlink / shortcut / alias.</param>
   /// <returns>Symlink target.</returns>
-  string FileSymlinkTarget(string symlinkPath);
+  string? FileSymlinkTarget(string symlinkPath);
 
   /// <summary>
   /// Creates all directories and subdirectories in the specified path unless
@@ -337,7 +337,7 @@ public class FileClient : IFileClient {
   public string Sanitize(string path) =>
     Files.Path.GetInvalidFileNameChars()
       .Union(Files.Path.GetInvalidPathChars())
-      .Aggregate(path, (current, c) => current.Replace(c, '_')).Trim('_');
+      .Aggregate(path, static (current, c) => current.Replace(c, '_')).Trim('_');
 
   /// <summary>
   /// Checks a string to see if it matches a glob pattern.
@@ -358,8 +358,8 @@ public class FileClient : IFileClient {
   public string DirectorySymlinkTarget(string symlinkPath)
     => Files.DirectoryInfo.New(symlinkPath).LinkTarget!;
 
-  public string FileSymlinkTarget(string symlinkPath)
-    => Files.FileInfo.New(symlinkPath).LinkTarget!;
+  public string? FileSymlinkTarget(string symlinkPath)
+    => Files.FileInfo.New(symlinkPath).LinkTarget;
 
   public void CreateDirectory(string path)
     => Files.Directory.CreateDirectory(path);

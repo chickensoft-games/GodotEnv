@@ -54,8 +54,9 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
 
     var noDotnetFlag = isDotnetVersion ? "" : " --no-dotnet";
 
-    var potentialInstallation =
-      godotRepo.GetInstallation(version, isDotnetVersion);
+    godotRepo.GetInstallation(
+      version, out var potentialInstallation, out var _, isDotnetVersion
+    );
 
     await Task.CompletedTask;
 

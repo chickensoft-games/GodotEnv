@@ -57,8 +57,9 @@ public class GodotInstallCommand :
     var godotInstallationsPath = godotRepo.GodotInstallationsPath;
     var godotCachePath = godotRepo.GodotCachePath;
 
-    var existingInstallation =
-      godotRepo.GetInstallation(version, isDotnetVersion);
+    godotRepo.GetInstallation(
+      version, out var existingInstallation, out var _, isDotnetVersion
+    );
 
     // Log information to show we understood.
     platform.Describe(log);

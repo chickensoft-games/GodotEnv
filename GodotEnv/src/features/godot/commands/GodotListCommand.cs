@@ -25,7 +25,8 @@ public class GodotListCommand : ICommand, ICliCommand {
     godotRepo.GetInstallationsList(
       out var installations,
       out var unrecognizedDirectories,
-      out var failedInstallations
+      out var failedInstallations,
+      out var isTargetAvailable
     );
     foreach (var installation in installations) {
       var activeTag = installation.IsActiveVersion ? " *" : "";
@@ -38,6 +39,9 @@ public class GodotListCommand : ICommand, ICliCommand {
     foreach (var failedInstallation in failedInstallations) {
       log.Err("Installation directory matches Godot version but failed to load:");
       log.Err($"  {failedInstallation}");
+    }
+    if (!isTargetAvailable) {
+      log.Warn("Could not determine current target version of Godot.");
     }
   }
 

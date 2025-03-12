@@ -21,8 +21,14 @@ public class GodotEnvTargetCommand : ICommand, ICliCommand {
   public async ValueTask ExecuteAsync(IConsole console) {
     var log = ExecutionContext.CreateLog(console);
     var godotRepo = ExecutionContext.Godot.GodotRepo;
+    var target = godotRepo.GodotSymlinkTarget;
 
-    log.Print(godotRepo.GodotSymlinkTarget);
+    if (target is null) {
+      log.Warn("Could not determine current target Godot version.");
+    }
+    else {
+      log.Print(target);
+    }
 
     await Task.CompletedTask;
   }
