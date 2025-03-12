@@ -185,9 +185,17 @@ public partial class GodotRepository : IGodotRepository {
     FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH
   );
 
-  public string GodotSymlinkPath => FileClient.Combine(
-    FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH, Defaults.GODOT_BIN_NAME
-  );
+  public string GodotSymlinkPath {
+    get {
+      var val = FileClient.Combine(
+        FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH, Defaults.GODOT_BIN_NAME
+      );
+      if (SystemInfo.OS == OSType.Windows) {
+        val = $"{val}.exe";
+      }
+      return val;
+    }
+  }
 
   public string GodotSharpSymlinkPath => FileClient.Combine(
     FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH, Defaults.GODOT_SHARP_PATH
@@ -424,13 +432,8 @@ public partial class GodotRepository : IGodotRepository {
     switch (SystemInfo.OS) {
       case OSType.Linux:
       case OSType.MacOS:
+      case OSType.Windows:
         await FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
-        break;
-      // NOTE: Windows demands the file extension to be in the name.
-      case OSType.Windows: {
-          var hardLinkPath = $"{GodotSymlinkPath}.exe";
-          await FileClient.CreateSymlink(hardLinkPath, installation.ExecutionPath);
-        }
         break;
       case OSType.Unknown:
       default:
