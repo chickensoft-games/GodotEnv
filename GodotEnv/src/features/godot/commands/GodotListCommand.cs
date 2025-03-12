@@ -41,7 +41,7 @@ public class GodotListCommand : ICommand, ICliCommand {
       log.Err($"  {failedInstallation}");
     }
     if (!isTargetAvailable) {
-      log.Warn("Could not determine current target version of Godot.");
+      log.Warn("Could not determine current target Godot version.");
     }
   }
 
