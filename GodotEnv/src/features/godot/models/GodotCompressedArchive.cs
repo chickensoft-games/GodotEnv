@@ -7,16 +7,13 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 /// file.</param>
 /// <param name="Filename">Filename of the compressed archive.</param>
 /// <param name="Version">Godot version.</param>
-/// <param name="IsDotnetVersion">True if this installation of Godot is the
-/// .NET-enabled version of Godot.</param>
 /// <param name="Path">
 /// Absolute path to the directory containing the installer file.
 /// </param>
 public record GodotCompressedArchive(
   string Name,
   string Filename,
-  GodotVersion Version,
-  bool IsDotnetVersion,
+  DotnetSpecificGodotVersion Version,
   string Path
 ) {
   public override string ToString() =>
@@ -25,7 +22,6 @@ public record GodotCompressedArchive(
       "name": {{Name}}",
       "filename": "{{Filename}}",
       "version": "{{Version}}",
-      "isDotnetVersion": {{IsDotnetVersion}},
       "path": "{{Path}}"
     }
     """;

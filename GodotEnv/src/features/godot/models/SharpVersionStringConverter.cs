@@ -4,7 +4,31 @@ using System;
 using System.Text.RegularExpressions;
 
 public partial class SharpVersionStringConverter : IVersionStringConverter {
-  public GodotVersion ParseVersion(string version) {
+  public DotnetAgnosticGodotVersion ParseVersion(string version) =>
+    new(ParseVersionNumber(version));
+
+  public DotnetSpecificGodotVersion ParseVersion(string version, bool isDotnet) =>
+    new(ParseVersionNumber(version), isDotnet);
+
+  public string VersionString(GodotVersion version) {
+    var versionString = string.Join(
+      ".", version.Number.Major, version.Number.Minor, version.Number.Patch
+    );
+    if (version.Number.Label != "stable") {
+      versionString += $"-{LabelString(version)}";
+    }
+    return versionString;
+  }
+
+  public string LabelString(GodotVersion version) {
+    var result = version.Number.Label;
+    if (result != "stable") {
+      result += $".{version.Number.LabelNumber}";
+    }
+    return result;
+  }
+
+  private static GodotVersionNumber ParseVersionNumber(string version) {
     var match = VersionStringRegex().Match(version);
     if (!match.Success) {
       throw new ArgumentException($"Couldn't match \"{version}\" to known GodotSharp version patterns.");
@@ -23,25 +47,7 @@ public partial class SharpVersionStringConverter : IVersionStringConverter {
     else {
       labelNum = int.Parse(match.Groups[6].Value);
     }
-    return new GodotVersion(major, minor, patch, label, labelNum);
-  }
-
-  public string VersionString(GodotVersion version) {
-    var versionString = string.Join(
-      ".", version.Major, version.Minor, version.Patch
-    );
-    if (version.Label != "stable") {
-      versionString += $"-{LabelString(version)}";
-    }
-    return versionString;
-  }
-
-  public string LabelString(GodotVersion version) {
-    var result = version.Label;
-    if (result != "stable") {
-      result += $".{version.LabelNumber}";
-    }
-    return result;
+    return new GodotVersionNumber(major, minor, patch, label, labelNum);
   }
 
   // All GodotSharp versions with a prerelease label include a number

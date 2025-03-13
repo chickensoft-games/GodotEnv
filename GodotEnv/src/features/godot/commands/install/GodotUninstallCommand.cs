@@ -2,6 +2,7 @@ namespace Chickensoft.GodotEnv.Features.Godot.Commands;
 
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
+using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Infrastructure;
@@ -46,12 +47,12 @@ public class GodotUninstallCommand :
 
     var log = ExecutionContext.CreateLog(console);
 
-    // We know this won't throw because the validator okayed it
-    var version = versionConverter.ParseVersion(RawVersion);
     var isDotnetVersion = !NoDotnet;
+    // We know this won't throw because the validator okayed it
+    var version = versionConverter.ParseVersion(RawVersion, isDotnetVersion);
 
     log.Print("");
-    if (await godotRepo.Uninstall(version, isDotnetVersion, log)) {
+    if (await godotRepo.Uninstall(version, log)) {
       log.Success($"Godot {versionConverter.VersionString(version)} uninstalled.");
     }
     else {

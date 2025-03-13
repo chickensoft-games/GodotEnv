@@ -22,26 +22,16 @@ public class GodotListCommand : ICommand, ICliCommand {
   }
 
   private static void ListLocalVersions(ILog log, IGodotRepository godotRepo) {
-    godotRepo.GetInstallationsList(
-      out var installations,
-      out var unrecognizedDirectories,
-      out var failedInstallations,
-      out var isTargetAvailable
-    );
-    foreach (var installation in installations) {
-      var activeTag = installation.IsActiveVersion ? " *" : "";
-      log.Print(godotRepo.InstallationVersionName(installation) + activeTag);
-    }
-    foreach (var unrecognized in unrecognizedDirectories) {
-      log.Warn("Unrecognized subfolder in Godot installation directory (may be a non-conforming version identifier):");
-      log.Warn($"  {unrecognized}");
-    }
-    foreach (var failedInstallation in failedInstallations) {
-      log.Err("Installation directory matches Godot version but failed to load:");
-      log.Err($"  {failedInstallation}");
-    }
-    if (!isTargetAvailable) {
-      log.Warn("Could not determine current target Godot version.");
+    var installations = godotRepo.GetInstallationsList();
+    foreach (var result in installations) {
+      if (result.IsSuccess) {
+        var installation = result.Value;
+        var activeTag = installation.IsActiveVersion ? " *" : "";
+        log.Print(godotRepo.InstallationVersionName(installation) + activeTag);
+      }
+      else {
+        log.Warn(result.Error);
+      }
     }
   }
 

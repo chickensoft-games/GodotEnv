@@ -1,6 +1,7 @@
 namespace Chickensoft.GodotEnv.Features.Godot.Models;
 
 public interface IVersionStringConverter {
-  public GodotVersion ParseVersion(string version);
+  public DotnetAgnosticGodotVersion ParseVersion(string version);
+  public DotnetSpecificGodotVersion ParseVersion(string version, bool isDotnet);
   public string VersionString(GodotVersion version);
 }

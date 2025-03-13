@@ -110,12 +110,11 @@ public class GodotRepositoryTest {
       versionStringConverter: versionStringConverter.Object
     );
 
-    var version = fileVersionStringConverter.ParseVersion(godotVersionString)!;
-    godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(version, true), out var reconstructedDotnetVersion, out var isDotnetVersionDotnet);
-    Assert.Equal(version, reconstructedDotnetVersion);
-    Assert.True(isDotnetVersionDotnet);
-    godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(version, false), out var reconstructedNonDotnetVersion, out var isNonDotnetVersionDotnet);
-    Assert.Equal(version, reconstructedNonDotnetVersion);
-    Assert.False(isNonDotnetVersionDotnet);
+    var dotnetVersion = fileVersionStringConverter.ParseVersion(godotVersionString, true)!;
+    var reconstructedDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(dotnetVersion));
+    Assert.Equal(dotnetVersion, reconstructedDotnetVersion);
+    var nonDotnetVersion = fileVersionStringConverter.ParseVersion(godotVersionString, false)!;
+    var reconstructedNonDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(nonDotnetVersion));
+    Assert.Equal(nonDotnetVersion, reconstructedNonDotnetVersion);
   }
 }

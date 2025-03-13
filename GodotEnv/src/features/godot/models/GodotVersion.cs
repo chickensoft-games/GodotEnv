@@ -2,14 +2,34 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 
 using System;
 
-public partial record GodotVersion {
+/// <summary>
+/// Represents a canonical Godot version number, independent of stringification
+/// schemes or .NET inclusion
+/// </summary>
+public record GodotVersionNumber {
+  /// <summary>
+  /// The major version number.
+  /// </summary>
   public int Major { get; }
+  /// <summary>
+  /// The minor version number.
+  /// </summary>
   public int Minor { get; }
+  /// <summary>
+  /// The patch version number (0 when the Godot release number has no patch).
+  /// </summary>
   public int Patch { get; }
+  /// <summary>
+  /// The label string (e.g., "beta", "rc", "stable")
+  /// </summary>
   public string Label { get; }
+  /// <summary>
+  /// The label number, if any (e.g., 1 if the Godot release ends with "-rc1").
+  /// When the label is "stable", this value is -1.
+  /// </summary>
   public int LabelNumber { get; }
 
-  internal GodotVersion(int major, int minor, int patch, string label, int labelNumber) {
+  public GodotVersionNumber(int major, int minor, int patch, string label, int labelNumber) {
     if (major < 0) {
       throw new ArgumentException($"Major version {major} is invalid");
     }
@@ -36,5 +56,65 @@ public partial record GodotVersion {
     Patch = patch;
     Label = label;
     LabelNumber = labelNumber;
+  }
+}
+
+public abstract record GodotVersion {
+  /// <summary>
+  /// The version number.
+  /// </summary>
+  public GodotVersionNumber Number { get; }
+
+  public GodotVersion(GodotVersionNumber number) {
+    Number = number;
+  }
+
+  public GodotVersion(
+    int major, int minor, int patch, string label, int labelNumber
+  ) {
+    Number =
+      new GodotVersionNumber(major, minor, patch, label, labelNumber);
+  }
+}
+
+/// <summary>
+/// Represents a version of Godot that may be .NET enabled or not.
+/// </summary>
+public sealed record DotnetAgnosticGodotVersion : GodotVersion {
+  public DotnetAgnosticGodotVersion(GodotVersionNumber number)
+    : base(number) { }
+
+  public DotnetAgnosticGodotVersion(
+    int major, int minor, int patch, string label, int labelNumber
+  )
+    : base(major, minor, patch, label, labelNumber) { }
+}
+
+/// <summary>
+/// Represents a version of Godot that either is, or is not, .NET-enabled.
+/// </summary>
+public sealed record DotnetSpecificGodotVersion : GodotVersion {
+  /// <summary>
+  /// True if referencing the .NET version of Godot.
+  /// </summary>
+  public bool IsDotnet { get; }
+
+  public DotnetSpecificGodotVersion(
+    GodotVersionNumber number, bool isDotnet
+  )
+    : base(number) {
+    IsDotnet = isDotnet;
+  }
+
+  public DotnetSpecificGodotVersion(
+    int major,
+    int minor,
+    int patch,
+    string label,
+    int labelNumber,
+    bool isDotnet
+  )
+    : base(major, minor, patch, label, labelNumber) {
+    IsDotnet = isDotnet;
   }
 }

@@ -17,8 +17,8 @@ public class Windows : GodotEnvironment {
 
   private string GetProcessorArchitecture(GodotVersion version) {
     var noKnownArmVersion =
-      version.Major < _firstKnownArmVersion.major
-        || version.Minor < _firstKnownArmVersion.minor;
+      version.Number.Major < _firstKnownArmVersion.major
+        || version.Number.Minor < _firstKnownArmVersion.minor;
 
     if (noKnownArmVersion || SystemInfo.CPUArch != CPUArch.Arm64) {
       return "win64";
@@ -28,25 +28,25 @@ public class Windows : GodotEnvironment {
   }
 
   public override string GetInstallerNameSuffix(
-    bool isDotnetVersion, GodotVersion version
+    DotnetSpecificGodotVersion version
   )
-    => isDotnetVersion
+    => version.IsDotnet
       ? $"_mono_{GetProcessorArchitecture(version)}"
       : $"_{GetProcessorArchitecture(version)}.exe";
 
   public override void Describe(ILog log) => log.Info("⧉ Running on Windows");
 
   public override string GetRelativeExtractedExecutablePath(
-    GodotVersion version, bool isDotnetVersion
+    DotnetSpecificGodotVersion version
   ) {
     var fsVersionString = GetFilenameVersionString(version);
     var name = fsVersionString +
-      $"{(isDotnetVersion ? "_mono" : "")}_{GetProcessorArchitecture(version)}.exe";
+      $"{(version.IsDotnet ? "_mono" : "")}_{GetProcessorArchitecture(version)}.exe";
 
     // Both versions extract to a folder. The dotnet folder name is different
     // from the non-dotnet folder name :P
 
-    if (isDotnetVersion) {
+    if (version.IsDotnet) {
       return FileClient.Combine(fsVersionString + $"_mono_{GetProcessorArchitecture(version)}", name);
     }
 
@@ -55,8 +55,7 @@ public class Windows : GodotEnvironment {
   }
 
   public override string GetRelativeGodotSharpPath(
-    GodotVersion version,
-    bool isDotnetVersion
+    DotnetSpecificGodotVersion version
   ) => FileClient.Combine(
     GetFilenameVersionString(version) + $"_mono_{GetProcessorArchitecture(version)}", "GodotSharp"
   );

@@ -68,7 +68,7 @@ public class GodotChecksumClient(
     checksumFileResponse.EnsureSuccessStatusCode();
 
     var metadata = await checksumFileResponse.Content.ReadFromJsonAsync<JsonReleaseMetadata>() ?? throw new KeyNotFoundException("Metadata object not found");
-    var downloadFileName = Platform.GetInstallerFilename(archive.Version, archive.IsDotnetVersion);
+    var downloadFileName = Platform.GetInstallerFilename(archive.Version);
     var fileData = metadata.GetChecksumForFile(downloadFileName) ?? throw new MissingChecksumException($"File checksum for {downloadFileName} not present");
 
     return fileData.Checksum ?? throw new MissingChecksumException($"File checksum for {downloadFileName} not present");

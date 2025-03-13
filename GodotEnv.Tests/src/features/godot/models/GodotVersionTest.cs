@@ -18,18 +18,70 @@ public partial class GodotVersionTest {
 
   [Theory]
   [MemberData(nameof(RejectionOfInvalidPropertyValuesTestData))]
-  public void RejectionOfInvalidPropertyValues(int major,
-                                               int minor,
-                                               int patch,
-                                               string label,
-                                               int labelNum) =>
+  public void VersionNumberRejectsInvalidPropertyValues(
+    int major,
+    int minor,
+    int patch,
+    string label,
+    int labelNum
+  ) =>
     Assert.Throws<ArgumentException>(
       () =>
-        new GodotVersion(major,
-                         minor,
-                         patch,
-                         label,
-                         labelNum));
-  //
+        new GodotVersionNumber(
+          major,
+          minor,
+          patch,
+          label,
+          labelNum
+      ));
 
+  [Theory]
+  [MemberData(nameof(RejectionOfInvalidPropertyValuesTestData))]
+  public void DotnetAgnosticRejectsInvalidPropertyValues(
+    int major,
+    int minor,
+    int patch,
+    string label,
+    int labelNum
+  ) =>
+    Assert.Throws<ArgumentException>(
+      () =>
+        new DotnetAgnosticGodotVersion(
+          major,
+          minor,
+          patch,
+          label,
+          labelNum
+      ));
+
+  [Theory]
+  [MemberData(nameof(RejectionOfInvalidPropertyValuesTestData))]
+  public void DotnetSpecificRejectsInvalidPropertyValues(
+    int major,
+    int minor,
+    int patch,
+    string label,
+    int labelNum
+  ) {
+    Assert.Throws<ArgumentException>(
+      () =>
+        new DotnetSpecificGodotVersion(
+          major,
+          minor,
+          patch,
+          label,
+          labelNum,
+          false
+      ));
+    Assert.Throws<ArgumentException>(
+      () =>
+        new DotnetSpecificGodotVersion(
+          major,
+          minor,
+          patch,
+          label,
+          labelNum,
+          true
+      ));
+  }
 }

@@ -13,21 +13,26 @@ public class MacOS : Unix {
   )
     : base(systemInfo, fileClient, computer, versionStringConverter) { }
 
-  public override string GetInstallerNameSuffix(bool isDotnetVersion, GodotVersion version) {
-    var hasUniversalSuffix = version.Major > 3 || (version.Major == 3 && version.Minor > 3 && version.Patch > 2);
+  public override string GetInstallerNameSuffix(DotnetSpecificGodotVersion version) {
+    var hasUniversalSuffix =
+      version.Number.Major > 3 ||
+        (
+          version.Number.Major == 3 &&
+          version.Number.Minor > 3 &&
+          version.Number.Patch > 2
+        );
     var universalSuffix = hasUniversalSuffix ? ".universal" : ".64";
 
-    return $"{(isDotnetVersion ? "_mono" : "")}_{(version.Major == 3 ? "osx" : "macos")}{universalSuffix}";
+    return $"{(version.IsDotnet ? "_mono" : "")}_{(version.Number.Major == 3 ? "osx" : "macos")}{universalSuffix}";
   }
 
   public override void Describe(ILog log) => log.Info("🍏 Running on macOS");
 
   public override string GetRelativeExtractedExecutablePath(
-    GodotVersion version, bool isDotnetVersion
-  ) => $"Godot{(isDotnetVersion ? "_mono" : "")}.app/Contents/MacOS/Godot";
+    DotnetSpecificGodotVersion version
+  ) => $"Godot{(version.IsDotnet ? "_mono" : "")}.app/Contents/MacOS/Godot";
 
   public override string GetRelativeGodotSharpPath(
-    GodotVersion version,
-    bool isDotnetVersion
+    DotnetSpecificGodotVersion version
   ) => "Godot_mono.app/Contents/Resources/GodotSharp";
 }

@@ -48,15 +48,14 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
     var log = ExecutionContext.CreateLog(console);
     var output = console.Output;
 
-    // We know this won't throw because the validator okayed it
-    var version = versionConverter.ParseVersion(RawVersion);
     var isDotnetVersion = !NoDotnet;
+    // We know this won't throw because the validator okayed it
+    var version = versionConverter.ParseVersion(RawVersion, isDotnetVersion);
 
     var noDotnetFlag = isDotnetVersion ? "" : " --no-dotnet";
 
-    godotRepo.GetInstallation(
-      version, out var potentialInstallation, out var _, isDotnetVersion
-    );
+    var potentialInstallation =
+      godotRepo.GetInstallation(version);
 
     await Task.CompletedTask;
 

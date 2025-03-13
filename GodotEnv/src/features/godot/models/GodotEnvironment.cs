@@ -20,25 +20,19 @@ public interface IGodotEnvironment {
   /// <summary>
   /// Godot installation filename suffix.
   /// </summary>
-  /// <param name="isDotnetVersion">True if using the .NET-enabled version of Godot,
-  /// false otherwise.</param>
   /// <param name="version">Godot version.</param>
   /// <returns>Godot filename suffix.</returns>
-  string GetInstallerNameSuffix(bool isDotnetVersion, GodotVersion version);
+  string GetInstallerNameSuffix(DotnetSpecificGodotVersion version);
 
   /// <summary>
   /// Computes the Godot download url.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  /// <param name="isDotnetVersion">
-  /// True if referencing the .NET version of Godot.
-  /// </param>
   /// <param name="isTemplate">True if computing the download url to the
   /// export templates, false to compute the download url to the Godot
   /// application.</param>
   string GetDownloadUrl(
-    GodotVersion version,
-    bool isDotnetVersion,
+    DotnetSpecificGodotVersion version,
     bool isTemplate
   );
 
@@ -46,11 +40,8 @@ public interface IGodotEnvironment {
   /// Gets the filename as which an installer is known.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  /// <param name="isDotnetVersion">
-  /// True if referencing the .NET version of Godot.
-  /// </param>
   public string GetInstallerFilename(
-    GodotVersion version, bool isDotnetVersion
+    DotnetSpecificGodotVersion version
   );
 
   /// <summary>
@@ -64,10 +55,9 @@ public interface IGodotEnvironment {
   /// to the extracted Godot installation directory.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  /// <param name="isDotnetVersion">Dotnet version indicator.</param>
   /// <returns>Relative path.</returns>
   string GetRelativeExtractedExecutablePath(
-    GodotVersion version, bool isDotnetVersion
+    DotnetSpecificGodotVersion version
   );
 
   /// <summary>
@@ -75,9 +65,8 @@ public interface IGodotEnvironment {
   /// directory that is included with Godot.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  /// <param name="isDotnetVersion">Dotnet version indicator.</param>
   /// <returns>Path to the GodotSharp directory.</returns>
-  string GetRelativeGodotSharpPath(GodotVersion version, bool isDotnetVersion);
+  string GetRelativeGodotSharpPath(DotnetSpecificGodotVersion version);
 }
 
 public abstract class GodotEnvironment : IGodotEnvironment {
@@ -127,19 +116,17 @@ public abstract class GodotEnvironment : IGodotEnvironment {
 
   public string ExportTemplatesBasePath => throw new NotImplementedException();
 
-  public abstract string GetInstallerNameSuffix(bool isDotnetVersion, GodotVersion version);
+  public abstract string GetInstallerNameSuffix(DotnetSpecificGodotVersion version);
   public abstract void Describe(ILog log);
   public abstract string GetRelativeExtractedExecutablePath(
-    GodotVersion version, bool isDotnetVersion
+    DotnetSpecificGodotVersion version
   );
   public abstract string GetRelativeGodotSharpPath(
-    GodotVersion version,
-    bool isDotnetVersion
+    DotnetSpecificGodotVersion version
   );
 
   public string GetDownloadUrl(
-    GodotVersion version,
-    bool isDotnetVersion,
+    DotnetSpecificGodotVersion version,
     bool isTemplate
   ) {
     // We need to be sure this is a release-style version string to get the
@@ -149,12 +136,12 @@ public abstract class GodotEnvironment : IGodotEnvironment {
 
     // Godot application download url.
     if (!isTemplate) {
-      return url + GetInstallerFilename(version, isDotnetVersion);
+      return url + GetInstallerFilename(version);
     }
 
     // Export template download url.
     return
-      url + GetExportTemplatesInstallerFilename(version, isDotnetVersion);
+      url + GetExportTemplatesInstallerFilename(version);
   }
 
   protected string GetFilenameVersionString(GodotVersion version) =>
@@ -162,15 +149,15 @@ public abstract class GodotEnvironment : IGodotEnvironment {
 
   // Gets the filename of the Godot installation download for the platform.
   public string GetInstallerFilename(
-    GodotVersion version, bool isDotnetVersion
-  ) => GetFilenameVersionString(version) + GetInstallerNameSuffix(isDotnetVersion, version) +
+    DotnetSpecificGodotVersion version
+  ) => GetFilenameVersionString(version) + GetInstallerNameSuffix(version) +
     ".zip";
 
   // Gets the filename of the Godot export templates installation download for
   // the platform.
   private string GetExportTemplatesInstallerFilename(
-    GodotVersion version, bool isDotnetVersion
-  ) => GetFilenameVersionString(version) + (isDotnetVersion ? "_mono" : "") +
+    DotnetSpecificGodotVersion version
+  ) => GetFilenameVersionString(version) + (version.IsDotnet ? "_mono" : "") +
       "_export_templates.tpz";
 
   private static InvalidOperationException GetUnknownOSException() =>

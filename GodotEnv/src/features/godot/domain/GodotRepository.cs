@@ -2,6 +2,7 @@ namespace Chickensoft.GodotEnv.Features.Godot.Domain;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -31,6 +32,8 @@ public interface IGodotRepository {
   string GodotInstallationsPath { get; }
   string GodotCachePath { get; }
   string GodotSymlinkPath { get; }
+  [MemberNotNullWhen(true, nameof(IsGodotSymlinkTargetAvailable))]
+  bool IsGodotSymlinkTargetAvailable { get; }
   string? GodotSymlinkTarget { get; }
   string GodotSharpSymlinkPath { get; }
 
@@ -45,18 +48,16 @@ public interface IGodotRepository {
   /// the same version are installed, this returns the .NET-enabled version.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  /// <param name="installation">Godot installation, or null if none found.</param>
-  /// <param name="isTargetAvailable">Whether the current target version was available.</param>
-  /// <param name="isDotnetVersion">True to search for an installed
-  /// .NET-enabled version of Godot. False to search for an installed non-.NET
-  /// version of Godot. Null to search for either.</param>
-  /// <returns></returns>
-  void GetInstallation(
-    GodotVersion version,
-    out GodotInstallation? installation,
-    out bool isTargetAvailable,
-    bool? isDotnetVersion = null
-  );
+  /// <returns>Godot installation, or null if none found.</returns>
+  GodotInstallation? GetInstallation(DotnetAgnosticGodotVersion version);
+
+  /// <summary>
+  /// Gets the installation associated with the specified version of Godot.
+  /// Returns only an installation of Godot matching the specified .NET status.
+  /// </summary>
+  /// <param name="version">Godot version.</param>
+  /// <returns>Godot installation, or null if none found.</returns>
+  GodotInstallation? GetInstallation(DotnetSpecificGodotVersion version);
 
   /// <summary>
   /// Name shown when listing Godot versions installed.
@@ -68,15 +69,13 @@ public interface IGodotRepository {
   /// Downloads the specified version of Godot.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  /// <param name="isDotnetVersion">True to download the .NET version.</param>
   /// <param name="skipChecksumVerification">True if checksum verification should be skipped</param>
   /// <param name="log">Output log.</param>
   /// <param name="token">Cancellation token.</param>
   /// <returns>The fully resolved / absolute path of the Godot installation zip
   /// file for the Platform.</returns>
   Task<GodotCompressedArchive> DownloadGodot(
-      GodotVersion version,
-      bool isDotnetVersion,
+      DotnetSpecificGodotVersion version,
       bool skipChecksumVerification,
       ILog log,
       CancellationToken token
@@ -126,22 +125,11 @@ public interface IGodotRepository {
   /// <summary>
   /// Get the list of installed Godot versions.
   /// </summary>
-  /// <param name="installations">The list of installed versions.</param>
-  /// <param name="unrecognizedDirectories">
-  /// A list of subdirectories in the installation directory that were not
-  /// recognized as Godot versions.
-  /// </param>
-  /// <param name="failedGodotInstallations">
-  /// A list of subdirectories in the installation directory that matched
-  /// Godot versions, but could not be loaded as installations.
-  /// </param>
-  /// <param name="isTargetAvailable">
-  /// Whether the current target version of Godot was available
-  /// </param>
-  void GetInstallationsList(out List<GodotInstallation> installations,
-                            out List<string> unrecognizedDirectories,
-                            out List<string> failedGodotInstallations,
-                            out bool isTargetAvailable);
+  /// <returns>
+  /// A list of installed versions and directories that couldn't be loaded
+  /// as Godot versions.
+  /// </returns>
+  List<Result<GodotInstallation>> GetInstallationsList();
 
   /// <summary>
   /// Get the list of available Godot versions.
@@ -153,12 +141,11 @@ public interface IGodotRepository {
   /// Uninstalls the specified version of Godot.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  /// <param name="isDotnetVersion">True to uninstall the .NET version.</param>
   /// <param name="log">Output log.</param>
   /// <returns>True if successful, false if installation doesn't exist.
   /// </returns>
   Task<bool> Uninstall(
-    GodotVersion version, bool isDotnetVersion, ILog log
+    DotnetSpecificGodotVersion version, ILog log
   );
 }
 
@@ -197,8 +184,8 @@ public partial class GodotRepository : IGodotRepository {
   public string GodotSymlinkPath {
     get {
       var val = FileClient.Combine(
-    FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH, Defaults.GODOT_BIN_NAME
-  );
+        FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH, Defaults.GODOT_BIN_NAME
+      );
       if (SystemInfo.OS == OSType.Windows) {
         val = $"{val}.exe";
       }
@@ -209,6 +196,9 @@ public partial class GodotRepository : IGodotRepository {
   public string GodotSharpSymlinkPath => FileClient.Combine(
     FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH, Defaults.GODOT_SHARP_PATH
   );
+
+  [MemberNotNullWhen(true, nameof(IsGodotSymlinkTargetAvailable))]
+  public bool IsGodotSymlinkTargetAvailable => GodotSymlinkTarget is not null;
 
   public string? GodotSymlinkTarget => FileClient.FileSymlinkTarget(
     GodotSymlinkPath
@@ -239,25 +229,18 @@ public partial class GodotRepository : IGodotRepository {
     VersionStringConverter = versionStringConverter;
   }
 
-  public void GetInstallation(
-    GodotVersion version,
-    out GodotInstallation? installation,
-    out bool isTargetAvailable,
-    bool? isDotnetVersion = null
-  ) {
-    if (isDotnetVersion is bool isDotnet) {
-      ReadInstallation(version, isDotnet, out installation, out isTargetAvailable);
-    }
+  public GodotInstallation? GetInstallation(
+    DotnetAgnosticGodotVersion version
+  ) => ReadInstallation(new DotnetSpecificGodotVersion(version.Number, isDotnet: true)) ??
+      ReadInstallation(new DotnetSpecificGodotVersion(version.Number, isDotnet: false));
 
-    ReadInstallation(version, isDotnetVersion: true, out installation, out isTargetAvailable);
-    if (installation is null) {
-      ReadInstallation(version, isDotnetVersion: false, out installation, out isTargetAvailable);
-    }
-  }
+  public GodotInstallation? GetInstallation(
+    DotnetSpecificGodotVersion version
+  ) => ReadInstallation(version);
 
   public string InstallationVersionName(GodotInstallation installation) =>
     VersionStringConverter.VersionString(installation.Version) +
-      (installation.IsDotnetVersion ? " dotnet" : " not-dotnet");
+      (installation.Version.IsDotnet ? " dotnet" : " not-dotnet");
 
   public void ClearCache() {
     if (FileClient.DirectoryExists(GodotCachePath)) {
@@ -267,21 +250,18 @@ public partial class GodotRepository : IGodotRepository {
   }
 
   public async Task<GodotCompressedArchive> DownloadGodot(
-    GodotVersion version,
-    bool isDotnetVersion,
+    DotnetSpecificGodotVersion version,
     bool skipChecksumVerification,
     ILog log,
     CancellationToken token
   ) {
     log.Info("⬇ Preparing to download Godot...");
 
-    var downloadUrl = Platform.GetDownloadUrl(
-      version, isDotnetVersion, isTemplate: false
-    );
+    var downloadUrl = Platform.GetDownloadUrl(version, isTemplate: false);
 
     log.Print($"🌏 Godot download url: {downloadUrl}");
 
-    var fsName = GetVersionFsName(version, isDotnetVersion);
+    var fsName = GetVersionFsName(version);
     // Tux server packages use .zip for everything.
     var cacheDir = FileClient.Combine(GodotCachePath, fsName);
     var cacheFilename = fsName + ".zip";
@@ -298,7 +278,6 @@ public partial class GodotRepository : IGodotRepository {
       Name: fsName,
       Filename: cacheFilename,
       Version: version,
-      IsDotnetVersion: isDotnetVersion,
       Path: cacheDir
     );
 
@@ -415,15 +394,13 @@ public partial class GodotRepository : IGodotRepository {
 
     var execPath = GetExecutionPath(
       installationPath: destinationDirName,
-      version: archive.Version,
-      isDotnetVersion: archive.IsDotnetVersion
+      version: archive.Version
     );
 
     return new GodotInstallation(
       Name: archive.Name,
       IsActiveVersion: true, // we always switch to the newly installed version.
       Version: archive.Version,
-      IsDotnetVersion: archive.IsDotnetVersion,
       Path: destinationDirName,
       ExecutionPath: execPath
     );
@@ -454,10 +431,10 @@ public partial class GodotRepository : IGodotRepository {
         break;
     }
 
-    if (installation.IsDotnetVersion) {
+    if (installation.Version.IsDotnet) {
       // Update GodotSharp symlinks
       var godotSharpPath = GetGodotSharpPath(
-        installation.Path, installation.Version, installation.IsDotnetVersion
+        installation.Path, installation.Version
       );
       await FileClient.CreateSymlink(
         GodotSharpSymlinkPath, godotSharpPath
@@ -539,14 +516,13 @@ public partial class GodotRepository : IGodotRepository {
           await task;
           if (!string.IsNullOrEmpty(task.Result.StandardError)) {
             log.Warn("Errors or warnings in shortcut creation:");
-            using (var reader = new StringReader(task.Result.StandardError)) {
-              while (true) {
-                var line = reader.ReadLine();
-                if (line is null) {
-                  break;
-                }
-                log.Warn($"  {line}");
+            using var reader = new StringReader(task.Result.StandardError);
+            while (true) {
+              var line = reader.ReadLine();
+              if (line is null) {
+                break;
               }
+              log.Warn($"  {line}");
             }
           }
           break;
@@ -582,44 +558,47 @@ public partial class GodotRepository : IGodotRepository {
     }
   }
 
-  public async Task<string> GetGodotEnvVariable() => await EnvironmentVariableClient.GetUserEnv(Defaults.GODOT_ENV_VAR_NAME);
+  public async Task<string> GetGodotEnvVariable() =>
+    await EnvironmentVariableClient.GetUserEnv(Defaults.GODOT_ENV_VAR_NAME);
 
-  public void GetInstallationsList(
-    out List<GodotInstallation> installations,
-    out List<string> unrecognizedDirectories,
-    out List<string> failedGodotInstallations,
-    out bool isTargetAvailable
-  ) {
-    installations = [];
-    unrecognizedDirectories = [];
-    failedGodotInstallations = [];
-    isTargetAvailable = false;
+  public List<Result<GodotInstallation>> GetInstallationsList() {
+    var results = new List<Result<GodotInstallation>>();
+    var successes = new List<GodotInstallation>();
+    var failures = new List<string>();
 
-    if (!FileClient.DirectoryExists(GodotInstallationsPath)) {
-      return;
+    if (FileClient.DirectoryExists(GodotInstallationsPath)) {
+      return results;
     }
 
     foreach (var dir in FileClient.GetSubdirectories(GodotInstallationsPath)) {
-      DirectoryToVersion(dir.Name, out var version, out var isDotnetVersion);
+      var version = DirectoryToVersion(dir.Name);
       if (version is null) {
-        unrecognizedDirectories.Add(dir.Name);
+        failures.Add(
+          $"Unrecognized subfolder in Godot installation directory (may be a non-conforming version identifier): {dir.Name}"
+        );
       }
       else {
-        GetInstallation(
-          version, out var installation, out isTargetAvailable, isDotnetVersion
-        );
+        var installation = GetInstallation(version);
         if (installation is null) {
-          failedGodotInstallations.Add(dir.Name);
+          failures.Add(
+            $"Installation directory matches Godot version but failed to load: {dir.Name}"
+          );
         }
         else {
-          installations.Add(installation);
+          successes.Add(installation);
         }
       }
     }
-
-    installations = [.. installations.OrderBy(InstallationVersionName)];
-    unrecognizedDirectories = [.. unrecognizedDirectories.Order()];
-    failedGodotInstallations = [.. failedGodotInstallations.Order()];
+    // order failures after successes
+    results = [..
+      (
+        from s in successes.OrderBy(InstallationVersionName)
+        select Result.Success(s)
+      ).Concat(
+        from f in failures.Order()
+        select Result.Failure<GodotInstallation>(null, f)
+      )];
+    return results;
   }
 
   public async Task<List<string>> GetRemoteVersionsList() {
@@ -663,11 +642,9 @@ public partial class GodotRepository : IGodotRepository {
   }
 
   public async Task<bool> Uninstall(
-    GodotVersion version, bool isDotnetVersion, ILog log
+    DotnetSpecificGodotVersion version, ILog log
   ) {
-    GetInstallation(
-      version, out var potentialInstallation, out var _, isDotnetVersion
-    );
+    var potentialInstallation = GetInstallation(version);
 
     if (potentialInstallation is not GodotInstallation installation) {
       return false;
@@ -693,73 +670,63 @@ public partial class GodotRepository : IGodotRepository {
   }
 
   private string GetExecutionPath(
-    string installationPath, GodotVersion version, bool isDotnetVersion
+    string installationPath, DotnetSpecificGodotVersion version
   ) =>
   FileClient.Combine(
     installationPath,
-    Platform.GetRelativeExtractedExecutablePath(version, isDotnetVersion)
+    Platform.GetRelativeExtractedExecutablePath(version)
   );
 
   private string GetGodotSharpPath(
-    string installationPath, GodotVersion version, bool isDotnetVersion
+    string installationPath, DotnetSpecificGodotVersion version
   ) => FileClient.Combine(
     installationPath,
-    Platform.GetRelativeGodotSharpPath(version, isDotnetVersion)
+    Platform.GetRelativeGodotSharpPath(version)
   );
 
-  private void ReadInstallation(
-    GodotVersion version,
-    bool isDotnetVersion,
-    out GodotInstallation? installation,
-    out bool isTargetAvailable
+  private GodotInstallation? ReadInstallation(
+    DotnetSpecificGodotVersion version
   ) {
-    var directoryName = GetVersionFsName(version, isDotnetVersion);
+    var directoryName = GetVersionFsName(version);
     var symlinkTarget = GodotSymlinkTarget;
     var installationDir = FileClient.Combine(
       GodotInstallationsPath, directoryName
     );
 
-    isTargetAvailable = symlinkTarget is not null;
-    installation = null;
+    GodotInstallation? installation = null;
 
-    if (!FileClient.DirectoryExists(installationDir)) {
-      return;
+    if (FileClient.DirectoryExists(installationDir)) {
+      var executionPath = GetExecutionPath(
+        installationPath: installationDir,
+        version: version
+      );
+
+      installation = new GodotInstallation(
+        Name: directoryName,
+        IsActiveVersion: symlinkTarget == executionPath,
+        Version: version,
+        Path: installationDir,
+        ExecutionPath: executionPath
+      );
     }
 
-    var executionPath = GetExecutionPath(
-      installationPath: installationDir,
-      version: version,
-      isDotnetVersion: isDotnetVersion
-    );
-
-    installation = new GodotInstallation(
-      Name: directoryName,
-      IsActiveVersion: symlinkTarget == executionPath,
-      Version: version,
-      IsDotnetVersion: isDotnetVersion,
-      Path: installationDir,
-      ExecutionPath: executionPath
-    );
+    return installation;
   }
 
   internal string GetVersionFsName(
-    GodotVersion version, bool isDotnetVersion
+    DotnetSpecificGodotVersion version
   ) =>
-    $"godot_{(isDotnetVersion ? "dotnet_" : "")}" +
+    $"godot_{(version.IsDotnet ? "dotnet_" : "")}" +
       FileClient.Sanitize(Platform.VersionStringConverter.VersionString(version))
         .Replace(".", "_")
         .Replace("-", "_");
 
-  internal void DirectoryToVersion(
-    string directory,
-    out GodotVersion? version,
-    out bool isDotnet
+  internal DotnetSpecificGodotVersion? DirectoryToVersion(
+    string directory
   ) {
     var versionParts = DirectoryToVersionStringRegex().Match(directory);
     if (!versionParts.Success) {
-      version = null;
-      isDotnet = false;
-      return;
+      return null;
     }
 
     var versionString = $"{versionParts.Groups["major"].Value}." +
@@ -774,8 +741,8 @@ public partial class GodotRepository : IGodotRepository {
     }
     versionString += $"-{label.Replace("_", ".")}";
 
-    isDotnet = directory.Contains("dotnet");
-    version = Platform.VersionStringConverter.ParseVersion(versionString);
+    var isDotnet = directory.Contains("dotnet");
+    return Platform.VersionStringConverter.ParseVersion(versionString, isDotnet);
   }
 
   // Regex for converting directory names back into version strings to see

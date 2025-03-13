@@ -50,16 +50,15 @@ public class GodotInstallCommand :
     var log = ExecutionContext.CreateLog(console);
     var token = console.RegisterCancellationHandler();
 
-    // We know this won't throw because the validator okayed it
-    var version = godotRepo.VersionStringConverter.ParseVersion(RawVersion);
     var isDotnetVersion = !NoDotnet;
+    // We know this won't throw because the validator okayed it
+    var version = godotRepo.VersionStringConverter.ParseVersion(RawVersion, isDotnetVersion);
 
     var godotInstallationsPath = godotRepo.GodotInstallationsPath;
     var godotCachePath = godotRepo.GodotCachePath;
 
-    godotRepo.GetInstallation(
-      version, out var existingInstallation, out var _, isDotnetVersion
-    );
+    var existingInstallation =
+      godotRepo.GetInstallation(version);
 
     // Log information to show we understood.
     platform.Describe(log);
@@ -79,7 +78,7 @@ public class GodotInstallCommand :
 
     var godotCompressedArchive =
       await godotRepo.DownloadGodot(
-        version, isDotnetVersion, SkipChecksumVerification, log, token
+        version, SkipChecksumVerification, log, token
       );
 
     var newInstallation =

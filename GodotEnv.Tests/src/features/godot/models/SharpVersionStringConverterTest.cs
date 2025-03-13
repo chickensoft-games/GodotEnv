@@ -24,34 +24,42 @@ public partial class SharpVersionStringConverterTest {
   }
 
   public static IEnumerable<object[]> CorrectParsingOfValidSharpVersionsTestData() {
-    yield return ["1.2.3", new GodotVersion(1, 2, 3, "stable", -1)];
-    yield return ["0.2.3", new GodotVersion(0, 2, 3, "stable", -1)];
-    yield return ["1.0.0", new GodotVersion(1, 0, 0, "stable", -1)];
-    yield return ["1.0.0-label.1", new GodotVersion(1, 0, 0, "label", 1)];
-    yield return ["1.0.0-label.23", new GodotVersion(1, 0, 0, "label", 23)];
-    yield return ["1.0.1-label.23", new GodotVersion(1, 0, 1, "label", 23)];
+    yield return ["1.2.3", new GodotVersionNumber(1, 2, 3, "stable", -1)];
+    yield return ["0.2.3", new GodotVersionNumber(0, 2, 3, "stable", -1)];
+    yield return ["1.0.0", new GodotVersionNumber(1, 0, 0, "stable", -1)];
+    yield return ["1.0.0-label.1", new GodotVersionNumber(1, 0, 0, "label", 1)];
+    yield return ["1.0.0-label.23", new GodotVersionNumber(1, 0, 0, "label", 23)];
+    yield return ["1.0.1-label.23", new GodotVersionNumber(1, 0, 1, "label", 23)];
   }
 
   [Theory]
   [MemberData(nameof(CorrectParsingOfValidSharpVersionsTestData))]
-  public void CorrectParsingOfValidSharpVersions(string toParse, GodotVersion expected) {
+  public void CorrectParsingOfValidSharpVersions(string toParse, GodotVersionNumber expectedNumber) {
     var converter = new SharpVersionStringConverter();
-    var parsed = converter.ParseVersion(toParse);
-    Assert.Equal(expected, parsed);
+    var parsedAgnostic = converter.ParseVersion(toParse);
+    Assert.Equal(expectedNumber, parsedAgnostic.Number);
+    var parsedDotnet = converter.ParseVersion(toParse, true);
+    Assert.Equal(expectedNumber, parsedDotnet.Number);
+    Assert.True(parsedDotnet.IsDotnet);
+    var parsedNonDotnet = converter.ParseVersion(toParse, false);
+    Assert.Equal(expectedNumber, parsedNonDotnet.Number);
+    Assert.False(parsedNonDotnet.IsDotnet);
   }
 
   public static IEnumerable<object[]> CorrectSharpVersionStringFormattingTestData() {
-    yield return [new GodotVersion(0, 0, 1, "stable", -1), "0.0.1"];
-    yield return [new GodotVersion(1, 2, 0, "stable", -1), "1.2.0"];
-    yield return [new GodotVersion(1, 2, 3, "stable", -1), "1.2.3"];
-    yield return [new GodotVersion(1, 2, 0, "label", 1), "1.2.0-label.1"];
-    yield return [new GodotVersion(1, 2, 3, "label", 23), "1.2.3-label.23"];
+    yield return [new GodotVersionNumber(0, 0, 1, "stable", -1), "0.0.1"];
+    yield return [new GodotVersionNumber(1, 2, 0, "stable", -1), "1.2.0"];
+    yield return [new GodotVersionNumber(1, 2, 3, "stable", -1), "1.2.3"];
+    yield return [new GodotVersionNumber(1, 2, 0, "label", 1), "1.2.0-label.1"];
+    yield return [new GodotVersionNumber(1, 2, 3, "label", 23), "1.2.3-label.23"];
   }
 
   [Theory]
   [MemberData(nameof(CorrectSharpVersionStringFormattingTestData))]
-  public void CorrectVersionStringFormatting(GodotVersion toFormat, string expected) {
+  public void CorrectVersionStringFormatting(GodotVersionNumber toFormat, string expected) {
     var converter = new SharpVersionStringConverter();
-    Assert.Equal(expected, converter.VersionString(toFormat));
+    Assert.Equal(expected, converter.VersionString(new DotnetAgnosticGodotVersion(toFormat)));
+    Assert.Equal(expected, converter.VersionString(new DotnetSpecificGodotVersion(toFormat, true)));
+    Assert.Equal(expected, converter.VersionString(new DotnetSpecificGodotVersion(toFormat, false)));
   }
 }
