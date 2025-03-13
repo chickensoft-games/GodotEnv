@@ -8,6 +8,7 @@ using CliFx.Attributes;
 using CliFx.Infrastructure;
 using CliWrap;
 
+// FIX - dependent files not working (e.g. steam_api64.dll)
 [Command("godot register", Description = "Register a version of Godot.")]
 public class GodotRegisterCommand :
   ICommand, ICliCommand, IWindowsElevationEnabled {
@@ -82,8 +83,6 @@ public class GodotRegisterCommand :
       log.Warn(installation);
     }
 
-
-    // FIX
     var newInstallation =
       await godotRepo.ExtractGodotCustomBuild(VersionPath, ExecutablePath, version, isDotnetVersion, log);
 
