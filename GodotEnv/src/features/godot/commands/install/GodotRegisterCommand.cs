@@ -55,7 +55,6 @@ public class GodotRegisterCommand :
     var platform = ExecutionContext.Godot.Platform;
 
     var log = ExecutionContext.CreateLog(console);
-    var token = console.RegisterCancellationHandler();
 
     // We know this won't throw because the validator okayed it
     var version = godotRepo.VersionStringConverter.ParseVersion(VersionName);
