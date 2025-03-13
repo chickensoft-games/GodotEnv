@@ -593,13 +593,11 @@ public partial class GodotRepository : IGodotRepository {
     installations = [];
     unrecognizedDirectories = [];
     failedGodotInstallations = [];
+    isTargetAvailable = false;
 
     if (!FileClient.DirectoryExists(GodotInstallationsPath)) {
-      isTargetAvailable = false;
       return;
     }
-
-    isTargetAvailable = false;
 
     foreach (var dir in FileClient.GetSubdirectories(GodotInstallationsPath)) {
       DirectoryToVersion(dir.Name, out var version, out var isDotnetVersion);
