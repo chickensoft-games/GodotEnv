@@ -523,7 +523,7 @@ public partial class GodotRepository : IGodotRepository {
         break;
 
       case OSType.Windows: {
-          var hardLinkPath = $"{GodotSymlinkPath}.exe";
+          var hardLinkPath = GodotSymlinkPath;
           var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
           var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
 
