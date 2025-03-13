@@ -624,6 +624,8 @@ public partial class GodotRepository : IGodotRepository {
     foreach (var dir in FileClient.GetSubdirectories(GodotInstallationsPath)) {
       DirectoryToVersion(dir.Name, out var version, out var isDotnetVersion);
       if (version is null) {
+        // TODO - Add a godotenv.json to custom builds directories
+        // so we can identify it's version and dependencies?
         unrecognizedDirectories.Add(dir.Name);
       }
       else {

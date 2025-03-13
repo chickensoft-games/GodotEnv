@@ -31,6 +31,7 @@ public class GodotListCommand : ICommand, ICliCommand {
       var activeTag = installation.IsActiveVersion ? " *" : "";
       log.Print(godotRepo.InstallationVersionName(installation) + activeTag);
     }
+    // TODO - Recognize Custom Builds
     foreach (var unrecognized in unrecognizedDirectories) {
       log.Warn("Unrecognized subfolder in Godot installation directory (may be a non-conforming version identifier):");
       log.Warn($"  {unrecognized}");

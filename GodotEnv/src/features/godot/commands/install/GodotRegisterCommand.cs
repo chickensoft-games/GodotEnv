@@ -60,6 +60,7 @@ public class GodotRegisterCommand :
     var version = godotRepo.VersionStringConverter.ParseVersion(VersionName);
     var isDotnetVersion = !NoDotnet;
 
+    // TODO - Check if are necessary
     var godotInstallationsPath = godotRepo.GodotInstallationsPath;
     var godotCachePath = godotRepo.GodotCachePath;
 
