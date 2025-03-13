@@ -98,7 +98,7 @@ public interface IGodotRepository {
   /// <returns>Path to the subfolder in the Godot installations directory
   /// containing the extracted contents.</returns>
   Task<GodotInstallation> ExtractGodotCustomBuild(
-    string archivePath, GodotVersion version, bool isDotnetVersion, ILog log
+    string archivePath, string executableName, GodotVersion version, bool isDotnetVersion, ILog log
   );
 
   /// <summary>
@@ -422,12 +422,15 @@ public partial class GodotRepository : IGodotRepository {
 
   public async Task<GodotInstallation> ExtractGodotCustomBuild(
     string archivePath,
+    string executableName,
     GodotVersion version,
     bool isDotnetVersion,
     ILog log
   ) {
+    var versionString = VersionStringConverter.VersionString(version);
+
     var destinationDirName =
-      FileClient.Combine(GodotInstallationsPath, version.ToString());
+      FileClient.Combine(GodotInstallationsPath, versionString);
 
     var numFilesExtracted = await ZipClient.ExtractToDirectory(
       archivePath,
@@ -446,11 +449,12 @@ public partial class GodotRepository : IGodotRepository {
     var execPath = GetExecutionPath(
       installationPath: destinationDirName,
       version: version,
-      isDotnetVersion: isDotnetVersion
+      isDotnetVersion: isDotnetVersion,
+      executableName
     );
 
     return new GodotInstallation(
-      Name: version.ToString(),
+      Name: versionString,
       IsActiveVersion: true, // we always switch to the newly installed version.
       Version: version,
       IsDotnetVersion: isDotnetVersion,
@@ -699,11 +703,11 @@ public partial class GodotRepository : IGodotRepository {
   }
 
   private string GetExecutionPath(
-    string installationPath, GodotVersion version, bool isDotnetVersion
+    string installationPath, GodotVersion version, bool isDotnetVersion, string? customExecutablePath = null
   ) =>
   FileClient.Combine(
     installationPath,
-    Platform.GetRelativeExtractedExecutablePath(version, isDotnetVersion)
+    customExecutablePath ?? Platform.GetRelativeExtractedExecutablePath(version, isDotnetVersion)
   );
 
   private string GetGodotSharpPath(

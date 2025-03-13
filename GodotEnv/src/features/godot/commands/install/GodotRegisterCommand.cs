@@ -17,17 +17,22 @@ public class GodotRegisterCommand :
     Validators = [typeof(GodotVersionValidator)],
     Description = "Godot version name: e.g., 4.1.0.CustomBuild, 4.2.0.GodotSteam, etc." +
       " Should be a unique Godot version name"
-
   )]
   public string VersionName { get; set; } = default!;
 
   [CommandParameter(
     1,
     Name = "Path",
-    Description = "Godot version path: e.g. /user/godot/version/path/CustomGodot.exe"
-
+    Description = "Godot version path: e.g. /user/godot/version/path/"
   )]
   public string VersionPath { get; set; } = default!;
+
+  [CommandParameter(
+    2,
+    Name = "Executable Path",
+    Description = "Godot executable name: e.g. \"godot-steam-4.3/godotsteam.multiplayer.43.editor.windows.64.exe\""
+  )]
+  public string ExecutablePath { get; set; } = default!;
 
   [CommandOption(
     "no-dotnet", 'n',
@@ -80,7 +85,7 @@ public class GodotRegisterCommand :
 
     // FIX
     var newInstallation =
-      await godotRepo.ExtractGodotCustomBuild(VersionPath, version, isDotnetVersion, log);
+      await godotRepo.ExtractGodotCustomBuild(VersionPath, ExecutablePath, version, isDotnetVersion, log);
 
     await godotRepo.UpdateGodotSymlink(newInstallation, log);
 
