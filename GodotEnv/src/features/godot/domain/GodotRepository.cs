@@ -89,6 +89,19 @@ public interface IGodotRepository {
   );
 
   /// <summary>
+  /// Move the Godot custom build files into the correct directory.
+  /// </summary>
+  /// <param name="archivePath">Godot installation path.</param>
+  /// <param name="version">Godot version.</param>
+  /// <param name="isDotnetVersion">If the Godot build is a Dotnet build.</param>
+  /// <param name="log">Output log.</param>
+  /// <returns>Path to the subfolder in the Godot installations directory
+  /// containing the extracted contents.</returns>
+  Task<GodotInstallation> ExtractGodotCustomBuild(
+    string archivePath, GodotVersion version, bool isDotnetVersion, ILog log
+  );
+
+  /// <summary>
   /// Updates the symlink to point to the specified Godot installation.
   /// </summary>
   /// <param name="installation">Godot installation.</param>
@@ -402,6 +415,45 @@ public partial class GodotRepository : IGodotRepository {
       IsActiveVersion: true, // we always switch to the newly installed version.
       Version: archive.Version,
       IsDotnetVersion: archive.IsDotnetVersion,
+      Path: destinationDirName,
+      ExecutionPath: execPath
+    );
+  }
+
+  public async Task<GodotInstallation> ExtractGodotCustomBuild(
+    string archivePath,
+    GodotVersion version,
+    bool isDotnetVersion,
+    ILog log
+  ) {
+    var destinationDirName =
+      FileClient.Combine(GodotInstallationsPath, version.ToString());
+
+    var numFilesExtracted = await ZipClient.ExtractToDirectory(
+      archivePath,
+      destinationDirName,
+      new Progress<double>((percent) => {
+        var p = Math.Round(percent * 100);
+        log.InfoInPlace($"🗜 Extracting Godot: {p}%" + "    ");
+      })
+    );
+    log.Print(""); // New line after progress.
+    log.ClearCurrentLine();
+    log.Print($"    Destination: {destinationDirName}");
+    log.Success($"✅ Extracted {numFilesExtracted} file(s).");
+    log.Print("");
+
+    var execPath = GetExecutionPath(
+      installationPath: destinationDirName,
+      version: version,
+      isDotnetVersion: isDotnetVersion
+    );
+
+    return new GodotInstallation(
+      Name: version.ToString(),
+      IsActiveVersion: true, // we always switch to the newly installed version.
+      Version: version,
+      IsDotnetVersion: isDotnetVersion,
       Path: destinationDirName,
       ExecutionPath: execPath
     );

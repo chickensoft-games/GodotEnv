@@ -9,7 +9,7 @@ public partial record GodotVersion {
   public string Label { get; }
   public int LabelNumber { get; }
 
-  internal GodotVersion(int major, int minor, int patch, string label, int labelNumber) {
+  internal GodotVersion(int major, int minor, int patch, string label, int labelNumber, bool isCustomBuild = false) {
     if (major < 0) {
       throw new ArgumentException($"Major version {major} is invalid");
     }
@@ -25,7 +25,7 @@ public partial record GodotVersion {
     if (char.IsDigit(label[^1])) {
       throw new ArgumentException("Label \"{label}\" ambiguously ends with number");
     }
-    if (label != "stable" && labelNumber <= 0) {
+    if (label != "stable" && !isCustomBuild && labelNumber <= 0) {
       throw new ArgumentException($"Version label \"{label}\" with numeric identifier {labelNumber} is invalid");
     }
     if (label == "stable" && labelNumber >= 0) {
