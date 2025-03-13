@@ -386,9 +386,7 @@ public class FileClient : IFileClient {
 
     // On Windows, elevated privileges are required to manage symlinks
     if (SystemInfo.OS == OSType.Windows) {
-      // If it's not a dir, creates a hardlink to the file.
-      var dirFlag = isDirectory ? "/D" : "/H";
-      // var dirFlag = isDirectory ? "/D " : "";
+      var dirFlag = isDirectory ? "/D " : "";
       await ProcessRunner.RunElevatedOnWindows(
         "cmd.exe", $"/c mklink {dirFlag} \"{path}\" \"{pathToTarget}\""
       );

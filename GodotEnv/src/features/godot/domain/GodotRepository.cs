@@ -197,8 +197,8 @@ public partial class GodotRepository : IGodotRepository {
   public string GodotSymlinkPath {
     get {
       var val = FileClient.Combine(
-        FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH, Defaults.GODOT_BIN_NAME
-      );
+    FileClient.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH, Defaults.GODOT_BIN_NAME
+  );
       if (SystemInfo.OS == OSType.Windows) {
         val = $"{val}.exe";
       }
@@ -523,17 +523,32 @@ public partial class GodotRepository : IGodotRepository {
         break;
 
       case OSType.Windows: {
-          var hardLinkPath = GodotSymlinkPath;
+          var linkPath = GodotSymlinkPath;
+          var targetPath = FileClient.FileSymlinkTarget(linkPath);
           var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
           var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
 
           var command = string.Join(";",
             "$ws = New-Object -ComObject (\"WScript.Shell\")",
             $"$s = $ws.CreateShortcut(\"{applicationsPath}\")",
-            $"$s.TargetPath = \"{hardLinkPath}\"",
+            $"$s.IconLocation = \"{targetPath}, 0\"",
+            $"$s.TargetPath = \"{linkPath}\"",
             "$s.save();"
           );
-          await FileClient.ProcessRunner.Run(".", "powershell", ["-c", command]);
+          var task = FileClient.ProcessRunner.Run(".", "powershell", ["-c", command]);
+          await task;
+          if (!string.IsNullOrEmpty(task.Result.StandardError)) {
+            log.Warn("Errors or warnings in shortcut creation:");
+            using (var reader = new StringReader(task.Result.StandardError)) {
+              while (true) {
+                var line = reader.ReadLine();
+                if (line is null) {
+                  break;
+                }
+                log.Warn($"  {line}");
+              }
+            }
+          }
           break;
         }
       case OSType.Unknown:
