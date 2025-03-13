@@ -89,6 +89,19 @@ public interface IGodotRepository {
   );
 
   /// <summary>
+  /// Move the Godot custom build files into the correct directory.
+  /// </summary>
+  /// <param name="archivePath">Godot installation path.</param>
+  /// <param name="version">Godot version.</param>
+  /// <param name="isDotnetVersion">If the Godot build is a Dotnet build.</param>
+  /// <param name="log">Output log.</param>
+  /// <returns>Path to the subfolder in the Godot installations directory
+  /// containing the extracted contents.</returns>
+  Task<GodotInstallation> ExtractGodotCustomBuild(
+    string archivePath, string executableName, GodotVersion version, bool isDotnetVersion, ILog log
+  );
+
+  /// <summary>
   /// Updates the symlink to point to the specified Godot installation.
   /// </summary>
   /// <param name="installation">Godot installation.</param>
@@ -407,6 +420,49 @@ public partial class GodotRepository : IGodotRepository {
     );
   }
 
+  public async Task<GodotInstallation> ExtractGodotCustomBuild(
+    string archivePath,
+    string executableName,
+    GodotVersion version,
+    bool isDotnetVersion,
+    ILog log
+  ) {
+    var versionString = VersionStringConverter.VersionString(version);
+
+    var destinationDirName =
+      FileClient.Combine(GodotInstallationsPath, versionString);
+
+    var numFilesExtracted = await ZipClient.ExtractToDirectory(
+      archivePath,
+      destinationDirName,
+      new Progress<double>((percent) => {
+        var p = Math.Round(percent * 100);
+        log.InfoInPlace($"🗜 Extracting Godot: {p}%" + "    ");
+      })
+    );
+    log.Print(""); // New line after progress.
+    log.ClearCurrentLine();
+    log.Print($"    Destination: {destinationDirName}");
+    log.Success($"✅ Extracted {numFilesExtracted} file(s).");
+    log.Print("");
+
+    var execPath = GetExecutionPath(
+      installationPath: destinationDirName,
+      version: version,
+      isDotnetVersion: isDotnetVersion,
+      executableName
+    );
+
+    return new GodotInstallation(
+      Name: versionString,
+      IsActiveVersion: true, // we always switch to the newly installed version.
+      Version: version,
+      IsDotnetVersion: isDotnetVersion,
+      Path: destinationDirName,
+      ExecutionPath: execPath
+    );
+  }
+
   public async Task UpdateGodotSymlink(
     GodotInstallation installation, ILog log
   ) {
@@ -568,6 +624,8 @@ public partial class GodotRepository : IGodotRepository {
     foreach (var dir in FileClient.GetSubdirectories(GodotInstallationsPath)) {
       DirectoryToVersion(dir.Name, out var version, out var isDotnetVersion);
       if (version is null) {
+        // TODO - Add a godotenv.json to custom builds directories
+        // so we can identify it's version and dependencies?
         unrecognizedDirectories.Add(dir.Name);
       }
       else {
@@ -647,11 +705,11 @@ public partial class GodotRepository : IGodotRepository {
   }
 
   private string GetExecutionPath(
-    string installationPath, GodotVersion version, bool isDotnetVersion
+    string installationPath, GodotVersion version, bool isDotnetVersion, string? customExecutablePath = null
   ) =>
   FileClient.Combine(
     installationPath,
-    Platform.GetRelativeExtractedExecutablePath(version, isDotnetVersion)
+    customExecutablePath ?? Platform.GetRelativeExtractedExecutablePath(version, isDotnetVersion)
   );
 
   private string GetGodotSharpPath(
