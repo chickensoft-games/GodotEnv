@@ -320,7 +320,6 @@ public partial class GodotRepository : IGodotRepository {
 
     try {
       if (string.IsNullOrEmpty(proxyUrl)) {
-        // use no proxy
         await NetworkClient.DownloadFileAsync(
           url: downloadUrl,
           destinationDirectory: cacheDir,
@@ -335,15 +334,12 @@ public partial class GodotRepository : IGodotRepository {
         );
       }
       else {
-        // use proxy to download
+        // if proxy is set, use System.Net.WebClient to download via proxy
         log.Info($"🌐 Using proxy for download: {proxyUrl}");
 
-        // use System.Net.WebClient to download via proxy
         using (var webClient = new System.Net.WebClient()) {
-          // initialize proxy
           webClient.Proxy = new System.Net.WebProxy(proxyUrl);
 
-          // download progress
           webClient.DownloadProgressChanged += (sender, e) => {
             log.InfoInPlace(
               $"🚀 Downloading Godot via proxy: {e.ProgressPercentage}%" +
@@ -351,7 +347,6 @@ public partial class GodotRepository : IGodotRepository {
             );
           };
 
-          // download completed
           var completedTask = new TaskCompletionSource<bool>();
           webClient.DownloadFileCompleted += (sender, e) => {
             if (e.Cancelled) {
@@ -369,13 +364,11 @@ public partial class GodotRepository : IGodotRepository {
             webClient.CancelAsync();
           });
 
-          // start downloading
           webClient.DownloadFileAsync(
             new Uri(downloadUrl),
             compressedArchivePath
           );
 
-          // wait for download to complete
           await completedTask.Task;
         }
       }

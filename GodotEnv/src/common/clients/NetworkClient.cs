@@ -82,11 +82,10 @@ public class NetworkClient : INetworkClient {
     string? proxyUrl = null
   ) {
     if (!string.IsNullOrEmpty(proxyUrl)) {
-      // 如果有代理，使用WebClient代替
+      // if proxy is set, use System.Net.WebClient to download via proxy
       using var webClient = new WebClient();
       webClient.Proxy = new WebProxy(proxyUrl);
 
-      // 创建临时进度报告
       var lastPercent = 0;
       webClient.DownloadProgressChanged += (sender, e) => {
         var percent = e.ProgressPercentage;
@@ -96,10 +95,8 @@ public class NetworkClient : INetworkClient {
         }
       };
 
-      // 设置取消
       token.Register(() => webClient.CancelAsync());
 
-      // 创建任务
       var tcs = new TaskCompletionSource<bool>();
       webClient.DownloadFileCompleted += (sender, e) => {
         if (e.Cancelled) {
@@ -113,13 +110,11 @@ public class NetworkClient : INetworkClient {
         }
       };
 
-      // 开始下载
       var filePath = System.IO.Path.Combine(destinationDirectory, filename);
       webClient.DownloadFileAsync(new Uri(url), filePath);
       await tcs.Task;
     }
     else {
-      // 使用原来的下载方式
       var download = DownloadBuilder
         .New()
         .WithUrl(url)
@@ -186,7 +181,6 @@ public class NetworkClient : INetworkClient {
     string? proxyUrl = null
   ) {
     if (!string.IsNullOrEmpty(proxyUrl)) {
-      // 使用带进度的方法
       await DownloadFileAsync(url, destinationDirectory, filename,
         new Progress<DownloadProgress>(), token, proxyUrl);
     }
