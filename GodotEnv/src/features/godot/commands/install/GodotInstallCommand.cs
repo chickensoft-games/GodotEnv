@@ -35,6 +35,12 @@ public class GodotInstallCommand :
   )]
   public bool SkipChecksumVerification { get; set; }
 
+  [CommandOption(
+    "proxy", 'p',
+    Description = "Specify a proxy server URL to use for downloads (e.g., http://127.0.0.1:1080)."
+  )]
+  public string? ProxyUrl { get; set; }
+
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
   public bool IsWindowsElevationRequired => true;
@@ -68,6 +74,10 @@ public class GodotInstallCommand :
       isDotnetVersion ? "😁 Using Godot with .NET" : "😢 Using Godot without .NET"
     );
 
+    if (!string.IsNullOrEmpty(ProxyUrl)) {
+      log.Info($"🌐 Using proxy: {ProxyUrl}");
+    }
+
     // Check for existing installation.
     if (existingInstallation is GodotInstallation installation) {
       log.Warn(
@@ -78,7 +88,7 @@ public class GodotInstallCommand :
 
     var godotCompressedArchive =
       await godotRepo.DownloadGodot(
-        version, isDotnetVersion, SkipChecksumVerification, log, token
+        version, isDotnetVersion, SkipChecksumVerification, log, token, ProxyUrl
       );
 
     var newInstallation =

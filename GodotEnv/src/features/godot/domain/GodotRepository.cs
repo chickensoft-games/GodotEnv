@@ -11,6 +11,7 @@ using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
+using CliFx.Exceptions;
 using global::GodotEnv.Common.Utilities;
 using Newtonsoft.Json;
 
@@ -67,6 +68,7 @@ public interface IGodotRepository {
   /// <param name="skipChecksumVerification">True if checksum verification should be skipped</param>
   /// <param name="log">Output log.</param>
   /// <param name="token">Cancellation token.</param>
+  /// <param name="proxyUrl">Optional proxy URL.</param>
   /// <returns>The fully resolved / absolute path of the Godot installation zip
   /// file for the Platform.</returns>
   Task<GodotCompressedArchive> DownloadGodot(
@@ -74,7 +76,8 @@ public interface IGodotRepository {
       bool isDotnetVersion,
       bool skipChecksumVerification,
       ILog log,
-      CancellationToken token
+      CancellationToken token,
+      string? proxyUrl = null
     );
 
   /// <summary>
@@ -249,7 +252,8 @@ public partial class GodotRepository : IGodotRepository {
     bool isDotnetVersion,
     bool skipChecksumVerification,
     ILog log,
-    CancellationToken token
+    CancellationToken token,
+    string? proxyUrl = null
   ) {
     log.Info("⬇ Preparing to download Godot...");
 
@@ -258,6 +262,10 @@ public partial class GodotRepository : IGodotRepository {
     );
 
     log.Print($"🌏 Godot download url: {downloadUrl}");
+
+    if (!string.IsNullOrEmpty(proxyUrl)) {
+      log.Info($"🔄 Using proxy: {proxyUrl}");
+    }
 
     var fsName = GetVersionFsName(version, isDotnetVersion);
     // Tux server packages use .zip for everything.
@@ -311,18 +319,67 @@ public partial class GodotRepository : IGodotRepository {
     log.Print($"💾 Compressed installer path: {compressedArchivePath}");
 
     try {
-      await NetworkClient.DownloadFileAsync(
-        url: downloadUrl,
-        destinationDirectory: cacheDir,
-        filename: cacheFilename,
-        new Progress<DownloadProgress>(
-          (progress) => log.InfoInPlace(
-            $"🚀 Downloading Godot: {progress.Percent}% at {progress.Speed}" +
-            "      "
-          )
-        ),
-        token: token
-      );
+      if (string.IsNullOrEmpty(proxyUrl)) {
+        // use no proxy
+        await NetworkClient.DownloadFileAsync(
+          url: downloadUrl,
+          destinationDirectory: cacheDir,
+          filename: cacheFilename,
+          new Progress<DownloadProgress>(
+            (progress) => log.InfoInPlace(
+              $"🚀 Downloading Godot: {progress.Percent}% at {progress.Speed}" +
+              "      "
+            )
+          ),
+          token: token
+        );
+      }
+      else {
+        // use proxy to download
+        log.Info($"🌐 Using proxy for download: {proxyUrl}");
+
+        // use System.Net.WebClient to download via proxy
+        using (var webClient = new System.Net.WebClient()) {
+          // initialize proxy
+          webClient.Proxy = new System.Net.WebProxy(proxyUrl);
+
+          // download progress
+          webClient.DownloadProgressChanged += (sender, e) => {
+            log.InfoInPlace(
+              $"🚀 Downloading Godot via proxy: {e.ProgressPercentage}%" +
+              "      "
+            );
+          };
+
+          // download completed
+          var completedTask = new TaskCompletionSource<bool>();
+          webClient.DownloadFileCompleted += (sender, e) => {
+            if (e.Cancelled) {
+              completedTask.SetException(new CommandException("Download cancelled!"));
+            }
+            else if (e.Error != null) {
+              completedTask.SetException(e.Error);
+            }
+            else {
+              completedTask.SetResult(true);
+            }
+          };
+
+          token.Register(() => {
+            webClient.CancelAsync();
+          });
+
+          // start downloading
+          webClient.DownloadFileAsync(
+            new Uri(downloadUrl),
+            compressedArchivePath
+          );
+
+          // wait for download to complete
+          await completedTask.Task;
+        }
+      }
+
       log.Print("");  // Force new line after download progress as the cursor remains in the previously line.
       log.ClearCurrentLine();
     }
