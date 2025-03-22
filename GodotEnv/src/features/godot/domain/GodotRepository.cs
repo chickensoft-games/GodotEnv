@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -319,7 +320,44 @@ public partial class GodotRepository : IGodotRepository {
     log.Print($"💾 Compressed installer path: {compressedArchivePath}");
 
     try {
-      if (string.IsNullOrEmpty(proxyUrl)) {
+      if (!string.IsNullOrEmpty(proxyUrl)) {
+        // if proxyUrl is set, use HttpClient to download through proxy
+        log.Info($"🌐 Using proxy for download: {proxyUrl}");
+
+        var handler = new HttpClientHandler {
+          Proxy = new System.Net.WebProxy(proxyUrl),
+          UseProxy = true
+        };
+
+        using var client = new HttpClient(handler);
+
+        var filePath = Path.Combine(cacheDir, cacheFilename);
+
+        using var response = await client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead, token);
+        response.EnsureSuccessStatusCode();
+
+        var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+        using var contentStream = await response.Content.ReadAsStreamAsync(token);
+        using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
+
+        var buffer = new byte[8192];
+        var bytesRead = 0;
+        var totalBytesRead = 0L;
+
+        while ((bytesRead = await contentStream.ReadAsync(new Memory<byte>(buffer), token)) > 0) {
+          await fileStream.WriteAsync(new ReadOnlyMemory<byte>(buffer, 0, bytesRead), token);
+          totalBytesRead += bytesRead;
+
+          if (totalBytes > 0) {
+            var percent = (int)(totalBytesRead * 100 / totalBytes);
+            log.InfoInPlace(
+              $"🚀 Downloading Godot via proxy: {percent}%" +
+              "      "
+            );
+          }
+        }
+      }
+      else {
         await NetworkClient.DownloadFileAsync(
           url: downloadUrl,
           destinationDirectory: cacheDir,
@@ -333,45 +371,6 @@ public partial class GodotRepository : IGodotRepository {
           token: token
         );
       }
-      else {
-        // if proxy is set, use System.Net.WebClient to download via proxy
-        log.Info($"🌐 Using proxy for download: {proxyUrl}");
-
-        using (var webClient = new System.Net.WebClient()) {
-          webClient.Proxy = new System.Net.WebProxy(proxyUrl);
-
-          webClient.DownloadProgressChanged += (sender, e) => {
-            log.InfoInPlace(
-              $"🚀 Downloading Godot via proxy: {e.ProgressPercentage}%" +
-              "      "
-            );
-          };
-
-          var completedTask = new TaskCompletionSource<bool>();
-          webClient.DownloadFileCompleted += (sender, e) => {
-            if (e.Cancelled) {
-              completedTask.SetException(new CommandException("Download cancelled!"));
-            }
-            else if (e.Error != null) {
-              completedTask.SetException(e.Error);
-            }
-            else {
-              completedTask.SetResult(true);
-            }
-          };
-
-          token.Register(() => {
-            webClient.CancelAsync();
-          });
-
-          webClient.DownloadFileAsync(
-            new Uri(downloadUrl),
-            compressedArchivePath
-          );
-
-          await completedTask.Task;
-        }
-      }
 
       log.Print("");  // Force new line after download progress as the cursor remains in the previously line.
       log.ClearCurrentLine();
@@ -383,7 +382,7 @@ public partial class GodotRepository : IGodotRepository {
     }
 
     if (!skipChecksumVerification) {
-      await VerifyArchiveChecksum(log, archive);
+      await VerifyArchiveChecksum(log, archive, proxyUrl);
     }
     else {
       log.Info("⚠️ Skipping checksum verification due to command-line flag!");
@@ -396,10 +395,10 @@ public partial class GodotRepository : IGodotRepository {
     return archive;
   }
 
-  private async Task VerifyArchiveChecksum(ILog log, GodotCompressedArchive archive) {
+  private async Task VerifyArchiveChecksum(ILog log, GodotCompressedArchive archive, string? proxyUrl = null) {
     try {
       log.InfoInPlace("⏳ Verifying Checksum.");
-      await ChecksumClient.VerifyArchiveChecksum(archive);
+      await ChecksumClient.VerifyArchiveChecksum(archive, proxyUrl);
       log.ClearCurrentLine();
       log.Success("✅ Checksum verified.");
     }

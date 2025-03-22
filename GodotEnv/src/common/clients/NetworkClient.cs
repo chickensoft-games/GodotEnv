@@ -1,6 +1,7 @@
 namespace Chickensoft.GodotEnv.Common.Clients;
 
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -82,37 +83,40 @@ public class NetworkClient : INetworkClient {
     string? proxyUrl = null
   ) {
     if (!string.IsNullOrEmpty(proxyUrl)) {
-      // if proxy is set, use System.Net.WebClient to download via proxy
-      using var webClient = new WebClient();
-      webClient.Proxy = new WebProxy(proxyUrl);
+      // if proxyUrl is set, use HttpClient to download through proxy
+      var handler = new HttpClientHandler {
+        Proxy = new WebProxy(proxyUrl),
+        UseProxy = true
+      };
 
+      using var client = new HttpClient(handler);
+      var filePath = Path.Combine(destinationDirectory, filename);
+
+      using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token);
+      response.EnsureSuccessStatusCode();
+
+      var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+      using var contentStream = await response.Content.ReadAsStreamAsync(token);
+      using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
+
+      var buffer = new byte[8192];
+      var bytesRead = 0;
+      var totalBytesRead = 0L;
       var lastPercent = 0;
-      webClient.DownloadProgressChanged += (sender, e) => {
-        var percent = e.ProgressPercentage;
-        if (percent > lastPercent) {
-          lastPercent = percent;
-          progress.Report(new(percent, $"{e.BytesReceived / 1024d / Math.Max(1, e.ProgressPercentage):F2} KB/s"));
-        }
-      };
 
-      token.Register(() => webClient.CancelAsync());
+      while ((bytesRead = await contentStream.ReadAsync(new Memory<byte>(buffer), token)) > 0) {
+        await fileStream.WriteAsync(new ReadOnlyMemory<byte>(buffer, 0, bytesRead), token);
+        totalBytesRead += bytesRead;
 
-      var tcs = new TaskCompletionSource<bool>();
-      webClient.DownloadFileCompleted += (sender, e) => {
-        if (e.Cancelled) {
-          tcs.SetException(new CommandException("Download cancelled!"));
+        if (totalBytes > 0) {
+          var percent = (int)(totalBytesRead * 100 / totalBytes);
+          if (percent > lastPercent) {
+            lastPercent = percent;
+            var speed = $"{totalBytesRead / 1024d / Math.Max(1, percent):F2} KB/s";
+            progress.Report(new(percent, speed));
+          }
         }
-        else if (e.Error != null) {
-          tcs.SetException(new CommandException($"Download failed. {e.Error.Message}"));
-        }
-        else {
-          tcs.SetResult(true);
-        }
-      };
-
-      var filePath = System.IO.Path.Combine(destinationDirectory, filename);
-      webClient.DownloadFileAsync(new Uri(url), filePath);
-      await tcs.Task;
+      }
     }
     else {
       var download = DownloadBuilder
