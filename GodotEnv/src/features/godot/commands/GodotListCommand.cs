@@ -32,6 +32,9 @@ public class GodotListCommand : ICommand, ICliCommand {
         log.Warn(result.Error);
       }
     }
+    if (!godotRepo.IsGodotSymlinkTargetAvailable) {
+      log.Warn("Could not determine current target Godot version.");
+    }
   }
 
   private static async Task ListRemoteVersions(ILog log, IGodotRepository godotRepo) {

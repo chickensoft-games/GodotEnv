@@ -571,7 +571,10 @@ public partial class GodotRepository : IGodotRepository {
     var successes = new List<GodotInstallation>();
     var failures = new List<string>();
 
-    if (FileClient.DirectoryExists(GodotInstallationsPath)) {
+    if (!FileClient.DirectoryExists(GodotInstallationsPath)) {
+      results.Add(Result.Failure<GodotInstallation>(
+        null, "Godot installation directory does not exist"
+      ));
       return results;
     }
 
