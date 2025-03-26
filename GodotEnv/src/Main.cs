@@ -93,7 +93,7 @@ public static class GodotEnv {
     );
 
     var fileVersionStringConverter = new ReleaseVersionStringConverter();
-    var ioVersionStringConverter = new IOVersionStringConverter();
+    var ioVersionStringConverter = new IoVersionStringConverter();
 
     // Godot feature dependencies
     var platform = GodotEnvironment.Create(

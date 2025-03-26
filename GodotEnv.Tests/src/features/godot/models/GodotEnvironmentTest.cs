@@ -13,12 +13,12 @@ public class GodotEnvironmentTest {
   private readonly Mock<IComputer> _computer = new();
   private readonly Mock<IFileClient> _fileClient = new();
   private readonly ReleaseVersionStringConverter _versionStringConverter = new();
-  private readonly DotnetSpecificGodotVersion _version4Dotnet = new(4, 1, 2, "stable", -1, true);
-  private readonly DotnetSpecificGodotVersion _version4NonDotnet = new(4, 1, 2, "stable", -1, false);
-  private readonly DotnetSpecificGodotVersion _version3Dotnet = new(3, 5, 3, "stable", -1, true);
-  private readonly DotnetSpecificGodotVersion _version3NonDotnet = new(3, 5, 3, "stable", -1, false);
-  private readonly DotnetSpecificGodotVersion _firstKnownWinArmVersionDotnet = new(4, 3, 0, "stable", -1, true);
-  private readonly DotnetSpecificGodotVersion _firstKnownWinArmVersionNonDotnet = new(4, 3, 0, "stable", -1, false);
+  private readonly SpecificDotnetStatusGodotVersion _version4Dotnet = new(4, 1, 2, "stable", -1, true);
+  private readonly SpecificDotnetStatusGodotVersion _version4NonDotnet = new(4, 1, 2, "stable", -1, false);
+  private readonly SpecificDotnetStatusGodotVersion _version3Dotnet = new(3, 5, 3, "stable", -1, true);
+  private readonly SpecificDotnetStatusGodotVersion _version3NonDotnet = new(3, 5, 3, "stable", -1, false);
+  private readonly SpecificDotnetStatusGodotVersion _firstKnownWinArmVersionDotnet = new(4, 3, 0, "stable", -1, true);
+  private readonly SpecificDotnetStatusGodotVersion _firstKnownWinArmVersionNonDotnet = new(4, 3, 0, "stable", -1, false);
 
   [Fact]
   public void GetsExpectedMacDownloadUrl() {

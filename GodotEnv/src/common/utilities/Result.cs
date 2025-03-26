@@ -3,7 +3,7 @@ namespace Chickensoft.GodotEnv.Common.Utilities;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-public class Result<T> {
+public sealed class Result<T> {
   [MemberNotNullWhen(true, nameof(Value))]
   public bool IsSuccess { get; }
   public T? Value { get; }
@@ -20,7 +20,7 @@ public class Result<T> {
 }
 
 // Avoid CA1000 by placing factory methods in a sibling class
-public class Result {
+public static class Result {
   public static Result<T> Success<T>(T value) =>
     new(true, value, string.Empty);
 

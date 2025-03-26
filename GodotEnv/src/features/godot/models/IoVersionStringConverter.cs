@@ -2,11 +2,11 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 
 using System;
 
-public partial class IOVersionStringConverter : IVersionStringConverter {
+public partial class IoVersionStringConverter : IVersionStringConverter {
   private readonly ReleaseVersionStringConverter _releaseConverter = new();
   private readonly SharpVersionStringConverter _sharpConverter = new();
 
-  public DotnetAgnosticGodotVersion ParseVersion(string version) {
+  public AnyDotnetStatusGodotVersion ParseVersion(string version) {
     var trimmedVersion = version.TrimStart('v');
     Exception releaseEx = null!;
     try {
@@ -23,7 +23,7 @@ public partial class IOVersionStringConverter : IVersionStringConverter {
     }
   }
 
-  public DotnetSpecificGodotVersion ParseVersion(string version, bool isDotnet) {
+  public SpecificDotnetStatusGodotVersion ParseVersion(string version, bool isDotnet) {
     var trimmedVersion = version.TrimStart('v');
     Exception releaseEx = null!;
     try {

@@ -12,6 +12,7 @@ using Common.Utilities;
 using Downloader;
 using global::GodotEnv.Common.Utilities;
 using Moq;
+using Shouldly;
 using Xunit;
 
 public class GodotRepositoryTest {
@@ -112,9 +113,9 @@ public class GodotRepositoryTest {
 
     var dotnetVersion = fileVersionStringConverter.ParseVersion(godotVersionString, true)!;
     var reconstructedDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(dotnetVersion));
-    Assert.Equal(dotnetVersion, reconstructedDotnetVersion);
+    dotnetVersion.ShouldBe(reconstructedDotnetVersion);
     var nonDotnetVersion = fileVersionStringConverter.ParseVersion(godotVersionString, false)!;
     var reconstructedNonDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(nonDotnetVersion));
-    Assert.Equal(nonDotnetVersion, reconstructedNonDotnetVersion);
+    nonDotnetVersion.ShouldBe(reconstructedNonDotnetVersion);
   }
 }

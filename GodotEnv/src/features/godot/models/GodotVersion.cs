@@ -78,35 +78,37 @@ public abstract record GodotVersion {
 }
 
 /// <summary>
-/// Represents a version of Godot that may be .NET enabled or not.
+/// Represents a Godot version with the specified version number, regardless
+/// of .NET capability.
 /// </summary>
-public sealed record DotnetAgnosticGodotVersion : GodotVersion {
-  public DotnetAgnosticGodotVersion(GodotVersionNumber number)
+public sealed record AnyDotnetStatusGodotVersion : GodotVersion {
+  public AnyDotnetStatusGodotVersion(GodotVersionNumber number)
     : base(number) { }
 
-  public DotnetAgnosticGodotVersion(
+  public AnyDotnetStatusGodotVersion(
     int major, int minor, int patch, string label, int labelNumber
   )
     : base(major, minor, patch, label, labelNumber) { }
 }
 
 /// <summary>
-/// Represents a version of Godot that either is, or is not, .NET-enabled.
+/// Represents a Godot version with the specified version number and the
+/// specified .NET capability (.NET-enabled or .NET-disabled).
 /// </summary>
-public sealed record DotnetSpecificGodotVersion : GodotVersion {
+public sealed record SpecificDotnetStatusGodotVersion : GodotVersion {
   /// <summary>
-  /// True if referencing the .NET version of Godot.
+  /// True if this version represents a .NET-enabled Godot.
   /// </summary>
-  public bool IsDotnet { get; }
+  public bool IsDotnetEnabled { get; }
 
-  public DotnetSpecificGodotVersion(
+  public SpecificDotnetStatusGodotVersion(
     GodotVersionNumber number, bool isDotnet
   )
     : base(number) {
-    IsDotnet = isDotnet;
+    IsDotnetEnabled = isDotnet;
   }
 
-  public DotnetSpecificGodotVersion(
+  public SpecificDotnetStatusGodotVersion(
     int major,
     int minor,
     int patch,
@@ -115,6 +117,6 @@ public sealed record DotnetSpecificGodotVersion : GodotVersion {
     bool isDotnet
   )
     : base(major, minor, patch, label, labelNumber) {
-    IsDotnet = isDotnet;
+    IsDotnetEnabled = isDotnet;
   }
 }

@@ -13,25 +13,25 @@ public class Linux : Unix {
   )
     : base(systemInfo, fileClient, computer, versionStringConverter) { }
 
-  public override string GetInstallerNameSuffix(DotnetSpecificGodotVersion version) {
+  public override string GetInstallerNameSuffix(SpecificDotnetStatusGodotVersion version) {
     var (platformName, architecture) = GetPlatformNameAndArchitecture(version);
 
-    return version.IsDotnet ? $"_mono_{platformName}_{architecture}" : $"_{platformName}.{architecture}";
+    return version.IsDotnetEnabled ? $"_mono_{platformName}_{architecture}" : $"_{platformName}.{architecture}";
   }
 
   public override void Describe(ILog log) => log.Info("🐧 Running on Linux");
 
   public override string GetRelativeExtractedExecutablePath(
-    DotnetSpecificGodotVersion version
+    SpecificDotnetStatusGodotVersion version
   ) {
     var fsVersionString = GetFilenameVersionString(version);
     var nameSuffix = GetInstallerNameSuffix(version);
     var (platformName, architecture) = GetPlatformNameAndArchitecture(version);
 
     var pathSuffix = fsVersionString +
-               $"{(version.IsDotnet ? "_mono" : "")}_{platformName}.{architecture}";
+               $"{(version.IsDotnetEnabled ? "_mono" : "")}_{platformName}.{architecture}";
 
-    if (version.IsDotnet) {
+    if (version.IsDotnetEnabled) {
       // Dotnet version extracts to a folder, whereas the non-dotnet version
       // does not.
       return FileClient.Combine(fsVersionString + nameSuffix, pathSuffix);
@@ -41,7 +41,7 @@ public class Linux : Unix {
   }
 
   public override string GetRelativeGodotSharpPath(
-    DotnetSpecificGodotVersion version
+    SpecificDotnetStatusGodotVersion version
   ) => FileClient.Combine(
       GetFilenameVersionString(version) + GetInstallerNameSuffix(version),
       "GodotSharp/"

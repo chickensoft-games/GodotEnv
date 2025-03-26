@@ -23,17 +23,17 @@ public class GodotChecksumClientTest {
     $"https://raw.githubusercontent.com/godotengine/godot-builds/main/releases/godot-{version}.json";
 
   public static IEnumerable<object[]> CorrectChecksumUrlRequestedTestData() {
-    yield return [new DotnetSpecificGodotVersion(1, 2, 3, "stable", -1, false), GetChecksumFileUrl("1.2.3-stable")];
-    yield return [new DotnetSpecificGodotVersion(1, 0, 0, "stable", -1, false), GetChecksumFileUrl("1.0-stable")];
-    yield return [new DotnetSpecificGodotVersion(4, 0, 0, "alpha", 14, false), GetChecksumFileUrl("4.0-alpha14")];
-    yield return [new DotnetSpecificGodotVersion(4, 2, 2, "rc", 1, false), GetChecksumFileUrl("4.2.2-rc1")];
-    yield return [new DotnetSpecificGodotVersion(4, 3, 0, "dev", 6, false), GetChecksumFileUrl("4.3-dev6")];
+    yield return [new SpecificDotnetStatusGodotVersion(1, 2, 3, "stable", -1, false), GetChecksumFileUrl("1.2.3-stable")];
+    yield return [new SpecificDotnetStatusGodotVersion(1, 0, 0, "stable", -1, false), GetChecksumFileUrl("1.0-stable")];
+    yield return [new SpecificDotnetStatusGodotVersion(4, 0, 0, "alpha", 14, false), GetChecksumFileUrl("4.0-alpha14")];
+    yield return [new SpecificDotnetStatusGodotVersion(4, 2, 2, "rc", 1, false), GetChecksumFileUrl("4.2.2-rc1")];
+    yield return [new SpecificDotnetStatusGodotVersion(4, 3, 0, "dev", 6, false), GetChecksumFileUrl("4.3-dev6")];
   }
 
   [Theory]
   [MemberData(nameof(CorrectChecksumUrlRequestedTestData))]
   public async Task CorrectChecksumUrlRequested(
-    DotnetSpecificGodotVersion version,
+    SpecificDotnetStatusGodotVersion version,
     string expectedChecksumUrl
   ) {
     var archive = new GodotCompressedArchive(
@@ -97,14 +97,14 @@ public class GodotChecksumClientTest {
     var archive = new GodotCompressedArchive(
       string.Empty,
       string.Empty,
-      new DotnetSpecificGodotVersion(4, 3, 0, "dev", 5, isDotnetVersion),
+      new SpecificDotnetStatusGodotVersion(4, 3, 0, "dev", 5, isDotnetVersion),
       string.Empty
     );
 
     var platform = new Mock<IGodotEnvironment>();
     platform.Setup(
       static platform => platform.GetInstallerFilename(
-        It.IsAny<DotnetSpecificGodotVersion>()
+        It.IsAny<SpecificDotnetStatusGodotVersion>()
       )
     ).Returns(filename);
 
@@ -129,14 +129,14 @@ public class GodotChecksumClientTest {
     var archive = new GodotCompressedArchive(
       string.Empty,
       downloadFileName,
-      new DotnetSpecificGodotVersion(1, 1, 0, "stable", -1, false),
+      new SpecificDotnetStatusGodotVersion(1, 1, 0, "stable", -1, false),
       string.Empty
     );
 
     var platform = new Mock<IGodotEnvironment>();
     platform.Setup(
       platform => platform.GetInstallerFilename(
-        It.IsAny<DotnetSpecificGodotVersion>()
+        It.IsAny<SpecificDotnetStatusGodotVersion>()
       )
     ).Returns(downloadFileName);
 
@@ -200,7 +200,7 @@ public class GodotChecksumClientTest {
       var dummyArchive = new GodotCompressedArchive(
         "TestFilename",
         Path.GetFileName(tempFileName),
-        new DotnetSpecificGodotVersion(1, 0, 0, "stable", -1, true),
+        new SpecificDotnetStatusGodotVersion(1, 0, 0, "stable", -1, true),
         Path.GetDirectoryName(tempFileName) ?? "/"
       );
 
@@ -239,14 +239,14 @@ public class GodotChecksumClientTest {
       var archive = new GodotCompressedArchive(
         string.Empty,
         archiveFileName,
-        new DotnetSpecificGodotVersion(4, 3, 0, "dev", 5, false),
+        new SpecificDotnetStatusGodotVersion(4, 3, 0, "dev", 5, false),
         Path.GetDirectoryName(archivePath) ?? "/"
       );
 
       var platform = new Mock<IGodotEnvironment>();
       platform.Setup(
         platform => platform.GetInstallerFilename(
-          It.IsAny<DotnetSpecificGodotVersion>()
+          It.IsAny<SpecificDotnetStatusGodotVersion>()
         )
       ).Returns(archiveFileName);
 

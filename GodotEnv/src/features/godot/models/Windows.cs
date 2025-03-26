@@ -28,25 +28,25 @@ public class Windows : GodotEnvironment {
   }
 
   public override string GetInstallerNameSuffix(
-    DotnetSpecificGodotVersion version
+    SpecificDotnetStatusGodotVersion version
   )
-    => version.IsDotnet
+    => version.IsDotnetEnabled
       ? $"_mono_{GetProcessorArchitecture(version)}"
       : $"_{GetProcessorArchitecture(version)}.exe";
 
   public override void Describe(ILog log) => log.Info("⧉ Running on Windows");
 
   public override string GetRelativeExtractedExecutablePath(
-    DotnetSpecificGodotVersion version
+    SpecificDotnetStatusGodotVersion version
   ) {
     var fsVersionString = GetFilenameVersionString(version);
     var name = fsVersionString +
-      $"{(version.IsDotnet ? "_mono" : "")}_{GetProcessorArchitecture(version)}.exe";
+      $"{(version.IsDotnetEnabled ? "_mono" : "")}_{GetProcessorArchitecture(version)}.exe";
 
     // Both versions extract to a folder. The dotnet folder name is different
     // from the non-dotnet folder name :P
 
-    if (version.IsDotnet) {
+    if (version.IsDotnetEnabled) {
       return FileClient.Combine(fsVersionString + $"_mono_{GetProcessorArchitecture(version)}", name);
     }
 
@@ -55,7 +55,7 @@ public class Windows : GodotEnvironment {
   }
 
   public override string GetRelativeGodotSharpPath(
-    DotnetSpecificGodotVersion version
+    SpecificDotnetStatusGodotVersion version
   ) => FileClient.Combine(
     GetFilenameVersionString(version) + $"_mono_{GetProcessorArchitecture(version)}", "GodotSharp"
   );

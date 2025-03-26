@@ -3,6 +3,7 @@ namespace Chickensoft.GodotEnv.Tests.Features.Godot.Models;
 using System;
 using System.Collections.Generic;
 using Chickensoft.GodotEnv.Features.Godot.Models;
+using Shouldly;
 using Xunit;
 
 public partial class GodotVersionTest {
@@ -25,7 +26,7 @@ public partial class GodotVersionTest {
     string label,
     int labelNum
   ) =>
-    Assert.Throws<ArgumentException>(
+    Should.Throw<ArgumentException>(
       () =>
         new GodotVersionNumber(
           major,
@@ -44,9 +45,9 @@ public partial class GodotVersionTest {
     string label,
     int labelNum
   ) =>
-    Assert.Throws<ArgumentException>(
+    Should.Throw<ArgumentException>(
       () =>
-        new DotnetAgnosticGodotVersion(
+        new AnyDotnetStatusGodotVersion(
           major,
           minor,
           patch,
@@ -63,9 +64,9 @@ public partial class GodotVersionTest {
     string label,
     int labelNum
   ) {
-    Assert.Throws<ArgumentException>(
+    Should.Throw<ArgumentException>(
       () =>
-        new DotnetSpecificGodotVersion(
+        new SpecificDotnetStatusGodotVersion(
           major,
           minor,
           patch,
@@ -73,9 +74,9 @@ public partial class GodotVersionTest {
           labelNum,
           false
       ));
-    Assert.Throws<ArgumentException>(
+    Should.Throw<ArgumentException>(
       () =>
-        new DotnetSpecificGodotVersion(
+        new SpecificDotnetStatusGodotVersion(
           major,
           minor,
           patch,

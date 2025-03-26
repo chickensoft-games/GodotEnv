@@ -15,7 +15,7 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 public record GodotInstallation(
   string Name,
   bool IsActiveVersion,
-  DotnetSpecificGodotVersion Version,
+  SpecificDotnetStatusGodotVersion Version,
   string Path,
   string ExecutionPath
 ) {

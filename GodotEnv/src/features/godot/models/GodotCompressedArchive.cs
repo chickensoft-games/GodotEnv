@@ -13,7 +13,7 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 public record GodotCompressedArchive(
   string Name,
   string Filename,
-  DotnetSpecificGodotVersion Version,
+  SpecificDotnetStatusGodotVersion Version,
   string Path
 ) {
   public override string ToString() =>

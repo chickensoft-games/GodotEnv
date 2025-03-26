@@ -4,10 +4,10 @@ using System;
 using System.Text.RegularExpressions;
 
 public partial class ReleaseVersionStringConverter : IVersionStringConverter {
-  public DotnetAgnosticGodotVersion ParseVersion(string version) =>
+  public AnyDotnetStatusGodotVersion ParseVersion(string version) =>
     new(ParseVersionNumber(version));
 
-  public DotnetSpecificGodotVersion ParseVersion(string version, bool isDotnet) =>
+  public SpecificDotnetStatusGodotVersion ParseVersion(string version, bool isDotnet) =>
     new(ParseVersionNumber(version), isDotnet);
 
   public string VersionString(GodotVersion version) {

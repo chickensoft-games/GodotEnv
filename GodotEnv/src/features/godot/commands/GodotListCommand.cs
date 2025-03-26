@@ -24,8 +24,7 @@ public class GodotListCommand : ICommand, ICliCommand {
   private static void ListLocalVersions(ILog log, IGodotRepository godotRepo) {
     var installations = godotRepo.GetInstallationsList();
     foreach (var result in installations) {
-      if (result.IsSuccess) {
-        var installation = result.Value;
+      if (result.Value is { } installation) {
         var activeTag = installation.IsActiveVersion ? " *" : "";
         log.Print(godotRepo.InstallationVersionName(installation) + activeTag);
       }

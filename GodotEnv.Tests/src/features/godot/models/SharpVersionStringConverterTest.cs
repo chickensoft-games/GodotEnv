@@ -40,10 +40,10 @@ public partial class SharpVersionStringConverterTest {
     Assert.Equal(expectedNumber, parsedAgnostic.Number);
     var parsedDotnet = converter.ParseVersion(toParse, true);
     Assert.Equal(expectedNumber, parsedDotnet.Number);
-    Assert.True(parsedDotnet.IsDotnet);
+    Assert.True(parsedDotnet.IsDotnetEnabled);
     var parsedNonDotnet = converter.ParseVersion(toParse, false);
     Assert.Equal(expectedNumber, parsedNonDotnet.Number);
-    Assert.False(parsedNonDotnet.IsDotnet);
+    Assert.False(parsedNonDotnet.IsDotnetEnabled);
   }
 
   public static IEnumerable<object[]> CorrectSharpVersionStringFormattingTestData() {
@@ -58,8 +58,8 @@ public partial class SharpVersionStringConverterTest {
   [MemberData(nameof(CorrectSharpVersionStringFormattingTestData))]
   public void CorrectVersionStringFormatting(GodotVersionNumber toFormat, string expected) {
     var converter = new SharpVersionStringConverter();
-    Assert.Equal(expected, converter.VersionString(new DotnetAgnosticGodotVersion(toFormat)));
-    Assert.Equal(expected, converter.VersionString(new DotnetSpecificGodotVersion(toFormat, true)));
-    Assert.Equal(expected, converter.VersionString(new DotnetSpecificGodotVersion(toFormat, false)));
+    Assert.Equal(expected, converter.VersionString(new AnyDotnetStatusGodotVersion(toFormat)));
+    Assert.Equal(expected, converter.VersionString(new SpecificDotnetStatusGodotVersion(toFormat, true)));
+    Assert.Equal(expected, converter.VersionString(new SpecificDotnetStatusGodotVersion(toFormat, false)));
   }
 }
