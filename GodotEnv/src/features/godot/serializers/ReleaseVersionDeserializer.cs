@@ -1,31 +1,15 @@
-namespace Chickensoft.GodotEnv.Features.Godot.Models;
+namespace Chickensoft.GodotEnv.Features.Godot.Serializers;
 
 using System;
 using System.Text.RegularExpressions;
+using Chickensoft.GodotEnv.Features.Godot.Models;
 
-public partial class ReleaseVersionStringConverter : IVersionStringConverter {
-  public AnyDotnetStatusGodotVersion ParseVersion(string version) =>
+public partial class ReleaseVersionDeserializer : IVersionDeserializer {
+  public AnyDotnetStatusGodotVersion Deserialize(string version) =>
     new(ParseVersionNumber(version));
 
-  public SpecificDotnetStatusGodotVersion ParseVersion(string version, bool isDotnet) =>
+  public SpecificDotnetStatusGodotVersion Deserialize(string version, bool isDotnet) =>
     new(ParseVersionNumber(version), isDotnet);
-
-  public string VersionString(GodotVersion version) {
-    var result = $"{version.Number.Major}.{version.Number.Minor}";
-    if (version.Number.Patch != 0) {
-      result += $".{version.Number.Patch}";
-    }
-    result += $"-{LabelString(version)}";
-    return result;
-  }
-
-  public string LabelString(GodotVersion version) {
-    var result = version.Number.Label;
-    if (result != "stable") {
-      result += version.Number.LabelNumber;
-    }
-    return result;
-  }
 
   private static GodotVersionNumber ParseVersionNumber(string version) {
     var match = VersionStringRegex().Match(version);

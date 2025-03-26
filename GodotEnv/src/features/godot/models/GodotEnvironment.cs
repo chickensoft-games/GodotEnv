@@ -4,6 +4,7 @@ using System;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
+using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using global::GodotEnv.Common.Utilities;
 
 public interface IGodotEnvironment {
@@ -15,7 +16,8 @@ public interface IGodotEnvironment {
 
   IComputer Computer { get; }
 
-  IVersionStringConverter VersionStringConverter { get; }
+  IVersionDeserializer VersionDeserializer { get; }
+  IVersionSerializer VersionSerializer { get; }
 
   /// <summary>
   /// Godot installation filename suffix.
@@ -87,12 +89,13 @@ public abstract class GodotEnvironment : IGodotEnvironment {
     ISystemInfo systemInfo,
     IFileClient fileClient,
     IComputer computer,
-    IVersionStringConverter versionStringConverter
+    IVersionDeserializer versionDeserializer,
+    IVersionSerializer versionSerializer
   ) =>
     systemInfo.OS switch {
-      OSType.Windows => new Windows(systemInfo, fileClient, computer, versionStringConverter),
-      OSType.MacOS => new MacOS(systemInfo, fileClient, computer, versionStringConverter),
-      OSType.Linux => new Linux(systemInfo, fileClient, computer, versionStringConverter),
+      OSType.Windows => new Windows(systemInfo, fileClient, computer, versionDeserializer, versionSerializer),
+      OSType.MacOS => new MacOS(systemInfo, fileClient, computer, versionDeserializer, versionSerializer),
+      OSType.Linux => new Linux(systemInfo, fileClient, computer, versionDeserializer, versionSerializer),
       OSType.Unknown => throw GetUnknownOSException(),
       _ => throw GetUnknownOSException()
     };
@@ -101,18 +104,21 @@ public abstract class GodotEnvironment : IGodotEnvironment {
     ISystemInfo systemInfo,
     IFileClient fileClient,
     IComputer computer,
-    IVersionStringConverter versionStringConverter
+    IVersionDeserializer versionDeserializer,
+    IVersionSerializer versionSerializer
   ) {
     SystemInfo = systemInfo;
     FileClient = fileClient;
     Computer = computer;
-    VersionStringConverter = versionStringConverter;
+    VersionDeserializer = versionDeserializer;
+    VersionSerializer = versionSerializer;
   }
 
   public ISystemInfo SystemInfo { get; }
   public IFileClient FileClient { get; }
   public IComputer Computer { get; }
-  public IVersionStringConverter VersionStringConverter { get; }
+  public IVersionDeserializer VersionDeserializer { get; }
+  public IVersionSerializer VersionSerializer { get; }
 
   public string ExportTemplatesBasePath => throw new NotImplementedException();
 
@@ -131,8 +137,8 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   ) {
     // We need to be sure this is a release-style version string to get the
     // correct url
-    var versionConverter = new ReleaseVersionStringConverter();
-    var url = $"{GODOT_URL_PREFIX}{versionConverter.VersionString(version)}/";
+    var versionConverter = new ReleaseVersionSerializer();
+    var url = $"{GODOT_URL_PREFIX}{versionConverter.Serialize(version)}/";
 
     // Godot application download url.
     if (!isTemplate) {
@@ -145,7 +151,7 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   }
 
   protected string GetFilenameVersionString(GodotVersion version) =>
-    GODOT_FILENAME_PREFIX + VersionStringConverter.VersionString(version);
+    GODOT_FILENAME_PREFIX + VersionSerializer.Serialize(version);
 
   // Gets the filename of the Godot installation download for the platform.
   public string GetInstallerFilename(

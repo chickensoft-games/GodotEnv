@@ -43,20 +43,24 @@ public class GodotUninstallCommand :
   public async ValueTask ExecuteAsync(IConsole console) {
     var godotRepo = ExecutionContext.Godot.GodotRepo;
     var platform = ExecutionContext.Godot.Platform;
-    var versionConverter = godotRepo.VersionStringConverter;
 
     var log = ExecutionContext.CreateLog(console);
 
     var isDotnetVersion = !NoDotnet;
     // We know this won't throw because the validator okayed it
-    var version = versionConverter.ParseVersion(RawVersion, isDotnetVersion);
+    var version =
+      godotRepo.VersionDeserializer.Deserialize(RawVersion, isDotnetVersion);
 
     log.Print("");
     if (await godotRepo.Uninstall(version, log)) {
-      log.Success($"Godot {versionConverter.VersionString(version)} uninstalled.");
+      log.Success(
+        $"Godot {godotRepo.VersionSerializer.Serialize(version)} uninstalled."
+      );
     }
     else {
-      log.Err($"Godot {versionConverter.VersionString(version)} not found.");
+      log.Err(
+        $"Godot {godotRepo.VersionSerializer.Serialize(version)} not found."
+      );
     }
     log.Print("");
   }

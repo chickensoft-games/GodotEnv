@@ -52,7 +52,7 @@ public class GodotInstallCommand :
 
     var isDotnetVersion = !NoDotnet;
     // We know this won't throw because the validator okayed it
-    var version = godotRepo.VersionStringConverter.ParseVersion(RawVersion, isDotnetVersion);
+    var version = godotRepo.VersionDeserializer.Deserialize(RawVersion, isDotnetVersion);
 
     var godotInstallationsPath = godotRepo.GodotInstallationsPath;
     var godotCachePath = godotRepo.GodotCachePath;

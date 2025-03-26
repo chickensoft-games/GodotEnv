@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Features.Godot.Domain;
 using Chickensoft.GodotEnv.Features.Godot.Models;
+using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using CliFx.Infrastructure;
 using Common.Clients;
 using Common.Models;
@@ -42,11 +43,19 @@ public class GodotRepositoryTest {
     environmentVariableClient.Setup(evc => evc.UpdateGodotEnvEnvironment(It.IsAny<string>(), It.IsAny<string>()))
       .Returns(Task.CompletedTask);
 
-    var platformVersionStringConverter = new Mock<IVersionStringConverter>();
-    var platform = new Mock<GodotEnvironment>(systemInfo, fileClient.Object, computer.Object, platformVersionStringConverter.Object);
+    var platformVersionDeserializer = new Mock<IVersionDeserializer>();
+    var platformVersionSerializer = new Mock<IVersionSerializer>();
+    var platform = new Mock<GodotEnvironment>(
+      systemInfo,
+      fileClient.Object,
+      computer.Object,
+      platformVersionDeserializer.Object,
+      platformVersionSerializer.Object
+    );
     var checksumClient = new Mock<IGodotChecksumClient>();
 
-    var versionStringConverter = new Mock<IVersionStringConverter>();
+    var versionDeserializer = new Mock<IVersionDeserializer>();
+    var versionSerializer = new Mock<IVersionSerializer>();
 
     var godotRepo = new GodotRepository(
       systemInfo: systemInfo,
@@ -58,7 +67,8 @@ public class GodotRepositoryTest {
       environmentVariableClient: environmentVariableClient.Object,
       processRunner: processRunner.Object,
       checksumClient: checksumClient.Object,
-      versionStringConverter: versionStringConverter.Object
+      versionDeserializer: versionDeserializer.Object,
+      versionSerializer: versionSerializer.Object
     );
 
     var executionContext = new Mock<IExecutionContext>();
@@ -92,11 +102,15 @@ public class GodotRepositoryTest {
     var zipClient = new Mock<ZipClient>(fileClient.Object.Files);
     var environmentVariableClient = new Mock<IEnvironmentVariableClient>();
 
-    var fileVersionStringConverter = new ReleaseVersionStringConverter();
-    var platform = new Mock<GodotEnvironment>(systemInfo, fileClient.Object, computer.Object, fileVersionStringConverter);
+    var fileVersionDeserializer = new ReleaseVersionDeserializer();
+    var fileVersionSerializer = new ReleaseVersionSerializer();
+    var platform = new Mock<GodotEnvironment>(
+      systemInfo, fileClient.Object, computer.Object, fileVersionDeserializer, fileVersionSerializer
+    );
 
     var checksumClient = new Mock<IGodotChecksumClient>();
-    var versionStringConverter = new Mock<IVersionStringConverter>();
+    var versionDeserializer = new Mock<IVersionDeserializer>();
+    var versionSerializer = new Mock<IVersionSerializer>();
 
     var godotRepo = new GodotRepository(
       systemInfo: systemInfo,
@@ -108,13 +122,14 @@ public class GodotRepositoryTest {
       environmentVariableClient: environmentVariableClient.Object,
       processRunner: processRunner.Object,
       checksumClient: checksumClient.Object,
-      versionStringConverter: versionStringConverter.Object
+      versionDeserializer: versionDeserializer.Object,
+      versionSerializer: versionSerializer.Object
     );
 
-    var dotnetVersion = fileVersionStringConverter.ParseVersion(godotVersionString, true)!;
+    var dotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, true)!;
     var reconstructedDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(dotnetVersion));
     dotnetVersion.ShouldBe(reconstructedDotnetVersion);
-    var nonDotnetVersion = fileVersionStringConverter.ParseVersion(godotVersionString, false)!;
+    var nonDotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, false)!;
     var reconstructedNonDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(nonDotnetVersion));
     nonDotnetVersion.ShouldBe(reconstructedNonDotnetVersion);
   }

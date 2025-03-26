@@ -2,6 +2,7 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
+using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using global::GodotEnv.Common.Utilities;
 
 public class Windows : GodotEnvironment {
@@ -9,9 +10,10 @@ public class Windows : GodotEnvironment {
     ISystemInfo systemInfo,
     IFileClient fileClient,
     IComputer computer,
-    IVersionStringConverter versionStringConverter
+    IVersionDeserializer versionDeserializer,
+    IVersionSerializer versionSerializer
   )
-    : base(systemInfo, fileClient, computer, versionStringConverter) { }
+    : base(systemInfo, fileClient, computer, versionDeserializer, versionSerializer) { }
 
   private static readonly (int major, int minor) _firstKnownArmVersion = (4, 3);
 

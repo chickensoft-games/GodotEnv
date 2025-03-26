@@ -18,7 +18,7 @@ public class GodotVersionValidator : BindingValidator<string> {
       return Error("Version cannot be null.");
     }
     try {
-      ExecutionContext.Godot.GodotRepo.VersionStringConverter.ParseVersion(str);
+      ExecutionContext.Godot.GodotRepo.VersionDeserializer.Deserialize(str);
     }
     catch (Exception ex) {
       return Error($"Version '{str}' is invalid: {ex.Message}.");

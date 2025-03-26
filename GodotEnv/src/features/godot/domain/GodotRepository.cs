@@ -12,6 +12,7 @@ using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
+using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using global::GodotEnv.Common.Utilities;
 using Newtonsoft.Json;
 
@@ -28,7 +29,8 @@ public interface IGodotRepository {
   IEnvironmentVariableClient EnvironmentVariableClient { get; }
   IGodotEnvironment Platform { get; }
   IProcessRunner ProcessRunner { get; }
-  IVersionStringConverter VersionStringConverter { get; }
+  IVersionDeserializer VersionDeserializer { get; }
+  IVersionSerializer VersionSerializer { get; }
   string GodotInstallationsPath { get; }
   string GodotCachePath { get; }
   string GodotSymlinkPath { get; }
@@ -165,7 +167,8 @@ public partial class GodotRepository : IGodotRepository {
 
   private IGodotChecksumClient ChecksumClient { get; }
 
-  public IVersionStringConverter VersionStringConverter { get; }
+  public IVersionDeserializer VersionDeserializer { get; }
+  public IVersionSerializer VersionSerializer { get; }
 
   public string GodotInstallationsPath => FileClient.Combine(
     FileClient.AppDataDirectory,
@@ -215,7 +218,8 @@ public partial class GodotRepository : IGodotRepository {
     IEnvironmentVariableClient environmentVariableClient,
     IProcessRunner processRunner,
     IGodotChecksumClient checksumClient,
-    IVersionStringConverter versionStringConverter
+    IVersionDeserializer versionDeserializer,
+    IVersionSerializer versionSerializer
   ) {
     SystemInfo = systemInfo;
     Config = config;
@@ -226,7 +230,8 @@ public partial class GodotRepository : IGodotRepository {
     EnvironmentVariableClient = environmentVariableClient;
     ProcessRunner = processRunner;
     ChecksumClient = checksumClient;
-    VersionStringConverter = versionStringConverter;
+    VersionDeserializer = versionDeserializer;
+    VersionSerializer = versionSerializer;
   }
 
   public GodotInstallation? GetInstallation(
@@ -239,7 +244,7 @@ public partial class GodotRepository : IGodotRepository {
   ) => ReadInstallation(version);
 
   public string InstallationVersionName(GodotInstallation installation) =>
-    VersionStringConverter.VersionString(installation.Version) +
+    VersionSerializer.Serialize(installation.Version) +
       (installation.Version.IsDotnetEnabled ? " dotnet" : " not-dotnet");
 
   public void ClearCache() {
@@ -615,23 +620,23 @@ public partial class GodotRepository : IGodotRepository {
     var versions = new List<string>();
     // format version name
     for (var i = 0; i < deserializedBody?.Count; i++) {
-      var deserializedVersion = deserializedBody[i];
-      deserializedVersion.Name =
-        deserializedVersion.Name.Replace("godot-", "").Replace(".json", "");
+      var remoteVersion = deserializedBody[i];
+      remoteVersion.Name =
+        remoteVersion.Name.Replace("godot-", "").Replace(".json", "");
 
       // limit versions to godot 3 and above
-      if (deserializedVersion.Name[0] == '2') {
+      if (remoteVersion.Name[0] == '2') {
         break;
       }
 
       try {
         // Version strings coming from remote will (mostly) be in release style
-        var version = new ReleaseVersionStringConverter().ParseVersion(
-          deserializedVersion.Name
+        var version = new ReleaseVersionDeserializer().Deserialize(
+          remoteVersion.Name
           );
         // Output in our preferred format
         // so the user has a consistent picture of versioning
-        versions.Add(VersionStringConverter.VersionString(version));
+        versions.Add(VersionSerializer.Serialize(version));
       }
       // Discard remote versions that aren't canonical,
       // like "3.2-alpha0-unofficial"
@@ -717,7 +722,7 @@ public partial class GodotRepository : IGodotRepository {
     SpecificDotnetStatusGodotVersion version
   ) =>
     $"godot_{(version.IsDotnetEnabled ? "dotnet_" : "")}" +
-      FileClient.Sanitize(Platform.VersionStringConverter.VersionString(version))
+      FileClient.Sanitize(Platform.VersionSerializer.Serialize(version))
         .Replace(".", "_")
         .Replace("-", "_");
 
@@ -742,7 +747,7 @@ public partial class GodotRepository : IGodotRepository {
     versionString += $"-{label.Replace("_", ".")}";
 
     var isDotnet = directory.Contains("dotnet");
-    return Platform.VersionStringConverter.ParseVersion(versionString, isDotnet);
+    return Platform.VersionDeserializer.Deserialize(versionString, isDotnet);
   }
 
   // Regex for converting directory names back into version strings to see

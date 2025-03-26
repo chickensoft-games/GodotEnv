@@ -7,6 +7,7 @@ using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using Common.Clients;
 using Models;
 
@@ -49,8 +50,8 @@ public class GodotChecksumClient(
 
   private static string GetChecksumFileUrl(GodotCompressedArchive archive) {
     // We need to be sure this will be a release-style version string to get the right URL
-    var versionConverter = new ReleaseVersionStringConverter();
-    var releaseFilename = $"godot-{versionConverter.VersionString(archive.Version)}.json";
+    var versionConverter = new ReleaseVersionSerializer();
+    var releaseFilename = $"godot-{versionConverter.Serialize(archive.Version)}.json";
     return $"https://raw.githubusercontent.com/godotengine/godot-builds/main/releases/{releaseFilename}";
   }
 
