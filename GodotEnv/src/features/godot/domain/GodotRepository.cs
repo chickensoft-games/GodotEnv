@@ -67,6 +67,7 @@ public interface IGodotRepository {
   /// <param name="skipChecksumVerification">True if checksum verification should be skipped</param>
   /// <param name="log">Output log.</param>
   /// <param name="token">Cancellation token.</param>
+  /// <param name="proxyUrl">Optional proxy URL.</param>
   /// <returns>The fully resolved / absolute path of the Godot installation zip
   /// file for the Platform.</returns>
   Task<GodotCompressedArchive> DownloadGodot(
@@ -74,7 +75,8 @@ public interface IGodotRepository {
       bool isDotnetVersion,
       bool skipChecksumVerification,
       ILog log,
-      CancellationToken token
+      CancellationToken token,
+      string? proxyUrl = null
     );
 
   /// <summary>
@@ -137,8 +139,9 @@ public interface IGodotRepository {
   /// <summary>
   /// Get the list of available Godot versions.
   /// </summary>
+  /// <param name="proxyUrl">Proxy URL to use for the request</param>
   /// <returns></returns>
-  Task<List<string>> GetRemoteVersionsList();
+  Task<List<string>> GetRemoteVersionsList(string? proxyUrl = null);
 
   /// <summary>
   /// Uninstalls the specified version of Godot.
@@ -249,7 +252,8 @@ public partial class GodotRepository : IGodotRepository {
     bool isDotnetVersion,
     bool skipChecksumVerification,
     ILog log,
-    CancellationToken token
+    CancellationToken token,
+    string? proxyUrl = null
   ) {
     log.Info("⬇ Preparing to download Godot...");
 
@@ -258,6 +262,10 @@ public partial class GodotRepository : IGodotRepository {
     );
 
     log.Print($"🌏 Godot download url: {downloadUrl}");
+
+    if (!string.IsNullOrEmpty(proxyUrl)) {
+      log.Info($"🔄 Using proxy: {proxyUrl}");
+    }
 
     var fsName = GetVersionFsName(version, isDotnetVersion);
     // Tux server packages use .zip for everything.
@@ -311,6 +319,11 @@ public partial class GodotRepository : IGodotRepository {
     log.Print($"💾 Compressed installer path: {compressedArchivePath}");
 
     try {
+      if (!string.IsNullOrEmpty(proxyUrl)) {
+        // if proxyUrl is set, use HttpClient to download through proxy
+        log.Info($"🌐 Using proxy for download: {proxyUrl}");
+      }
+
       await NetworkClient.DownloadFileAsync(
         url: downloadUrl,
         destinationDirectory: cacheDir,
@@ -321,8 +334,10 @@ public partial class GodotRepository : IGodotRepository {
             "      "
           )
         ),
-        token: token
+        token: token,
+        proxyUrl: proxyUrl
       );
+
       log.Print("");  // Force new line after download progress as the cursor remains in the previously line.
       log.ClearCurrentLine();
     }
@@ -333,7 +348,7 @@ public partial class GodotRepository : IGodotRepository {
     }
 
     if (!skipChecksumVerification) {
-      await VerifyArchiveChecksum(log, archive);
+      await VerifyArchiveChecksum(log, archive, proxyUrl);
     }
     else {
       log.Info("⚠️ Skipping checksum verification due to command-line flag!");
@@ -346,10 +361,10 @@ public partial class GodotRepository : IGodotRepository {
     return archive;
   }
 
-  private async Task VerifyArchiveChecksum(ILog log, GodotCompressedArchive archive) {
+  private async Task VerifyArchiveChecksum(ILog log, GodotCompressedArchive archive, string? proxyUrl = null) {
     try {
       log.InfoInPlace("⏳ Verifying Checksum.");
-      await ChecksumClient.VerifyArchiveChecksum(archive);
+      await ChecksumClient.VerifyArchiveChecksum(archive, proxyUrl);
       log.ClearCurrentLine();
       log.Success("✅ Checksum verified.");
     }
@@ -586,8 +601,8 @@ public partial class GodotRepository : IGodotRepository {
     failedGodotInstallations = [.. failedGodotInstallations.Order()];
   }
 
-  public async Task<List<string>> GetRemoteVersionsList() {
-    var response = await NetworkClient.WebRequestGetAsync(GODOT_REMOTE_VERSIONS_URL, true);
+  public async Task<List<string>> GetRemoteVersionsList(string? proxyUrl = null) {
+    var response = await NetworkClient.WebRequestGetAsync(GODOT_REMOTE_VERSIONS_URL, true, proxyUrl);
     response.EnsureSuccessStatusCode();
 
     var responseBody = await response.Content.ReadAsStringAsync();
