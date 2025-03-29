@@ -17,6 +17,12 @@ public class GodotListCommand : ICommand, ICliCommand {
     Description = "Specify to list all available versions of Godot")]
   public bool ListRemoteAvailable { get; set; }
 
+  [CommandOption(
+    "proxy", 'x',
+    Description = "Specify a proxy server URL to use for downloads (e.g., http://127.0.0.1:1080)."
+  )]
+  public string? ProxyUrl { get; set; }
+
   public GodotListCommand(IExecutionContext context) {
     ExecutionContext = context;
   }

@@ -48,7 +48,9 @@ public class GodotChecksumClientTest {
     var networkClient = new Mock<INetworkClient>();
     networkClient.Setup(
       client => client.WebRequestGetAsync(
-        It.IsAny<string>(), false
+        It.IsAny<string>(),
+        It.IsAny<bool>(),
+        It.IsAny<string?>()
       ))
       .ThrowsAsync(new HttpRequestException());
 
@@ -56,9 +58,9 @@ public class GodotChecksumClientTest {
 
     var checksumClient = new GodotChecksumClient(networkClient.Object, platform.Object);
 
-    await Assert.ThrowsAsync<HttpRequestException>(async () => await checksumClient.GetExpectedChecksumForArchive(archive));
+    await Assert.ThrowsAsync<MissingChecksumException>(async () => await checksumClient.GetExpectedChecksumForArchive(archive));
 
-    networkClient.Verify(nc => nc.WebRequestGetAsync(expectedChecksumUrl, false), Times.Once);
+    networkClient.Verify(nc => nc.WebRequestGetAsync(expectedChecksumUrl, true, null), Times.Once);
   }
 
   public static IEnumerable<object[]> CorrectlyParsedJsonTestData() {
@@ -186,7 +188,9 @@ public class GodotChecksumClientTest {
     var networkClient = new Mock<INetworkClient>();
     networkClient.Setup(
         client => client.WebRequestGetAsync(
-          It.IsAny<string>(), false
+          It.IsAny<string>(),
+          It.IsAny<bool>(),
+          It.IsAny<string?>()
         ))
       .ReturnsAsync(() => new HttpResponseMessage(HttpStatusCode.OK) {
         Content = new StringContent(godotReleaseJson)

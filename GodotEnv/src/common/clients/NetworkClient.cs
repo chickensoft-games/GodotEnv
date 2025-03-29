@@ -1,6 +1,7 @@
 namespace Chickensoft.GodotEnv.Common.Clients;
 
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,17 +18,19 @@ public interface INetworkClient {
     string destinationDirectory,
     string filename,
     IProgress<DownloadProgress> progress,
-    CancellationToken token
+    CancellationToken token,
+    string? proxyUrl = null
   );
 
   Task DownloadFileAsync(
     string url,
     string destinationDirectory,
     string filename,
-    CancellationToken token
+    CancellationToken token,
+    string? proxyUrl = null
   );
 
-  public Task<HttpResponseMessage> WebRequestGetAsync(string url, bool requestAgent = false);
+  public Task<HttpResponseMessage> WebRequestGetAsync(string url, bool requestAgent = false, string? proxyUrl = null);
 }
 
 /// <summary>Download progress.</summary>
@@ -50,8 +53,18 @@ public class NetworkClient : INetworkClient {
     DownloadConfiguration = downloadConfiguration;
   }
 
-  public async Task<HttpResponseMessage> WebRequestGetAsync(string url, bool requestAgent = false) {
-    _client ??= new HttpClient();
+  public async Task<HttpResponseMessage> WebRequestGetAsync(string url, bool requestAgent = false, string? proxyUrl = null) {
+    if (_client == null || !string.IsNullOrEmpty(proxyUrl)) {
+      var handler = string.IsNullOrEmpty(proxyUrl)
+        ? new HttpClientHandler()
+        : new HttpClientHandler {
+          Proxy = new WebProxy(proxyUrl),
+          UseProxy = true
+        };
+
+      _client = new HttpClient(handler);
+    }
+
     if (requestAgent) {
       _client.DefaultRequestHeaders.UserAgent.TryParseAdd("request");
     }
@@ -63,8 +76,20 @@ public class NetworkClient : INetworkClient {
     string destinationDirectory,
     string filename,
     IProgress<DownloadProgress> progress,
-    CancellationToken token
+    CancellationToken token,
+    string? proxyUrl = null
   ) {
+    // if proxyUrl is provided, set the proxy, otherwise clear the proxy
+    if (!string.IsNullOrEmpty(proxyUrl)) {
+      DownloadConfiguration.RequestConfiguration.Proxy = new WebProxy {
+        Address = new Uri(proxyUrl),
+        UseDefaultCredentials = false
+      };
+    }
+    else {
+      DownloadConfiguration.RequestConfiguration.Proxy = null;
+    }
+
     var download = DownloadBuilder
       .New()
       .WithUrl(url)
@@ -85,7 +110,7 @@ public class NetworkClient : INetworkClient {
     );
 
     void internalProgress(
-      object? sender, DownloadProgressChangedEventArgs args
+      object? sender, Downloader.DownloadProgressChangedEventArgs args
     ) {
       var speed = args.BytesPerSecondSpeed;
       var humanizedSpeed = speed.Bytes().Per(1.Seconds()).Humanize("#.##");
@@ -126,8 +151,20 @@ public class NetworkClient : INetworkClient {
     string url,
     string destinationDirectory,
     string filename,
-    CancellationToken token
+    CancellationToken token,
+    string? proxyUrl = null
   ) {
+    // if proxyUrl is provided, set the proxy, otherwise clear the proxy
+    if (!string.IsNullOrEmpty(proxyUrl)) {
+      DownloadConfiguration.RequestConfiguration.Proxy = new WebProxy {
+        Address = new Uri(proxyUrl),
+        UseDefaultCredentials = false
+      };
+    }
+    else {
+      DownloadConfiguration.RequestConfiguration.Proxy = null;
+    }
+
     var download = DownloadBuilder
       .New()
       .WithUrl(url)
