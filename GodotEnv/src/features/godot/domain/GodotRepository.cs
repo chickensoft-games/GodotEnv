@@ -139,6 +139,7 @@ public interface IGodotRepository {
   /// <summary>
   /// Get the list of available Godot versions.
   /// </summary>
+  /// <param name="proxyUrl">Proxy URL to use for the request</param>
   /// <returns></returns>
   Task<List<string>> GetRemoteVersionsList(string? proxyUrl = null);
 

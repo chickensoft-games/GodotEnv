@@ -18,6 +18,7 @@ public interface IGodotChecksumClient {
   /// if they do not match.
   /// </summary>
   /// <param name="archive">Downloaded archive to check</param>
+  /// <param name="proxyUrl">Proxy URL to use for the request</param>
   /// <returns>Nothing</returns>
   public Task VerifyArchiveChecksum(GodotCompressedArchive archive, string? proxyUrl = null);
 
@@ -25,6 +26,7 @@ public interface IGodotChecksumClient {
   /// Gets the expected checksum for a given GodotCompressedArchive
   /// </summary>
   /// <param name="archive">Archive to get the checksum for</param>
+  /// <param name="proxyUrl">Proxy URL to use for the request</param>
   /// <returns>Checksum as hex-string</returns>
   public Task<string> GetExpectedChecksumForArchive(GodotCompressedArchive archive, string? proxyUrl = null);
   /// <summary>

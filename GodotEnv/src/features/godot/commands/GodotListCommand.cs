@@ -19,7 +19,7 @@ public class GodotListCommand : ICommand, ICliCommand {
 
   [CommandOption(
     "proxy", 'x',
-    Description = "Specify a proxy server URL to use for downloads (e.g., http://127.0.0.1:1080)."
+    Description = "Specify a proxy server URL (e.g., http://127.0.0.1:1080)."
   )]
   public string? ProxyUrl { get; set; }
 
