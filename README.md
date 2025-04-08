@@ -450,7 +450,7 @@ While the addons installation logic is well-tested, the Godot version management
 
 🐣 Made with love by 🐤 Chickensoft — <https://chickensoft.games>
 
-[chickensoft-badge]: https://chickensoft.games/images/chickensoft/chickensoft_badge.svg
+[chickensoft-badge]: https://chickensoft.games/img/badges/chickensoft_badge.svg
 [chickensoft-website]: https://chickensoft.games
 [discord]: https://discord.gg/gSjaPgMmYW
 [jsonc]: https://code.visualstudio.com/docs/languages/json#_json-with-comments
