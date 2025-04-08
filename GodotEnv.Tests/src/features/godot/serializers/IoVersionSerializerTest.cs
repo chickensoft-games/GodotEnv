@@ -5,7 +5,7 @@ using Chickensoft.GodotEnv.Features.Godot.Models;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using Xunit;
 
-public class IOVersionStringConverterTest {
+public class IoVersionStringConverterTest {
   public static IEnumerable<object[]> CorrectReleaseVersionSerializationTestData() {
     yield return [new GodotVersionNumber(0, 0, 1, "stable", -1), "0.0.1-stable"];
     yield return [new GodotVersionNumber(1, 2, 0, "stable", -1), "1.2-stable"];
