@@ -127,10 +127,10 @@ public class GodotRepositoryTest {
     );
 
     var dotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, true)!;
-    var reconstructedDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(dotnetVersion));
+    var reconstructedDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(fileVersionSerializer, dotnetVersion));
     dotnetVersion.ShouldBe(reconstructedDotnetVersion);
     var nonDotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, false)!;
-    var reconstructedNonDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(nonDotnetVersion));
+    var reconstructedNonDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(fileVersionSerializer, nonDotnetVersion));
     nonDotnetVersion.ShouldBe(reconstructedNonDotnetVersion);
   }
 }
