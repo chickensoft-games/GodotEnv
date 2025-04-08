@@ -266,7 +266,9 @@ public partial class GodotRepository : IGodotRepository {
 
     log.Print($"🌏 Godot download url: {downloadUrl}");
 
-    var fsName = GetVersionFsName(version);
+    var fsName = GetVersionFsName(
+      Platform.VersionSerializer, version
+    );
     // Tux server packages use .zip for everything.
     var cacheDir = FileClient.Combine(GodotCachePath, fsName);
     var cacheFilename = fsName + ".zip";
@@ -329,7 +331,9 @@ public partial class GodotRepository : IGodotRepository {
         ),
         token: token
       );
-      log.Print("");  // Force new line after download progress as the cursor remains in the previously line.
+      // Force new line after download progress as the cursor remains in the
+      // previous line.
+      log.Print("");
       log.ClearCurrentLine();
     }
     catch (Exception) {
@@ -375,6 +379,7 @@ public partial class GodotRepository : IGodotRepository {
       throw;
     }
   }
+
   public async Task<GodotInstallation> ExtractGodotInstaller(
     GodotCompressedArchive archive,
     ILog log
@@ -397,16 +402,18 @@ public partial class GodotRepository : IGodotRepository {
     log.Success($"✅ Extracted {numFilesExtracted} file(s).");
     log.Print("");
 
+    var location = new GodotInstallationLocation(
+      archive.Name, destinationDirName
+    );
     var execPath = GetExecutionPath(
-      installationPath: destinationDirName,
+      installationPath: location.InstallationDirectory,
       version: archive.Version
     );
 
     return new GodotInstallation(
-      Name: archive.Name,
+      Location: location,
       IsActiveVersion: true, // we always switch to the newly installed version.
       Version: archive.Version,
-      Path: destinationDirName,
       ExecutionPath: execPath
     );
   }
@@ -414,7 +421,8 @@ public partial class GodotRepository : IGodotRepository {
   public async Task UpdateGodotSymlink(
     GodotInstallation installation, ILog log
   ) {
-    if (FileClient.IsFileSymlink(GodotBinPath)) {  // Removes old 'bin' file-symlink.
+    if (FileClient.IsFileSymlink(GodotBinPath)) {
+      // Removes old 'bin' file-symlink.
       await FileClient.DeleteFile(GodotBinPath);
     }
 
@@ -423,13 +431,14 @@ public partial class GodotRepository : IGodotRepository {
     }
 
     log.Info("📝 Updating Godot symlink.");
-    // log.Print($"    Linking Godot: {GodotSymlinkPath} -> {installation.ExecutionPath}");
     // Create or update the symlink to the new version of Godot.
     switch (SystemInfo.OS) {
       case OSType.Linux:
       case OSType.MacOS:
       case OSType.Windows:
-        await FileClient.CreateSymlink(GodotSymlinkPath, installation.ExecutionPath);
+        await FileClient.CreateSymlink(
+          GodotSymlinkPath, installation.ExecutionPath
+        );
         break;
       case OSType.Unknown:
       default:
@@ -439,7 +448,7 @@ public partial class GodotRepository : IGodotRepository {
     if (installation.Version.IsDotnetEnabled) {
       // Update GodotSharp symlinks
       var godotSharpPath = GetGodotSharpPath(
-        installation.Path, installation.Version
+        installation.Location.InstallationDirectory, installation.Version
       );
       await FileClient.CreateSymlink(
         GodotSharpSymlinkPath, godotSharpPath
@@ -456,20 +465,30 @@ public partial class GodotRepository : IGodotRepository {
     log.Print("");
   }
 
-  public async Task UpdateDesktopShortcut(GodotInstallation installation, ILog log) {
+  public async Task UpdateDesktopShortcut(
+    GodotInstallation installation, ILog log
+  ) {
     log.Info("📝 Updating Godot desktop shortcut.");
     switch (SystemInfo.OS) {
       case OSType.MacOS: {
-          var appFilePath = FileClient.Files.Directory.GetDirectories(installation.Path).First();
-          var applicationsPath = FileClient.Combine(FileClient.UserDirectory, "Applications", "Godot.app");
+          var appFilePath = FileClient.Files.Directory.GetDirectories(
+            installation.Location.InstallationDirectory
+          ).First();
+          var applicationsPath = FileClient.Combine(
+            FileClient.UserDirectory, "Applications", "Godot.app"
+          );
           await FileClient.DeleteDirectory(applicationsPath);
           await FileClient.CreateSymlinkRecursively(applicationsPath, appFilePath);
           break;
         }
 
       case OSType.Linux:
-        var userApplicationsPath = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "applications");
-        var userIconsPath = FileClient.Combine(FileClient.UserDirectory, ".local", "share", "icons");
+        var userApplicationsPath = FileClient.Combine(
+          FileClient.UserDirectory, ".local", "share", "applications"
+        );
+        var userIconsPath = FileClient.Combine(
+          FileClient.UserDirectory, ".local", "share", "icons"
+        );
 
         FileClient.CreateDirectory(userApplicationsPath);
         FileClient.CreateDirectory(userIconsPath);
@@ -481,7 +500,8 @@ public partial class GodotRepository : IGodotRepository {
           CancellationToken.None);
 
         // https://github.com/godotengine/godot/blob/master/misc/dist/linux/org.godotengine.Godot.desktop
-        FileClient.CreateFile(FileClient.Combine(userApplicationsPath, "Godot.desktop"),
+        FileClient.CreateFile(
+          FileClient.Combine(userApplicationsPath, "Godot.desktop"),
           $"""
            [Desktop Entry]
            Name=Godot Engine
@@ -501,14 +521,19 @@ public partial class GodotRepository : IGodotRepository {
            MimeType=application/x-godot-project;
            Categories=Development;IDE;
            StartupWMClass=Godot
-           """);
+           """
+        );
         break;
 
       case OSType.Windows: {
           var linkPath = GodotSymlinkPath;
           var targetPath = FileClient.FileSymlinkTarget(linkPath);
-          var commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
-          var applicationsPath = FileClient.Combine(commonStartMenuPath, "Programs", "Godot.lnk");
+          var commonStartMenuPath = Environment.GetFolderPath(
+            Environment.SpecialFolder.StartMenu
+          );
+          var applicationsPath = FileClient.Combine(
+            commonStartMenuPath, "Programs", "Godot.lnk"
+          );
 
           var command = string.Join(";",
             "$ws = New-Object -ComObject (\"WScript.Shell\")",
@@ -517,7 +542,9 @@ public partial class GodotRepository : IGodotRepository {
             $"$s.TargetPath = \"{linkPath}\"",
             "$s.save();"
           );
-          var task = FileClient.ProcessRunner.Run(".", "powershell", ["-c", command]);
+          var task = FileClient.ProcessRunner.Run(
+            ".", "powershell", ["-c", command]
+          );
           await task;
           if (!string.IsNullOrEmpty(task.Result.StandardError)) {
             log.Warn("Errors or warnings in shortcut creation:");
@@ -658,7 +685,9 @@ public partial class GodotRepository : IGodotRepository {
       return false;
     }
 
-    await FileClient.DeleteDirectory(installation.Path);
+    await FileClient.DeleteDirectory(
+      installation.Location.InstallationDirectory
+    );
 
     if (installation.IsActiveVersion) {
       // Remove symlink if we're deleting the active version.
@@ -695,39 +724,72 @@ public partial class GodotRepository : IGodotRepository {
   private GodotInstallation? ReadInstallation(
     SpecificDotnetStatusGodotVersion version
   ) {
-    var directoryName = GetVersionFsName(version);
-    var symlinkTarget = GodotSymlinkTarget;
+    var canonicalName = GetVersionFsName(
+      Platform.VersionSerializer, version
+    );
+
+    var installationLocation = GetInstallationLocation(version);
+    if (installationLocation is null) { return null; }
+
+    var executionPath = GetExecutionPath(
+      installationPath: installationLocation.InstallationDirectory,
+      version: version
+    );
+
+    return new GodotInstallation(
+      Location: installationLocation,
+      IsActiveVersion: GodotSymlinkTarget == executionPath,
+      Version: version,
+      ExecutionPath: executionPath
+    );
+  }
+
+  private GodotInstallationLocation? GetInstallationLocation(
+    SpecificDotnetStatusGodotVersion version
+  ) {
+    var directoryName = GetVersionFsName(
+      Platform.VersionSerializer, version
+    );
     var installationDir = FileClient.Combine(
       GodotInstallationsPath, directoryName
     );
-
-    GodotInstallation? installation = null;
-
     if (FileClient.DirectoryExists(installationDir)) {
-      var executionPath = GetExecutionPath(
-        installationPath: installationDir,
-        version: version
-      );
-
-      installation = new GodotInstallation(
-        Name: directoryName,
-        IsActiveVersion: symlinkTarget == executionPath,
-        Version: version,
-        Path: installationDir,
-        ExecutionPath: executionPath
-      );
+      return new GodotInstallationLocation(directoryName, installationDir);
     }
+    return GetOldInstallationLocation(version);
+  }
 
-    return installation;
+  private GodotInstallationLocation? GetOldInstallationLocation(
+    SpecificDotnetStatusGodotVersion version
+  ) {
+    bool[] flagVals = [true, false];
+    var serializers =
+      from labelFlag in flagVals
+      from patchFlag in flagVals
+      from stableFlag in flagVals
+      select new OldDiskVersionSerializer(labelFlag, patchFlag, stableFlag);
+    foreach (var serializer in serializers) {
+      var directoryName = GetVersionFsName(
+        serializer, version
+      );
+      var installationDir = FileClient.Combine(
+        GodotInstallationsPath, directoryName
+      );
+      if (FileClient.DirectoryExists(installationDir)) {
+        return new GodotInstallationLocation(directoryName, installationDir);
+      }
+    }
+    return null;
   }
 
   internal string GetVersionFsName(
+    IVersionSerializer versionSerializer,
     SpecificDotnetStatusGodotVersion version
   ) =>
     $"godot_{(version.IsDotnetEnabled ? "dotnet_" : "")}" +
-      FileClient.Sanitize(Platform.VersionSerializer.Serialize(version))
-        .Replace(".", "_")
-        .Replace("-", "_");
+    FileClient.Sanitize(versionSerializer.Serialize(version))
+      .Replace(".", "_")
+      .Replace("-", "_");
 
   internal SpecificDotnetStatusGodotVersion? DirectoryToVersion(
     string directory
@@ -737,24 +799,20 @@ public partial class GodotRepository : IGodotRepository {
       return null;
     }
 
-    var versionString = $"{versionParts.Groups["major"].Value}." +
-      $"{versionParts.Groups["minor"].Value}";
-    if (versionParts.Groups["patch"].Value.Length > 0) {
-      versionString += $".{versionParts.Groups["patch"].Value[..^1]}";
-    }
-
-    var label = versionParts.Groups["label"].Value;
-    if (label.Length == 0) {
-      label = "stable";
-    }
-    versionString += $"-{label.Replace("_", ".")}";
+    var major = int.Parse(versionParts.Groups["major"].Value);
+    var minor = int.Parse(versionParts.Groups["minor"].Value);
+    var patch = versionParts.Groups["patch"].Value.Length > 0 ? int.Parse(versionParts.Groups["patch"].Value[..^1]) : 0;
+    var label = versionParts.Groups["label"].Value.Length > 0 ? versionParts.Groups["labelName"].Value : "stable";
+    var labelNumber = versionParts.Groups["labelNumber"].Value.Length > 0 ? int.Parse(versionParts.Groups["labelNumber"].Value) : -1;
 
     var isDotnet = directory.Contains("dotnet");
-    return Platform.VersionDeserializer.Deserialize(versionString, isDotnet);
+    return new SpecificDotnetStatusGodotVersion(major, minor, patch, label, labelNumber, isDotnet);
   }
 
   // Regex for converting directory names back into version strings to see
   // what versions we have installed.
-  [GeneratedRegex(@"godot_(dotnet_)?(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+_)?(?<label>[a-z]+[\d]+)?")]
+  // Ideally, all version strings on disk would be in release format, but old
+  // installs may have a mix of release and GodotSharp format (e.g., "4.4.0-dev6")
+  [GeneratedRegex(@"godot_(dotnet_)?(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+_)?(?<label>(?<labelName>[a-z]+)(?<labelNumber>\d*))?")]
   private static partial Regex DirectoryToVersionStringRegex();
 }
