@@ -43,8 +43,6 @@ public class NetworkClient : INetworkClient {
   public IDownloadService DownloadService { get; }
   public DownloadConfiguration DownloadConfiguration { get; }
 
-  private static HttpClient? _client;
-
   public NetworkClient(
     IDownloadService downloadService,
     DownloadConfiguration downloadConfiguration
@@ -54,21 +52,20 @@ public class NetworkClient : INetworkClient {
   }
 
   public async Task<HttpResponseMessage> WebRequestGetAsync(string url, bool requestAgent = false, string? proxyUrl = null) {
-    if (_client == null || !string.IsNullOrEmpty(proxyUrl)) {
-      var handler = string.IsNullOrEmpty(proxyUrl)
-        ? new HttpClientHandler()
-        : new HttpClientHandler {
-          Proxy = new WebProxy(proxyUrl),
-          UseProxy = true
-        };
-
-      _client = new HttpClient(handler);
+    var handler = new HttpClientHandler();
+    if (!string.IsNullOrEmpty(proxyUrl)) {
+      if (!Uri.TryCreate(proxyUrl, UriKind.Absolute, out var proxyUri)) {
+        throw new CommandException($"Invalid proxy URL: {proxyUrl}");
+      }
+      handler.Proxy = new WebProxy(proxyUri);
+      handler.UseProxy = true;
     }
 
+    using var client = new HttpClient(handler);
     if (requestAgent) {
-      _client.DefaultRequestHeaders.UserAgent.TryParseAdd("request");
+      client.DefaultRequestHeaders.UserAgent.TryParseAdd("request");
     }
-    return await _client.GetAsync(url);
+    return await client.GetAsync(url);
   }
 
   public async Task DownloadFileAsync(

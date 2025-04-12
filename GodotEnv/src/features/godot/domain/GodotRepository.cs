@@ -138,9 +138,10 @@ public interface IGodotRepository {
   /// <summary>
   /// Get the list of available Godot versions.
   /// </summary>
+  /// <param name="log">Output log.</param>
   /// <param name="proxyUrl">Proxy URL to use for the request</param>
   /// <returns></returns>
-  Task<List<string>> GetRemoteVersionsList(string? proxyUrl = null);
+  Task<List<string>> GetRemoteVersionsList(ILog log, string? proxyUrl = null);
 
   /// <summary>
   /// Uninstalls the specified version of Godot.
@@ -650,7 +651,10 @@ public partial class GodotRepository : IGodotRepository {
     return results;
   }
 
-  public async Task<List<string>> GetRemoteVersionsList(string? proxyUrl = null) {
+  public async Task<List<string>> GetRemoteVersionsList(ILog log, string? proxyUrl = null) {
+    if (proxyUrl is not null) {
+      log.Info($"🔄 Using proxy: {proxyUrl}");
+    }
     var response = await NetworkClient.WebRequestGetAsync(
       GODOT_REMOTE_VERSIONS_URL, true, proxyUrl
       );
