@@ -22,7 +22,12 @@ public class GodotEnvTargetCommand : ICommand, ICliCommand {
     var log = ExecutionContext.CreateLog(console);
     var godotRepo = ExecutionContext.Godot.GodotRepo;
 
-    log.Print(godotRepo.GodotSymlinkTarget);
+    if (godotRepo.IsGodotSymlinkTargetAvailable) {
+      log.Print(godotRepo.GodotSymlinkTarget);
+    }
+    else {
+      log.Warn("Could not determine current target Godot version.");
+    }
 
     await Task.CompletedTask;
   }

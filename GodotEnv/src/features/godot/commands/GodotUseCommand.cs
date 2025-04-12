@@ -43,28 +43,32 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
   public async ValueTask ExecuteAsync(IConsole console) {
     var godotRepo = ExecutionContext.Godot.GodotRepo;
     var platform = ExecutionContext.Godot.Platform;
-    var versionConverter = godotRepo.VersionStringConverter;
 
     var log = ExecutionContext.CreateLog(console);
     var output = console.Output;
 
-    // We know this won't throw because the validator okayed it
-    var version = versionConverter.ParseVersion(RawVersion);
     var isDotnetVersion = !NoDotnet;
+    // We know this won't throw because the validator okayed it
+    var version =
+      godotRepo.VersionDeserializer.Deserialize(RawVersion, isDotnetVersion);
 
     var noDotnetFlag = isDotnetVersion ? "" : " --no-dotnet";
 
     var potentialInstallation =
-      godotRepo.GetInstallation(version, isDotnetVersion);
+      godotRepo.GetInstallation(version);
 
     await Task.CompletedTask;
 
     if (potentialInstallation is not GodotInstallation installation) {
       log.Print("");
-      log.Warn($"Godot version {versionConverter.VersionString(version)} is not installed.");
+      log.Warn(
+        $"Godot version {godotRepo.VersionSerializer.Serialize(version)} is not installed."
+      );
       log.Print("To install this version of Godot, run:");
       log.Print("");
-      log.Success($"    godotenv godot install {versionConverter.VersionString(version)}{noDotnetFlag}");
+      log.Success(
+        $"    godotenv godot install {godotRepo.VersionSerializer.Serialize(version)}{noDotnetFlag}"
+      );
       log.Print("");
 
       return;
@@ -73,7 +77,9 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
     await godotRepo.UpdateGodotSymlink(installation, log);
 
     log.Print("");
-    log.Success($"Godot version `{godotRepo.InstallationVersionName(installation)}` is now active.");
+    log.Success(
+      $"Godot version `{godotRepo.InstallationVersionName(installation)}` is now active."
+    );
     log.Print("");
     log.Info("Please make sure your GODOT environment variable is set to the ");
     log.Info("symlink pointing to the current version of Godot:");

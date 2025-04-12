@@ -161,6 +161,7 @@ public partial class Log : ILog {
       // Set the new foreground and background colors.
       consoleStyle(Console);
 
+      var wasStyleUpdated = false;
       if (message is string str && str != "") {
         if (SystemInfo.OS == OSType.Windows) {
           // Remove emoji from message.
@@ -168,9 +169,11 @@ public partial class Log : ILog {
           message = str;
         }
         UpdateStyle();
+        wasStyleUpdated = true;
       }
       else if (message is not string and not null) {
         UpdateStyle();
+        wasStyleUpdated = true;
       }
 
       var left = 0;
@@ -193,6 +196,8 @@ public partial class Log : ILog {
         OutputConsole.WriteLine();
         _sb.AppendLine();
       }
+
+      Styles.Normal(Console);
 
       if (inPlace && !IsInRedirectedEnv) {
         Console.CursorLeft = left;

@@ -17,6 +17,7 @@ using Chickensoft.GodotEnv.Features.Addons.Commands;
 using Chickensoft.GodotEnv.Features.Addons.Domain;
 using Chickensoft.GodotEnv.Features.Godot.Domain;
 using Chickensoft.GodotEnv.Features.Godot.Models;
+using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using CliFx;
 using CliFx.Infrastructure;
 using Downloader;
@@ -92,15 +93,18 @@ public static class GodotEnv {
       AddonsInstaller: addonsInstaller
     );
 
-    var fileVersionStringConverter = new ReleaseVersionStringConverter();
-    var ioVersionStringConverter = new IOVersionStringConverter();
+    var fileVersionDeserializer = new ReleaseVersionDeserializer();
+    var fileVersionSerializer = new ReleaseVersionSerializer();
+    var ioVersionDeserializer = new IoVersionDeserializer();
+    var ioVersionSerializer = new IoVersionSerializer();
 
     // Godot feature dependencies
     var platform = GodotEnvironment.Create(
       systemInfo: systemInfo,
       fileClient: fileClient,
       computer: computer,
-      versionStringConverter: fileVersionStringConverter
+      versionDeserializer: fileVersionDeserializer,
+      versionSerializer: fileVersionSerializer
     );
 
     var checksumRepository = new GodotChecksumClient(networkClient, platform);
@@ -115,7 +119,8 @@ public static class GodotEnv {
       environmentVariableClient: environmentVariableClient,
       processRunner: processRunner,
       checksumClient: checksumRepository,
-      versionStringConverter: ioVersionStringConverter
+      versionDeserializer: ioVersionDeserializer,
+      versionSerializer: ioVersionSerializer
     );
 
     var godotContext = new GodotContext(

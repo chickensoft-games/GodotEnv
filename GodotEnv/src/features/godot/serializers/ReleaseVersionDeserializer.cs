@@ -1,10 +1,17 @@
-namespace Chickensoft.GodotEnv.Features.Godot.Models;
+namespace Chickensoft.GodotEnv.Features.Godot.Serializers;
 
 using System;
 using System.Text.RegularExpressions;
+using Chickensoft.GodotEnv.Features.Godot.Models;
 
-public partial class ReleaseVersionStringConverter : IVersionStringConverter {
-  public GodotVersion ParseVersion(string version) {
+public partial class ReleaseVersionDeserializer : IVersionDeserializer {
+  public AnyDotnetStatusGodotVersion Deserialize(string version) =>
+    new(ParseVersionNumber(version));
+
+  public SpecificDotnetStatusGodotVersion Deserialize(string version, bool isDotnet) =>
+    new(ParseVersionNumber(version), isDotnet);
+
+  private static GodotVersionNumber ParseVersionNumber(string version) {
     var match = VersionStringRegex().Match(version);
     if (!match.Success) {
       throw new ArgumentException(
@@ -31,24 +38,7 @@ public partial class ReleaseVersionStringConverter : IVersionStringConverter {
       // digits
       labelNum = int.Parse(match.Groups[6].Value);
     }
-    return new GodotVersion(major, minor, patch, label, labelNum);
-  }
-
-  public string VersionString(GodotVersion version) {
-    var result = $"{version.Major}.{version.Minor}";
-    if (version.Patch != 0) {
-      result += $".{version.Patch}";
-    }
-    result += $"-{LabelString(version)}";
-    return result;
-  }
-
-  public string LabelString(GodotVersion version) {
-    var result = version.Label;
-    if (result != "stable") {
-      result += version.LabelNumber;
-    }
-    return result;
+    return new GodotVersionNumber(major, minor, patch, label, labelNum);
   }
 
   // All published Godot 4+ packages have a label ("-stable" if not prerelease)

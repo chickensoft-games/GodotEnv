@@ -4,6 +4,7 @@ using System;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
+using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using global::GodotEnv.Common.Utilities;
 
 public interface IGodotEnvironment {
@@ -15,30 +16,25 @@ public interface IGodotEnvironment {
 
   IComputer Computer { get; }
 
-  IVersionStringConverter VersionStringConverter { get; }
+  IVersionDeserializer VersionDeserializer { get; }
+  IVersionSerializer VersionSerializer { get; }
 
   /// <summary>
   /// Godot installation filename suffix.
   /// </summary>
-  /// <param name="isDotnetVersion">True if using the .NET-enabled version of Godot,
-  /// false otherwise.</param>
   /// <param name="version">Godot version.</param>
   /// <returns>Godot filename suffix.</returns>
-  string GetInstallerNameSuffix(bool isDotnetVersion, GodotVersion version);
+  string GetInstallerNameSuffix(SpecificDotnetStatusGodotVersion version);
 
   /// <summary>
   /// Computes the Godot download url.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  /// <param name="isDotnetVersion">
-  /// True if referencing the .NET version of Godot.
-  /// </param>
   /// <param name="isTemplate">True if computing the download url to the
   /// export templates, false to compute the download url to the Godot
   /// application.</param>
   string GetDownloadUrl(
-    GodotVersion version,
-    bool isDotnetVersion,
+    SpecificDotnetStatusGodotVersion version,
     bool isTemplate
   );
 
@@ -46,11 +42,8 @@ public interface IGodotEnvironment {
   /// Gets the filename as which an installer is known.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  /// <param name="isDotnetVersion">
-  /// True if referencing the .NET version of Godot.
-  /// </param>
   public string GetInstallerFilename(
-    GodotVersion version, bool isDotnetVersion
+    SpecificDotnetStatusGodotVersion version
   );
 
   /// <summary>
@@ -64,10 +57,9 @@ public interface IGodotEnvironment {
   /// to the extracted Godot installation directory.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  /// <param name="isDotnetVersion">Dotnet version indicator.</param>
   /// <returns>Relative path.</returns>
   string GetRelativeExtractedExecutablePath(
-    GodotVersion version, bool isDotnetVersion
+    SpecificDotnetStatusGodotVersion version
   );
 
   /// <summary>
@@ -75,9 +67,8 @@ public interface IGodotEnvironment {
   /// directory that is included with Godot.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  /// <param name="isDotnetVersion">Dotnet version indicator.</param>
   /// <returns>Path to the GodotSharp directory.</returns>
-  string GetRelativeGodotSharpPath(GodotVersion version, bool isDotnetVersion);
+  string GetRelativeGodotSharpPath(SpecificDotnetStatusGodotVersion version);
 }
 
 public abstract class GodotEnvironment : IGodotEnvironment {
@@ -98,12 +89,13 @@ public abstract class GodotEnvironment : IGodotEnvironment {
     ISystemInfo systemInfo,
     IFileClient fileClient,
     IComputer computer,
-    IVersionStringConverter versionStringConverter
+    IVersionDeserializer versionDeserializer,
+    IVersionSerializer versionSerializer
   ) =>
     systemInfo.OS switch {
-      OSType.Windows => new Windows(systemInfo, fileClient, computer, versionStringConverter),
-      OSType.MacOS => new MacOS(systemInfo, fileClient, computer, versionStringConverter),
-      OSType.Linux => new Linux(systemInfo, fileClient, computer, versionStringConverter),
+      OSType.Windows => new Windows(systemInfo, fileClient, computer, versionDeserializer, versionSerializer),
+      OSType.MacOS => new MacOS(systemInfo, fileClient, computer, versionDeserializer, versionSerializer),
+      OSType.Linux => new Linux(systemInfo, fileClient, computer, versionDeserializer, versionSerializer),
       OSType.Unknown => throw GetUnknownOSException(),
       _ => throw GetUnknownOSException()
     };
@@ -112,65 +104,66 @@ public abstract class GodotEnvironment : IGodotEnvironment {
     ISystemInfo systemInfo,
     IFileClient fileClient,
     IComputer computer,
-    IVersionStringConverter versionStringConverter
+    IVersionDeserializer versionDeserializer,
+    IVersionSerializer versionSerializer
   ) {
     SystemInfo = systemInfo;
     FileClient = fileClient;
     Computer = computer;
-    VersionStringConverter = versionStringConverter;
+    VersionDeserializer = versionDeserializer;
+    VersionSerializer = versionSerializer;
   }
 
   public ISystemInfo SystemInfo { get; }
   public IFileClient FileClient { get; }
   public IComputer Computer { get; }
-  public IVersionStringConverter VersionStringConverter { get; }
+  public IVersionDeserializer VersionDeserializer { get; }
+  public IVersionSerializer VersionSerializer { get; }
 
   public string ExportTemplatesBasePath => throw new NotImplementedException();
 
-  public abstract string GetInstallerNameSuffix(bool isDotnetVersion, GodotVersion version);
+  public abstract string GetInstallerNameSuffix(SpecificDotnetStatusGodotVersion version);
   public abstract void Describe(ILog log);
   public abstract string GetRelativeExtractedExecutablePath(
-    GodotVersion version, bool isDotnetVersion
+    SpecificDotnetStatusGodotVersion version
   );
   public abstract string GetRelativeGodotSharpPath(
-    GodotVersion version,
-    bool isDotnetVersion
+    SpecificDotnetStatusGodotVersion version
   );
 
   public string GetDownloadUrl(
-    GodotVersion version,
-    bool isDotnetVersion,
+    SpecificDotnetStatusGodotVersion version,
     bool isTemplate
   ) {
     // We need to be sure this is a release-style version string to get the
     // correct url
-    var versionConverter = new ReleaseVersionStringConverter();
-    var url = $"{GODOT_URL_PREFIX}{versionConverter.VersionString(version)}/";
+    var versionConverter = new ReleaseVersionSerializer();
+    var url = $"{GODOT_URL_PREFIX}{versionConverter.Serialize(version)}/";
 
     // Godot application download url.
     if (!isTemplate) {
-      return url + GetInstallerFilename(version, isDotnetVersion);
+      return url + GetInstallerFilename(version);
     }
 
     // Export template download url.
     return
-      url + GetExportTemplatesInstallerFilename(version, isDotnetVersion);
+      url + GetExportTemplatesInstallerFilename(version);
   }
 
   protected string GetFilenameVersionString(GodotVersion version) =>
-    GODOT_FILENAME_PREFIX + VersionStringConverter.VersionString(version);
+    GODOT_FILENAME_PREFIX + VersionSerializer.Serialize(version);
 
   // Gets the filename of the Godot installation download for the platform.
   public string GetInstallerFilename(
-    GodotVersion version, bool isDotnetVersion
-  ) => GetFilenameVersionString(version) + GetInstallerNameSuffix(isDotnetVersion, version) +
+    SpecificDotnetStatusGodotVersion version
+  ) => GetFilenameVersionString(version) + GetInstallerNameSuffix(version) +
     ".zip";
 
   // Gets the filename of the Godot export templates installation download for
   // the platform.
   private string GetExportTemplatesInstallerFilename(
-    GodotVersion version, bool isDotnetVersion
-  ) => GetFilenameVersionString(version) + (isDotnetVersion ? "_mono" : "") +
+    SpecificDotnetStatusGodotVersion version
+  ) => GetFilenameVersionString(version) + (version.IsDotnetEnabled ? "_mono" : "") +
       "_export_templates.tpz";
 
   private static InvalidOperationException GetUnknownOSException() =>
