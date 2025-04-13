@@ -202,8 +202,12 @@ public class NetworkClient : INetworkClient {
 
   protected virtual IDownload CreateDownloadWithProxy(string url, string destinationDirectory, string filename, string? proxyUrl = null) {
     if (!string.IsNullOrEmpty(proxyUrl)) {
+      if (!Uri.TryCreate(proxyUrl, UriKind.Absolute, out var proxyUri)) {
+        throw new CommandException($"Invalid proxy URL: {proxyUrl}");
+      }
+
       DownloadConfiguration.RequestConfiguration.Proxy = new WebProxy {
-        Address = new Uri(proxyUrl),
+        Address = proxyUri,
         UseDefaultCredentials = false
       };
     }

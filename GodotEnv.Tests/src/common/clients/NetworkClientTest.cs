@@ -102,6 +102,21 @@ public class NetworkClientTest {
   }
 
   [Fact]
+  public void CreateDownloadWithInvalidProxyThrowsCommandException() {
+    var invalidProxyUrl = "invalid-proxy-url";
+    var url = "https://example.com/file.zip";
+    var destinationDirectory = "/tmp/downloads";
+    var filename = "test-file.zip";
+
+    var mockDownloadService = new Mock<IDownloadService>();
+    var downloadConfig = Defaults.DownloadConfiguration;
+
+    var networkClient = new TestableNetworkClient(mockDownloadService.Object, downloadConfig);
+
+    Should.Throw<CommandException>(() => networkClient.PublicCreateDownloadWithProxy(url, destinationDirectory, filename, invalidProxyUrl)).Message.ShouldContain("Invalid proxy URL");
+  }
+
+  [Fact]
   public async Task DownloadFileAsyncUseNoProxyWithProgress() {
     var testUrl = "https://httpbin.org/bytes/1024"; // 1KB random data
     var tempDir = Path.GetTempPath();
