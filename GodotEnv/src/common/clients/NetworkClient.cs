@@ -13,6 +13,16 @@ public interface INetworkClient {
   IDownloadService DownloadService { get; }
   DownloadConfiguration DownloadConfiguration { get; }
 
+  /// <summary>
+  /// Downloads a file from the specified URL to the specified destination directory.
+  /// </summary>
+  /// <param name="url">The URL of the file to download.</param>
+  /// <param name="destinationDirectory">The directory to save the file to.</param>
+  /// <param name="filename">The name of the file to download.</param>
+  /// <param name="progress">The progress of the download.</param>
+  /// <param name="token">The cancellation token.</param>
+  /// <param name="proxyUrl">The proxy URL to use for the download.</param>
+  /// <returns>The downloaded file.</returns>
   Task DownloadFileAsync(
     string url,
     string destinationDirectory,
@@ -22,6 +32,15 @@ public interface INetworkClient {
     string? proxyUrl = null
   );
 
+  /// <summary>
+  /// Downloads a file from the specified URL to the specified destination directory.
+  /// </summary>
+  /// <param name="url">The URL of the file to download.</param>
+  /// <param name="destinationDirectory">The directory to save the file to.</param>
+  /// <param name="filename">The name of the file to download.</param>
+  /// <param name="token">The cancellation token.</param>
+  /// <param name="proxyUrl">The proxy URL to use for the download.</param>
+  /// <returns>The downloaded file.</returns>
   Task DownloadFileAsync(
     string url,
     string destinationDirectory,
@@ -30,7 +49,18 @@ public interface INetworkClient {
     string? proxyUrl = null
   );
 
-  public Task<HttpResponseMessage> WebRequestGetAsync(string url, bool requestAgent = false, string? proxyUrl = null);
+  /// <summary>
+  /// Sends a GET request to the specified URL.
+  /// </summary>
+  /// <param name="url">The URL to send the GET request to.</param>
+  /// <param name="requestAgent">Whether to request an agent.</param>
+  /// <param name="proxyUrl">The proxy URL to use for the request.</param>
+  /// <returns>The response from the GET request.</returns>
+  Task<HttpResponseMessage> WebRequestGetAsync(
+    string url,
+    bool requestAgent = false,
+    string? proxyUrl = null
+  );
 }
 
 /// <summary>Download progress.</summary>
@@ -52,20 +82,29 @@ public class NetworkClient : INetworkClient {
   }
 
   public async Task<HttpResponseMessage> WebRequestGetAsync(string url, bool requestAgent = false, string? proxyUrl = null) {
+    var handler = CreateHttpClientHandler(proxyUrl);
+    using var client = new HttpClient(handler);
+
+    if (requestAgent) {
+      client.DefaultRequestHeaders.UserAgent.TryParseAdd("request");
+    }
+
+    return await client.GetAsync(url);
+  }
+
+  protected virtual HttpClientHandler CreateHttpClientHandler(string? proxyUrl) {
     var handler = new HttpClientHandler();
+
     if (!string.IsNullOrEmpty(proxyUrl)) {
       if (!Uri.TryCreate(proxyUrl, UriKind.Absolute, out var proxyUri)) {
         throw new CommandException($"Invalid proxy URL: {proxyUrl}");
       }
+
       handler.Proxy = new WebProxy(proxyUri);
       handler.UseProxy = true;
     }
 
-    using var client = new HttpClient(handler);
-    if (requestAgent) {
-      client.DefaultRequestHeaders.UserAgent.TryParseAdd("request");
-    }
-    return await client.GetAsync(url);
+    return handler;
   }
 
   public async Task DownloadFileAsync(
@@ -76,24 +115,7 @@ public class NetworkClient : INetworkClient {
     CancellationToken token,
     string? proxyUrl = null
   ) {
-    // if proxyUrl is provided, set the proxy, otherwise clear the proxy
-    if (!string.IsNullOrEmpty(proxyUrl)) {
-      DownloadConfiguration.RequestConfiguration.Proxy = new WebProxy {
-        Address = new Uri(proxyUrl),
-        UseDefaultCredentials = false
-      };
-    }
-    else {
-      DownloadConfiguration.RequestConfiguration.Proxy = null;
-    }
-
-    var download = DownloadBuilder
-      .New()
-      .WithUrl(url)
-      .WithDirectory(destinationDirectory)
-      .WithFileName(filename)
-      .WithConfiguration(DownloadConfiguration)
-      .Build();
+    var download = CreateDownloadWithProxy(url, destinationDirectory, filename, proxyUrl);
 
     var lastPercent = 0d;
     var threshold = 1d;
@@ -128,6 +150,7 @@ public class NetworkClient : INetworkClient {
           "🚨 Download cancelled!"
         );
       }
+
       if (args.Error != null) {
         throw new CommandException(
           $"Download failed. {args.Error.Message}"
@@ -151,7 +174,33 @@ public class NetworkClient : INetworkClient {
     CancellationToken token,
     string? proxyUrl = null
   ) {
-    // if proxyUrl is provided, set the proxy, otherwise clear the proxy
+    var download = CreateDownloadWithProxy(url, destinationDirectory, filename, proxyUrl);
+
+    token.Register(
+      () => {
+        if (download.Status == DownloadStatus.Running) {
+          download.Stop();
+        }
+      }
+    );
+
+    void done(
+    object? sender, System.ComponentModel.AsyncCompletedEventArgs args) {
+      if (args.Error != null) {
+        throw new CommandException(
+          $"Download failed. {args.Error.Message}"
+        );
+      }
+    }
+
+    download.DownloadFileCompleted += done;
+
+    await download.StartAsync(token);
+
+    download.DownloadFileCompleted -= done;
+  }
+
+  protected virtual IDownload CreateDownloadWithProxy(string url, string destinationDirectory, string filename, string? proxyUrl = null) {
     if (!string.IsNullOrEmpty(proxyUrl)) {
       DownloadConfiguration.RequestConfiguration.Proxy = new WebProxy {
         Address = new Uri(proxyUrl),
@@ -162,22 +211,12 @@ public class NetworkClient : INetworkClient {
       DownloadConfiguration.RequestConfiguration.Proxy = null;
     }
 
-    var download = DownloadBuilder
+    return DownloadBuilder
       .New()
       .WithUrl(url)
       .WithDirectory(destinationDirectory)
       .WithFileName(filename)
       .WithConfiguration(DownloadConfiguration)
       .Build();
-
-    token.Register(
-      () => {
-        if (download.Status == DownloadStatus.Running) {
-          download.Stop();
-        }
-      }
-    );
-
-    await download.StartAsync(token);
   }
 }
