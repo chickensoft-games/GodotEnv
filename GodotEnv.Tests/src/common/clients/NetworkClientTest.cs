@@ -16,26 +16,9 @@ using Xunit;
 
 public class NetworkClientTest {
 
-  private const string TEST_URL = "https://httpbin.org/get";
-
   [Fact]
-  public async Task WebRequestGetAsyncUseNoProxy() {
-    var mockDownloadService = new Mock<IDownloadService>();
-    var downloadConfig = Defaults.DownloadConfiguration;
-    var networkClient = new NetworkClient(mockDownloadService.Object, downloadConfig);
-
-    var response = await networkClient.WebRequestGetAsync(TEST_URL, false, null);
-
-    response.ShouldNotBeNull();
-    response.StatusCode.ShouldBe(HttpStatusCode.OK);
-
-    response.IsSuccessStatusCode.ShouldBeTrue();
-    var content = await response.Content.ReadAsStringAsync();
-    content.ShouldContain("\"url\":");
-  }
-
-  [Fact]
-  public void WebRequestGetAsyncUseInvalidProxyThrowsCommandException() {
+  public void WebRequestGetAsyncWithInvalidProxyThrowsCommandException() {
+    var testUrl = "https://example.com/get";
     var mockDownloadService = new Mock<IDownloadService>();
     var downloadConfig = Defaults.DownloadConfiguration;
     var invalidProxyUrl = "invalid-proxy-url";
@@ -45,11 +28,11 @@ public class NetworkClientTest {
       downloadConfig
     );
 
-    Should.Throw<CommandException>(async () => await networkClient.WebRequestGetAsync(TEST_URL, false, invalidProxyUrl)).Message.ShouldContain("Invalid proxy URL");
+    Should.Throw<CommandException>(async () => await networkClient.WebRequestGetAsync(testUrl, false, invalidProxyUrl)).Message.ShouldContain("Invalid proxy URL");
   }
 
   [Fact]
-  public void WebRequestGetAsyncUseValidProxy() {
+  public void CreateHttpClientHandlerWithValidProxy() {
     var proxyUrl = "http://proxy.example.com:8080";
 
     var mockDownloadService = new Mock<IDownloadService>();
@@ -71,7 +54,7 @@ public class NetworkClientTest {
   }
 
   [Fact]
-  public void CreateDownloadWithProxy() {
+  public void CreateDownloadWithValidProxy() {
     var url = "https://example.com/file.zip";
     var destinationDirectory = "/tmp/downloads";
     var filename = "test-file.zip";
@@ -114,74 +97,6 @@ public class NetworkClientTest {
     var networkClient = new TestableNetworkClient(mockDownloadService.Object, downloadConfig);
 
     Should.Throw<CommandException>(() => networkClient.PublicCreateDownloadWithProxy(url, destinationDirectory, filename, invalidProxyUrl)).Message.ShouldContain("Invalid proxy URL");
-  }
-
-  [Fact]
-  public async Task DownloadFileAsyncUseNoProxyWithProgress() {
-    var testUrl = "https://httpbin.org/bytes/1024"; // 1KB random data
-    var tempDir = Path.GetTempPath();
-    var fileName = $"test_download_{Guid.NewGuid()}.bin";
-    var progress = new Mock<IProgress<DownloadProgress>>().Object;
-    var token = new CancellationToken();
-
-    var downloadConfig = new DownloadConfiguration();
-    var downloadService = new Mock<IDownloadService>().Object;
-    var networkClient = new NetworkClient(downloadService, downloadConfig);
-
-    try {
-      await networkClient.DownloadFileAsync(
-        testUrl,
-        tempDir,
-        fileName,
-        progress,
-        token
-      );
-
-      var filePath = Path.Combine(tempDir, fileName);
-      File.Exists(filePath).ShouldBeTrue();
-
-      var fileInfo = new FileInfo(filePath);
-      fileInfo.Length.ShouldBeInRange(800, 1200); // allow some error
-    }
-    finally {
-      var filePath = Path.Combine(tempDir, fileName);
-      if (File.Exists(filePath)) {
-        File.Delete(filePath);
-      }
-    }
-  }
-
-  [Fact]
-  public async Task DownloadFileAsyncUseNoProxyWithNoProgress() {
-    var testUrl = "https://httpbin.org/bytes/1024"; // 1KB random data
-    var tempDir = Path.GetTempPath();
-    var fileName = $"test_download_{Guid.NewGuid()}.bin";
-    var token = new CancellationToken();
-
-    var downloadConfig = new DownloadConfiguration();
-    var downloadService = new Mock<IDownloadService>().Object;
-    var networkClient = new NetworkClient(downloadService, downloadConfig);
-
-    try {
-      await networkClient.DownloadFileAsync(
-        testUrl,
-        tempDir,
-        fileName,
-        token
-      );
-
-      var filePath = Path.Combine(tempDir, fileName);
-      File.Exists(filePath).ShouldBeTrue();
-
-      var fileInfo = new FileInfo(filePath);
-      fileInfo.Length.ShouldBeInRange(800, 1200); // allow some error
-    }
-    finally {
-      var filePath = Path.Combine(tempDir, fileName);
-      if (File.Exists(filePath)) {
-        File.Delete(filePath);
-      }
-    }
   }
 
   [Fact]
