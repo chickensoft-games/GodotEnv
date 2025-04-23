@@ -46,12 +46,12 @@ public sealed class GodotListCommandTest : IDisposable {
   [Fact]
   public async Task Executes() {
     var testVersions = new List<string> { "3.2.3", "4.0.1" };
-    _godotRepo.Setup(r => r.GetRemoteVersionsList()).ReturnsAsync(testVersions);
+    _godotRepo.Setup(r => r.GetRemoteVersionsList(_log, null)).ReturnsAsync(testVersions);
 
     var listCommand = new GodotListCommand(_context.Object) { ListRemoteAvailable = true };
     await listCommand.ExecuteAsync(_console);
 
-    _godotRepo.Verify(r => r.GetRemoteVersionsList());
+    _godotRepo.Verify(r => r.GetRemoteVersionsList(_log, null));
     _log.ToString().ShouldBe(
       """
         Retrieving available Godot versions...
@@ -63,12 +63,12 @@ public sealed class GodotListCommandTest : IDisposable {
 
   [Fact]
   public async Task FailsGracefullyOnHttpException() {
-    _godotRepo.Setup(r => r.GetRemoteVersionsList()).Throws<HttpRequestException>();
+    _godotRepo.Setup(r => r.GetRemoteVersionsList(_log, null)).Throws<HttpRequestException>();
 
     var listCommand = new GodotListCommand(_context.Object) { ListRemoteAvailable = true };
     await listCommand.ExecuteAsync(_console);
 
-    _godotRepo.Verify(r => r.GetRemoteVersionsList());
+    _godotRepo.Verify(r => r.GetRemoteVersionsList(_log, null));
     _log.ToString().ShouldBe(
       """
         Retrieving available Godot versions...

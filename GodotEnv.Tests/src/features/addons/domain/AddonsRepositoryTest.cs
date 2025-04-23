@@ -108,721 +108,722 @@ public class AddonsRepositoryTest {
     repo.Computer.ShouldBe(subject.Computer.Object);
   }
 
-   [Fact]
-   public void ResolveUrlResolvesRemoteUrl() {
-     var addon = TestData.Addon with { };
+  [Fact]
+  public void ResolveUrlResolvesRemoteUrl() {
+    var addon = TestData.Addon with { };
 
-     var subject = BuildSubject();
-     var repo = subject.Repo;
-     var client = subject.Client;
+    var subject = BuildSubject();
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     var result = repo.ResolveUrl(addon, "/");
+    var result = repo.ResolveUrl(addon, "/");
 
-     result.ShouldBe(addon.Url);
-   }
+    result.ShouldBe(addon.Url);
+  }
 
-   [Fact]
-   public void ResolveUrlResolvesSymlinkUrl() {
-     var url = "/some/local/path";
-     var addon = TestData.Addon with { Url = url, Source = AssetSource.Symlink };
+  [Fact]
+  public void ResolveUrlResolvesSymlinkUrl() {
+    var url = "/some/local/path";
+    var addon = TestData.Addon with { Url = url, Source = AssetSource.Symlink };
 
-     var subject = BuildSubject();
-     var repo = subject.Repo;
-     var client = subject.Client;
+    var subject = BuildSubject();
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     var path = "/";
-     client.Setup(c => c.IsDirectorySymlink(path)).Returns(true);
-     client.Setup(c => c.DirectorySymlinkTarget(path)).Returns(path);
-     client.Setup(c => c.GetRootedPath(addon.Url, path)).Returns(addon.Url);
+    var path = "/";
+    client.Setup(c => c.IsDirectorySymlink(path)).Returns(true);
+    client.Setup(c => c.DirectorySymlinkTarget(path)).Returns(path);
+    client.Setup(c => c.GetRootedPath(addon.Url, path)).Returns(addon.Url);
 
-     var result = repo.ResolveUrl(addon, path);
+    var result = repo.ResolveUrl(addon, path);
 
-     result.ShouldBe(addon.Url);
+    result.ShouldBe(addon.Url);
 
-     client.VerifyAll();
-   }
+    client.VerifyAll();
+  }
 
-   [Fact]
-   public void EnsuresExistsCreatesCacheDir() {
-     var subject = BuildSubject();
-     var repo = subject.Repo;
-     var client = subject.Client;
-     client.Setup(c => c.DirectoryExists(CACHE_DIR)).Returns(false);
-     repo.EnsureCacheAndAddonsDirectoriesExists();
-     client.VerifyAll();
-   }
+  [Fact]
+  public void EnsuresExistsCreatesCacheDir() {
+    var subject = BuildSubject();
+    var repo = subject.Repo;
+    var client = subject.Client;
+    client.Setup(c => c.DirectoryExists(CACHE_DIR)).Returns(false);
+    repo.EnsureCacheAndAddonsDirectoriesExists();
+    client.VerifyAll();
+  }
 
-   [Fact]
-   public async Task CacheAddonReturnsSymlinkAddonTargetWithSubfolder() {
-     var addon = TestData.Addon with {
-       Source = AssetSource.Symlink,
-       Url = "/some/local/path",
-       Subfolder = "some/subfolder"
-     };
+  [Fact]
+  public async Task CacheAddonReturnsSymlinkAddonTargetWithSubfolder() {
+    var addon = TestData.Addon with {
+      Source = AssetSource.Symlink,
+      Url = "/some/local/path",
+      Subfolder = "some/subfolder"
+    };
 
-     var subject = BuildSubject();
+    var subject = BuildSubject();
 
-     var repo = subject.Repo;
-     var client = subject.Client;
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     var expected = addon.Url + "/" + addon.Subfolder;
+    var expected = addon.Url + "/" + addon.Subfolder;
 
-     client.Setup(c => c.Combine(addon.Url, addon.Subfolder)).Returns(expected);
+    client.Setup(c => c.Combine(addon.Url, addon.Subfolder)).Returns(expected);
 
-     var token = new CancellationToken();
-     var downloadProgress = new Mock<IProgress<DownloadProgress>>();
-     var extractProgress = new Mock<IProgress<double>>();
+    var token = new CancellationToken();
+    var downloadProgress = new Mock<IProgress<DownloadProgress>>();
+    var extractProgress = new Mock<IProgress<double>>();
 
-     var result = await repo.CacheAddon(
-       addon,
-       addon.Name,
-       downloadProgress.Object,
-       extractProgress.Object,
-       token
-     );
+    var result = await repo.CacheAddon(
+      addon,
+      addon.Name,
+      downloadProgress.Object,
+      extractProgress.Object,
+      token
+    );
 
-     result.ShouldBe(expected);
+    result.ShouldBe(expected);
 
-     client.VerifyAll();
-   }
+    client.VerifyAll();
+  }
 
-   [Fact]
-   public async Task CacheAddonCachesAddon() {
-     var addon = TestData.Addon with { };
+  [Fact]
+  public async Task CacheAddonCachesAddon() {
+    var addon = TestData.Addon with { };
 
-     var addonsCachePath = CACHE_DIR + "/" + addon.Name;
+    var addonsCachePath = CACHE_DIR + "/" + addon.Name;
 
-     var cli = new ShellVerifier(CACHE_DIR, addonsCachePath);
-     var subject = BuildSubject(cli: cli);
+    var cli = new ShellVerifier(CACHE_DIR, addonsCachePath);
+    var subject = BuildSubject(cli: cli);
 
-     var repo = subject.Repo;
-     var client = subject.Client;
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     var addonCachePath = CACHE_DIR + "/" + addon.Name;
+    var addonCachePath = CACHE_DIR + "/" + addon.Name;
 
-     client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
-     client.Setup(c => c.DirectoryExists(addonCachePath)).Returns(false);
+    client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
+    client.Setup(c => c.DirectoryExists(addonCachePath)).Returns(false);
 
-     cli.Runs(
-       CACHE_DIR, new ProcessResult(0),
-       "git", "clone", addon.Url, "--recurse-submodules", addon.Name
-     );
+    cli.Runs(
+      CACHE_DIR, new ProcessResult(0),
+      "git", "clone", addon.Url, "--recurse-submodules", addon.Name
+    );
 
-     var token = new CancellationToken();
-     var downloadProgress = new Mock<IProgress<DownloadProgress>>();
-     var extractProgress = new Mock<IProgress<double>>();
-
-     await repo.CacheAddon(
-       addon,
-       addon.Name,
-       downloadProgress.Object,
-       extractProgress.Object,
-       token
-     );
-
-     client.VerifyAll();
-     cli.VerifyAll();
-   }
-
-   [Fact]
-   public async Task CacheAddonReusesZipAddonCache() {
-     var addon = TestData.ZipAddon with { };
-
-     var addonsCachePath = CACHE_DIR + "/" + addon.Name;
-
-     var subject = BuildSubject();
-
-     var repo = subject.Repo;
-     var client = subject.Client;
-
-     var addonCachePath = CACHE_DIR + "/" + addon.Name;
+    var token = new CancellationToken();
+    var downloadProgress = new Mock<IProgress<DownloadProgress>>();
+    var extractProgress = new Mock<IProgress<double>>();
+
+    await repo.CacheAddon(
+      addon,
+      addon.Name,
+      downloadProgress.Object,
+      extractProgress.Object,
+      token
+    );
+
+    client.VerifyAll();
+    cli.VerifyAll();
+  }
+
+  [Fact]
+  public async Task CacheAddonReusesZipAddonCache() {
+    var addon = TestData.ZipAddon with { };
+
+    var addonsCachePath = CACHE_DIR + "/" + addon.Name;
+
+    var subject = BuildSubject();
+
+    var repo = subject.Repo;
+    var client = subject.Client;
+
+    var addonCachePath = CACHE_DIR + "/" + addon.Name;
+
+    client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
+
+    var extractedDir = addonCachePath + "/" + addon.Hash;
+    client.Setup(c => c.Combine(addonCachePath, addon.Hash)).Returns(extractedDir);
+    client.Setup(c => c.DirectoryExists(extractedDir)).Returns(true);
+
+    var token = new CancellationToken();
+    var downloadProgress = new Mock<IProgress<DownloadProgress>>();
+    var extractProgress = new Mock<IProgress<double>>();
+
+    await repo.CacheAddon(
+      addon,
+      addon.Name,
+      downloadProgress.Object,
+      extractProgress.Object,
+      token
+    );
+
+    client.VerifyAll();
+  }
+
+  [Fact]
+  public async Task CacheAddonCachesZipAddon() {
+    var addon = TestData.ZipAddon with { };
+
+    var addonsCachePath = CACHE_DIR + "/" + addon.Name;
+
+    var subject = BuildSubject();
+
+    var repo = subject.Repo;
+    var client = subject.Client;
+    var networkClient = subject.NetworkClient;
+    var zipClient = subject.ZipClient;
+
+    var addonCachePath = CACHE_DIR + "/" + addon.Name;
+
+    client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
+
+    var token = new CancellationToken();
+    var zipFileName = addon.Hash + ".zip";
+    var extractedDir = addonCachePath + "/" + addon.Hash;
+    var downloadProgress = new Mock<IProgress<DownloadProgress>>();
+    var extractProgress = new Mock<IProgress<double>>();
+
+    client.Setup(c => c.Combine(addonCachePath, addon.Hash)).Returns(extractedDir);
+    client.Setup(c => c.DirectoryExists(extractedDir)).Returns(false);
+
+    client.Setup(c => c.DeleteDirectory(addonCachePath));
+    client.Setup(c => c.CreateDirectory(addonCachePath));
+
+    networkClient
+      .Setup(nc => nc.DownloadFileAsync(
+        addon.Url,
+        addonCachePath,
+        zipFileName,
+        downloadProgress.Object,
+        token,
+        null
+      ))
+      .Returns(Task.CompletedTask);
 
-     client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
-
-     var extractedDir = addonCachePath + "/" + addon.Hash;
-     client.Setup(c => c.Combine(addonCachePath, addon.Hash)).Returns(extractedDir);
-     client.Setup(c => c.DirectoryExists(extractedDir)).Returns(true);
-
-     var token = new CancellationToken();
-     var downloadProgress = new Mock<IProgress<DownloadProgress>>();
-     var extractProgress = new Mock<IProgress<double>>();
-
-     await repo.CacheAddon(
-       addon,
-       addon.Name,
-       downloadProgress.Object,
-       extractProgress.Object,
-       token
-     );
-
-     client.VerifyAll();
-   }
-
-   [Fact]
-   public async Task CacheAddonCachesZipAddon() {
-     var addon = TestData.ZipAddon with { };
-
-     var addonsCachePath = CACHE_DIR + "/" + addon.Name;
-
-     var subject = BuildSubject();
-
-     var repo = subject.Repo;
-     var client = subject.Client;
-     var networkClient = subject.NetworkClient;
-     var zipClient = subject.ZipClient;
-
-     var addonCachePath = CACHE_DIR + "/" + addon.Name;
+    var zipFilePath = addonCachePath + "/" + zipFileName;
+    client.Setup(c => c.Combine(addonCachePath, zipFileName)).Returns(zipFilePath);
 
-     client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
-
-     var token = new CancellationToken();
-     var zipFileName = addon.Hash + ".zip";
-     var extractedDir = addonCachePath + "/" + addon.Hash;
-     var downloadProgress = new Mock<IProgress<DownloadProgress>>();
-     var extractProgress = new Mock<IProgress<double>>();
+    zipClient
+      .Setup(zc => zc.ExtractToDirectory(
+        zipFilePath,
+        extractedDir,
+        extractProgress.Object
+      ))
+      .Returns(Task.FromResult(1));
 
-     client.Setup(c => c.Combine(addonCachePath, addon.Hash)).Returns(extractedDir);
-     client.Setup(c => c.DirectoryExists(extractedDir)).Returns(false);
-
-     client.Setup(c => c.DeleteDirectory(addonCachePath));
-     client.Setup(c => c.CreateDirectory(addonCachePath));
-
-     networkClient
-       .Setup(nc => nc.DownloadFileAsync(
-         addon.Url,
-         addonCachePath,
-         zipFileName,
-         downloadProgress.Object,
-         token
-       ))
-       .Returns(Task.CompletedTask);
+    await repo.CacheAddon(
+      addon,
+      addon.Name,
+      downloadProgress.Object,
+      extractProgress.Object,
+      token
+    );
 
-     var zipFilePath = addonCachePath + "/" + zipFileName;
-     client.Setup(c => c.Combine(addonCachePath, zipFileName)).Returns(zipFilePath);
+    client.VerifyAll();
+    networkClient.VerifyAll();
+    zipClient.VerifyAll();
+  }
 
-     zipClient
-       .Setup(zc => zc.ExtractToDirectory(
-         zipFilePath,
-         extractedDir,
-         extractProgress.Object
-       ))
-       .Returns(Task.FromResult(1));
+  [Fact]
+  public async Task CacheAddonDoesNotCacheIfAddonIsAlreadyCached() {
+    var addon = TestData.Addon with { };
 
-     await repo.CacheAddon(
-       addon,
-       addon.Name,
-       downloadProgress.Object,
-       extractProgress.Object,
-       token
-     );
+    var cli = new ShellVerifier(CACHE_DIR);
+    var subject = BuildSubject(cli: cli);
 
-     client.VerifyAll();
-     networkClient.VerifyAll();
-     zipClient.VerifyAll();
-   }
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-   [Fact]
-   public async Task CacheAddonDoesNotCacheIfAddonIsAlreadyCached() {
-     var addon = TestData.Addon with { };
+    var addonCachePath = CACHE_DIR + "/" + addon.Name;
 
-     var cli = new ShellVerifier(CACHE_DIR);
-     var subject = BuildSubject(cli: cli);
+    client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
+    client.Setup(c => c.DirectoryExists(addonCachePath)).Returns(true);
 
-     var repo = subject.Repo;
-     var client = subject.Client;
+    var token = new CancellationToken();
+    var downloadProgress = new Mock<IProgress<DownloadProgress>>();
+    var extractProgress = new Mock<IProgress<double>>();
 
-     var addonCachePath = CACHE_DIR + "/" + addon.Name;
+    await repo.CacheAddon(
+      addon,
+      addon.Name,
+      downloadProgress.Object,
+      extractProgress.Object,
+      token
+    );
 
-     client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
-     client.Setup(c => c.DirectoryExists(addonCachePath)).Returns(true);
+    client.VerifyAll();
+    cli.VerifyAll();
+  }
 
-     var token = new CancellationToken();
-     var downloadProgress = new Mock<IProgress<DownloadProgress>>();
-     var extractProgress = new Mock<IProgress<double>>();
+  [Fact]
+  public async Task DeleteAddonWillNotDeleteNonExistentAddonOnUnix() {
+    var addon = TestData.Addon with { };
+    var addonPath = ADDONS_DIR + "/" + addon.Name;
 
-     await repo.CacheAddon(
-       addon,
-       addon.Name,
-       downloadProgress.Object,
-       extractProgress.Object,
-       token
-     );
+    var cli = new ShellVerifier(addonPath);
+    var subject = BuildSubject(cli: cli);
 
-     client.VerifyAll();
-     cli.VerifyAll();
-   }
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-   [Fact]
-   public async Task DeleteAddonWillNotDeleteNonExistentAddonOnUnix() {
-     var addon = TestData.Addon with { };
-     var addonPath = ADDONS_DIR + "/" + addon.Name;
+    client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
+    client.Setup(c => c.DirectoryExists(addonPath)).Returns(false);
 
-     var cli = new ShellVerifier(addonPath);
-     var subject = BuildSubject(cli: cli);
+    await repo.DeleteAddon(addon);
 
-     var repo = subject.Repo;
-     var client = subject.Client;
+    client.VerifyAll();
+    cli.VerifyAll();
+  }
 
-     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
-     client.Setup(c => c.DirectoryExists(addonPath)).Returns(false);
+  [Fact]
+  public async Task DeleteAddonWillNotDeleteNonExistentAddonOnWindows() {
+    var addon = TestData.Addon with { };
+    var addonPath = ADDONS_DIR + "/" + addon.Name;
+
+    var cli = new ShellVerifier(addonPath);
+    var subject = BuildSubject(cli: cli);
 
-     await repo.DeleteAddon(addon);
+    var systemInfo = subject.SystemInfo;
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     client.VerifyAll();
-     cli.VerifyAll();
-   }
+    systemInfo.Setup(sys => sys.OS).Returns(OSType.Windows);
+    systemInfo.Setup(sys => sys.OSFamily).Returns(OSFamily.Windows);
 
-   [Fact]
-   public async Task DeleteAddonWillNotDeleteNonExistentAddonOnWindows() {
-     var addon = TestData.Addon with { };
-     var addonPath = ADDONS_DIR + "/" + addon.Name;
+    client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
+    client.Setup(c => c.DirectoryExists(addonPath)).Returns(false);
 
-     var cli = new ShellVerifier(addonPath);
-     var subject = BuildSubject(cli: cli);
+    await repo.DeleteAddon(addon);
 
-     var systemInfo = subject.SystemInfo;
-     var repo = subject.Repo;
-     var client = subject.Client;
+    client.VerifyAll();
+    cli.VerifyAll();
+  }
 
-     systemInfo.Setup(sys => sys.OS).Returns(OSType.Windows);
-     systemInfo.Setup(sys => sys.OSFamily).Returns(OSFamily.Windows);
+  [Fact]
+  public async Task DeleteAddonDeletesSymlinkedAddonOnUnix() {
+    var addon = TestData.Addon with { };
+    var addonPath = ADDONS_DIR + "/" + addon.Name;
 
-     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
-     client.Setup(c => c.DirectoryExists(addonPath)).Returns(false);
+    var cli = new ShellVerifier(addonPath);
+    var subject = BuildSubject(cli: cli);
 
-     await repo.DeleteAddon(addon);
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     client.VerifyAll();
-     cli.VerifyAll();
-   }
+    client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
+    client.Setup(c => c.DirectoryExists(addonPath)).Returns(true);
+    client.Setup(c => c.IsDirectorySymlink(addonPath)).Returns(true);
+    client.Setup(c => c.DeleteDirectory(addonPath));
 
-   [Fact]
-   public async Task DeleteAddonDeletesSymlinkedAddonOnUnix() {
-     var addon = TestData.Addon with { };
-     var addonPath = ADDONS_DIR + "/" + addon.Name;
+    await repo.DeleteAddon(addon);
 
-     var cli = new ShellVerifier(addonPath);
-     var subject = BuildSubject(cli: cli);
+    client.VerifyAll();
+    cli.VerifyAll();
+  }
 
-     var repo = subject.Repo;
-     var client = subject.Client;
+  [Fact]
+  public async Task DeleteAddonDeletesSymlinkedAddonOnWindows() {
+    var addon = TestData.Addon with { };
+    var addonPath = ADDONS_DIR + "/" + addon.Name;
 
-     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
-     client.Setup(c => c.DirectoryExists(addonPath)).Returns(true);
-     client.Setup(c => c.IsDirectorySymlink(addonPath)).Returns(true);
-     client.Setup(c => c.DeleteDirectory(addonPath));
+    var cli = new ShellVerifier(addonPath);
+    var subject = BuildSubject(cli: cli);
 
-     await repo.DeleteAddon(addon);
+    var systemInfo = subject.SystemInfo;
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     client.VerifyAll();
-     cli.VerifyAll();
-   }
+    systemInfo.Setup(sys => sys.OS).Returns(OSType.Windows);
+    systemInfo.Setup(sys => sys.OSFamily).Returns(OSFamily.Windows);
 
-   [Fact]
-   public async Task DeleteAddonDeletesSymlinkedAddonOnWindows() {
-     var addon = TestData.Addon with { };
-     var addonPath = ADDONS_DIR + "/" + addon.Name;
+    client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
+    client.Setup(c => c.DirectoryExists(addonPath)).Returns(true);
+    client.Setup(c => c.IsDirectorySymlink(addonPath)).Returns(true);
+    client.Setup(c => c.DeleteDirectory(addonPath));
 
-     var cli = new ShellVerifier(addonPath);
-     var subject = BuildSubject(cli: cli);
+    await repo.DeleteAddon(addon);
 
-     var systemInfo = subject.SystemInfo;
-     var repo = subject.Repo;
-     var client = subject.Client;
+    client.VerifyAll();
+    cli.VerifyAll();
+  }
 
-     systemInfo.Setup(sys => sys.OS).Returns(OSType.Windows);
-     systemInfo.Setup(sys => sys.OSFamily).Returns(OSFamily.Windows);
+  [Fact]
+  public async Task DeleteAddonDeletesAddonOnWindows() {
+    var addon = TestData.Addon with { };
+    var addonPath = ADDONS_DIR + "/" + addon.Name;
 
-     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
-     client.Setup(c => c.DirectoryExists(addonPath)).Returns(true);
-     client.Setup(c => c.IsDirectorySymlink(addonPath)).Returns(true);
-     client.Setup(c => c.DeleteDirectory(addonPath));
+    var cli = new ShellVerifier(addonPath, ADDONS_DIR);
+    var subject = BuildSubject(cli: cli);
 
-     await repo.DeleteAddon(addon);
+    var systemInfo = subject.SystemInfo;
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     client.VerifyAll();
-     cli.VerifyAll();
-   }
+    systemInfo.Setup(sys => sys.OS).Returns(OSType.Windows);
+    systemInfo.Setup(sys => sys.OSFamily).Returns(OSFamily.Windows);
 
-   [Fact]
-   public async Task DeleteAddonDeletesAddonOnWindows() {
-     var addon = TestData.Addon with { };
-     var addonPath = ADDONS_DIR + "/" + addon.Name;
+    client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
+    client.Setup(c => c.DirectoryExists(addonPath)).Returns(true);
+    client.Setup(c => c.IsDirectorySymlink(addonPath)).Returns(false);
 
-     var cli = new ShellVerifier(addonPath, ADDONS_DIR);
-     var subject = BuildSubject(cli: cli);
+    cli.RunsUnchecked(
+      addonPath, new ProcessResult(0), "git", "status", "--porcelain"
+    );
+    cli.Runs(
+      addonPath, new ProcessResult(0),
+      "cmd.exe", "/c", "erase", "/s", "/f", "/q", "*"
+    );
+    cli.RunsUnchecked(
+      ADDONS_DIR, new ProcessResult(0),
+      "cmd.exe", "/c", "rmdir", addon.Name, "/s", "/q"
+    );
 
-     var systemInfo = subject.SystemInfo;
-     var repo = subject.Repo;
-     var client = subject.Client;
+    await repo.DeleteAddon(addon);
 
-     systemInfo.Setup(sys => sys.OS).Returns(OSType.Windows);
-     systemInfo.Setup(sys => sys.OSFamily).Returns(OSFamily.Windows);
+    client.VerifyAll();
+    cli.VerifyAll();
+  }
+
+  [Fact]
+  public async Task DeleteAddonDeletesAddonOnUnix() {
+    var addon = TestData.Addon with { };
+    var addonPath = ADDONS_DIR + "/" + addon.Name;
+
+    var cli = new ShellVerifier(addonPath, ADDONS_DIR);
+    var subject = BuildSubject(cli: cli);
+
+    var repo = subject.Repo;
+    var client = subject.Client;
+
+    client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
+    client.Setup(c => c.DirectoryExists(addonPath)).Returns(true);
+    client.Setup(c => c.IsDirectorySymlink(addonPath)).Returns(false);
+
+    cli.RunsUnchecked(
+      addonPath, new ProcessResult(0), "git", "status", "--porcelain"
+    );
+
+    client.Setup(c => c.DeleteDirectory(addonPath));
+
+    await repo.DeleteAddon(addon);
+
+    client.VerifyAll();
+    cli.VerifyAll();
+  }
 
-     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
-     client.Setup(c => c.DirectoryExists(addonPath)).Returns(true);
-     client.Setup(c => c.IsDirectorySymlink(addonPath)).Returns(false);
+  [Fact]
+  public async Task DeleteAddonThrowsIfAddonWasModified() {
+    var addon = TestData.Addon with { };
+    var addonPath = ADDONS_DIR + "/" + addon.Name;
 
-     cli.RunsUnchecked(
-       addonPath, new ProcessResult(0), "git", "status", "--porcelain"
-     );
-     cli.Runs(
-       addonPath, new ProcessResult(0),
-       "cmd.exe", "/c", "erase", "/s", "/f", "/q", "*"
-     );
-     cli.RunsUnchecked(
-       ADDONS_DIR, new ProcessResult(0),
-       "cmd.exe", "/c", "rmdir", addon.Name, "/s", "/q"
-     );
+    var cli = new ShellVerifier(addonPath);
+    var subject = BuildSubject(cli: cli);
 
-     await repo.DeleteAddon(addon);
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     client.VerifyAll();
-     cli.VerifyAll();
-   }
+    client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
+    client.Setup(c => c.DirectoryExists(addonPath)).Returns(true);
+    client.Setup(c => c.IsDirectorySymlink(addonPath)).Returns(false);
 
-   [Fact]
-   public async Task DeleteAddonDeletesAddonOnUnix() {
-     var addon = TestData.Addon with { };
-     var addonPath = ADDONS_DIR + "/" + addon.Name;
-
-     var cli = new ShellVerifier(addonPath, ADDONS_DIR);
-     var subject = BuildSubject(cli: cli);
-
-     var repo = subject.Repo;
-     var client = subject.Client;
-
-     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
-     client.Setup(c => c.DirectoryExists(addonPath)).Returns(true);
-     client.Setup(c => c.IsDirectorySymlink(addonPath)).Returns(false);
-
-     cli.RunsUnchecked(
-       addonPath, new ProcessResult(0), "git", "status", "--porcelain"
-     );
-
-     client.Setup(c => c.DeleteDirectory(addonPath));
-
-     await repo.DeleteAddon(addon);
-
-     client.VerifyAll();
-     cli.VerifyAll();
-   }
+    cli.RunsUnchecked(
+      addonPath, new ProcessResult(0, StandardOutput: " M file.txt"),
+      "git", "status", "--porcelain"
+    );
 
-   [Fact]
-   public async Task DeleteAddonThrowsIfAddonWasModified() {
-     var addon = TestData.Addon with { };
-     var addonPath = ADDONS_DIR + "/" + addon.Name;
+    await Should.ThrowAsync<IOException>(
+      async () => await repo.DeleteAddon(addon)
+    );
 
-     var cli = new ShellVerifier(addonPath);
-     var subject = BuildSubject(cli: cli);
+    client.VerifyAll();
+    cli.VerifyAll();
+  }
 
-     var repo = subject.Repo;
-     var client = subject.Client;
+  [Fact]
+  public async Task InstallAddonFromCacheCopiesCachedAddonToAddonsPath() {
+    var addon = TestData.Addon with { };
+    var addonCachePath = CACHE_DIR + "/" + addon.Name;
+    var copyFromPath = addonCachePath + "/" + addon.Subfolder;
+    var addonInstallPath = ADDONS_DIR + "/" + addon.Name + "/";
+    var subfolderWithSeparatorPath = copyFromPath + "/";
 
-     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(addonPath);
-     client.Setup(c => c.DirectoryExists(addonPath)).Returns(true);
-     client.Setup(c => c.IsDirectorySymlink(addonPath)).Returns(false);
+    var cli = new ShellVerifier(addonCachePath, PROJECT_PATH, addonInstallPath);
+    var subject = BuildSubject(cli: cli);
 
-     cli.RunsUnchecked(
-       addonPath, new ProcessResult(0, StandardOutput: " M file.txt"),
-       "git", "status", "--porcelain"
-     );
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     await Should.ThrowAsync<IOException>(
-       async () => await repo.DeleteAddon(addon)
-     );
+    client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
 
-     client.VerifyAll();
-     cli.VerifyAll();
-   }
+    client.Setup(c => c.Separator).Returns('/');
 
-   [Fact]
-   public async Task InstallAddonFromCacheCopiesCachedAddonToAddonsPath() {
-     var addon = TestData.Addon with { };
-     var addonCachePath = CACHE_DIR + "/" + addon.Name;
-     var copyFromPath = addonCachePath + "/" + addon.Subfolder;
-     var addonInstallPath = ADDONS_DIR + "/" + addon.Name + "/";
-     var subfolderWithSeparatorPath = copyFromPath + "/";
+    client.Setup(c => c.Combine(addonCachePath, addon.Subfolder))
+      .Returns(copyFromPath);
 
-     var cli = new ShellVerifier(addonCachePath, PROJECT_PATH, addonInstallPath);
-     var subject = BuildSubject(cli: cli);
+    client.Setup(c => c.DirectoryExists(subfolderWithSeparatorPath)).Returns(true);
 
-     var repo = subject.Repo;
-     var client = subject.Client;
+    client.Setup(c => c.Combine(ADDONS_DIR, addon.Name))
+      .Returns(addonInstallPath);
 
-     client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
+    client.Setup(
+      c => c.CopyBulk(
+        cli.GetShell(PROJECT_PATH).Object,
+        copyFromPath + "/",
+        addonInstallPath
+      )
+    );
 
-     client.Setup(c => c.Separator).Returns('/');
+    cli.Runs(addonInstallPath, new ProcessResult(0), "git", "init");
+    cli.Runs(addonInstallPath, new ProcessResult(0),
+      "git", "config", "--local", "user.email", "godotenv@godotenv.com"
+    );
+    cli.Runs(addonInstallPath, new ProcessResult(0),
+      "git", "config", "--local", "user.name", "GodotEnv"
+    );
+    cli.Runs(addonInstallPath, new ProcessResult(0), "git", "add", "-A");
+    cli.Runs(
+      addonInstallPath, new ProcessResult(0),
+      "git", "config", "--local", "commit.gpgsign", "false"
+    );
+    cli.Runs(
+      addonInstallPath, new ProcessResult(0),
+      "git", "commit", "-m", "\"Initial commit\""
+    );
 
-     client.Setup(c => c.Combine(addonCachePath, addon.Subfolder))
-       .Returns(copyFromPath);
+    await repo.InstallAddonFromCache(addon, addon.Name);
 
-     client.Setup(c => c.DirectoryExists(subfolderWithSeparatorPath)).Returns(true);
+    client.VerifyAll();
+    cli.VerifyAll();
+  }
 
-     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name))
-       .Returns(addonInstallPath);
+  [Fact]
+  public void TestValidateSubfolderThrowsIfNoDirectory() {
+    var addon = TestData.Addon with { };
+    var addonCachePath = CACHE_DIR + "/" + addon.Name;
+    var copyFromPath = addonCachePath + "/" + addon.Subfolder;
+    var subfolderWithSeparatorPath = copyFromPath + "/";
 
-     client.Setup(
-       c => c.CopyBulk(
-         cli.GetShell(PROJECT_PATH).Object,
-         copyFromPath + "/",
-         addonInstallPath
-       )
-     );
+    var subject = BuildSubject();
 
-     cli.Runs(addonInstallPath, new ProcessResult(0), "git", "init");
-     cli.Runs(addonInstallPath, new ProcessResult(0),
-       "git", "config", "--local", "user.email", "godotenv@godotenv.com"
-     );
-     cli.Runs(addonInstallPath, new ProcessResult(0),
-       "git", "config", "--local", "user.name", "GodotEnv"
-     );
-     cli.Runs(addonInstallPath, new ProcessResult(0), "git", "add", "-A");
-     cli.Runs(
-       addonInstallPath, new ProcessResult(0),
-       "git", "config", "--local", "commit.gpgsign", "false"
-     );
-     cli.Runs(
-       addonInstallPath, new ProcessResult(0),
-       "git", "commit", "-m", "\"Initial commit\""
-     );
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     await repo.InstallAddonFromCache(addon, addon.Name);
+    client.Setup(c => c.DirectoryExists(subfolderWithSeparatorPath)).Returns(false);
 
-     client.VerifyAll();
-     cli.VerifyAll();
-   }
+    Should.Throw<IOException>(() => repo.ValidateSubfolder(subfolderWithSeparatorPath, addon.Name));
 
-   [Fact]
-   public void TestValidateSubfolderThrowsIfNoDirectory() {
-     var addon = TestData.Addon with { };
-     var addonCachePath = CACHE_DIR + "/" + addon.Name;
-     var copyFromPath = addonCachePath + "/" + addon.Subfolder;
-     var subfolderWithSeparatorPath = copyFromPath + "/";
+    client.VerifyAll();
+  }
 
-     var subject = BuildSubject();
+  [Fact]
+  public void GetCachedAddonPathDeterminesZipAddonCachePath() {
 
-     var repo = subject.Repo;
-     var client = subject.Client;
+    var subject = BuildSubject();
+    var client = subject.Client;
+    var addon = TestData.ZipAddon with { };
 
-     client.Setup(c => c.DirectoryExists(subfolderWithSeparatorPath)).Returns(false);
+    var cacheName = "test_addon";
+    var result = "cached_addon_path";
 
-     Should.Throw<IOException>(() => repo.ValidateSubfolder(subfolderWithSeparatorPath, addon.Name));
+    client.Setup(c => c.Combine(CACHE_DIR, cacheName, addon.Hash))
+      .Returns(result);
 
-     client.VerifyAll();
-   }
+    var cachedAddonPath = subject.Repo.GetCachedAddonPath(addon, cacheName);
 
-   [Fact]
-   public void GetCachedAddonPathDeterminesZipAddonCachePath() {
+    cachedAddonPath.ShouldBe(result);
+  }
 
-     var subject = BuildSubject();
-     var client = subject.Client;
-     var addon = TestData.ZipAddon with { };
+  [Fact]
+  public void InstallAddonWithSymlinkRejectsAddonsWithWrongSource() {
+    var addon = TestData.Addon with { };
 
-     var cacheName = "test_addon";
-     var result = "cached_addon_path";
+    var subject = BuildSubject();
+    var repo = subject.Repo;
 
-     client.Setup(c => c.Combine(CACHE_DIR, cacheName, addon.Hash))
-       .Returns(result);
+    Should.Throw<IOException>(() => repo.InstallAddonWithSymlink(addon));
+  }
 
-     var cachedAddonPath = subject.Repo.GetCachedAddonPath(addon, cacheName);
+  [Fact]
+  public void InstallAddonWithSymlinkWillNotInstallIfTargetAlreadyExists() {
+    var addon = TestData.Addon with { Source = AssetSource.Symlink };
 
-     cachedAddonPath.ShouldBe(result);
-   }
+    var subject = BuildSubject();
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-   [Fact]
-   public void InstallAddonWithSymlinkRejectsAddonsWithWrongSource() {
-     var addon = TestData.Addon with { };
+    var symlinkTarget = ADDONS_DIR + "/" + addon.Name;
+    var symlinkSource = addon.Url + "/" + addon.Subfolder;
 
-     var subject = BuildSubject();
-     var repo = subject.Repo;
+    client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(symlinkTarget);
+    client.Setup(c => c.Combine(addon.Url, addon.Subfolder))
+      .Returns(symlinkSource);
 
-     Should.Throw<IOException>(() => repo.InstallAddonWithSymlink(addon));
-   }
+    client.Setup(c => c.DirectoryExists(symlinkTarget)).Returns(true);
 
-   [Fact]
-   public void InstallAddonWithSymlinkWillNotInstallIfTargetAlreadyExists() {
-     var addon = TestData.Addon with { Source = AssetSource.Symlink };
+    Should.Throw<IOException>(() => repo.InstallAddonWithSymlink(addon));
 
-     var subject = BuildSubject();
-     var repo = subject.Repo;
-     var client = subject.Client;
+    client.VerifyAll();
+  }
 
-     var symlinkTarget = ADDONS_DIR + "/" + addon.Name;
-     var symlinkSource = addon.Url + "/" + addon.Subfolder;
+  [Fact]
+  public void InstallAddonWithSymlinkWillNotInstallIfSourceDoesNotExist() {
+    var addon = TestData.Addon with { Source = AssetSource.Symlink };
 
-     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(symlinkTarget);
-     client.Setup(c => c.Combine(addon.Url, addon.Subfolder))
-       .Returns(symlinkSource);
+    var subject = BuildSubject();
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     client.Setup(c => c.DirectoryExists(symlinkTarget)).Returns(true);
+    var symlinkTarget = ADDONS_DIR + "/" + addon.Name;
+    var symlinkSource = addon.Url + "/" + addon.Subfolder;
 
-     Should.Throw<IOException>(() => repo.InstallAddonWithSymlink(addon));
+    client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(symlinkTarget);
+    client.Setup(c => c.Combine(addon.Url, addon.Subfolder))
+      .Returns(symlinkSource);
 
-     client.VerifyAll();
-   }
+    client.Setup(c => c.DirectoryExists(symlinkTarget)).Returns(false);
+    client.Setup(c => c.DirectoryExists(symlinkSource)).Returns(false);
 
-   [Fact]
-   public void InstallAddonWithSymlinkWillNotInstallIfSourceDoesNotExist() {
-     var addon = TestData.Addon with { Source = AssetSource.Symlink };
+    Should.Throw<IOException>(() => repo.InstallAddonWithSymlink(addon));
 
-     var subject = BuildSubject();
-     var repo = subject.Repo;
-     var client = subject.Client;
+    client.VerifyAll();
+  }
 
-     var symlinkTarget = ADDONS_DIR + "/" + addon.Name;
-     var symlinkSource = addon.Url + "/" + addon.Subfolder;
+  [Fact]
+  public void InstallAddonWithSymlinkCreatesSymlink() {
+    var addon = TestData.Addon with { Source = AssetSource.Symlink };
 
-     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(symlinkTarget);
-     client.Setup(c => c.Combine(addon.Url, addon.Subfolder))
-       .Returns(symlinkSource);
+    var subject = BuildSubject();
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     client.Setup(c => c.DirectoryExists(symlinkTarget)).Returns(false);
-     client.Setup(c => c.DirectoryExists(symlinkSource)).Returns(false);
+    var symlinkTarget = ADDONS_DIR + "/" + addon.Name;
+    var symlinkSource = addon.Url + "/" + addon.Subfolder;
 
-     Should.Throw<IOException>(() => repo.InstallAddonWithSymlink(addon));
+    client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(symlinkTarget);
+    client.Setup(c => c.Combine(addon.Url, addon.Subfolder))
+      .Returns(symlinkSource);
 
-     client.VerifyAll();
-   }
+    client.Setup(c => c.DirectoryExists(symlinkTarget)).Returns(false);
+    client.Setup(c => c.DirectoryExists(symlinkSource)).Returns(true);
+    client.Setup(c => c.CreateSymlink(symlinkTarget, symlinkSource));
 
-   [Fact]
-   public void InstallAddonWithSymlinkCreatesSymlink() {
-     var addon = TestData.Addon with { Source = AssetSource.Symlink };
+    repo.InstallAddonWithSymlink(addon);
 
-     var subject = BuildSubject();
-     var repo = subject.Repo;
-     var client = subject.Client;
+    client.VerifyAll();
+  }
 
-     var symlinkTarget = ADDONS_DIR + "/" + addon.Name;
-     var symlinkSource = addon.Url + "/" + addon.Subfolder;
+  [Fact]
+  public void InstallAddonWithSymlinkThrowsErrorIfSymlinkCreationFailed() {
+    var addon = TestData.Addon with { Source = AssetSource.Symlink };
 
-     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(symlinkTarget);
-     client.Setup(c => c.Combine(addon.Url, addon.Subfolder))
-       .Returns(symlinkSource);
+    var subject = BuildSubject();
+    var repo = subject.Repo;
+    var client = subject.Client;
 
-     client.Setup(c => c.DirectoryExists(symlinkTarget)).Returns(false);
-     client.Setup(c => c.DirectoryExists(symlinkSource)).Returns(true);
-     client.Setup(c => c.CreateSymlink(symlinkTarget, symlinkSource));
+    var symlinkTarget = ADDONS_DIR + "/" + addon.Name;
+    var symlinkSource = addon.Url + "/" + addon.Subfolder;
 
-     repo.InstallAddonWithSymlink(addon);
+    client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(symlinkTarget);
+    client.Setup(c => c.Combine(addon.Url, addon.Subfolder))
+      .Returns(symlinkSource);
 
-     client.VerifyAll();
-   }
+    client.Setup(c => c.DirectoryExists(symlinkTarget)).Returns(false);
+    client.Setup(c => c.DirectoryExists(symlinkSource)).Returns(true);
+    client.Setup(c => c.CreateSymlink(symlinkTarget, symlinkSource)).Throws(
+      new IOException("Failed to create symlink.")
+    );
 
-   [Fact]
-   public void InstallAddonWithSymlinkThrowsErrorIfSymlinkCreationFailed() {
-     var addon = TestData.Addon with { Source = AssetSource.Symlink };
+    Should.Throw<IOException>(() => repo.InstallAddonWithSymlink(addon));
 
-     var subject = BuildSubject();
-     var repo = subject.Repo;
-     var client = subject.Client;
+    client.VerifyAll();
+  }
 
-     var symlinkTarget = ADDONS_DIR + "/" + addon.Name;
-     var symlinkSource = addon.Url + "/" + addon.Subfolder;
+  [Fact]
+  public async Task UpdateCacheIgnoresSymlinkAddons() {
+    var addon = TestData.Addon with { Source = AssetSource.Symlink };
 
-     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(symlinkTarget);
-     client.Setup(c => c.Combine(addon.Url, addon.Subfolder))
-       .Returns(symlinkSource);
+    var subject = BuildSubject();
+    var repo = subject.Repo;
+    var client = subject.Client;
+    var config = subject.Config;
+    var cacheName = "cache_name";
 
-     client.Setup(c => c.DirectoryExists(symlinkTarget)).Returns(false);
-     client.Setup(c => c.DirectoryExists(symlinkSource)).Returns(true);
-     client.Setup(c => c.CreateSymlink(symlinkTarget, symlinkSource)).Throws(
-       new IOException("Failed to create symlink.")
-     );
+    await repo.UpdateCache(addon, cacheName);
 
-     Should.Throw<IOException>(() => repo.InstallAddonWithSymlink(addon));
+    client.VerifyAll();
+  }
 
-     client.VerifyAll();
-   }
+  [Fact]
+  public async Task UpdateCacheCallsGitCorrectlyInAddonCacheLocation() {
+    var addon = TestData.Addon with { };
+    var addonCachePath = CACHE_DIR + "/" + addon.Name;
 
-   [Fact]
-   public async Task UpdateCacheIgnoresSymlinkAddons() {
-     var addon = TestData.Addon with { Source = AssetSource.Symlink };
+    var cli = new ShellVerifier(addonCachePath);
+    var subject = BuildSubject(cli: cli);
 
-     var subject = BuildSubject();
-     var repo = subject.Repo;
-     var client = subject.Client;
-     var config = subject.Config;
-     var cacheName = "cache_name";
+    var repo = subject.Repo;
+    var client = subject.Client;
+    var config = subject.Config;
+    var cacheName = "cache_name";
 
-     await repo.UpdateCache(addon, cacheName);
+    client.Setup(c => c.Combine(config.CachePath, cacheName))
+      .Returns(addonCachePath);
 
-     client.VerifyAll();
-   }
+    cli.RunsUnchecked(
+      addonCachePath, new ProcessResult(0), "git", "clean", "-fdx"
+    );
+    cli.RunsUnchecked(addonCachePath, new ProcessResult(0), "git", "pull");
+    cli.RunsUnchecked(
+      addonCachePath, new ProcessResult(0),
+      "git",
+      "submodule", "update", "--init", "--recursive", "--rebase", "--force"
+    );
 
-   [Fact]
-   public async Task UpdateCacheCallsGitCorrectlyInAddonCacheLocation() {
-     var addon = TestData.Addon with { };
-     var addonCachePath = CACHE_DIR + "/" + addon.Name;
+    await repo.UpdateCache(addon, cacheName);
 
-     var cli = new ShellVerifier(addonCachePath);
-     var subject = BuildSubject(cli: cli);
+    client.VerifyAll();
+    cli.VerifyAll();
+  }
 
-     var repo = subject.Repo;
-     var client = subject.Client;
-     var config = subject.Config;
-     var cacheName = "cache_name";
+  [Fact]
+  public async Task PrepareCacheIgnoresSymlinkAddons() {
+    var addon = TestData.Addon with { Source = AssetSource.Symlink };
 
-     client.Setup(c => c.Combine(config.CachePath, cacheName))
-       .Returns(addonCachePath);
+    var subject = BuildSubject();
+    var repo = subject.Repo;
+    var client = subject.Client;
+    var config = subject.Config;
+    var cacheName = "cache_name";
 
-     cli.RunsUnchecked(
-       addonCachePath, new ProcessResult(0), "git", "clean", "-fdx"
-     );
-     cli.RunsUnchecked(addonCachePath, new ProcessResult(0), "git", "pull");
-     cli.RunsUnchecked(
-       addonCachePath, new ProcessResult(0),
-       "git",
-       "submodule", "update", "--init", "--recursive", "--rebase", "--force"
-     );
+    await repo.PrepareCache(addon, cacheName);
 
-     await repo.UpdateCache(addon, cacheName);
+    client.VerifyAll();
+  }
 
-     client.VerifyAll();
-     cli.VerifyAll();
-   }
+  [Fact]
+  public async Task PrepareCacheCallsGitCorrectlyInAddonCacheLocation() {
+    var addon = TestData.Addon with { };
+    var addonCachePath = CACHE_DIR + "/" + addon.Name;
 
-   [Fact]
-   public async Task PrepareCacheIgnoresSymlinkAddons() {
-     var addon = TestData.Addon with { Source = AssetSource.Symlink };
+    var cli = new ShellVerifier(addonCachePath);
+    var subject = BuildSubject(cli: cli);
 
-     var subject = BuildSubject();
-     var repo = subject.Repo;
-     var client = subject.Client;
-     var config = subject.Config;
-     var cacheName = "cache_name";
+    var repo = subject.Repo;
+    var client = subject.Client;
+    var config = subject.Config;
+    var cacheName = "cache_name";
 
-     await repo.PrepareCache(addon, cacheName);
+    client.Setup(c => c.Combine(config.CachePath, cacheName))
+      .Returns(addonCachePath);
 
-     client.VerifyAll();
-   }
+    cli.RunsUnchecked(
+      addonCachePath, new ProcessResult(0), "git", "clean", "-fdx"
+    );
+    cli.Runs(
+      addonCachePath, new ProcessResult(0), "git", "checkout", addon.Checkout
+    );
 
-   [Fact]
-   public async Task PrepareCacheCallsGitCorrectlyInAddonCacheLocation() {
-     var addon = TestData.Addon with { };
-     var addonCachePath = CACHE_DIR + "/" + addon.Name;
+    await repo.PrepareCache(addon, cacheName);
 
-     var cli = new ShellVerifier(addonCachePath);
-     var subject = BuildSubject(cli: cli);
-
-     var repo = subject.Repo;
-     var client = subject.Client;
-     var config = subject.Config;
-     var cacheName = "cache_name";
-
-     client.Setup(c => c.Combine(config.CachePath, cacheName))
-       .Returns(addonCachePath);
-
-     cli.RunsUnchecked(
-       addonCachePath, new ProcessResult(0), "git", "clean", "-fdx"
-     );
-     cli.Runs(
-       addonCachePath, new ProcessResult(0), "git", "checkout", addon.Checkout
-     );
-
-     await repo.PrepareCache(addon, cacheName);
-
-     client.VerifyAll();
-     cli.VerifyAll();
-   }
+    client.VerifyAll();
+    cli.VerifyAll();
+  }
 }

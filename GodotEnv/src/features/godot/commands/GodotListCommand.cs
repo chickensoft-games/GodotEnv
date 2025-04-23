@@ -17,6 +17,12 @@ public class GodotListCommand : ICommand, ICliCommand {
     Description = "Specify to list all available versions of Godot")]
   public bool ListRemoteAvailable { get; set; }
 
+  [CommandOption(
+    "proxy", 'x',
+    Description = "Specify a proxy server URL (e.g., http://127.0.0.1:1080)."
+  )]
+  public string? ProxyUrl { get; set; }
+
   public GodotListCommand(IExecutionContext context) {
     ExecutionContext = context;
   }
@@ -37,11 +43,11 @@ public class GodotListCommand : ICommand, ICliCommand {
     }
   }
 
-  private static async Task ListRemoteVersions(ILog log, IGodotRepository godotRepo) {
+  private static async Task ListRemoteVersions(ILog log, IGodotRepository godotRepo, string? proxyUrl = null) {
     log.Print("Retrieving available Godot versions...");
 
     try {
-      var remoteVersions = await godotRepo.GetRemoteVersionsList();
+      var remoteVersions = await godotRepo.GetRemoteVersionsList(log, proxyUrl);
       foreach (var version in remoteVersions) {
         log.Print(version);
       }
@@ -56,7 +62,7 @@ public class GodotListCommand : ICommand, ICliCommand {
     var godotRepo = ExecutionContext.Godot.GodotRepo;
 
     if (ListRemoteAvailable) {
-      await ListRemoteVersions(log, godotRepo);
+      await ListRemoteVersions(log, godotRepo, ProxyUrl);
     }
     else {
       ListLocalVersions(log, godotRepo);
