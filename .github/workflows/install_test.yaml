@@ -18,8 +18,7 @@ jobs:
       # Don't cancel other runners if one fails.
       fail-fast: false
       matrix:
-        # Also try windows-2019?
-        os: [ macos-latest, ubuntu-latest, windows-2019 ]
+        os: [ macos-latest, ubuntu-latest, windows-2025 ]
     defaults:
       run:
         # Use bash shells on all platforms.
@@ -102,8 +101,7 @@ jobs:
       # Don't cancel other runners if one fails.
       fail-fast: false
       matrix:
-        # Also try windows-2019?
-        os: [macos-latest, ubuntu-latest, windows-2019]
+        os: [macos-latest, ubuntu-latest, windows-2025]
         version: ["4.1.1", "4.4.0-beta.1", "4.0.1-stable"]
     defaults:
       run:
