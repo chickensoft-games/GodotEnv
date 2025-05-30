@@ -16,10 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         # Put the operating systems you want to run on here.
-        #
-        # You can change windows-2019 to windows-latest, but windows-2019
-        # was running in half the time. Try it out and see what works best.
-        os: [ubuntu-latest, macos-latest, windows-2019]
+        os: [ubuntu-latest, macos-latest, windows-2025]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
       DOTNET_NOLOGO: true
