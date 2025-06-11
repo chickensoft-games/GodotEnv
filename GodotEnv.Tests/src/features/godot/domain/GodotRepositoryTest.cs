@@ -36,7 +36,7 @@ public class GodotRepositoryTest {
     fileClient.Setup(fc => fc.Combine(fileClient.Object.AppDataDirectory, Defaults.GODOT_PATH, Defaults.GODOT_BIN_PATH,
       Defaults.GODOT_BIN_NAME)).Returns("/godot/bin/godot");
 
-    var networkClient = new Mock<NetworkClient>(new Mock<DownloadService>().Object, Defaults.DownloadConfiguration);
+    var networkClient = new Mock<NetworkClient>(new Mock<IDownloadService>().Object, Defaults.DownloadConfiguration);
     var zipClient = new Mock<ZipClient>(fileClient.Object.Files);
 
     var environmentVariableClient = new Mock<IEnvironmentVariableClient>();
@@ -98,7 +98,7 @@ public class GodotRepositoryTest {
                   .Aggregate(path, (current, c) => current.Replace(c, '_')).Trim('_')
     );
 
-    var networkClient = new Mock<NetworkClient>(new Mock<DownloadService>().Object, Defaults.DownloadConfiguration);
+    var networkClient = new Mock<NetworkClient>(new Mock<IDownloadService>().Object, Defaults.DownloadConfiguration);
     var zipClient = new Mock<ZipClient>(fileClient.Object.Files);
     var environmentVariableClient = new Mock<IEnvironmentVariableClient>();
 
