@@ -83,6 +83,7 @@ public class FileClientTest {
     fs.Directory.Exists(path).ShouldBe(false);
   }
 
+  [Fact]
   public async Task DeleteDirectoryDeletesNonSymlinkOnWindows() {
     var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
     const string path = "/a/b/c";
