@@ -38,7 +38,7 @@ jobs:
         run: dotnet restore
 
       - name: 🤖 Setup Godot
-        uses: chickensoft-games/setup-godot@v1
+        uses: chickensoft-games/setup-godot@v2
         with:
           # Version must include major, minor, and patch, and be >= 4.0.0
           # Pre-release label is optional.
