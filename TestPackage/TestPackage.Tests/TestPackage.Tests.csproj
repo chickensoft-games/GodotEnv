@@ -23,7 +23,7 @@
     <!-- Bring your own assertion library for tests! -->
     <PackageReference Include="Shouldly" Version="4.3.0" />
     <!-- LightMock is a mocking library that can run without reflection. -->
-    <PackageReference Include="LightMock.Generator" Version="1.2.2" />
+    <PackageReference Include="LightMock.Generator" Version="1.2.3" />
     <!-- LightMoq is a Chickensoft package which makes it more like Moq. -->
     <PackageReference Include="LightMoq" Version="0.1.0" />
     <!-- Include the package to test. -->
