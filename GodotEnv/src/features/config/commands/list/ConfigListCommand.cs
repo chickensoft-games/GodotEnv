@@ -1,6 +1,7 @@
 namespace Chickensoft.GodotEnv.Features.Config.Commands.List;
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using CliFx;
@@ -32,7 +33,12 @@ public class ConfigListCommand : ICommand, ICliCommand {
       }
     }
     else {
-      foreach (var keyValuePair in config.AsEnumerable()) {
+      foreach (
+        var keyValuePair in config.AsEnumerable().OrderBy(
+          (kvp) => kvp.Key,
+          StringComparer.InvariantCulture
+        )
+      ) {
         if (!string.IsNullOrEmpty(keyValuePair.Value)) {
           log.Print($"{keyValuePair.Key} = {keyValuePair.Value}");
         }
