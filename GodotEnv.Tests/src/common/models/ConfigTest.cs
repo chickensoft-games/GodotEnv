@@ -1,6 +1,7 @@
 namespace Chickensoft.GodotEnv.Tests;
 
 using Chickensoft.GodotEnv.Common.Models;
+using Microsoft.Extensions.Configuration;
 using Shouldly;
 using Xunit;
 
@@ -94,5 +95,54 @@ public class ConfigTest {
       }
     );
     config.Get("Godot:InstallationsPath").ShouldBe(testPath);
+  }
+
+  [Fact]
+  public void NewConfigHasKeyValuePairFromTerminalDisplayEmoji() {
+    var displayEmoji = !Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI;
+    var config = new Config(
+      new ConfigValues {
+        Terminal = new() { DisplayEmoji = displayEmoji }
+      }
+    );
+    config.Get("Terminal:DisplayEmoji").ShouldBe(displayEmoji.ToString());
+  }
+
+  [Fact]
+  public void NewConfigHasValueFromKeyValuePairGodotInstallationsPath() {
+    var testPath = "/test/path";
+    var configuration = new ConfigurationBuilder()
+      .AddInMemoryCollection(initialData: [new("Godot:InstallationsPath", testPath)])
+      .Build();
+    var config = new Config(configuration);
+    config.ConfigValues.Godot.InstallationsPath.ShouldBe(testPath);
+  }
+
+  [Fact]
+  public void NewConfigHasValueFromKeyValuePairTerminalDisplayEmoji() {
+    var displayEmoji = !Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI;
+    var configuration = new ConfigurationBuilder()
+      .AddInMemoryCollection(initialData: [new("Terminal:DisplayEmoji", displayEmoji.ToString())])
+      .Build();
+    var config = new Config(configuration);
+    config.ConfigValues.Terminal.DisplayEmoji.ShouldBe(displayEmoji);
+  }
+
+  [Fact]
+  public void ConfigValueUpdatesWhenGodotInstallationsPathKeyValueSet() {
+    var testPath = "/test/path";
+    var config = new Config();
+    config.ConfigValues.Godot.InstallationsPath.ShouldBe(Defaults.CONFIG_GODOT_INSTALLATIONS_PATH);
+    config.Set("Godot:InstallationsPath", testPath);
+    config.ConfigValues.Godot.InstallationsPath.ShouldBe(testPath);
+  }
+
+  [Fact]
+  public void ConfigValueUpdatesWhenTerminalDisplayEmojiKeyValueSet() {
+    var displayEmoji = !Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI;
+    var config = new Config();
+    config.ConfigValues.Terminal.DisplayEmoji.ShouldBe(Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI);
+    config.Set("Terminal:DisplayEmoji", displayEmoji.ToString());
+    config.ConfigValues.Terminal.DisplayEmoji.ShouldBe(displayEmoji);
   }
 }
