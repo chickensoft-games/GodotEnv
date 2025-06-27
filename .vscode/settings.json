@@ -11,6 +11,7 @@
   },
   "csharp.semanticHighlighting.enabled": true,
   "editor.semanticHighlighting.enabled": true,
+  "editor.rulers": [80, 120],
   // C# doc comment colorization gets lost with semantic highlighting, but we
   // need semantic highlighting for proper syntax highlighting with record
   // shorthand.
