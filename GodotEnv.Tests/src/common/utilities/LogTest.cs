@@ -6,14 +6,13 @@ namespace Chickensoft.GodotEnv.Tests;
 using System;
 using Common.Models;
 using Common.Utilities;
-using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
 
 public sealed class LogTest : IDisposable {
 
-  private readonly OutputTestFakeInMemoryConsole _console = new ();
+  private readonly OutputTestFakeInMemoryConsole _console = new();
 
   public void Dispose() => _console.Dispose();
 

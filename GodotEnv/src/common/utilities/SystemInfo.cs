@@ -1,15 +1,23 @@
-namespace GodotEnv.Common.Utilities;
+namespace Chickensoft.GodotEnv.Common.Utilities;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Chickensoft.GodotEnv.Common.Models;
 
 /// <summary>
-/// Imutable system information (OS, CPU architecture, ...).
+/// Immutable system information (OS, CPU architecture, ...).
 /// </summary>
 public interface ISystemInfo {
   public OSType OS { get; }
 
+  [
+    SuppressMessage(
+      "Style",
+      "IDE0072",
+      Justification = "Missing cases handled by default"
+    )
+  ]
   public OSFamily OSFamily =>
     OS switch {
       OSType.Windows => OSFamily.Windows,
@@ -21,17 +29,22 @@ public interface ISystemInfo {
 }
 
 public class SystemInfo : ISystemInfo {
-  public OSType OS {
-    get =>
-      IsOSPlatformProxy(OSPlatform.OSX)
-        ? OSType.MacOS
-        : IsOSPlatformProxy(OSPlatform.Linux)
-          ? OSType.Linux
-          : IsOSPlatformProxy(OSPlatform.Windows)
-            ? OSType.Windows
-            : OSType.Unknown;
-  }
+  public OSType OS =>
+    IsOSPlatformProxy(OSPlatform.OSX)
+      ? OSType.MacOS
+      : IsOSPlatformProxy(OSPlatform.Linux)
+        ? OSType.Linux
+        : IsOSPlatformProxy(OSPlatform.Windows)
+          ? OSType.Windows
+          : OSType.Unknown;
 
+  [
+    SuppressMessage(
+      "Style",
+      "IDE0072",
+      Justification = "Missing cases handled by default"
+    )
+  ]
   public CPUArch CPUArch => CPUArchProxy switch {
     Architecture.X64 => CPUArch.X64,
     Architecture.X86 => CPUArch.X86,

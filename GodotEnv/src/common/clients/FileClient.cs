@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
-using global::GodotEnv.Common.Utilities;
 
 /// <summary>File client interface.</summary>
 public interface IFileClient {

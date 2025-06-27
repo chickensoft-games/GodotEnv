@@ -7,7 +7,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Chickensoft.GodotEnv.Common.Models;
 using CliFx.Infrastructure;
-using global::GodotEnv.Common.Utilities;
 
 /// <summary>CLI log interface.</summary>
 public interface ILog {

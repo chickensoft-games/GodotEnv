@@ -21,7 +21,6 @@ using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using CliFx;
 using CliFx.Infrastructure;
 using Downloader;
-using global::GodotEnv.Common.Utilities;
 
 public static class GodotEnv {
   public static async Task<int> Main(string[] args) {

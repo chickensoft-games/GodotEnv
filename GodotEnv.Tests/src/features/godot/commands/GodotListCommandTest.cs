@@ -10,7 +10,6 @@ using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx.Infrastructure;
 using Common.Models;
 using Common.Utilities;
-using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;

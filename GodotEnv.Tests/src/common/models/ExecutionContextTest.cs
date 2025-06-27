@@ -3,7 +3,6 @@ namespace Chickensoft.GodotEnv.Tests;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using CliFx.Infrastructure;
-using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;

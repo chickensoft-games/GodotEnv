@@ -1,8 +1,7 @@
-﻿using GodotEnv.Common.Utilities;
-
-namespace Chickensoft.GodotEnv.Tests.common.utilities;
+﻿namespace Chickensoft.GodotEnv.Tests;
 
 using System.Runtime.InteropServices;
+using Chickensoft.GodotEnv.Common.Utilities;
 using Common.Models;
 using Shouldly;
 using Xunit;

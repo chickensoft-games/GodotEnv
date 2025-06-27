@@ -14,7 +14,6 @@ using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
-using global::GodotEnv.Common.Utilities;
 
 public struct RemoteVersion {
   public string Name { get; set; }

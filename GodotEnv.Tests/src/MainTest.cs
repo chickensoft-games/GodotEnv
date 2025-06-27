@@ -2,7 +2,7 @@ namespace Chickensoft.GodotEnv.Tests;
 
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
-using global::GodotEnv.Common.Utilities;
+using Chickensoft.GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;

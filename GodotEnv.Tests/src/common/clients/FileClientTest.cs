@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
-using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;

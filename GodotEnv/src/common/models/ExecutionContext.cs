@@ -2,7 +2,6 @@ namespace Chickensoft.GodotEnv.Common.Models;
 
 using Chickensoft.GodotEnv.Common.Utilities;
 using CliFx.Infrastructure;
-using global::GodotEnv.Common.Utilities;
 
 /// <summary>
 /// Execution context created by the app before any commands are run. Execution
