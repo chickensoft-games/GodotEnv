@@ -7,11 +7,20 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 
+public interface IConfig {
+  public IReadOnlyConfigValues ConfigValues { get; }
+
+  public IEnumerable<KeyValuePair<string, string?>> AsEnumerable();
+  public string Get(string key);
+  public void Set(string key, string value);
+  public void Upgrade();
+}
+
 // Responsible for providing access to a ConfigValues (for strongly-typed
 // config values that don't rely on string keys and can be serialized) and an
 // IConfiguration (for user-facing key-value lookups and changes), and keeping
 // the two in sync
-public class Config {
+public class Config : IConfig {
   private readonly IConfiguration _configuration;
   private readonly ConfigValues _configValues;
   public IReadOnlyConfigValues ConfigValues => _configValues;
