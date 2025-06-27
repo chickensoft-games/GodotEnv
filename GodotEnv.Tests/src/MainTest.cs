@@ -16,7 +16,7 @@ public class MainTest {
 
   [Fact]
   public void CreateExecutionContextParsesArgs() {
-    var config = new ConfigFile();
+    var config = new Config();
     var args = new string[] { "a", "--", "b" };
     var workingDir = "/";
     var systemInfo = new Mock<ISystemInfo>();

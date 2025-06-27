@@ -5,71 +5,71 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using global::GodotEnv.Common.Utilities;
-using Newtonsoft.Json;
 
 /// <summary>File client interface.</summary>
 public interface IFileClient {
   public ISystemInfo SystemInfo { get; }
 
   /// <summary>Underlying file system interface used by the client.</summary>
-  IFileSystem Files { get; }
+  public IFileSystem Files { get; }
 
   /// <summary>Computer instance.</summary>
-  IComputer Computer { get; }
+  public IComputer Computer { get; }
 
   /// <summary>
   /// Process runner. Used on Windows to perform elevated file operations.
   /// </summary>
-  IProcessRunner ProcessRunner { get; }
+  public IProcessRunner ProcessRunner { get; }
 
   /// <summary>Path directory separator.</summary>
-  char Separator { get; }
+  public char Separator { get; }
 
   /// <summary>User directory without trailing slashes.</summary>
-  string UserDirectory { get; }
+  public string UserDirectory { get; }
 
   /// <summary>Application data directory without trailing slashes.</summary>
-  string AppDataDirectory { get; }
+  public string AppDataDirectory { get; }
 
   /// <summary>
   /// Replaces invalid file system characters with underscores.
   /// </summary>
   /// <param name="path">File or folder path.</param>
   /// <returns>Sanitized path.</returns>
-  string Sanitize(string path);
+  public string Sanitize(string path);
 
   /// <summary>
   /// Combines the given path components into a single path.
   /// </summary>
   /// <param name="paths">Path components to combine.</param>
   /// <returns>Combined path.</returns>
-  string Combine(params string[] paths);
+  public string Combine(params string[] paths);
 
   /// <summary>
   /// Returns the target of the given symlink.
   /// </summary>
   /// <param name="symlinkPath">Path of the symlink / shortcut / alias.</param>
   /// <returns>Symlink target.</returns>
-  string DirectorySymlinkTarget(string symlinkPath);
+  public string DirectorySymlinkTarget(string symlinkPath);
 
   /// <summary>
   /// Returns the target of the given symlink.
   /// </summary>
   /// <param name="symlinkPath">Path of the symlink / shortcut / alias.</param>
   /// <returns>Symlink target.</returns>
-  string? FileSymlinkTarget(string symlinkPath);
+  public string? FileSymlinkTarget(string symlinkPath);
 
   /// <summary>
   /// Creates all directories and subdirectories in the specified path unless
   /// they already exist.
   /// </summary>
   /// <param name="path">Directory path.</param>
-  void CreateDirectory(string path);
+  public void CreateDirectory(string path);
 
   /// <summary>
   /// Gets the path of the parent directory for the given path. If the path is
@@ -77,7 +77,7 @@ public interface IFileClient {
   /// string if there is no parent directory.
   /// </summary>
   /// <param name="path">File or directory path.</param>
-  string GetParentDirectoryPath(string path);
+  public string GetParentDirectoryPath(string path);
 
   /// <summary>
   /// Gets the name of the parent directory for the given path (just the last
@@ -85,7 +85,7 @@ public interface IFileClient {
   /// </summary>
   /// <param name="path">File or directory path.</param>
   /// <returns>Parent directory name.</returns>
-  string GetParentDirectoryName(string path);
+  public string GetParentDirectoryName(string path);
 
   /// <summary>
   /// Creates a symbolic link identified by <paramref name="path" />
@@ -96,7 +96,7 @@ public interface IFileClient {
   /// <param name="path">Path to the symbolic link.</param>
   /// <param name="pathToTarget">Path to the target of the symbolic
   /// link.</param>
-  Task CreateSymlink(string path, string pathToTarget);
+  public Task CreateSymlink(string path, string pathToTarget);
 
   /// <summary>
   /// Creates symbolic links recursively on <paramref name="path" />,
@@ -106,21 +106,21 @@ public interface IFileClient {
   /// <param name="path">Path to the symbolic link.</param>
   /// <param name="pathToTarget">Path to the target of the symbolic
   /// link.</param>
-  Task CreateSymlinkRecursively(string path, string pathToTarget);
+  public Task CreateSymlinkRecursively(string path, string pathToTarget);
 
   /// <summary>
   /// Determines if the given directory path is a symlink.
   /// </summary>
   /// <param name="path">Path in question.</param>
   /// <returns>True if the path is a symlink, false otherwise.</returns>
-  bool IsDirectorySymlink(string path);
+  public bool IsDirectorySymlink(string path);
 
   /// <summary>
   /// Determines if the given file path is a symlink.
   /// </summary>
   /// <param name="path">Path in question.</param>
   /// <returns>True if the path is a symlink, false otherwise.</returns>
-  bool IsFileSymlink(string path);
+  public bool IsFileSymlink(string path);
 
   /// <summary>
   /// Deletes a directory. The directory can be a symbolic link or an actual
@@ -129,7 +129,7 @@ public interface IFileClient {
   /// symlinks.
   /// </summary>
   /// <param name="path">Path of the directory to delete.</param>
-  Task DeleteDirectory(string path);
+  public Task DeleteDirectory(string path);
 
   /// <summary>
   /// Deletes a single file.<br />
@@ -137,7 +137,7 @@ public interface IFileClient {
   /// symlinks.
   /// </summary>
   /// <param name="path">Absolute path of file to delete.</param>
-  Task DeleteFile(string path);
+  public Task DeleteFile(string path);
 
   /// <summary>
   /// Copies files in bulk, excluding any `.git` folder inside the source
@@ -148,7 +148,7 @@ public interface IFileClient {
   /// <param name="destination">Destination directory path.</param>
   /// <returns>Task that completes when the copy processes complete.</returns>
   /// <exception cref="IOException" />
-  Task CopyBulk(IShell shell, string source, string destination);
+  public Task CopyBulk(IShell shell, string source, string destination);
 
   /// <summary>
   /// Given a list of possible file names and a project path, return the first
@@ -158,7 +158,7 @@ public interface IFileClient {
   /// <param name="basePath">Path to search.</param>
   /// <returns>The first found file matching
   /// <paramref name="possibleFilenames" />, or null.</returns>
-  string? FileThatExists(string[] possibleFilenames, string basePath);
+  public string? FileThatExists(string[] possibleFilenames, string basePath);
 
   /// <summary>
   /// Computes the rooted path of <paramref name="url" /> using
@@ -168,7 +168,7 @@ public interface IFileClient {
   /// <param name="url">Path url.</param>
   /// <param name="basePath">Base path</param>
   /// <returns>Rooted path.</returns>
-  string GetRootedPath(string url, string basePath);
+  public string GetRootedPath(string url, string basePath);
 
   /// <summary>
   /// Gets the full path of the given path (.NET's equivalent to path
@@ -176,17 +176,17 @@ public interface IFileClient {
   /// </summary>
   /// <param name="path">File path.</param>
   /// <returns>Full / "normalized" path.</returns>
-  string GetFullPath(string path);
+  public string GetFullPath(string path);
 
   /// <summary>Determines whether the specified file exists.</summary>
   /// <param name="path">File path to check.</param>
   /// <returns>True if the file exists, false otherwise.</returns>
-  bool FileExists(string path);
+  public bool FileExists(string path);
 
   /// <summary>Determines whether the specified directory exists.</summary>
   /// <param name="path">Directory path to check.</param>
   /// <returns>True if the directory exists, false otherwise.</returns>
-  bool DirectoryExists(string path);
+  public bool DirectoryExists(string path);
 
   /// <summary>
   /// Reads and deserializes a JSON file into the given type.
@@ -195,7 +195,7 @@ public interface IFileClient {
   /// <typeparam name="T">JSON model type.</typeparam>
   /// <exception cref="InvalidOperationException" />
   /// <returns>The deserialized JSON model from the file.</returns>
-  T ReadJsonFile<T>(string path) where T : notnull;
+  public T ReadJsonFile<T>(string path) where T : notnull;
 
   /// <summary>
   /// Reads and deserializes a json file of type<typeparamref name= "T" />
@@ -216,7 +216,7 @@ public interface IFileClient {
   /// <returns>Loaded json model (or the default value).</returns>
   /// <exception cref="InvalidOperationException" />
   /// <exception cref="IOException" />
-  T ReadJsonFile<T>(
+  public T ReadJsonFile<T>(
       string projectPath,
       string[] possibleFilenames,
       out string filename,
@@ -226,12 +226,12 @@ public interface IFileClient {
   /// <summary>Read text lines from a file.</summary>
   /// <param name="path">File to read.</param>
   /// <returns>List of lines.</returns>
-  List<string> ReadLines(string path);
+  public List<string> ReadLines(string path);
 
   /// <summary>Overwrite a file with new lines of text.</summary>
   /// <param name="path">File to read.</param>
   /// <param name="lines">Lines to write.</param>
-  void WriteLines(string path, IEnumerable<string> lines);
+  public void WriteLines(string path, IEnumerable<string> lines);
 
   /// <summary>
   /// Writes a JSON model to the file system.
@@ -239,14 +239,14 @@ public interface IFileClient {
   /// <param name="filePath">Absolute path to the destination file.</param>
   /// <param name="data">Data to be converted to JSON.</param>
   /// <typeparam name="T">Type of the JSON model.</typeparam>
-  void WriteJsonFile<T>(string filePath, T data) where T : notnull;
+  public void WriteJsonFile<T>(string filePath, T data) where T : notnull;
 
   /// <summary>
   /// Creates a file with the given contents.
   /// </summary>
   /// <param name="filePath">Absolute path of file to create.</param>
   /// <param name="contents">File contents.</param>
-  void CreateFile(string filePath, string contents);
+  public void CreateFile(string filePath, string contents);
 
   /// <summary>
   /// Searches through a directory recursively, capturing file info for each
@@ -261,7 +261,7 @@ public interface IFileClient {
   /// <param name="onDirectory">Callback invoked for each directory.</param>
   /// <param name="indent">Optional indent.</param>
   /// <returns>List of selected files.</returns>
-  Task<List<IFileInfo>> SearchRecursively(
+  public Task<List<IFileInfo>> SearchRecursively(
     string dir,
     Func<IFileInfo, string, Task<bool>> selector,
     Func<IDirectoryInfo, Task<bool>> dirSelector,
@@ -276,8 +276,9 @@ public interface IFileClient {
   /// <param name="filePath">File path.</param>
   /// <param name="lines">Lines to add to the file. Any lines the file does
   /// not contain will be added to the file.</param>
-  void AddLinesToFileIfNotPresent(
-    string filePath, params string[] lines
+  public void AddLinesToFileIfNotPresent(
+    string filePath,
+    params string[] lines
   );
 
   /// <summary>
@@ -287,7 +288,7 @@ public interface IFileClient {
   /// <param name="filePath">File path.</param>
   /// <param name="prefix">Line prefix.</param>
   /// <returns>First matching line, or the empty string.</returns>
-  string FindLineBeginningWithPrefix(string filePath, string prefix);
+  public string FindLineBeginningWithPrefix(string filePath, string prefix);
 
   /// <summary>
   /// Returns directory information for each subdirectory in the given
@@ -295,7 +296,7 @@ public interface IFileClient {
   /// </summary>
   /// <param name="dir">Directory to examine.</param>
   /// <returns>Enumerable of directory info objects.</returns>
-  IEnumerable<IDirectoryInfo> GetSubdirectories(string dir);
+  public IEnumerable<IDirectoryInfo> GetSubdirectories(string dir);
 }
 
 /// <summary>File system operations client.</summary>
@@ -308,6 +309,7 @@ public class FileClient : IFileClient {
   // public OSType OS { get; }
   // public ProcessorType Processor { get; }
   public char Separator { get; }
+  public JsonSerializerOptions JsonSerializerOptions { get; }
 
   public string UserDirectory => Path.TrimEndingDirectorySeparator(
     Environment.GetFolderPath(
@@ -332,6 +334,10 @@ public class FileClient : IFileClient {
     Computer = computer;
     ProcessRunner = processRunner;
     Separator = Files.Path.DirectorySeparatorChar;
+    JsonSerializerOptions = new JsonSerializerOptions {
+      WriteIndented = true,
+      ReadCommentHandling = JsonCommentHandling.Skip,
+    };
   }
 
   public string Sanitize(string path) =>
@@ -507,7 +513,7 @@ public class FileClient : IFileClient {
 
   public T ReadJsonFile<T>(string path) where T : notnull {
     var contents = Files.File.ReadAllText(path);
-    return JsonConvert.DeserializeObject<T>(contents)
+    return JsonSerializer.Deserialize<T>(contents, JsonSerializerOptions)
       ?? throw new InvalidOperationException(
         $"Failed to load file `{path}.`"
       );
@@ -525,7 +531,10 @@ public class FileClient : IFileClient {
         try {
           var contents = Files.File.ReadAllText(path);
           filename = file;
-          var data = JsonConvert.DeserializeObject<T>(contents);
+          var data = JsonSerializer.Deserialize<T>(
+            contents,
+            JsonSerializerOptions
+          );
           return data ??
             throw new InvalidOperationException(
               $"Couldn't load file `{path}`"
@@ -543,7 +552,7 @@ public class FileClient : IFileClient {
   }
 
   public void WriteJsonFile<T>(string filePath, T data) where T : notnull {
-    var contents = JsonConvert.SerializeObject(data, Formatting.Indented);
+    var contents = JsonSerializer.Serialize(data, JsonSerializerOptions);
     Files.File.WriteAllText(filePath, contents);
   }
 

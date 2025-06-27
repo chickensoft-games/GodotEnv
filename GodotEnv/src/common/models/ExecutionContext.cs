@@ -12,30 +12,29 @@ using global::GodotEnv.Common.Utilities;
 /// </summary>
 public interface IExecutionContext {
   /// <summary>Arguments passed to the app itself.</summary>
-  string[] CliArgs { get; }
+  public string[] CliArgs { get; }
   /// <summary>
   /// Dynamic arguments that follow `--` (if supplied by the user). Some
   /// commands, such as template execution, require dynamic arguments be given.
   /// </summary>
-  string[] CommandArgs { get; }
+  public string[] CommandArgs { get; }
   /// <summary>App package version.</summary>
-  string Version { get; }
+  public string Version { get; }
   /// <summary>Working directory that the app is running in.</summary>
-  string WorkingDir { get; }
-
+  public string WorkingDir { get; }
   /// <summary>App configuration settings.</summary>
-  ConfigFile Config { get; }
+  public Config Config { get; }
   /// <summary>System information.</summary>
-  ISystemInfo SystemInfo { get; }
+  public ISystemInfo SystemInfo { get; }
   /// <summary>Addons context.</summary>
-  IAddonsContext Addons { get; }
+  public IAddonsContext Addons { get; }
   /// <summary>Godot context.</summary>
-  IGodotContext Godot { get; }
+  public IGodotContext Godot { get; }
 
   /// <summary>Creates a log using the specified console.</summary>
   /// <param name="console">Output console.</param>
   /// <returns>Log.</returns>
-  ILog CreateLog(IConsole console);
+  public ILog CreateLog(IConsole console);
 }
 
 public record ExecutionContext(
@@ -43,7 +42,7 @@ public record ExecutionContext(
   string[] CommandArgs,
   string Version,
   string WorkingDir,
-  ConfigFile Config,
+  Config Config,
   ISystemInfo SystemInfo,
   IAddonsContext Addons,
   IGodotContext Godot

@@ -2,27 +2,28 @@ namespace Chickensoft.GodotEnv.Common.Models;
 
 using System.Globalization;
 using System.IO;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using CaseExtensions;
 using Chickensoft.GodotEnv.Common.Utilities;
-using Newtonsoft.Json;
 
 /// <summary>Represents how an asset is copied or accessed.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum AssetSource {
   /// <summary>Asset is copied from a path on the local machine.</summary>
-  [JsonProperty("local")]
+  [JsonStringEnumMemberName("local")]
   Local = 0,
   /// <summary>Asset is copied from a remote git repository.</summary>
-  [JsonProperty("remote")]
+  [JsonStringEnumMemberName("remote")]
   Remote = 1,
   /// <summary>
   /// Asset is directly referenced via a symbolic link from a path on the
   /// local machine.
   /// </summary>
-  [JsonProperty("symlink")]
+  [JsonStringEnumMemberName("symlink")]
   Symlink = 2,
   /// <summary>Asset is obtained via a url to compressed zip file.</summary>
-  [JsonProperty("zip")]
+  [JsonStringEnumMemberName("zip")]
   Zip = 3,
 }
 
@@ -36,40 +37,40 @@ public partial interface IAsset {
   /// <see cref="Source" /> is <see cref="AssetSource.Remote" />, the url is
   /// the git repository url.
   /// </summary>
-  string Url { get; }
+  public string Url { get; }
 
   /// <summary>
   /// Git branch or tag to checkout (only meaningful if the asset is a valid
   /// git repository).
   /// </summary>
-  string Checkout { get; }
+  public string Checkout { get; }
 
   /// <summary>Where the asset is copied or referenced from.</summary>
-  AssetSource Source { get; }
+  public AssetSource Source { get; }
 
   /// <summary>
   /// True if the asset is copied from a path on the local machine.
   /// </summary>
-  bool IsLocal => Source == AssetSource.Local;
+  public bool IsLocal => Source == AssetSource.Local;
 
   /// <summary>
   /// True if the asset is copied from a remote git url.
   /// </summary>
-  bool IsRemote => Source == AssetSource.Remote;
+  public bool IsRemote => Source == AssetSource.Remote;
 
   /// <summary>
   /// True if the asset is referenced from a symlink on the local machine.
   /// </summary>
-  bool IsSymlink => Source == AssetSource.Symlink;
+  public bool IsSymlink => Source == AssetSource.Symlink;
 
   /// <summary>True if the asset is a zip file.</summary>
-  bool IsZip => Source == AssetSource.Zip;
+  public bool IsZip => Source == AssetSource.Zip;
 
   /// <summary>Lowercase version of the url.</summary>
-  string NormalizedUrl => Url.ToLower(CultureInfo.InvariantCulture);
+  public string NormalizedUrl => Url.ToLower(CultureInfo.InvariantCulture);
 
   /// <summary>Deterministic id based only on the url.</summary>
-  string Id {
+  public string Id {
     get {
       var match = UrlRegex.Match(Url);
       return (

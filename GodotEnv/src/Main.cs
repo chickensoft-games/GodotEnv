@@ -36,7 +36,7 @@ public static class GodotEnv {
 
     var configFileRepo = new ConfigFileRepository(fileClient);
 
-    var config = configFileRepo.LoadConfigFile(out var _);
+    var config = configFileRepo.LoadConfig();
 
     var workingDir = Environment.CurrentDirectory;
 
@@ -167,7 +167,7 @@ public static class GodotEnv {
 
   internal static ExecutionContext CreateExecutionContext(
     string[] args,
-    ConfigFile config,
+    Config config,
     string workingDir,
     ISystemInfo systemInfo,
     IAddonsContext addonsContext,

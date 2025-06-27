@@ -33,6 +33,19 @@ public static class Defaults {
   /// </summary>
   public const string CONFIG_FILE_NAME = "godotenv.json";
 
+  #region ConfigDefaults
+  /// <summary>
+  /// Default directory where Godot installations should be stored, relative to
+  /// <see cref="GODOT_PATH" />.
+  /// </summary>
+  public const string CONFIG_GODOT_INSTALLATIONS_PATH = "versions";
+
+  /// <summary>
+  /// Whether to use emoji in the terminal.
+  /// </summary>
+  public const bool CONFIG_TERMINAL_USE_EMOJI = true;
+  #endregion ConfigDefaults
+
   /// <summary>User-wide GODOT environment variable name.</summary>
   public const string GODOT_ENV_VAR_NAME = "GODOT";
 
@@ -44,12 +57,6 @@ public static class Defaults {
   /// storage location.
   /// </summary>
   public const string GODOT_PATH = "godot";
-
-  /// <summary>
-  /// Default directory where Godot installations should be stored, relative to
-  /// <see cref="GODOT_PATH" />.
-  /// </summary>
-  public const string GODOT_INSTALLATIONS_PATH = "versions";
 
   /// <summary>
   /// Symlink directory where the current Godot installation can be referenced,

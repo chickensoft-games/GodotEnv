@@ -1,9 +1,11 @@
 namespace Chickensoft.GodotEnv.Common.Domain;
+
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
+using Microsoft.Extensions.Configuration;
 
 public interface IConfigFileRepository {
-  IFileClient FileClient { get; }
+  public IFileClient FileClient { get; }
 
   /// <summary>
   /// Absolute path to the application config file.
@@ -13,12 +15,10 @@ public interface IConfigFileRepository {
   /// <summary>
   /// Loads the application config file, or returns one with the default values.
   /// </summary>
-  /// <param name="filename">Path to the config file, or the default storage
-  /// location if it does not exist.</param>
   /// <returns>An application config file.</returns>
-  ConfigFile LoadConfigFile(out string filename);
-  void EnsureAppDataDirectoryExists();
-  void SaveConfig(ConfigFile config);
+  public Config LoadConfig();
+  public void EnsureAppDataDirectoryExists();
+  public void SaveConfig(Config config);
 }
 
 public class ConfigFileRepository : IConfigFileRepository {
@@ -32,17 +32,39 @@ public class ConfigFileRepository : IConfigFileRepository {
     );
   }
 
-  public ConfigFile LoadConfigFile(out string filename) =>
-    FileClient.ReadJsonFile(
-      projectPath: FileClient.AppDataDirectory,
-      possibleFilenames: [Defaults.CONFIG_FILE_NAME],
-      filename: out filename,
-      defaultValue: new ConfigFile()
-    );
+  public Config LoadConfig() {
+    var configRoot = new ConfigurationBuilder()
+      .AddJsonFile(ConfigFilePath)
+      .Build();
+    var config = new Config();
+    configRoot.Bind(config);
+    // re-saving the config upgrades it
+    SaveConfig(config);
+    return config;
+  }
 
   public void EnsureAppDataDirectoryExists() =>
     FileClient.CreateDirectory(FileClient.AppDataDirectory);
 
-  public void SaveConfig(ConfigFile config) =>
+  public void SaveConfig(Config config) {
+    UpgradeConfig(config);
     FileClient.WriteJsonFile(ConfigFilePath, config);
+  }
+
+  // We need the deprecated properties to update the values of the new properties
+#pragma warning disable CS0618
+  public void UpgradeConfig(Config config) {
+    if (config.GodotInstallationsPath is not null) {
+      if (
+        config.GodotInstallationsPath != Defaults.CONFIG_GODOT_INSTALLATIONS_PATH
+        && config.GodotInstallationsPath != config.Godot.InstallationsPath
+      ) {
+        config.Godot.InstallationsPath = config.GodotInstallationsPath;
+      }
+      config.GodotInstallationsPath = null;
+      SaveConfig(config);
+    }
+  }
+#pragma warning restore CS0618
+
 }
