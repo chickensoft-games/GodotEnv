@@ -28,8 +28,10 @@ public class ConfigListCommand : ICommand, ICliCommand {
         log.Print($"{ConfigKey} = {config.Get(ConfigKey)}");
       }
       catch (Exception) {
-        log.Print($"\"{ConfigKey}\" is not a valid configuration key. Try " +
-          "\"godotenv config list\" for a complete list of all entries.");
+        log.Print($"""
+          "{ConfigKey}" is not a valid configuration key. Try
+          "godotenv config list" for a complete list of all entries.
+          """);
       }
     }
     else {

@@ -28,11 +28,12 @@ public class ConfigSetCommand : ICommand, ICliCommand {
     try {
       config.Set(ConfigKey, ConfigValue);
     }
-    catch (Exception e) {
-      log.Print($"\"{ConfigKey}\" is not a valid configuration key, or " +
-        $"\"{ConfigValue}\" is not a valid value for \"{ConfigKey}\". Try " +
-        "\"godotenv config list\" for a complete list of all entries.");
-      log.Print($"Details: {e}");
+    catch (Exception) {
+      log.Print($"""
+      "{ConfigKey}" is not a valid configuration key, or "{ConfigValue}" is
+      not a valid value for "{ConfigKey}". Try "godotenv config list" for a
+      complete list of all entries.
+      """);
     }
     return new();
   }
