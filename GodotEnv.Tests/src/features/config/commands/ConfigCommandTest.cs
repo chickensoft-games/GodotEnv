@@ -14,9 +14,10 @@ public class ConfigCommandTest {
   [Fact]
   public async Task Executes() {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var config = MockConfig.Get();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
-    var log = new Log(systemInfo, console); // Use real log to test colors in output
+    var log = new Log(systemInfo, config.Object, console); // Use real log to test colors in output
 
     context.Setup(ctx => ctx.SystemInfo).Returns(systemInfo);
     context.Setup(ctx => ctx.CreateLog(console)).Returns(log);

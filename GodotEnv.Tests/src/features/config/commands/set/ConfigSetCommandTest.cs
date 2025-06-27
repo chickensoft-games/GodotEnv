@@ -13,11 +13,11 @@ public class ConfigSetCommandTest {
   [Fact]
   public async Task SetsIndicatedValue() {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
-    var log = new Log(systemInfo, console); // Use real log to test colors in output
+    var log = new Log(systemInfo, config, console); // Use real log to test colors in output
 
-    var config = new Config();
     var testEmojiValue = !!config.ConfigValues.Terminal.DisplayEmoji;
 
     context.Setup(ctx => ctx.SystemInfo).Returns(systemInfo);
@@ -35,11 +35,10 @@ public class ConfigSetCommandTest {
   [Fact]
   public async Task FailsGracefullyWhenIndicatedKeyDoesNotExist() {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
-    var log = new Log(systemInfo, console); // Use real log to test colors in output
-
-    var config = new Config();
+    var log = new Log(systemInfo, config, console); // Use real log to test colors in output
 
     context.Setup(ctx => ctx.SystemInfo).Returns(systemInfo);
     context.Setup(ctx => ctx.CreateLog(console)).Returns(log);
@@ -64,11 +63,10 @@ public class ConfigSetCommandTest {
   [Fact]
   public async Task FailsGracefullyWhenIndicatedValueIsInvalid() {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
-    var log = new Log(systemInfo, console); // Use real log to test colors in output
-
-    var config = new Config();
+    var log = new Log(systemInfo, config, console); // Use real log to test colors in output
 
     context.Setup(ctx => ctx.SystemInfo).Returns(systemInfo);
     context.Setup(ctx => ctx.CreateLog(console)).Returns(log);

@@ -41,12 +41,13 @@ public class AddonsInstallCommandTest {
     systemInfo.Setup(sys => sys.CPUArch).Returns(CPUArch.X64);
     systemInfo.Setup(sys => sys.OS).Returns(OSType.Linux);
     systemInfo.Setup(sys => sys.OSFamily).Returns(OSFamily.Unix);
+    var config = MockConfig.Get();
     var context = new Mock<IExecutionContext>();
     var fakeConsole = new FakeInMemoryConsole();
     console = fakeConsole;
 
     // Use real log to test colors in output
-    log = new Log(systemInfo.Object, console);
+    log = new Log(systemInfo.Object, config.Object, console);
 
     var workingDir = "/";
 

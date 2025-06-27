@@ -21,7 +21,7 @@ public interface IExecutionContext {
   /// <summary>Working directory that the app is running in.</summary>
   public string WorkingDir { get; }
   /// <summary>App configuration settings.</summary>
-  public Config Config { get; }
+  public IConfig Config { get; }
   /// <summary>System information.</summary>
   public ISystemInfo SystemInfo { get; }
   /// <summary>Addons context.</summary>
@@ -40,10 +40,10 @@ public record ExecutionContext(
   string[] CommandArgs,
   string Version,
   string WorkingDir,
-  Config Config,
+  IConfig Config,
   ISystemInfo SystemInfo,
   IAddonsContext Addons,
   IGodotContext Godot
 ) : IExecutionContext {
-  public ILog CreateLog(IConsole console) => new Log(SystemInfo, console);
+  public ILog CreateLog(IConsole console) => new Log(SystemInfo, Config, console);
 }
