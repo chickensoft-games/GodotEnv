@@ -139,10 +139,14 @@ public class GodotConfigSection : IReadOnlyGodotConfigSection {
 }
 
 public interface IReadOnlyTerminalConfigSection {
-  public bool UseEmoji { get; }
+  /// <summary>
+  /// Whether terminal output includes emoji. Ignored on Windows, which never
+  /// displays emoji in the terminal.
+  /// </summary>
+  public bool DisplayEmoji { get; }
 }
 
 public class TerminalConfigSection : IReadOnlyTerminalConfigSection {
-  public bool UseEmoji { get; set; }
-    = Defaults.CONFIG_TERMINAL_USE_EMOJI;
+  public bool DisplayEmoji { get; set; }
+    = Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI;
 }

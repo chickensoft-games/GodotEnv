@@ -43,7 +43,7 @@ public static class Defaults {
   /// <summary>
   /// Whether to use emoji in the terminal.
   /// </summary>
-  public const bool CONFIG_TERMINAL_USE_EMOJI = true;
+  public const bool CONFIG_TERMINAL_DISPLAY_EMOJI = true;
   #endregion ConfigDefaults
 
   /// <summary>User-wide GODOT environment variable name.</summary>
