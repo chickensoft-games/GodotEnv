@@ -95,7 +95,24 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
-  public void OutputStringWithEmojisOnWindows() {
+  public void OutputStringWithNoEmojisOnUnixIfConfigValueFalse() {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var config = MockConfig.Get(Defaults.CONFIG_GODOT_INSTALLATIONS_PATH, false);
+    Log log = new(systemInfo, config.Object, _console);
+
+    log.Print("✅ Installed successfully.");
+
+    var debugLog = log.ToString();
+
+    debugLog.ShouldBe(
+      """
+      Installed successfully.
+
+      """, StringCompareShould.IgnoreLineEndings);
+  }
+
+  [Fact]
+  public void OutputStringWithNoEmojisOnWindows() {
     var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
     var config = MockConfig.Get();
     Log log = new(systemInfo, config.Object, _console);
