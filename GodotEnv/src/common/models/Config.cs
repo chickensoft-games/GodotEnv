@@ -68,13 +68,14 @@ public class Config {
   /// deprecated properties/keys and transferring their values to newer ones
   /// if necessary.
   /// </summary>
-  // We need the deprecated properties to update the values of the new properties
+  // We need to use deprecated properties to update the values of the new properties
 #pragma warning disable CS0618
   public void Upgrade() {
     if (ConfigValues.GodotInstallationsPath is not null) {
       if (
         ConfigValues.GodotInstallationsPath != Defaults.CONFIG_GODOT_INSTALLATIONS_PATH
-        && ConfigValues.GodotInstallationsPath != ConfigValues.Godot.InstallationsPath
+        && (string.IsNullOrEmpty(ConfigValues.Godot.InstallationsPath)
+          || ConfigValues.Godot.InstallationsPath == Defaults.CONFIG_GODOT_INSTALLATIONS_PATH)
       ) {
         _configValues.Godot.InstallationsPath = ConfigValues.GodotInstallationsPath;
         _configuration["Godot.InstallationsPath"] = ConfigValues.GodotInstallationsPath;
