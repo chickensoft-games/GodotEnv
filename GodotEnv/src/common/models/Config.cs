@@ -7,27 +7,27 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 
-// Responsible for providing access to a GodotEnvConfig (for strongly-typed
+// Responsible for providing access to a ConfigValues (for strongly-typed
 // config values that don't rely on string keys and can be serialized) and an
 // IConfiguration (for user-facing key-value lookups and changes), and keeping
 // the two in sync
 public class Config {
   private readonly IConfiguration _configuration;
-  private readonly GodotEnvConfig _godotEnvConfig;
-  public IReadOnlyGodotEnvConfig GodotEnvConfig => _godotEnvConfig;
+  private readonly ConfigValues _configValues;
+  public IReadOnlyConfigValues ConfigValues => _configValues;
 
-  public Config() : this(new GodotEnvConfig()) {
+  public Config() : this(new ConfigValues()) {
   }
 
   public Config(IConfiguration configuration) {
     _configuration = configuration;
-    _godotEnvConfig = new();
-    _configuration.Bind(GodotEnvConfig);
+    _configValues = new();
+    _configuration.Bind(ConfigValues);
   }
 
-  public Config(GodotEnvConfig godotEnvConfig) {
-    _godotEnvConfig = godotEnvConfig;
-    var json = JsonSerializer.Serialize(GodotEnvConfig);
+  public Config(ConfigValues configValues) {
+    _configValues = configValues;
+    var json = JsonSerializer.Serialize(ConfigValues);
     using (var jsonStream = new MemoryStream()) {
       using (var writer = new StreamWriter(jsonStream, null, -1, true)) {
         writer.Write(json);
@@ -51,11 +51,11 @@ public class Config {
     }
     _configuration[key] = value;
     try {
-      _configuration.Bind(GodotEnvConfig);
+      _configuration.Bind(ConfigValues);
     }
     catch (Exception) {
       _configuration[key] = oldValue;
-      _configuration.Bind(GodotEnvConfig);
+      _configuration.Bind(ConfigValues);
       throw;
     }
   }
@@ -63,33 +63,40 @@ public class Config {
   public IEnumerable<KeyValuePair<string, string?>> AsEnumerable() =>
     _configuration.AsEnumerable();
 
-  // We need the deprecated properties to update the values of the new properties
   /// <summary>
   /// Upgrades the configuration structure to the latest specification, removing
   /// deprecated properties/keys and transferring their values to newer ones
   /// if necessary.
   /// </summary>
+  // We need the deprecated properties to update the values of the new properties
 #pragma warning disable CS0618
   public void Upgrade() {
-    if (GodotEnvConfig.GodotInstallationsPath is not null) {
+    if (ConfigValues.GodotInstallationsPath is not null) {
       if (
-        GodotEnvConfig.GodotInstallationsPath != Defaults.CONFIG_GODOT_INSTALLATIONS_PATH
-        && GodotEnvConfig.GodotInstallationsPath != GodotEnvConfig.Godot.InstallationsPath
+        ConfigValues.GodotInstallationsPath != Defaults.CONFIG_GODOT_INSTALLATIONS_PATH
+        && ConfigValues.GodotInstallationsPath != ConfigValues.Godot.InstallationsPath
       ) {
-        _godotEnvConfig.Godot.InstallationsPath = GodotEnvConfig.GodotInstallationsPath;
-        _configuration["Godot.InstallationsPath"] = GodotEnvConfig.GodotInstallationsPath;
+        _configValues.Godot.InstallationsPath = ConfigValues.GodotInstallationsPath;
+        _configuration["Godot.InstallationsPath"] = ConfigValues.GodotInstallationsPath;
       }
-      _godotEnvConfig.GodotInstallationsPath = null;
+      _configValues.GodotInstallationsPath = null;
       _configuration["Godot.InstallationsPath"] = null;
     }
   }
 #pragma warning restore CS0618
 }
 
-public interface IReadOnlyGodotEnvConfig {
+public interface IReadOnlyConfigValues {
+  [
+    Obsolete(
+      "GodotInstallationsPath is deprecated. Please use Godot.InstallationsPath"
+    ),
+    JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull),
+    JsonPropertyName("godotInstallationsPath"),
+  ]
   public string? GodotInstallationsPath { get; }
-  public IReadOnlyGodotConfig Godot { get; }
-  public IReadOnlyTerminalConfig Terminal { get; }
+  public IReadOnlyGodotConfigSection Godot { get; }
+  public IReadOnlyTerminalConfigSection Terminal { get; }
 }
 
 // required to be able to write out new values, since Extensions.Configuration
@@ -98,10 +105,10 @@ public interface IReadOnlyGodotEnvConfig {
 /// Configuration values as strongly-typed, named C# properties. Access from
 /// <see cref="Config"/>.
 /// </summary>
-public class GodotEnvConfig : IReadOnlyGodotEnvConfig {
+public class ConfigValues : IReadOnlyConfigValues {
   /// <summary>
   /// The old location of Godot.InstallationsPath, kept for backwards
-  /// compatibility with old installations.
+  /// compatibility with old installations of GodotEnv.
   /// </summary>
   [
     Obsolete(
@@ -112,29 +119,29 @@ public class GodotEnvConfig : IReadOnlyGodotEnvConfig {
   ]
   public string? GodotInstallationsPath { get; set; }
 
-  public GodotConfig Godot { get; set; } = new();
+  public GodotConfigSection Godot { get; set; } = new();
 
-  public TerminalConfig Terminal { get; set; } = new();
+  public TerminalConfigSection Terminal { get; set; } = new();
 
-  IReadOnlyGodotConfig IReadOnlyGodotEnvConfig.Godot => Godot;
+  IReadOnlyGodotConfigSection IReadOnlyConfigValues.Godot => Godot;
 
-  IReadOnlyTerminalConfig IReadOnlyGodotEnvConfig.Terminal => Terminal;
+  IReadOnlyTerminalConfigSection IReadOnlyConfigValues.Terminal => Terminal;
 }
 
-public interface IReadOnlyGodotConfig {
+public interface IReadOnlyGodotConfigSection {
   public string InstallationsPath { get; }
 }
 
-public class GodotConfig : IReadOnlyGodotConfig {
+public class GodotConfigSection : IReadOnlyGodotConfigSection {
   public string InstallationsPath { get; set; }
     = Defaults.CONFIG_GODOT_INSTALLATIONS_PATH;
 }
 
-public interface IReadOnlyTerminalConfig {
+public interface IReadOnlyTerminalConfigSection {
   public bool UseEmoji { get; }
 }
 
-public class TerminalConfig : IReadOnlyTerminalConfig {
+public class TerminalConfigSection : IReadOnlyTerminalConfigSection {
   public bool UseEmoji { get; set; }
     = Defaults.CONFIG_TERMINAL_USE_EMOJI;
 }

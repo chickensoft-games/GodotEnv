@@ -60,8 +60,8 @@ public class GodotRepositoryTest {
     var godotRepo = new GodotRepository(
       systemInfo: systemInfo,
       config: new Config(
-        new GodotEnvConfig {
-          Godot = new GodotConfig {
+        new ConfigValues {
+          Godot = new GodotConfigSection {
             InstallationsPath = "INSTALLATION_PATH"
           },
         }
@@ -121,8 +121,8 @@ public class GodotRepositoryTest {
     var godotRepo = new GodotRepository(
       systemInfo: systemInfo,
       config: new Config(
-        new GodotEnvConfig {
-          Godot = new GodotConfig {
+        new ConfigValues {
+          Godot = new GodotConfigSection {
             InstallationsPath = "INSTALLATION_PATH"
           },
         }

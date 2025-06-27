@@ -33,7 +33,7 @@ public class ConfigRepository : IConfigRepository {
   }
 
   public Config LoadConfig() {
-    var config = new Config(new GodotEnvConfig());
+    var config = new Config(new ConfigValues());
     if (FileClient.FileExists(ConfigFilePath)) {
       var configRoot = new ConfigurationBuilder()
         .AddJsonFile(ConfigFilePath)
@@ -48,5 +48,5 @@ public class ConfigRepository : IConfigRepository {
     FileClient.CreateDirectory(FileClient.AppDataDirectory);
 
   public void SaveConfig(Config config) =>
-    FileClient.WriteJsonFile(ConfigFilePath, config.GodotEnvConfig);
+    FileClient.WriteJsonFile(ConfigFilePath, config.ConfigValues);
 }
