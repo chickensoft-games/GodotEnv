@@ -59,11 +59,13 @@ public class GodotRepositoryTest {
 
     var godotRepo = new GodotRepository(
       systemInfo: systemInfo,
-      config: new Config {
-        Godot = new GodotConfig {
-          InstallationsPath = "INSTALLATION_PATH"
-        },
-      },
+      config: new Config(
+        new GodotEnvConfig {
+          Godot = new GodotConfig {
+            InstallationsPath = "INSTALLATION_PATH"
+          },
+        }
+      ),
       fileClient: fileClient.Object,
       networkClient: networkClient.Object,
       zipClient: zipClient.Object,
@@ -118,11 +120,13 @@ public class GodotRepositoryTest {
 
     var godotRepo = new GodotRepository(
       systemInfo: systemInfo,
-      config: new Config {
-        Godot = new GodotConfig {
-          InstallationsPath = "INSTALLATION_PATH"
-        },
-      },
+      config: new Config(
+        new GodotEnvConfig {
+          Godot = new GodotConfig {
+            InstallationsPath = "INSTALLATION_PATH"
+          },
+        }
+      ),
       fileClient: fileClient.Object,
       networkClient: networkClient.Object,
       zipClient: zipClient.Object,

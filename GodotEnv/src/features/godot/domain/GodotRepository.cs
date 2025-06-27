@@ -177,7 +177,7 @@ public partial class GodotRepository : IGodotRepository {
   public string GodotInstallationsPath => FileClient.Combine(
     FileClient.AppDataDirectory,
     Defaults.GODOT_PATH,
-    Config.Godot.InstallationsPath
+    Config.GodotEnvConfig.Godot.InstallationsPath
   );
 
   public string GodotCachePath => FileClient.Combine(

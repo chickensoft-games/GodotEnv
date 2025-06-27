@@ -1,7 +1,6 @@
 namespace Chickensoft.GodotEnv.Common.Models;
 
 using Chickensoft.GodotEnv.Common.Utilities;
-using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx.Infrastructure;
 using global::GodotEnv.Common.Utilities;
 

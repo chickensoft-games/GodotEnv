@@ -34,7 +34,7 @@ public static class GodotEnv {
 
     var fileClient = new FileClient(systemInfo, new FileSystem(), computer, processRunner);
 
-    var configFileRepo = new ConfigFileRepository(fileClient);
+    var configFileRepo = new ConfigRepository(fileClient);
 
     var config = configFileRepo.LoadConfig();
 
