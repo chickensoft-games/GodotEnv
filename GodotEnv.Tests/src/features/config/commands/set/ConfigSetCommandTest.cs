@@ -25,7 +25,7 @@ public class ConfigSetCommandTest {
     context.Setup(ctx => ctx.Config).Returns(config);
 
     var addonCommand = new ConfigSetCommand(context.Object) {
-      ConfigKey = "Terminal:DisplayEmoji",
+      ConfigKey = "Terminal.DisplayEmoji",
       ConfigValue = testEmojiValue.ToString(),
     };
     await addonCommand.ExecuteAsync(console);
@@ -45,7 +45,7 @@ public class ConfigSetCommandTest {
     context.Setup(ctx => ctx.Config).Returns(config);
 
     var addonCommand = new ConfigSetCommand(context.Object) {
-      ConfigKey = "FakeSection:FakeKey",
+      ConfigKey = "FakeSection.FakeKey",
       ConfigValue = "FakeValue"
     };
     await addonCommand.ExecuteAsync(console);
@@ -73,7 +73,7 @@ public class ConfigSetCommandTest {
     context.Setup(ctx => ctx.Config).Returns(config);
 
     var addonCommand = new ConfigSetCommand(context.Object) {
-      ConfigKey = "Terminal:DisplayEmoji",
+      ConfigKey = "Terminal.DisplayEmoji",
       ConfigValue = "FakeValue"
     };
     await addonCommand.ExecuteAsync(console);

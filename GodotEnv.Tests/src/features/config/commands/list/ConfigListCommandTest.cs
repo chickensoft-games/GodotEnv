@@ -28,8 +28,8 @@ public class ConfigListCommandTest {
     log.ToString().ShouldBe(
       $"""
 
-      Godot:InstallationsPath = {Defaults.CONFIG_GODOT_INSTALLATIONS_PATH}
-      Terminal:DisplayEmoji = {Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI}
+      Godot.InstallationsPath = {Defaults.CONFIG_GODOT_INSTALLATIONS_PATH}
+      Terminal.DisplayEmoji = {Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI}
 
       """, StringCompareShould.IgnoreLineEndings);
   }
@@ -47,14 +47,14 @@ public class ConfigListCommandTest {
     context.Setup(ctx => ctx.Config).Returns(config);
 
     var addonCommand = new ConfigListCommand(context.Object) {
-      ConfigKey = "Terminal:DisplayEmoji"
+      ConfigKey = "Terminal.DisplayEmoji"
     };
     await addonCommand.ExecuteAsync(console);
 
     log.ToString().ShouldBe(
       $"""
 
-      Terminal:DisplayEmoji = {Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI}
+      Terminal.DisplayEmoji = {Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI}
 
       """, StringCompareShould.IgnoreLineEndings);
   }
@@ -72,7 +72,7 @@ public class ConfigListCommandTest {
     context.Setup(ctx => ctx.Config).Returns(config);
 
     var addonCommand = new ConfigListCommand(context.Object) {
-      ConfigKey = "FakeSection:FakeKey"
+      ConfigKey = "FakeSection.FakeKey"
     };
     await addonCommand.ExecuteAsync(console);
 

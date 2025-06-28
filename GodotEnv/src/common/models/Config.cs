@@ -1,16 +1,16 @@
 namespace Chickensoft.GodotEnv.Common.Models;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 
-public interface IConfig {
+public interface IConfig : IEnumerable<KeyValuePair<string, string?>> {
   public IReadOnlyConfigValues ConfigValues { get; }
 
-  public IEnumerable<KeyValuePair<string, string?>> AsEnumerable();
   public string Get(string key);
   public void Set(string key, string value);
   public void Upgrade();
@@ -50,27 +50,39 @@ public class Config : IConfig {
   }
 
   public string Get(string key) =>
-    _configuration.GetValue<string>(key)
+    _configuration.GetValue<string>(ConfigurationKey(key))
       ?? throw new ArgumentException($"Key \"{key}\" not valid");
 
   public void Set(string key, string value) {
-    var oldValue = _configuration.GetValue<string>(key);
+    var configKey = ConfigurationKey(key);
+    var oldValue = _configuration.GetValue<string>(configKey);
     if (string.IsNullOrEmpty(oldValue)) {
       throw new ArgumentException($"Key \"{key}\" not valid");
     }
-    _configuration[key] = value;
+    _configuration[configKey] = value;
     try {
       _configuration.Bind(ConfigValues);
     }
     catch (Exception) {
-      _configuration[key] = oldValue;
+      _configuration[configKey] = oldValue;
       _configuration.Bind(ConfigValues);
       throw;
     }
   }
 
-  public IEnumerable<KeyValuePair<string, string?>> AsEnumerable() =>
-    _configuration.AsEnumerable();
+  public IEnumerator<KeyValuePair<string, string?>> GetEnumerator() {
+    foreach (var keyValuePair in _configuration.AsEnumerable()) {
+      yield return new(UserKey(keyValuePair.Key), keyValuePair.Value);
+    }
+  }
+
+  IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+  public static string ConfigurationKey(string userKey) =>
+    userKey.Replace('.', ':');
+
+  public static string UserKey(string configurationKey) =>
+    configurationKey.Replace(':', '.');
 
   /// <summary>
   /// Upgrades the configuration structure to the latest specification, removing
@@ -87,10 +99,10 @@ public class Config : IConfig {
           || ConfigValues.Godot.InstallationsPath == Defaults.CONFIG_GODOT_INSTALLATIONS_PATH)
       ) {
         _configValues.Godot.InstallationsPath = ConfigValues.GodotInstallationsPath;
-        _configuration["Godot.InstallationsPath"] = ConfigValues.GodotInstallationsPath;
+        _configuration["Godot:InstallationsPath"] = ConfigValues.GodotInstallationsPath;
       }
       _configValues.GodotInstallationsPath = null;
-      _configuration["Godot.InstallationsPath"] = null;
+      _configuration["Godot:InstallationsPath"] = null;
     }
   }
 #pragma warning restore CS0618

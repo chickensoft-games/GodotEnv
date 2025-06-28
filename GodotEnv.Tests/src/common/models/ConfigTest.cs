@@ -1,5 +1,6 @@
 namespace Chickensoft.GodotEnv.Tests;
 
+using System.Collections.Generic;
 using Chickensoft.GodotEnv.Common.Models;
 using Microsoft.Extensions.Configuration;
 using Shouldly;
@@ -94,7 +95,7 @@ public class ConfigTest {
         Godot = new() { InstallationsPath = testPath }
       }
     );
-    config.Get("Godot:InstallationsPath").ShouldBe(testPath);
+    config.Get("Godot.InstallationsPath").ShouldBe(testPath);
   }
 
   [Fact]
@@ -105,7 +106,7 @@ public class ConfigTest {
         Terminal = new() { DisplayEmoji = displayEmoji }
       }
     );
-    config.Get("Terminal:DisplayEmoji").ShouldBe(displayEmoji.ToString());
+    config.Get("Terminal.DisplayEmoji").ShouldBe(displayEmoji.ToString());
   }
 
   [Fact]
@@ -133,7 +134,7 @@ public class ConfigTest {
     var testPath = "/test/path";
     var config = new Config();
     config.ConfigValues.Godot.InstallationsPath.ShouldBe(Defaults.CONFIG_GODOT_INSTALLATIONS_PATH);
-    config.Set("Godot:InstallationsPath", testPath);
+    config.Set("Godot.InstallationsPath", testPath);
     config.ConfigValues.Godot.InstallationsPath.ShouldBe(testPath);
   }
 
@@ -142,7 +143,36 @@ public class ConfigTest {
     var displayEmoji = !Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI;
     var config = new Config();
     config.ConfigValues.Terminal.DisplayEmoji.ShouldBe(Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI);
-    config.Set("Terminal:DisplayEmoji", displayEmoji.ToString());
+    config.Set("Terminal.DisplayEmoji", displayEmoji.ToString());
     config.ConfigValues.Terminal.DisplayEmoji.ShouldBe(displayEmoji);
   }
+
+  [Fact]
+  public void EnumeratesKeyValuePairs() {
+    var config = new Config();
+    var keyValuePairs = new KeyValuePair<string, string?>[4] {
+      new("Godot.InstallationsPath", Defaults.CONFIG_GODOT_INSTALLATIONS_PATH),
+      new("Terminal.DisplayEmoji", Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI.ToString()),
+      new("Terminal", null),
+      new("Godot", null),
+    };
+    var pairCount = 0;
+    foreach (var pair in config) {
+      pair.ShouldBeOneOf(keyValuePairs);
+      pairCount += 1;
+    }
+    pairCount.ShouldBe(4);
+  }
+
+  [Fact]
+  public void ConvertsUserKeyToConfigurationKey() =>
+    Config
+      .ConfigurationKey("TestSection.TestKey")
+      .ShouldBe("TestSection:TestKey");
+
+  [Fact]
+  public void ConvertsConfigurationKeyToUserKey() =>
+    Config
+      .UserKey("TestSection:TestKey")
+      .ShouldBe("TestSection.TestKey");
 }
