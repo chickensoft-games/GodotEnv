@@ -8,7 +8,6 @@ using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Addons.Models;
-using global::GodotEnv.Common.Utilities;
 
 public interface IAddonsRepository {
   ISystemInfo SystemInfo { get; }

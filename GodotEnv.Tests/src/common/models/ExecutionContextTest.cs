@@ -3,7 +3,6 @@ namespace Chickensoft.GodotEnv.Tests;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using CliFx.Infrastructure;
-using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -16,7 +15,7 @@ public class ExecutionContextTest {
 
   [Fact]
   public void Initializes() {
-    var config = new ConfigFile();
+    var config = new Config();
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
     var addons = new Mock<IAddonsContext>().Object;
     var godot = new Mock<IGodotContext>().Object;

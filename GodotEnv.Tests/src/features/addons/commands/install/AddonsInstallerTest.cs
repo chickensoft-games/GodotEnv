@@ -68,9 +68,9 @@ public class AddonsInstallerTest {
 
     var projectPath = "/";
 
-    var entry = new AddonsFileEntry(
-      url: "https://github.com/chickensoft-games/addon"
-    );
+    var entry = new AddonsFileEntry {
+      Url = "https://github.com/chickensoft-games/addon",
+    };
 
     var addonsFile = new AddonsFile(
       addons: new() {
@@ -130,9 +130,9 @@ public class AddonsInstallerTest {
 
     var projectPath = "/";
 
-    var entry = new AddonsFileEntry(
-      url: "https://github.com/chickensoft-games/addon"
-    );
+    var entry = new AddonsFileEntry {
+      Url = "https://github.com/chickensoft-games/addon"
+    };
 
     var addonsFile = new AddonsFile(
       addons: new() {
@@ -236,10 +236,10 @@ public class AddonsInstallerTest {
     var projectPath = "/";
 
 
-    var entry = new AddonsFileEntry(
-      url: "/symlink_addon/addon",
-      source: AssetSource.Symlink
-    );
+    var entry = new AddonsFileEntry {
+      Url = "/symlink_addon/addon",
+      Source = AssetSource.Symlink,
+    };
 
     var addonsFile = new AddonsFile(
       addons: new() {

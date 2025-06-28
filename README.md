@@ -440,6 +440,35 @@ An addon can itself contain an `addons.json` file that declares dependencies on 
 
 GodotEnv uses a flat dependency graph that is reminiscent of tools like [bower]. In general, GodotEnv tries to be extremely forgiving and helpful, especially if you try to include addons in incompatible configurations. GodotEnv will display warnings and errors as clearly as possible to help you resolve any potential conflicting scenarios that may arise.
 
+## 🎛️ Configuration
+
+You can view and adjust GodotEnv's settings. Configuration settings are organized into sections and are accessed by keys of the form `<SectionName>.<SettingName>`.
+
+### 🔍 Viewing Configuration Settings
+
+To view all configuration settings:
+
+```sh
+godotenv config list
+```
+
+To view a particular configuration setting:
+
+```sh
+godotenv config list Terminal.DisplayEmoji
+```
+
+### 🎚️ Adjusting Configuration Settings
+
+To specify a new value for a configuration setting:
+
+```sh
+godotenv config set Terminal.DisplayEmoji False
+```
+
+> [!NOTE]
+> The value provided must be convertible to the underlying type of the setting. For instance, `Terminal.DisplayEmoji` is a boolean.
+
 ## 🤗 Contribution
 
 If you want to contribute, please check out [`CONTRIBUTING.md`](/CONTRIBUTING.md)!

@@ -21,7 +21,6 @@ using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using CliFx;
 using CliFx.Infrastructure;
 using Downloader;
-using global::GodotEnv.Common.Utilities;
 
 public static class GodotEnv {
   public static async Task<int> Main(string[] args) {
@@ -34,9 +33,9 @@ public static class GodotEnv {
 
     var fileClient = new FileClient(systemInfo, new FileSystem(), computer, processRunner);
 
-    var configFileRepo = new ConfigFileRepository(fileClient);
+    var configFileRepo = new ConfigRepository(fileClient);
 
-    var config = configFileRepo.LoadConfigFile(out var _);
+    var config = configFileRepo.LoadConfig();
 
     var workingDir = Environment.CurrentDirectory;
 
@@ -167,7 +166,7 @@ public static class GodotEnv {
 
   internal static ExecutionContext CreateExecutionContext(
     string[] args,
-    ConfigFile config,
+    Config config,
     string workingDir,
     ISystemInfo systemInfo,
     IAddonsContext addonsContext,

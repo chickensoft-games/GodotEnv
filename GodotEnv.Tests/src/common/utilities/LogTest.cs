@@ -6,21 +6,21 @@ namespace Chickensoft.GodotEnv.Tests;
 using System;
 using Common.Models;
 using Common.Utilities;
-using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
 
 public sealed class LogTest : IDisposable {
 
-  private readonly OutputTestFakeInMemoryConsole _console = new ();
+  private readonly OutputTestFakeInMemoryConsole _console = new();
 
   public void Dispose() => _console.Dispose();
 
   [Fact]
   public void Prints() {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
-    Log log = new(systemInfo, _console);
+    var config = MockConfig.Get();
+    Log log = new(systemInfo, config.Object, _console);
 
     log.Print("Hello, world!");
 
@@ -30,7 +30,8 @@ public sealed class LogTest : IDisposable {
   [Fact]
   public void PrintsInfo() {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
-    Log log = new(systemInfo, _console);
+    var config = MockConfig.Get();
+    Log log = new(systemInfo, config.Object, _console);
 
     log.Info("Hello, world!");
 
@@ -40,7 +41,8 @@ public sealed class LogTest : IDisposable {
   [Fact]
   public void PrintsWarning() {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
-    Log log = new(systemInfo, _console);
+    var config = MockConfig.Get();
+    Log log = new(systemInfo, config.Object, _console);
 
     log.Warn("Hello, world!");
 
@@ -50,7 +52,8 @@ public sealed class LogTest : IDisposable {
   [Fact]
   public void PrintsErr() {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
-    Log log = new(systemInfo, _console);
+    var config = MockConfig.Get();
+    Log log = new(systemInfo, config.Object, _console);
 
     log.Err("Hello, world!");
 
@@ -60,7 +63,8 @@ public sealed class LogTest : IDisposable {
   [Fact]
   public void PrintsSuccess() {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
-    Log log = new(systemInfo, _console);
+    var config = MockConfig.Get();
+    Log log = new(systemInfo, config.Object, _console);
 
     log.Success("Hello, world!");
 
@@ -76,7 +80,8 @@ public sealed class LogTest : IDisposable {
   [Fact]
   public void OutputStringWithEmojisOnUnix() {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
-    Log log = new(systemInfo, _console);
+    var config = MockConfig.Get();
+    Log log = new(systemInfo, config.Object, _console);
 
     log.Print("✅ Installed successfully.");
 
@@ -90,9 +95,27 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
-  public void OutputStringWithEmojisOnWindows() {
+  public void OutputStringWithNoEmojisOnUnixIfConfigValueFalse() {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var config = MockConfig.Get(Defaults.CONFIG_GODOT_INSTALLATIONS_PATH, false);
+    Log log = new(systemInfo, config.Object, _console);
+
+    log.Print("✅ Installed successfully.");
+
+    var debugLog = log.ToString();
+
+    debugLog.ShouldBe(
+      """
+      Installed successfully.
+
+      """, StringCompareShould.IgnoreLineEndings);
+  }
+
+  [Fact]
+  public void OutputStringWithNoEmojisOnWindows() {
     var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
-    Log log = new(systemInfo, _console);
+    var config = MockConfig.Get();
+    Log log = new(systemInfo, config.Object, _console);
 
     log.Print("✅ Installed successfully.");
 
@@ -109,7 +132,8 @@ public sealed class LogTest : IDisposable {
   [Fact]
   public void OutputsCorrectStyleChanges() {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
-    Log log = new(systemInfo, _console);
+    var config = MockConfig.Get();
+    Log log = new(systemInfo, config.Object, _console);
 
     log.Print("A");
     log.Print("");
@@ -147,7 +171,8 @@ public sealed class LogTest : IDisposable {
   [Fact]
   public void OutputsNull() {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
-    Log log = new(systemInfo, _console);
+    var config = MockConfig.Get();
+    Log log = new(systemInfo, config.Object, _console);
 
     log.Print(null);
     log.Info(null);
@@ -162,7 +187,8 @@ public sealed class LogTest : IDisposable {
   [Fact]
   public void OutputsObject() {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
-    Log log = new(systemInfo, _console);
+    var config = MockConfig.Get();
+    Log log = new(systemInfo, config.Object, _console);
 
     log.Print(new { Hello = "world" });
 

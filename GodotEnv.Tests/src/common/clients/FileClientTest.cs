@@ -6,20 +6,20 @@ using System.IO;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
-using global::GodotEnv.Common.Utilities;
 using Moq;
-using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
 
 public class FileClientTest {
   public record TestJsonModel {
-    [JsonProperty("name")] public string Name { get; }
+    [JsonPropertyName("name")]
+    public string Name { get; }
 
     [JsonConstructor]
     public TestJsonModel(string name) {
@@ -483,7 +483,7 @@ public class FileClientTest {
       systemInfo, fs, computer.Object, new Mock<IProcessRunner>().Object
     );
 
-    Should.Throw<InvalidOperationException>(
+    Should.Throw<JsonException>(
       () => client.ReadJsonFile<TestJsonModel>("model.json")
     );
   }
@@ -532,7 +532,7 @@ public class FileClientTest {
       )
     );
 
-    e.InnerException.ShouldBeOfType<InvalidOperationException>();
+    e.InnerException.ShouldBeOfType<JsonException>();
   }
 
   [Fact]

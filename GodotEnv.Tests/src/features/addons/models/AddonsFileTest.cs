@@ -9,8 +9,8 @@ using Xunit;
 public class AddonsFileTest {
   public static readonly Dictionary<string, AddonsFileEntry> ENTRIES
     = new() {
-      { "a", new AddonsFileEntry("https://a.git") },
-      { "b", new AddonsFileEntry("https://b.git") },
+      { "a", new AddonsFileEntry{ Url = "https://a.git" } },
+      { "b", new AddonsFileEntry{ Url = "https://b.git" } },
     };
   public const string ADDONS_PATH = "my_addons";
   public const string CACHE_PATH = ".my_addons";

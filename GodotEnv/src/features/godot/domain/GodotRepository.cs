@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,36 +14,34 @@ using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
-using global::GodotEnv.Common.Utilities;
-using Newtonsoft.Json;
 
 public struct RemoteVersion {
   public string Name { get; set; }
 }
 
 public interface IGodotRepository {
-  ISystemInfo SystemInfo { get; }
-  ConfigFile Config { get; }
-  IFileClient FileClient { get; }
-  INetworkClient NetworkClient { get; }
-  IZipClient ZipClient { get; }
-  IEnvironmentVariableClient EnvironmentVariableClient { get; }
-  IGodotEnvironment Platform { get; }
-  IProcessRunner ProcessRunner { get; }
-  IVersionDeserializer VersionDeserializer { get; }
-  IVersionSerializer VersionSerializer { get; }
-  string GodotInstallationsPath { get; }
-  string GodotCachePath { get; }
-  string GodotSymlinkPath { get; }
+  public ISystemInfo SystemInfo { get; }
+  public Config Config { get; }
+  public IFileClient FileClient { get; }
+  public INetworkClient NetworkClient { get; }
+  public IZipClient ZipClient { get; }
+  public IEnvironmentVariableClient EnvironmentVariableClient { get; }
+  public IGodotEnvironment Platform { get; }
+  public IProcessRunner ProcessRunner { get; }
+  public IVersionDeserializer VersionDeserializer { get; }
+  public IVersionSerializer VersionSerializer { get; }
+  public string GodotInstallationsPath { get; }
+  public string GodotCachePath { get; }
+  public string GodotSymlinkPath { get; }
   [MemberNotNullWhen(true, nameof(IsGodotSymlinkTargetAvailable))]
-  bool IsGodotSymlinkTargetAvailable { get; }
-  string? GodotSymlinkTarget { get; }
-  string GodotSharpSymlinkPath { get; }
+  public bool IsGodotSymlinkTargetAvailable { get; }
+  public string? GodotSymlinkTarget { get; }
+  public string GodotSharpSymlinkPath { get; }
 
   /// <summary>
   /// Clears the Godot installations cache and recreates the cache directory.
   /// </summary>
-  void ClearCache();
+  public void ClearCache();
 
   /// <summary>
   /// Gets the installation associated with the specified version of Godot.
@@ -51,7 +50,7 @@ public interface IGodotRepository {
   /// </summary>
   /// <param name="version">Godot version.</param>
   /// <returns>Godot installation, or null if none found.</returns>
-  GodotInstallation? GetInstallation(AnyDotnetStatusGodotVersion version);
+  public GodotInstallation? GetInstallation(AnyDotnetStatusGodotVersion version);
 
   /// <summary>
   /// Gets the installation associated with the specified version of Godot.
@@ -59,13 +58,13 @@ public interface IGodotRepository {
   /// </summary>
   /// <param name="version">Godot version.</param>
   /// <returns>Godot installation, or null if none found.</returns>
-  GodotInstallation? GetInstallation(SpecificDotnetStatusGodotVersion version);
+  public GodotInstallation? GetInstallation(SpecificDotnetStatusGodotVersion version);
 
   /// <summary>
   /// Name shown when listing Godot versions installed.
   /// </summary>
   /// <param name="installation">Installation whose version will be shown.</param>
-  string InstallationVersionName(GodotInstallation installation);
+  public string InstallationVersionName(GodotInstallation installation);
 
   /// <summary>
   /// Downloads the specified version of Godot.
@@ -77,7 +76,7 @@ public interface IGodotRepository {
   /// <param name="proxyUrl">Optional proxy URL.</param>
   /// <returns>The fully resolved / absolute path of the Godot installation zip
   /// file for the Platform.</returns>
-  Task<GodotCompressedArchive> DownloadGodot(
+  public Task<GodotCompressedArchive> DownloadGodot(
       SpecificDotnetStatusGodotVersion version,
       bool skipChecksumVerification,
       ILog log,
@@ -92,7 +91,7 @@ public interface IGodotRepository {
   /// <param name="log">Output log.</param>
   /// <returns>Path to the subfolder in the Godot installations directory
   /// containing the extracted contents.</returns>
-  Task<GodotInstallation> ExtractGodotInstaller(
+  public Task<GodotInstallation> ExtractGodotInstaller(
     GodotCompressedArchive archive, ILog log
   );
 
@@ -101,7 +100,7 @@ public interface IGodotRepository {
   /// </summary>
   /// <param name="installation">Godot installation.</param>
   /// <param name="log">Output log.</param>
-  Task UpdateGodotSymlink(GodotInstallation installation, ILog log);
+  public Task UpdateGodotSymlink(GodotInstallation installation, ILog log);
 
   /// <summary>
   /// <para>Updates (or creates if non-existent) the desktop shortcut pointing to the newly created symlink.</para>
@@ -109,7 +108,7 @@ public interface IGodotRepository {
   /// </summary>
   /// <param name="installation">Godot installation.</param>
   /// <param name="log">Output log.</param>
-  Task UpdateDesktopShortcut(GodotInstallation installation, ILog log);
+  public Task UpdateDesktopShortcut(GodotInstallation installation, ILog log);
 
   /// <summary>
   /// Adds (or updates) the GODOT user environment variable to point to the
@@ -118,13 +117,13 @@ public interface IGodotRepository {
   /// </summary>
   /// <param name="log">Output log.</param>
   /// <returns>Completion task.</returns>
-  Task AddOrUpdateGodotEnvVariable(ILog log);
+  public Task AddOrUpdateGodotEnvVariable(ILog log);
 
   /// <summary>
   /// Gets the GODOT user environment variable.
   /// </summary>
   /// <returns>GODOT user environment variable value.</returns>
-  Task<string> GetGodotEnvVariable();
+  public Task<string> GetGodotEnvVariable();
 
   /// <summary>
   /// Get the list of installed Godot versions.
@@ -133,7 +132,7 @@ public interface IGodotRepository {
   /// A list of installed versions and directories that couldn't be loaded
   /// as Godot versions.
   /// </returns>
-  List<Result<GodotInstallation>> GetInstallationsList();
+  public List<Result<GodotInstallation>> GetInstallationsList();
 
   /// <summary>
   /// Get the list of available Godot versions.
@@ -141,7 +140,7 @@ public interface IGodotRepository {
   /// <param name="log">Output log.</param>
   /// <param name="proxyUrl">Proxy URL to use for the request</param>
   /// <returns></returns>
-  Task<List<string>> GetRemoteVersionsList(ILog log, string? proxyUrl = null);
+  public Task<List<string>> GetRemoteVersionsList(ILog log, string? proxyUrl = null);
 
   /// <summary>
   /// Uninstalls the specified version of Godot.
@@ -150,14 +149,14 @@ public interface IGodotRepository {
   /// <param name="log">Output log.</param>
   /// <returns>True if successful, false if installation doesn't exist.
   /// </returns>
-  Task<bool> Uninstall(
+  public Task<bool> Uninstall(
     SpecificDotnetStatusGodotVersion version, ILog log
   );
 }
 
 public partial class GodotRepository : IGodotRepository {
   public ISystemInfo SystemInfo { get; }
-  public ConfigFile Config { get; }
+  public Config Config { get; }
   public IFileClient FileClient { get; }
   public INetworkClient NetworkClient { get; }
   public IZipClient ZipClient { get; }
@@ -177,7 +176,7 @@ public partial class GodotRepository : IGodotRepository {
   public string GodotInstallationsPath => FileClient.Combine(
     FileClient.AppDataDirectory,
     Defaults.GODOT_PATH,
-    Config.GodotInstallationsPath
+    Config.ConfigValues.Godot.InstallationsPath
   );
 
   public string GodotCachePath => FileClient.Combine(
@@ -214,7 +213,7 @@ public partial class GodotRepository : IGodotRepository {
   // TODO: Rely on platform to provide our file version-name conversion
   public GodotRepository(
     ISystemInfo systemInfo,
-    ConfigFile config,
+    Config config,
     IFileClient fileClient,
     INetworkClient networkClient,
     IZipClient zipClient,
@@ -662,7 +661,7 @@ public partial class GodotRepository : IGodotRepository {
 
     var responseBody = await response.Content.ReadAsStringAsync();
     var deserializedBody =
-      JsonConvert.DeserializeObject<List<RemoteVersion>>(responseBody);
+      JsonSerializer.Deserialize<List<RemoteVersion>>(responseBody);
     deserializedBody?.Reverse();
 
     var versions = new List<string>();

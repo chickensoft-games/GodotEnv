@@ -2,6 +2,7 @@
 #pragma warning disable CA1859
 namespace Chickensoft.GodotEnv.Tests;
 
+using System.Text.Json;
 using Chickensoft.GodotEnv.Common.Models;
 using Shouldly;
 using Xunit;
@@ -12,6 +13,54 @@ public class AssetTest {
 
   public const string URL = "git@github.com:chickensoft-games/GodotEnv.git";
   public const string CHECKOUT = "main";
+
+  [Fact]
+  public void AssetSourceLocalSerializes() {
+    var json = JsonSerializer.Serialize(AssetSource.Local);
+    json.ShouldBe("\"local\"");
+  }
+
+  [Fact]
+  public void AssetSourceLocalDeserializes() {
+    var source = JsonSerializer.Deserialize<AssetSource>("\"local\"");
+    source.ShouldBe(AssetSource.Local);
+  }
+
+  [Fact]
+  public void AssetSourceRemoteSerializes() {
+    var json = JsonSerializer.Serialize(AssetSource.Remote);
+    json.ShouldBe("\"remote\"");
+  }
+
+  [Fact]
+  public void AssetSourceRemoteDeserializes() {
+    var source = JsonSerializer.Deserialize<AssetSource>("\"remote\"");
+    source.ShouldBe(AssetSource.Remote);
+  }
+
+  [Fact]
+  public void AssetSourceSymlinkSerializes() {
+    var json = JsonSerializer.Serialize(AssetSource.Symlink);
+    json.ShouldBe("\"symlink\"");
+  }
+
+  [Fact]
+  public void AssetSourceSymlinkDeserializes() {
+    var source = JsonSerializer.Deserialize<AssetSource>("\"symlink\"");
+    source.ShouldBe(AssetSource.Symlink);
+  }
+
+  [Fact]
+  public void AssetSourceZipSerializes() {
+    var json = JsonSerializer.Serialize(AssetSource.Zip);
+    json.ShouldBe("\"zip\"");
+  }
+
+  [Fact]
+  public void AssetSourceZipDeserializes() {
+    var source = JsonSerializer.Deserialize<AssetSource>("\"zip\"");
+    source.ShouldBe(AssetSource.Zip);
+  }
 
   [Fact]
   public void RemoteAsset() {

@@ -10,7 +10,6 @@ using Chickensoft.GodotEnv.Features.Addons.Domain;
 using Chickensoft.GodotEnv.Features.Addons.Models;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
-using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -42,12 +41,13 @@ public class AddonsInstallCommandTest {
     systemInfo.Setup(sys => sys.CPUArch).Returns(CPUArch.X64);
     systemInfo.Setup(sys => sys.OS).Returns(OSType.Linux);
     systemInfo.Setup(sys => sys.OSFamily).Returns(OSFamily.Unix);
+    var config = MockConfig.Get();
     var context = new Mock<IExecutionContext>();
     var fakeConsole = new FakeInMemoryConsole();
     console = fakeConsole;
 
     // Use real log to test colors in output
-    log = new Log(systemInfo.Object, console);
+    log = new Log(systemInfo.Object, config.Object, console);
 
     var workingDir = "/";
 

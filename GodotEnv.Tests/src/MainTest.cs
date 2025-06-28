@@ -2,7 +2,7 @@ namespace Chickensoft.GodotEnv.Tests;
 
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
-using global::GodotEnv.Common.Utilities;
+using Chickensoft.GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -16,7 +16,7 @@ public class MainTest {
 
   [Fact]
   public void CreateExecutionContextParsesArgs() {
-    var config = new ConfigFile();
+    var config = new Config();
     var args = new string[] { "a", "--", "b" };
     var workingDir = "/";
     var systemInfo = new Mock<ISystemInfo>();

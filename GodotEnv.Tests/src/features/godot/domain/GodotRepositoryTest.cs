@@ -11,7 +11,6 @@ using Common.Clients;
 using Common.Models;
 using Common.Utilities;
 using Downloader;
-using global::GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 using Xunit;
@@ -59,7 +58,13 @@ public class GodotRepositoryTest {
 
     var godotRepo = new GodotRepository(
       systemInfo: systemInfo,
-      config: new ConfigFile { GodotInstallationsPath = "INSTALLATION_PATH" },
+      config: new Config(
+        new ConfigValues {
+          Godot = new GodotConfigSection {
+            InstallationsPath = "INSTALLATION_PATH"
+          },
+        }
+      ),
       fileClient: fileClient.Object,
       networkClient: networkClient.Object,
       zipClient: zipClient.Object,
@@ -114,7 +119,13 @@ public class GodotRepositoryTest {
 
     var godotRepo = new GodotRepository(
       systemInfo: systemInfo,
-      config: new ConfigFile { GodotInstallationsPath = "INSTALLATION_PATH" },
+      config: new Config(
+        new ConfigValues {
+          Godot = new GodotConfigSection {
+            InstallationsPath = "INSTALLATION_PATH"
+          },
+        }
+      ),
       fileClient: fileClient.Object,
       networkClient: networkClient.Object,
       zipClient: zipClient.Object,

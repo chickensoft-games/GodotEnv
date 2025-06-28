@@ -7,47 +7,48 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Chickensoft.GodotEnv.Common.Models;
 using CliFx.Infrastructure;
-using global::GodotEnv.Common.Utilities;
 
 /// <summary>CLI log interface.</summary>
 public interface ILog {
-  ISystemInfo SystemInfo { get; }
+  public ISystemInfo SystemInfo { get; }
+  /// <summary>Application configuration.</summary>
+  public IConfig Config { get; }
   /// <summary>CLI command console.</summary>
-  IConsole Console { get; }
+  public IConsole Console { get; }
   /// <summary>Print an error message to the console.</summary>
   /// <param name="message">Error message.</param>
-  void Err(object? message);
+  public void Err(object? message);
   /// <summary>Print an error message to the console in place.</summary>
   /// <param name="message">Error message.</param>
-  void ErrInPlace(object? message);
+  public void ErrInPlace(object? message);
   /// <summary>Print a message to the console.</summary>
   /// <param name="message">Message.</param>
-  void Print(object? message);
+  public void Print(object? message);
   /// <summary>Print a message to the console in place.</summary>
   /// <param name="message">Message.</param>
-  void PrintInPlace(object? message);
+  public void PrintInPlace(object? message);
   /// <summary>Print an information message to the console.</summary>
   /// <param name="message">Informational message.</param>
-  void Info(object? message);
+  public void Info(object? message);
   /// <summary>Print an information message to the console in place.</summary>
   /// <param name="message">Informational message.</param>
-  void InfoInPlace(object? message);
+  public void InfoInPlace(object? message);
   /// <summary>Print a success message to the console.</summary>
   /// <param name="message">Success message.</param>
-  void Success(object? message);
+  public void Success(object? message);
   /// <summary>Print a success message to the console in place.</summary>
   /// <param name="message">Success message.</param>
-  void SuccessInPlace(object? message);
+  public void SuccessInPlace(object? message);
   /// <summary>Print a warning message to the console.</summary>
   /// <param name="message">Warning message.</param>
-  void Warn(object? message);
+  public void Warn(object? message);
   /// <summary>Print a warning message to the console in place.</summary>
   /// <param name="message">Warning message.</param>
-  void WarnInPlace(object? message);
+  public void WarnInPlace(object? message);
   /// <summary>
   /// Clears the last written line of the console.
   /// </summary>
-  void ClearCurrentLine();
+  public void ClearCurrentLine();
 }
 
 /// <summary>
@@ -56,7 +57,7 @@ public interface ILog {
 public interface IReportableEvent {
   /// <summary>Report the event to a log.</summary>
   /// <param name="log">Log to output to.</param>
-  void Report(ILog log);
+  public void Report(ILog log);
 }
 
 /// <summary>Custom reportable event.</summary>
@@ -78,6 +79,8 @@ public partial class Log : ILog {
 
   public ISystemInfo SystemInfo { get; }
 
+  public IConfig Config { get; }
+
   public IConsole Console { get; }
 
   private ConsoleWriter OutputConsole => Console.Output;
@@ -93,8 +96,9 @@ public partial class Log : ILog {
   public bool IsInRedirectedEnv =>
     Console.IsOutputRedirected || Console.IsErrorRedirected;
 
-  public Log(ISystemInfo systemInfo, IConsole console) {
+  public Log(ISystemInfo systemInfo, IConfig config, IConsole console) {
     SystemInfo = systemInfo;
+    Config = config;
     Console = console;
 
     if (!IsInRedirectedEnv) {
@@ -161,19 +165,18 @@ public partial class Log : ILog {
       // Set the new foreground and background colors.
       consoleStyle(Console);
 
-      var wasStyleUpdated = false;
       if (message is string str && str != "") {
-        if (SystemInfo.OS == OSType.Windows) {
+        if (SystemInfo.OS == OSType.Windows
+          || !Config.ConfigValues.Terminal.DisplayEmoji
+        ) {
           // Remove emoji from message.
           str = RemoveNonANSICharacters(str);
           message = str;
         }
         UpdateStyle();
-        wasStyleUpdated = true;
       }
       else if (message is not string and not null) {
         UpdateStyle();
-        wasStyleUpdated = true;
       }
 
       var left = 0;

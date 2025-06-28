@@ -3,7 +3,6 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
-using global::GodotEnv.Common.Utilities;
 
 public class Linux : Unix {
   public Linux(
