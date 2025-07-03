@@ -11,6 +11,7 @@ public class GodotrcFile : IGodotVersionFile, IEquatable<GodotrcFile> {
     " not-dotnet",
   ];
   private static readonly IoVersionDeserializer _versionDeserializer = new();
+  private static readonly IoVersionSerializer _versionSerializer = new();
 
   /// <inheritdoc/>
   public string FilePath { get; }
@@ -44,6 +45,19 @@ public class GodotrcFile : IGodotVersionFile, IEquatable<GodotrcFile> {
       }
     }
     return _versionDeserializer.Deserialize(version, isDotnet);
+  }
+
+  /// <inheritdoc/>
+  public void WriteGodotVersion(
+    SpecificDotnetStatusGodotVersion version,
+    IFileClient fileClient
+  ) {
+    // we can simply overwrite any existing .godotrc file
+    using (var writer = fileClient.GetWriter(FilePath)) {
+      writer.WriteLine(
+        _versionSerializer.SerializeWithDotnetStatus(version)
+      );
+    }
   }
 
   public bool Equals(GodotrcFile? other) =>

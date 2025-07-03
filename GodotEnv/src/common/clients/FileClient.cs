@@ -231,6 +231,20 @@ public interface IFileClient {
   public TextReader GetReader(string path);
 
   /// <summary>
+  /// Get a <see cref="TextWriter"/> for a given file path.
+  /// </summary>
+  /// <param name="path">File to write.</param>
+  /// <returns>
+  /// A writer to use for writing to the file. This value must be disposed by
+  /// the caller.
+  /// </returns>
+  /// <remarks>
+  /// Clears the file contents; if you wish to modify or append to them, you
+  /// must read them in before calling this method.
+  /// </remarks>
+  public TextWriter GetWriter(string path);
+
+  /// <summary>
   /// Get a <see cref="Stream"/> for reading a given file.
   /// </summary>
   /// <param name="path">File to read.</param>
@@ -553,12 +567,7 @@ public class FileClient : IFileClient {
   public IEnumerable<IDirectoryInfo> GetSubdirectories(string dir) =>
     Files.DirectoryInfo.New(dir).EnumerateDirectories();
 
-  /// <summary>
-  /// Gets an enumerable over the given directory and its ancestor directories,
-  /// starting with itself and finishing with the root directory.
-  /// </summary>
-  /// <param name="dir">The directory to start from.</param>
-  /// <returns>An enumerable over the directory and its ancestors.</returns>
+  /// <inheritdoc/>
   public IEnumerable<IDirectoryInfo> GetAncestorDirectories(string dir) {
     var directoryInfo = Files.DirectoryInfo.New(dir);
     while (directoryInfo is not null) {
@@ -617,8 +626,13 @@ public class FileClient : IFileClient {
     Files.File.WriteAllText(filePath, contents);
   }
 
+  /// <inheritdoc/>
   public TextReader GetReader(string path) => new StreamReader(path);
 
+  /// <inheritdoc/>
+  public TextWriter GetWriter(string path) => new StreamWriter(path);
+
+  /// <inheritdoc/>
   public Stream GetReadStream(string path) => File.OpenRead(path);
 
   public List<string> ReadLines(string path) =>
