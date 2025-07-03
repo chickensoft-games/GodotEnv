@@ -148,6 +148,20 @@ godotenv godot use 4.0.1
 godotenv godot use 4.0.1 --no-dotnet
 ```
 
+### 🔮 Installing or Using a Project-Specific Godot Version
+
+You may want to install or use the version of Godot that is appropriate for the project you're currently working on. You can issue the `godotenv godot install` and `godotenv godot use` commands _without_ providing a version parameter, and the commands can infer the correct version from files in your directory tree.
+
+The command will walk up the directory tree and use the following files, in order of precedence:
+
+- `global.json` specifying a `Godot.NET.Sdk` value in `msbuild-sdks`.
+- `*.csproj` specifying a versioned `Godot.NET.Sdk` as its Project SDK.
+- `.godotrc` with a Godot version string as its first line.
+
+A `global.json` file at any directory level above the working directory will take precedence over all `csproj` files, even those closer to the working directory; likewise, any `csproj` file in the tree will take precedence over all `.godotrc` files.
+
+Versions from `global.json` or a `csproj` file are assumed to be .NET-enabled. A `.godotrc` file may specify a non-.NET Godot by prefixing the version string with a tilde (`~`) character. For instance, a `.godotrc` file containing the value `~4.0.1` indicates the non-.NET version of Godot 4.0.1.
+
 ### 🚫 Uninstalling a Godot Version
 
 Uninstalling works the same way as installing and switching versions does.
