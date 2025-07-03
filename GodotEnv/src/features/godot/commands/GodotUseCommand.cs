@@ -23,7 +23,8 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
     Description = "Godot version to install: e.g., 4.1.0-rc.2, 4.2.0, etc." +
       " Should match a version of Godot " +
       "(https://github.com/godotengine/godot-builds/tags) or GodotSharp " +
-      "(https://www.nuget.org/packages/GodotSharp/)"
+      "(https://www.nuget.org/packages/GodotSharp/)",
+    IsRequired = false
   )]
   public string RawVersion { get; set; } = default!;
 
@@ -47,12 +48,33 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
     var log = ExecutionContext.CreateLog(console);
     var output = console.Output;
 
-    var isDotnetVersion = !NoDotnet;
-    // We know this won't throw because the validator okayed it
-    var version =
-      godotRepo.VersionDeserializer.Deserialize(RawVersion, isDotnetVersion);
+    SpecificDotnetStatusGodotVersion? version = null;
 
-    var noDotnetFlag = isDotnetVersion ? "" : " --no-dotnet";
+    if (!string.IsNullOrEmpty(RawVersion)) {
+      var isDotnetVersion = !NoDotnet;
+      // We know this won't throw because the validator okayed it
+      version =
+        godotRepo.VersionDeserializer.Deserialize(RawVersion, isDotnetVersion);
+    }
+    else {
+      var versionRepo = ExecutionContext.Godot.VersionRepo;
+      var versionFiles = versionRepo.GetVersionFiles();
+      version = versionRepo.InferVersion(versionFiles, log);
+    }
+
+    if (version is null) {
+      log.Err(
+        """
+        No version specified and couldn't find version file in directory tree.
+        Please specify a version or execute in a directory with access to a
+        global.json, .csproj, or .godotrc file with the appropriate Godot
+        version for your project.
+        """
+      );
+      return;
+    }
+
+    var noDotnetFlag = version.IsDotnetEnabled ? "" : " --no-dotnet";
 
     var potentialInstallation =
       godotRepo.GetInstallation(version);
