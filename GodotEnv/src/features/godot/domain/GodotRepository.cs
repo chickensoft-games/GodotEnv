@@ -248,7 +248,7 @@ public partial class GodotRepository : IGodotRepository {
 
   public string InstallationVersionName(GodotInstallation installation) =>
     VersionSerializer.Serialize(installation.Version) +
-      (installation.Version.IsDotnetEnabled ? " dotnet" : " not-dotnet");
+      (installation.Version.IsDotnetEnabled ? " dotnet" : " no-dotnet");
 
   public void ClearCache() {
     if (FileClient.DirectoryExists(GodotCachePath)) {

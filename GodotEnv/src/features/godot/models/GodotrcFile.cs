@@ -5,6 +5,11 @@ using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 
 public class GodotrcFile : IGodotVersionFile, IEquatable<GodotrcFile> {
+  private static readonly string[] _noDotnetPatterns = [
+    " no-dotnet",
+    " non-dotnet",
+    " not-dotnet",
+  ];
   private static readonly IoVersionDeserializer _versionDeserializer = new();
 
   /// <inheritdoc/>
@@ -31,9 +36,12 @@ public class GodotrcFile : IGodotVersionFile, IEquatable<GodotrcFile> {
       return null;
     }
     var isDotnet = true;
-    if (version[0] == '~') {
-      isDotnet = false;
-      version = version[1..];
+    foreach (var noDotnetPattern in _noDotnetPatterns) {
+      if (version.EndsWith(noDotnetPattern)) {
+        isDotnet = false;
+        version = version[..^noDotnetPattern.Length];
+        break;
+      }
     }
     return _versionDeserializer.Deserialize(version, isDotnet);
   }

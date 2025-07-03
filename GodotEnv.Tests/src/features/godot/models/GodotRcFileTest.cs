@@ -44,11 +44,35 @@ public class GodotRcFileTest {
   }
 
   [Fact]
-  public void ParsedVersionIsNotDotnetIfPrecededByTilde() {
+  public void ParsedVersionIsNotDotnetIfFollowedBySpaceSeparatedNoDotnet() {
     var path = "/test/path";
     var file = new GodotrcFile(path);
     var reader = new Mock<TextReader>();
-    reader.Setup(rdr => rdr.ReadLine()).Returns("~4.2.0");
+    reader.Setup(rdr => rdr.ReadLine()).Returns("4.2.0 no-dotnet");
+    var fileClient = new Mock<IFileClient>();
+    fileClient.Setup(client => client.GetReader(path)).Returns(reader.Object);
+    var version = new SpecificDotnetStatusGodotVersion(4, 2, 0, "stable", -1, false);
+    file.ParseGodotVersion(fileClient.Object).ShouldBe(version);
+  }
+
+  [Fact]
+  public void ParsedVersionIsNotDotnetIfFollowedBySpaceSeparatedNotDotnet() {
+    var path = "/test/path";
+    var file = new GodotrcFile(path);
+    var reader = new Mock<TextReader>();
+    reader.Setup(rdr => rdr.ReadLine()).Returns("4.2.0 not-dotnet");
+    var fileClient = new Mock<IFileClient>();
+    fileClient.Setup(client => client.GetReader(path)).Returns(reader.Object);
+    var version = new SpecificDotnetStatusGodotVersion(4, 2, 0, "stable", -1, false);
+    file.ParseGodotVersion(fileClient.Object).ShouldBe(version);
+  }
+
+  [Fact]
+  public void ParsedVersionIsNotDotnetIfFollowedBySpaceSeparatedNonDotnet() {
+    var path = "/test/path";
+    var file = new GodotrcFile(path);
+    var reader = new Mock<TextReader>();
+    reader.Setup(rdr => rdr.ReadLine()).Returns("4.2.0 non-dotnet");
     var fileClient = new Mock<IFileClient>();
     fileClient.Setup(client => client.GetReader(path)).Returns(reader.Object);
     var version = new SpecificDotnetStatusGodotVersion(4, 2, 0, "stable", -1, false);
