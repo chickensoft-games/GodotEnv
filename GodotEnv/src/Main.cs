@@ -122,9 +122,15 @@ public static class GodotEnv {
       versionSerializer: ioVersionSerializer
     );
 
+    var versionRepo = new GodotVersionSpecifierRepository(
+      workingDir: workingDir,
+      fileClient: fileClient
+    );
+
     var godotContext = new GodotContext(
       Platform: platform,
-      GodotRepo: godotRepo
+      GodotRepo: godotRepo,
+      VersionRepo: versionRepo
     );
 
     // Create a context that contains all the information and dependencies that

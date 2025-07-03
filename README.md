@@ -148,6 +148,20 @@ godotenv godot use 4.0.1
 godotenv godot use 4.0.1 --no-dotnet
 ```
 
+### 🔮 Installing or Using a Project-Specific Godot Version
+
+You may want to install or use the version of Godot that is appropriate for the project you're currently working on. You can issue the `godotenv godot install` and `godotenv godot use` commands _without_ providing a version parameter, and the commands can infer the correct version from files in your directory tree.
+
+The command will walk up the directory tree and use the following files, in order of precedence:
+
+- `global.json` specifying a `Godot.NET.Sdk` value in `msbuild-sdks`.
+- `*.csproj` specifying a versioned `Godot.NET.Sdk` as its Project SDK.
+- `.godotrc` with a Godot version string as its first line.
+
+A `global.json` file at any directory level above the working directory will take precedence over all `csproj` files, even those closer to the working directory; likewise, any `csproj` file in the tree will take precedence over all `.godotrc` files. Files of the same type that are fewer steps up the directory tree will take precedence over ones that are further up the tree.
+
+Versions from `global.json` or a `csproj` file are assumed to be .NET-enabled. A `.godotrc` file may specify a non-.NET Godot by appending a space and the string `no-dotnet` to the version string. For instance, a `.godotrc` file containing the value `4.0.1 no-dotnet` indicates the non-.NET version of Godot 4.0.1.
+
 ### 🚫 Uninstalling a Godot Version
 
 Uninstalling works the same way as installing and switching versions does.
@@ -156,7 +170,7 @@ Uninstalling works the same way as installing and switching versions does.
 # uninstalls .NET version
 godotenv godot uninstall 4.0.1
 
-# uninstalls not-dotnet version
+# uninstalls non-dotnet version
 godotenv godot uninstall 4.0.1 --no-dotnet
 ```
 
@@ -399,7 +413,7 @@ GodotEnv can "install" addons using symlinks. Addons installed with symlinks do 
   }
 ```
 
-> *Note*: The `checkout` reference is ignored when using symlinks.
+> _Note_: The `checkout` reference is ignored when using symlinks.
 
 Whenever a symlinked addon is modified, the changes will immediately appear in the project, unlike addons included with git repositories. Additionally, if you change the addon from your game project, it updates the addon source where the symbolic link is pointing.
 

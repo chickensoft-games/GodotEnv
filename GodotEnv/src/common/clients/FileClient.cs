@@ -222,6 +222,24 @@ public interface IFileClient {
       T defaultValue
     ) where T : notnull;
 
+  /// <summary>Get a <see cref="TextReader"/> for a given file path.</summary>
+  /// <param name="path">File to read.</param>
+  /// <returns>
+  /// A reader to use for reading the file. This value must be disposed by
+  /// the caller.
+  /// </returns>
+  public TextReader GetReader(string path);
+
+  /// <summary>
+  /// Get a <see cref="Stream"/> for reading a given file.
+  /// </summary>
+  /// <param name="path">File to read.</param>
+  /// <returns>
+  /// A stream to use for reading the file. This value must be disposed by the
+  /// caller.
+  /// </returns>
+  public Stream GetReadStream(string path);
+
   /// <summary>Read text lines from a file.</summary>
   /// <param name="path">File to read.</param>
   /// <returns>List of lines.</returns>
@@ -296,6 +314,25 @@ public interface IFileClient {
   /// <param name="dir">Directory to examine.</param>
   /// <returns>Enumerable of directory info objects.</returns>
   public IEnumerable<IDirectoryInfo> GetSubdirectories(string dir);
+
+  /// <summary>
+  /// Returns directory information for each ancestor directory of the given
+  /// directory.
+  /// </summary>
+  /// <param name="dir">Directory to examine.</param>
+  /// <returns>Enumerable of directory info objects.</returns>
+  public IEnumerable<IDirectoryInfo> GetAncestorDirectories(string dir);
+
+  /// <summary>
+  /// Returns the full names (including paths) of files within the given
+  /// directory, optionally matching a provided wildcard pattern.
+  /// </summary>
+  /// <param name="dir">Directory to examine.</param>
+  /// <param name="wildcardPattern">
+  /// Wildcard pattern to match, or null to enumerate all files.
+  /// </param>
+  /// <returns>Enumerable of strings.</returns>
+  public IEnumerable<string> GetFiles(string dir, string? wildcardPattern = null);
 }
 
 /// <summary>File system operations client.</summary>
@@ -510,6 +547,25 @@ public class FileClient : IFileClient {
   public IEnumerable<IDirectoryInfo> GetSubdirectories(string dir) =>
     Files.DirectoryInfo.New(dir).EnumerateDirectories();
 
+  /// <summary>
+  /// Gets an enumerable over the given directory and its ancestor directories,
+  /// starting with itself and finishing with the root directory.
+  /// </summary>
+  /// <param name="dir">The directory to start from.</param>
+  /// <returns>An enumerable over the directory and its ancestors.</returns>
+  public IEnumerable<IDirectoryInfo> GetAncestorDirectories(string dir) {
+    var directoryInfo = Files.DirectoryInfo.New(dir);
+    while (directoryInfo is not null) {
+      yield return directoryInfo;
+      directoryInfo = directoryInfo.Parent;
+    }
+  }
+
+  public IEnumerable<string> GetFiles(string dir, string? wildcardPattern = null) =>
+    (wildcardPattern is null)
+      ? Files.Directory.EnumerateFiles(dir)
+      : Files.Directory.EnumerateFiles(dir, wildcardPattern);
+
   public T ReadJsonFile<T>(string path) where T : notnull {
     var contents = Files.File.ReadAllText(path);
     return JsonSerializer.Deserialize<T>(contents, JsonSerializerOptions)
@@ -554,6 +610,10 @@ public class FileClient : IFileClient {
     var contents = JsonSerializer.Serialize(data, JsonSerializerOptions);
     Files.File.WriteAllText(filePath, contents);
   }
+
+  public TextReader GetReader(string path) => new StreamReader(path);
+
+  public Stream GetReadStream(string path) => File.OpenRead(path);
 
   public List<string> ReadLines(string path) =>
     [.. Files.File.ReadAllLines(path)];

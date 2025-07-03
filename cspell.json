@@ -14,6 +14,7 @@
     "gdenv",
     "globaltool",
     "godotenv",
+    "godotrc",
     "gpgsign",
     "imrp",
     "inheritdoc",
