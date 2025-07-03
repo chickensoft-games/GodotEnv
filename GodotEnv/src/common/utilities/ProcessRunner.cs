@@ -38,6 +38,15 @@ public interface IProcessRunner {
   Task<ProcessResult> Run(string workingDir, string exe, string[] args);
 
   /// <summary>
+  /// Starts a detached process. (e.g. launching a GUI app) without waiting for it.
+  /// </summary>
+  /// <param name="args">Process arguments.
+  /// </param>
+  /// <param name="exe">Process to run (must be in the system shell's path).
+  /// </param>
+  Task RunDetached(string exe, string[] args);
+
+  /// <summary>
   /// Runs an external process with callbacks for stdout and stderr.
   /// </summary>
   /// <param name="workingDir">Working directory to run the process from.
@@ -85,6 +94,26 @@ public class ProcessRunner : IProcessRunner {
       StandardOutput: stdOutBuffer.ToString(),
       StandardError: stdErrBuffer.ToString()
     );
+  }
+
+  // This method is used to run a detached process.
+  public Task RunDetached(string exe, string[] args) {
+    var startInfo = new ProcessStartInfo {
+      FileName = exe,
+      Arguments = string.Join(" ", args),
+      UseShellExecute = true,
+      CreateNoWindow = true,
+      WorkingDirectory = Environment.CurrentDirectory
+    };
+
+    try {
+      Process.Start(startInfo);
+    }
+    catch (Exception ex) {
+      Console.Error.WriteLine($"Failed to launch detached process: {ex.Message}");
+    }
+
+    return Task.CompletedTask;
   }
 
   public async Task<ProcessResult> RunElevatedOnWindows(
