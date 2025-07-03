@@ -55,7 +55,9 @@ public class GodotrcFile : IGodotVersionFile, IEquatable<GodotrcFile> {
     // we can simply overwrite any existing .godotrc file
     using (var writer = fileClient.GetWriter(FilePath)) {
       writer.WriteLine(
-        _versionSerializer.SerializeWithDotnetStatus(version)
+        version.IsDotnetEnabled
+          ? _versionSerializer.Serialize(version)
+          : _versionSerializer.SerializeWithDotnetStatus(version)
       );
     }
   }

@@ -92,9 +92,22 @@ public class GodotRcFileTest {
   }
 
   [Fact]
-  public void WriteGodotVersionOpensWriterToFileAndWritesVersionWithDotnetStatus() {
+  public void WriteGodotVersionOpensWriterToFileAndWritesVersionWithoutDotnetStatusIfDotnet() {
     var path = "/test/path/.godotrc";
     var version = new SpecificDotnetStatusGodotVersion(4, 4, 1, "stable", -1, true);
+    var serializer = new IoVersionSerializer();
+    var file = new GodotrcFile(path);
+    var writer = new Mock<TextWriter>();
+    var fileClient = new Mock<IFileClient>();
+    fileClient.Setup(client => client.GetWriter(path)).Returns(writer.Object);
+    file.WriteGodotVersion(version, fileClient.Object);
+    writer.Verify(wrt => wrt.WriteLine(serializer.Serialize(version)));
+  }
+
+  [Fact]
+  public void WriteGodotVersionOpensWriterToFileAndWritesVersionWithDotnetStatusIfNotDotnet() {
+    var path = "/test/path/.godotrc";
+    var version = new SpecificDotnetStatusGodotVersion(4, 4, 1, "stable", -1, false);
     var serializer = new IoVersionSerializer();
     var file = new GodotrcFile(path);
     var writer = new Mock<TextWriter>();
