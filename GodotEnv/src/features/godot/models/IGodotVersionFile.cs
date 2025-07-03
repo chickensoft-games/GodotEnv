@@ -28,4 +28,20 @@ public interface IGodotVersionFile {
   public SpecificDotnetStatusGodotVersion? ParseGodotVersion(
     IFileClient fileClient
   );
+
+  /// <summary>
+  /// Writes a given Godot version into this file, if supported. Will overwrite
+  /// any existing Godot version information in the file.
+  /// </summary>
+  /// <param name="version">The version to write into the file.</param>
+  /// <param name="fileClient">
+  /// The file client to use for writing the file.
+  /// </param>
+  /// <exception cref="NotSupportedException">
+  /// If this file type does not support writing Godot versions.
+  /// </exception>
+  public void WriteGodotVersion(
+    SpecificDotnetStatusGodotVersion version,
+    IFileClient fileClient
+  );
 }
