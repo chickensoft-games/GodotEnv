@@ -183,4 +183,13 @@ public class CsprojFileTest {
     fileClient.Setup(client => client.GetReader(path)).Returns(reader);
     Should.Throw<ArgumentException>(() => file.ParseGodotVersion(fileClient.Object));
   }
+
+  [Fact]
+  public void WriteGodotVersionThrowsNotSupported() {
+    var path = "/test/path";
+    var fileClient = new Mock<IFileClient>();
+    var file = new CsprojFile(path);
+    var version = new SpecificDotnetStatusGodotVersion(4, 4, 1, "stable", -1, true);
+    Should.Throw<NotSupportedException>(() => file.WriteGodotVersion(version, fileClient.Object));
+  }
 }
