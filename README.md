@@ -53,7 +53,13 @@ dotnet nuget enable source <NAME>
 
 GodotEnv uses the local `git` installation and other processes available from the shell, so make sure you've installed `git` and [configured your local shell environment][ssh-github] correctly.
 
-> ⧉ On Windows, certain operations may require administrator privileges, such as managing symlinks or editing certain files. GodotEnv should prompt you in these cases for your approval, and certain operations will cause a command line window to pop open for a moment before disappearing — this is normal.
+> [!NOTE]
+> **Windows Users**
+>
+> Certain operations may require administrator privileges, such as managing symlinks or editing certain files. GodotEnv should prompt you in these cases for your approval, and certain operations will cause a command line window to pop open for a moment before disappearing — this is normal.
+>
+> In some cases, enabling [Developer Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) may be required for GodotEnv to correctly manage symlinks.
+
 
 ## Quick Start
 
