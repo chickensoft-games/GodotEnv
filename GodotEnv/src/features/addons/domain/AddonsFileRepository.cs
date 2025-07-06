@@ -5,7 +5,7 @@ using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Features.Addons.Models;
 
 public interface IAddonsFileRepository {
-  IFileClient FileClient { get; }
+  public IFileClient FileClient { get; }
 
   /// <summary>
   /// Loads the addons file in the project path and returns the filename
@@ -17,7 +17,7 @@ public interface IAddonsFileRepository {
   /// <param name="addonsFileName">Optional path to the addons file to load.
   /// If unspecified will load "addons.jsonc" or "addons.json". </param>
   /// <returns>Loaded addons file (or an empty one).</returns>
-  AddonsFile LoadAddonsFile(string projectPath, out string filename, string? addonsFileName = null);
+  public AddonsFile LoadAddonsFile(string projectPath, out string filename, string? addonsFileName = null);
 
   /// <summary>
   /// Creates an addons configuration object that represents the configuration
@@ -26,7 +26,7 @@ public interface IAddonsFileRepository {
   /// <param name="projectPath">Path containing the addons file.</param>
   /// <param name="addonsFile">Addons file.</param>
   /// <returns>Addons configuration.</returns>
-  AddonsConfiguration CreateAddonsConfiguration(
+  public AddonsConfiguration CreateAddonsConfiguration(
       string projectPath, AddonsFile addonsFile
     );
 
@@ -34,7 +34,7 @@ public interface IAddonsFileRepository {
   /// Creates a default addons file in the project path.
   /// </summary>
   /// <param name="projectPath">Project path.</param>
-  string CreateAddonsConfigurationStartingFile(string projectPath);
+  public string CreateAddonsConfigurationStartingFile(string projectPath);
 }
 
 public class AddonsFileRepository : IAddonsFileRepository {
