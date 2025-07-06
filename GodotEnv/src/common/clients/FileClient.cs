@@ -364,7 +364,12 @@ public class FileClient : IFileClient {
     Defaults.BIN_NAME
   );
 
-  public FileClient(ISystemInfo systemInfo, IFileSystem fs, IComputer computer, IProcessRunner processRunner) {
+  public FileClient(
+    ISystemInfo systemInfo,
+    IFileSystem fs,
+    IComputer computer,
+    IProcessRunner processRunner
+  ) {
     SystemInfo = systemInfo;
     Files = fs;
     Computer = computer;
@@ -373,6 +378,7 @@ public class FileClient : IFileClient {
     JsonSerializerOptions = new JsonSerializerOptions {
       WriteIndented = true,
       ReadCommentHandling = JsonCommentHandling.Skip,
+      AllowTrailingCommas = true,
     };
   }
 

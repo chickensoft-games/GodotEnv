@@ -2,6 +2,7 @@ namespace Chickensoft.GodotEnv.Tests;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
@@ -27,17 +28,29 @@ public class FileClientTest {
     }
   }
 
-  public const string JSON_FILE_CONTENTS = /*lang=json,strict*/ """
-                                                                {
-                                                                  "name": "test"
-                                                                }
-                                                                """;
+  public const string JSON_FILE_CONTENTS =
+    /*lang=json,strict*/
+    """
+    {
+      "name": "test"
+    }
+    """;
 
-  public const string JSON_FILE_CONTENTS_ALT = /*lang=json,strict*/ """
-                                                                    {
-                                                                      "name": "alternative"
-                                                                    }
-                                                                    """;
+  public const string JSON_FILE_CONTENTS_TRAILING_COMMA =
+    /*lang=json*/
+    """
+    {
+      "name": "test",
+    }
+    """;
+
+  public const string JSON_FILE_CONTENTS_ALT =
+    /*lang=json,strict*/
+    """
+    {
+      "name": "alternative"
+    }
+    """;
 
   [Theory]
   [MemberData(nameof(GetSystemInfoForUnixOSes))]
@@ -460,6 +473,22 @@ public class FileClientTest {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
     var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
       { "model.json", new MockFileData(JSON_FILE_CONTENTS) }
+    });
+
+    var computer = new Mock<IComputer>();
+    var client = new FileClient(
+      systemInfo, fs, computer.Object, new Mock<IProcessRunner>().Object
+    );
+
+    client.ReadJsonFile<TestJsonModel>("model.json")
+      .ShouldBe(new TestJsonModel(name: "test"));
+  }
+
+  [Fact]
+  public void ReadJsonFilesAllowsTrailingCommas() {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
+      { "model.json", new MockFileData(JSON_FILE_CONTENTS_TRAILING_COMMA) }
     });
 
     var computer = new Mock<IComputer>();
