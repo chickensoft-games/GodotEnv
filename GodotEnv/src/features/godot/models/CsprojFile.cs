@@ -45,6 +45,13 @@ public class CsprojFile : IGodotVersionFile, IEquatable<CsprojFile> {
     return _versionDeserializer.Deserialize(version, true);
   }
 
+  /// <inheritdoc/>
+  public void WriteGodotVersion(
+    SpecificDotnetStatusGodotVersion version,
+    IFileClient fileClient
+  ) =>
+    throw new NotSupportedException("Writing Godot version information to csproj files is not supported.");
+
   public bool Equals(CsprojFile? other) =>
     other is not null && FilePath == other.FilePath;
 

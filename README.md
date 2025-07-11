@@ -168,6 +168,18 @@ A `global.json` file at any directory level above the working directory will tak
 
 Versions from `global.json` or a `csproj` file are assumed to be .NET-enabled. A `.godotrc` file may specify a non-.NET Godot by appending a space and the string `no-dotnet` to the version string. For instance, a `.godotrc` file containing the value `4.0.1 no-dotnet` indicates the non-.NET version of Godot 4.0.1.
 
+### ✍️ Pinning the Current Godot Version for a Project
+
+To enable the version-free `godotenv godot install` and `godotenv godot use` commands without hand-authoring a version-specifying file for your project, you can use the `godotenv godot pin` command. This command will locate the top-level directory of your project and place a version-specifying file in it, indicating your active Godot version as the preferred version for the project.
+
+- To find the top-level directory of your project, the command walks up the directory tree from the working directory.
+  - If your project contains any `sln` files, the command will use the topmost directory containing a `sln` file.
+  - If your project does not contain any `sln` files, the command will use the topmost directory containing a `project.godot` file.
+- If your active Godot version is .NET-enabled, the command will add its version number as a `Godot.NET.Sdk` value in an existing `global.json` in the top-level project directory, or create a new `global.json` with the value if one does not exist.
+- If your active Godot version is not .NET-enabled, the command will place its version number in a `.godotrc` file in the top-level project directory, overwriting any existing `.godotrc` file in that location.
+
+Once the version-specifying file is created or updated with the preferred Godot version, you can commit it to source control for use by others on your team.
+
 ### 🚫 Uninstalling a Godot Version
 
 Uninstalling works the same way as installing and switching versions does.
