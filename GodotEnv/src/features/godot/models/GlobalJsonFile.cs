@@ -2,21 +2,29 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 
 using System;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 
 public class GlobalJsonFile : IGodotVersionFile, IEquatable<GlobalJsonFile> {
   private static readonly SharpVersionDeserializer _versionDeserializer = new();
+  private static readonly SharpVersionSerializer _versionSerializer = new();
 
   /// <inheritdoc/>
   public string FilePath { get; }
   public JsonDocumentOptions JsonDocumentOptions { get; }
+  public JsonNodeOptions JsonNodeOptions { get; }
+  public JsonSerializerOptions JsonSerializerOptions { get; }
 
   public GlobalJsonFile(string filePath) {
     FilePath = filePath;
     JsonDocumentOptions = new() {
       CommentHandling = JsonCommentHandling.Skip,
       AllowTrailingCommas = true,
+    };
+    JsonNodeOptions = new();
+    JsonSerializerOptions = new() {
+      WriteIndented = true,
     };
   }
 
@@ -42,6 +50,28 @@ public class GlobalJsonFile : IGodotVersionFile, IEquatable<GlobalJsonFile> {
     }
     // if the version is from a global.json, we definitely want .NET
     return _versionDeserializer.Deserialize(version, true);
+  }
+
+  /// <inheritdoc/>
+  public void WriteGodotVersion(
+    SpecificDotnetStatusGodotVersion version,
+    IFileClient fileClient
+  ) {
+    JsonNode jsonNode = new JsonObject();
+    // preserve existing global.json data
+    if (fileClient.FileExists(FilePath)) {
+      using var stream = fileClient.GetReadStream(FilePath);
+      jsonNode = JsonNode.Parse(stream, JsonNodeOptions, JsonDocumentOptions)
+        ?? jsonNode;
+    }
+
+    var msbuildSdks = jsonNode["msbuild-sdks"] ?? new JsonObject();
+    msbuildSdks["Godot.NET.Sdk"] = _versionSerializer.Serialize(version);
+    jsonNode["msbuild-sdks"] = msbuildSdks;
+    var jsonString = jsonNode.ToJsonString(JsonSerializerOptions);
+    using (var writer = fileClient.GetWriter(FilePath)) {
+      writer.WriteLine(jsonString);
+    }
   }
 
   public bool Equals(GlobalJsonFile? other) =>

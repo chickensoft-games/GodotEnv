@@ -2,8 +2,8 @@ namespace Chickensoft.GodotEnv.Features.Godot.Serializers;
 
 using Chickensoft.GodotEnv.Features.Godot.Models;
 
-public partial class SharpVersionSerializer : IVersionSerializer {
-  public string Serialize(GodotVersion version) {
+public partial class SharpVersionSerializer : VersionSerializer {
+  public override string Serialize(GodotVersion version) {
     var versionString = string.Join(
       ".", version.Number.Major, version.Number.Minor, version.Number.Patch
     );
