@@ -155,6 +155,10 @@ public interface IGodotRepository {
 }
 
 public partial class GodotRepository : IGodotRepository {
+  private readonly JsonSerializerOptions _jsonOptions = new() {
+    PropertyNameCaseInsensitive = true,
+  };
+
   public ISystemInfo SystemInfo { get; }
   public Config Config { get; }
   public IFileClient FileClient { get; }
@@ -660,7 +664,7 @@ public partial class GodotRepository : IGodotRepository {
 
     var responseBody = await response.Content.ReadAsStringAsync();
     var deserializedBody =
-      JsonSerializer.Deserialize<List<RemoteVersion>>(responseBody);
+      JsonSerializer.Deserialize<List<RemoteVersion>>(responseBody, _jsonOptions);
     deserializedBody?.Reverse();
 
     var versions = new List<string>();
