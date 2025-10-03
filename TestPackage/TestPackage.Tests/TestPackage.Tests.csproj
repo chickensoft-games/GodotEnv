@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Chickensoft.GoDotTest" Version="2.0.16" />
+    <PackageReference Include="Chickensoft.GoDotTest" Version="2.0.17" />
     <!-- Bring your own assertion library for tests! -->
     <PackageReference Include="Shouldly" Version="4.3.0" />
     <!-- LightMock is a mocking library that can run without reflection. -->
