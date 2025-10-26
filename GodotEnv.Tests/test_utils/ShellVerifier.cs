@@ -7,7 +7,8 @@ using Chickensoft.GodotEnv.Common.Utilities;
 using Moq;
 using Shouldly;
 
-public enum RunMode {
+public enum RunMode
+{
   Run = 0,
   RunUnchecked = 1,
 }
@@ -16,14 +17,17 @@ public enum RunMode {
 /// Test utility class that makes it easier to verify the order of
 /// shell commands that were executed.
 /// </summary>
-public class ShellVerifier {
-  private readonly Dictionary<string, Mock<IShell>> _shells = new();
+public class ShellVerifier
+{
+  private readonly Dictionary<string, Mock<IShell>> _shells = [];
   private readonly MockSequence _sequence = new();
   private int _calls;
   private int _added;
 
-  public ShellVerifier(params string[] paths) {
-    foreach (var path in paths) {
+  public ShellVerifier(params string[] paths)
+  {
+    foreach (var path in paths)
+    {
       CreateShell(path);
     }
   }
@@ -34,7 +38,8 @@ public class ShellVerifier {
   /// <param name="workingDir">Directory in which the shell commands should
   /// be run from.</param>
   /// <returns>The mocked shell.</returns>
-  public Mock<IShell> CreateShell(string workingDir) {
+  public Mock<IShell> CreateShell(string workingDir)
+  {
     var shell = new Mock<IShell>(MockBehavior.Strict);
     _shells.Add(workingDir, shell);
     return shell;
@@ -85,11 +90,14 @@ public class ShellVerifier {
   /// expected order by the system under test.
   /// </summary>
   /// <exception cref="InvalidOperationException" />
-  public void VerifyAll() {
-    foreach (var (_, value) in _shells) {
+  public void VerifyAll()
+  {
+    foreach (var (_, value) in _shells)
+    {
       value.VerifyAll();
     }
-    if (_calls < _added) {
+    if (_calls < _added)
+    {
       throw new InvalidOperationException(
         $"{_calls} calls were made, but {_added} were added. " +
         $"Missing {_added - _calls} calls."
@@ -103,11 +111,14 @@ public class ShellVerifier {
     RunMode runMode,
     string exe,
     params string[] args
-  ) {
-    if (_shells.TryGetValue(workingDir, out var sh)) {
+  )
+  {
+    if (_shells.TryGetValue(workingDir, out var sh))
+    {
       MockShell(sh, result, runMode, exe, args);
     }
-    else {
+    else
+    {
       throw new InvalidOperationException($"Shell not found: {workingDir}");
     }
   }
@@ -118,14 +129,17 @@ public class ShellVerifier {
     RunMode runMode,
     string exe,
     string[] args
-  ) {
+  )
+  {
     var call = _added++;
-    if (runMode == RunMode.Run) {
+    if (runMode == RunMode.Run)
+    {
       shell.InSequence(_sequence).Setup(shell => shell.Run(exe, args))
         .Returns(Task.FromResult(result))
         .Callback(() => _calls++.ShouldBe(call));
     }
-    else {
+    else
+    {
       shell.InSequence(_sequence).Setup(
         shell => shell.RunUnchecked(exe, args)
       )

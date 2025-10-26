@@ -17,7 +17,8 @@ public record ProcessResult(
   int ExitCode,
   string StandardOutput = "",
   string StandardError = ""
-) {
+)
+{
   /// <summary>
   /// True if the process succeeded, false otherwise.
   /// </summary>
@@ -25,7 +26,8 @@ public record ProcessResult(
 }
 
 /// <summary>Process runner interface.</summary>
-public interface IProcessRunner {
+public interface IProcessRunner
+{
   /// <summary>
   /// Run an external process.
   /// </summary>
@@ -67,10 +69,12 @@ public interface IProcessRunner {
 }
 
 /// <summary>Process runner.</summary>
-public class ProcessRunner : IProcessRunner {
+public class ProcessRunner : IProcessRunner
+{
   public async Task<ProcessResult> Run(
     string workingDir, string exe, string[] args
-  ) {
+  )
+  {
     var stdOutBuffer = new StringBuilder();
     var stdErrBuffer = new StringBuilder();
     var result = await Cli.Wrap(exe)
@@ -89,8 +93,10 @@ public class ProcessRunner : IProcessRunner {
 
   public async Task<ProcessResult> RunElevatedOnWindows(
     string exe, string args
-  ) {
-    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+  )
+  {
+    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    {
       throw new InvalidOperationException(
         "RunElevatedOnWindows is only supported on Windows."
       );
@@ -98,9 +104,10 @@ public class ProcessRunner : IProcessRunner {
 
     // The user should be prompted for elevation if GodotEnv
     // doesn't have admin rights
-    bool shouldElevate = !UACHelper.UACHelper.IsElevated;
+    var shouldElevate = !UACHelper.UACHelper.IsElevated;
 
-    Process process = UACHelper.UACHelper.StartElevated(new ProcessStartInfo() {
+    var process = UACHelper.UACHelper.StartElevated(new ProcessStartInfo()
+    {
       FileName = exe,
       Arguments = args,
       UseShellExecute = shouldElevate,
@@ -123,7 +130,8 @@ public class ProcessRunner : IProcessRunner {
     string[] args,
     Action<string> onStdOut,
     Action<string> onStdError
-  ) {
+  )
+  {
     var stdOutBuffer = new StringBuilder();
     var stdErrBuffer = new StringBuilder();
 
@@ -133,8 +141,10 @@ public class ProcessRunner : IProcessRunner {
       .WithWorkingDirectory(workingDir);
 
     var exitCode = 0;
-    await cmd.Observe().ForEachAsync(@event => {
-      switch (@event) {
+    await cmd.Observe().ForEachAsync(@event =>
+    {
+      switch (@event)
+      {
         // case StartedCommandEvent started:
         case StandardOutputCommandEvent stdOut:
           onStdOut(stdOut.Text);

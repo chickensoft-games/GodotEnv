@@ -8,9 +8,11 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public partial class AddonsFileRepositoryTest {
+public partial class AddonsFileRepositoryTest
+{
   [Fact]
-  public void LoadsAddonsFile() {
+  public void LoadsAddonsFile()
+  {
     var fileClient = new Mock<IFileClient>();
     var repo = new AddonsFileRepository(fileClient.Object);
 
@@ -38,7 +40,8 @@ public partial class AddonsFileRepositoryTest {
   }
 
   [Fact]
-  public void CreatesAddonsConfiguration() {
+  public void CreatesAddonsConfiguration()
+  {
     var fileClient = new Mock<IFileClient>();
     var repo = new AddonsFileRepository(fileClient.Object);
 
@@ -57,7 +60,8 @@ public partial class AddonsFileRepositoryTest {
   }
 
   [Fact]
-  public void LoadsAddonsFileWhenCalledWithAddonsFileNameArgumentShouldLoadCorrectFile() {
+  public void LoadsAddonsFileWhenCalledWithAddonsFileNameArgumentShouldLoadCorrectFile()
+  {
     var fileClient = new Mock<IFileClient>();
     var repo = new AddonsFileRepository(fileClient.Object);
 

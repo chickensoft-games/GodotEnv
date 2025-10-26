@@ -10,13 +10,14 @@ public record GodotContext(
 ) : IGodotContext;
 
 /// <summary>Godot feature dependencies.</summary>
-public interface IGodotContext {
+public interface IGodotContext
+{
   /// <summary>Godot environment.</summary>
-  public IGodotEnvironment Platform { get; }
+  IGodotEnvironment Platform { get; }
 
   /// <summary>Godot installations repository.</summary>
-  public IGodotRepository GodotRepo { get; }
+  IGodotRepository GodotRepo { get; }
 
   /// <summary>Godot version-specifying repository.</summary>
-  public IGodotVersionSpecifierRepository VersionRepo { get; }
+  IGodotVersionSpecifierRepository VersionRepo { get; }
 }

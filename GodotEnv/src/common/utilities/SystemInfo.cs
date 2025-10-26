@@ -8,8 +8,9 @@ using Chickensoft.GodotEnv.Common.Models;
 /// <summary>
 /// Immutable system information (OS, CPU architecture, ...).
 /// </summary>
-public interface ISystemInfo {
-  public OSType OS { get; }
+public interface ISystemInfo
+{
+  OSType OS { get; }
 
   [
     SuppressMessage(
@@ -18,17 +19,19 @@ public interface ISystemInfo {
       Justification = "Missing cases handled by default"
     )
   ]
-  public OSFamily OSFamily =>
-    OS switch {
+  OSFamily OSFamily =>
+    OS switch
+    {
       OSType.Windows => OSFamily.Windows,
       OSType.Linux or OSType.MacOS => OSFamily.Unix,
       _ => OSFamily.Unknown
     };
 
-  public CPUArch CPUArch { get; }
+  CpuArch CpuArch { get; }
 }
 
-public class SystemInfo : ISystemInfo {
+public class SystemInfo : ISystemInfo
+{
   public OSType OS =>
     IsOSPlatformProxy(OSPlatform.OSX)
       ? OSType.MacOS
@@ -45,12 +48,13 @@ public class SystemInfo : ISystemInfo {
       Justification = "Missing cases handled by default"
     )
   ]
-  public CPUArch CPUArch => CPUArchProxy switch {
-    Architecture.X64 => CPUArch.X64,
-    Architecture.X86 => CPUArch.X86,
-    Architecture.Arm64 => CPUArch.Arm64,
-    Architecture.Arm => CPUArch.Arm,
-    _ => CPUArch.Other,
+  public CpuArch CpuArch => CpuArchProxy switch
+  {
+    Architecture.X64 => CpuArch.X64,
+    Architecture.X86 => CpuArch.X86,
+    Architecture.Arm64 => CpuArch.Arm64,
+    Architecture.Arm => CpuArch.Arm,
+    _ => CpuArch.Other,
   };
 
   // Shims for testing.
@@ -60,14 +64,15 @@ public class SystemInfo : ISystemInfo {
   public Func<OSPlatform, bool> IsOSPlatformProxy { get; set; } =
     IsOSPlatformDefault;
 
-  public static Architecture CPUArchDefault { get; } =
+  public static Architecture CpuArchDefault { get; } =
     RuntimeInformation.ProcessArchitecture;
 
-  public Architecture CPUArchProxy { get; set; } =
-    CPUArchDefault;
+  public Architecture CpuArchProxy { get; set; } =
+    CpuArchDefault;
 }
 
-public class MockSystemInfo(OSType os, CPUArch cpuArch) : ISystemInfo {
+public class MockSystemInfo(OSType os, CpuArch cpuArch) : ISystemInfo
+{
   public OSType OS { get; } = os;
-  public CPUArch CPUArch { get; } = cpuArch;
+  public CpuArch CpuArch { get; } = cpuArch;
 }

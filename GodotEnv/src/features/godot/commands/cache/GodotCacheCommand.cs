@@ -11,14 +11,17 @@ using CliWrap;
   "godot cache",
   Description = "Manage the Godot installation cache."
 )]
-public class GodotCacheCommand : ICommand, ICliCommand {
+public class GodotCacheCommand : ICommand, ICliCommand
+{
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
-  public GodotCacheCommand(IExecutionContext context) {
+  public GodotCacheCommand(IExecutionContext context)
+  {
     ExecutionContext = context;
   }
 
-  public async ValueTask ExecuteAsync(IConsole console) {
+  public async ValueTask ExecuteAsync(IConsole console)
+  {
     var log = ExecutionContext.CreateLog(console);
 
     log.Print("");

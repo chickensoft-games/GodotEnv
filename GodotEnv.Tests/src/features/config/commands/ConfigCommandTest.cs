@@ -9,11 +9,13 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class ConfigCommandTest {
+public class ConfigCommandTest
+{
 
   [Fact]
-  public async Task Executes() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public async Task Executes()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = MockConfig.Get();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();

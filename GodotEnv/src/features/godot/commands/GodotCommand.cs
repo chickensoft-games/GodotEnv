@@ -7,16 +7,18 @@ using CliFx.Attributes;
 using CliFx.Infrastructure;
 
 [Command("godot", Description = "Manage Godot installations.")]
-public class GodotCommand : ICommand, ICliCommand {
+public class GodotCommand : ICommand, ICliCommand
+{
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
-  public GodotCommand(IExecutionContext context) {
+  public GodotCommand(IExecutionContext context)
+  {
     ExecutionContext = context;
   }
 
-  public ValueTask ExecuteAsync(IConsole console) {
+  public ValueTask ExecuteAsync(IConsole console)
+  {
     var log = ExecutionContext.CreateLog(console);
-    var output = console.Output;
     log.Print("");
     log.Warn("Please use a subcommand to manage Godot installations.");
     log.Print("");

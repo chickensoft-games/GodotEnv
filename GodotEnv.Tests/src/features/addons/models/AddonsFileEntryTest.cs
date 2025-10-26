@@ -5,12 +5,14 @@ using Chickensoft.GodotEnv.Features.Addons.Models;
 using Shouldly;
 using Xunit;
 
-public class AddonsFileEntryTest {
+public class AddonsFileEntryTest
+{
   public const string URL = "git@github.com:chickensoft-games/GodotEnv.git";
   public const string CHECKOUT = "main";
 
   [Fact]
-  public void InitializesWithDefaults() {
+  public void InitializesWithDefaults()
+  {
     var entry = new AddonsFileEntry { Url = URL };
     entry.Url.ShouldBe(URL);
     entry.Subfolder.ShouldBe(Defaults.SUBFOLDER);
@@ -19,8 +21,10 @@ public class AddonsFileEntryTest {
   }
 
   [Fact]
-  public void InitializesWithValues() {
-    var entry = new AddonsFileEntry {
+  public void InitializesWithValues()
+  {
+    var entry = new AddonsFileEntry
+    {
       Url = URL,
       Subfolder = "/",
       Checkout = CHECKOUT,
@@ -33,7 +37,8 @@ public class AddonsFileEntryTest {
   }
 
   [Fact]
-  public void ToAddonConvertsEntryToAddon() {
+  public void ToAddonConvertsEntryToAddon()
+  {
     var entry = new AddonsFileEntry { Url = URL };
     var addon = entry.ToAddon("godotenv", URL, "addons.json");
     addon.Name.ShouldBe("godotenv");

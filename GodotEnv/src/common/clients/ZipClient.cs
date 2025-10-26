@@ -10,7 +10,8 @@ using Chickensoft.GodotEnv.Common.Utilities;
 /// <summary>
 /// Zip client. Credit: https://stackoverflow.com/a/42436311
 /// </summary>
-public interface IZipClient {
+public interface IZipClient
+{
   Task<int> ExtractToDirectory(
     string sourceArchiveFileName,
     string destinationDirectoryName,
@@ -21,7 +22,8 @@ public interface IZipClient {
 /// <summary>
 /// Zip client. Credit: https://stackoverflow.com/a/42436311
 /// </summary>
-public class ZipClient : IZipClient {
+public class ZipClient : IZipClient
+{
   public static Func<string, ZipArchive> ZipFileOpenReadDefault { get; } =
     (path) => ZipFile.Open(path, ZipArchiveMode.Read);
   public static Func<string, ZipArchive> ZipFileOpenRead { get; set; } =
@@ -29,7 +31,8 @@ public class ZipClient : IZipClient {
 
   public IFileSystem Files { get; }
 
-  public ZipClient(IFileSystem files) {
+  public ZipClient(IFileSystem files)
+  {
     Files = files;
   }
 
@@ -37,19 +40,22 @@ public class ZipClient : IZipClient {
     string sourceArchiveFileName,
     string destinationDirectoryName,
     IProgress<double> progress
-  ) {
+  )
+  {
     using var archive = ZipFileOpenRead(sourceArchiveFileName);
     var totalBytes = archive.Entries.Sum(e => e.Length);
     var currentBytes = 0d;
 
-    foreach (var entry in archive.Entries) {
+    foreach (var entry in archive.Entries)
+    {
       var fileName = Files.Path.Combine(
         destinationDirectoryName, entry.FullName
       );
 
       var isDirectory = fileName.EndsWith('/') || fileName.EndsWith('\\');
 
-      if (isDirectory) {
+      if (isDirectory)
+      {
         Files.Directory.CreateDirectory(fileName);
         continue;
       }
@@ -57,11 +63,13 @@ public class ZipClient : IZipClient {
       Files.Directory.CreateDirectory(Files.Path.GetDirectoryName(fileName)!);
 
       using (var inputStream = entry.Open())
-      using (var outputStream = Files.File.OpenWrite(fileName)) {
+      using (var outputStream = Files.File.OpenWrite(fileName))
+      {
         var progressStream = new ProgressStream(
           outputStream,
           new Progress<int>((p) => { }),
-          new Progress<int>(i => {
+          new Progress<int>(i =>
+          {
             currentBytes += i;
             progress.Report(currentBytes / totalBytes);
           })

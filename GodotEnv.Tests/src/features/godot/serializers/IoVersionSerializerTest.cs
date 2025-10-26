@@ -6,8 +6,10 @@ using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using Shouldly;
 using Xunit;
 
-public class IoVersionStringConverterTest {
-  public static IEnumerable<object[]> CorrectReleaseVersionSerializationTestData() {
+public class IoVersionStringConverterTest
+{
+  public static IEnumerable<object[]> CorrectReleaseVersionSerializationTestData()
+  {
     yield return [new GodotVersionNumber(0, 0, 1, "stable", -1), "0.0.1-stable"];
     yield return [new GodotVersionNumber(1, 2, 0, "stable", -1), "1.2-stable"];
     yield return [new GodotVersionNumber(1, 2, 3, "stable", -1), "1.2.3-stable"];
@@ -17,7 +19,8 @@ public class IoVersionStringConverterTest {
 
   [Theory]
   [MemberData(nameof(CorrectReleaseVersionSerializationTestData))]
-  public void CorrectReleaseVersionSerialization(GodotVersionNumber toFormat, string expected) {
+  public void CorrectReleaseVersionSerialization(GodotVersionNumber toFormat, string expected)
+  {
     var serializer = new IoVersionSerializer();
     Assert.Equal(expected, serializer.Serialize(new AnyDotnetStatusGodotVersion(toFormat)));
     Assert.Equal(expected, serializer.Serialize(new SpecificDotnetStatusGodotVersion(toFormat, true)));
@@ -25,14 +28,16 @@ public class IoVersionStringConverterTest {
   }
 
   [Fact]
-  public void CorrectDotnetStatusSerialization() {
+  public void CorrectDotnetStatusSerialization()
+  {
     var serializer = new IoVersionSerializer();
     serializer.SerializeWithDotnetStatus(new SpecificDotnetStatusGodotVersion(4, 4, 1, "stable", -1, true))
       .ShouldBe("4.4.1-stable dotnet");
   }
 
   [Fact]
-  public void CorrectNoDotnetStatusSerialization() {
+  public void CorrectNoDotnetStatusSerialization()
+  {
     var serializer = new IoVersionSerializer();
     serializer.SerializeWithDotnetStatus(new SpecificDotnetStatusGodotVersion(4, 4, 1, "stable", -1, false))
       .ShouldBe("4.4.1-stable no-dotnet");

@@ -9,16 +9,19 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class GlobalJsonFileTest {
+public class GlobalJsonFileTest
+{
   [Fact]
-  public void NewGlobalJsonFileHasFilePath() {
+  public void NewGlobalJsonFileHasFilePath()
+  {
     var path = "/test/path";
     var file = new GlobalJsonFile(path);
     file.FilePath.ShouldBe(path);
   }
 
   [Fact]
-  public void ParsedVersionIsGodotSdkIfPresent() {
+  public void ParsedVersionIsGodotSdkIfPresent()
+  {
     var contents =
         /*lang=json,strict*/
         """
@@ -34,8 +37,10 @@ public class GlobalJsonFileTest {
         """;
     var path = "/test/path";
     var file = new GlobalJsonFile(path);
-    using (var stream = new MemoryStream()) {
-      using (var writer = new StreamWriter(stream, leaveOpen: true)) {
+    using (var stream = new MemoryStream())
+    {
+      using (var writer = new StreamWriter(stream, leaveOpen: true))
+      {
         writer.Write(contents);
         writer.Flush();
       }
@@ -48,7 +53,8 @@ public class GlobalJsonFileTest {
   }
 
   [Fact]
-  public void ParsedVersionIsNullIfGodotSdkNotPresent() {
+  public void ParsedVersionIsNullIfGodotSdkNotPresent()
+  {
     var contents =
         /*lang=json,strict*/
         """
@@ -61,8 +67,10 @@ public class GlobalJsonFileTest {
         """;
     var path = "/test/path";
     var file = new GlobalJsonFile(path);
-    using (var stream = new MemoryStream()) {
-      using (var writer = new StreamWriter(stream, leaveOpen: true)) {
+    using (var stream = new MemoryStream())
+    {
+      using (var writer = new StreamWriter(stream, leaveOpen: true))
+      {
         writer.Write(contents);
         writer.Flush();
       }
@@ -74,7 +82,8 @@ public class GlobalJsonFileTest {
   }
 
   [Fact]
-  public void ParseVersionThrowsIfGodotSdkVersionInvalid() {
+  public void ParseVersionThrowsIfGodotSdkVersionInvalid()
+  {
     var contents =
         /*lang=json,strict*/
         """
@@ -90,8 +99,10 @@ public class GlobalJsonFileTest {
         """;
     var path = "/test/path";
     var file = new GlobalJsonFile(path);
-    using (var stream = new MemoryStream()) {
-      using (var writer = new StreamWriter(stream, leaveOpen: true)) {
+    using (var stream = new MemoryStream())
+    {
+      using (var writer = new StreamWriter(stream, leaveOpen: true))
+      {
         writer.Write(contents);
         writer.Flush();
       }
@@ -103,7 +114,8 @@ public class GlobalJsonFileTest {
   }
 
   [Fact]
-  public void WriteGodotVersionOpensWriterToNewFileAndWritesVersionWithDotnetStatus() {
+  public void WriteGodotVersionOpensWriterToNewFileAndWritesVersionWithDotnetStatus()
+  {
     var expectedRawJson =
       /*lang=json,strict*/
       """
@@ -127,7 +139,8 @@ public class GlobalJsonFileTest {
   }
 
   [Fact]
-  public void WriteGodotVersionOpensWriterToExistingFileAndWritesNewMsbuildSdkSectionAndVersionWithDotnetStatus() {
+  public void WriteGodotVersionOpensWriterToExistingFileAndWritesNewMsbuildSdkSectionAndVersionWithDotnetStatus()
+  {
     var existingJson =
       /*lang=json,strict*/
       """
@@ -156,8 +169,10 @@ public class GlobalJsonFileTest {
     var path = "/test/path/global.json";
     var version = new SpecificDotnetStatusGodotVersion(4, 4, 1, "stable", -1, true);
     var file = new GlobalJsonFile(path);
-    using (var stream = new MemoryStream()) {
-      using (var existingWriter = new StreamWriter(stream, leaveOpen: true)) {
+    using (var stream = new MemoryStream())
+    {
+      using (var existingWriter = new StreamWriter(stream, leaveOpen: true))
+      {
         existingWriter.Write(existingJson);
         existingWriter.Flush();
       }
@@ -173,7 +188,8 @@ public class GlobalJsonFileTest {
   }
 
   [Fact]
-  public void WriteGodotVersionOpensWriterToExistingFileAndOverwritesExistingVersionWithDotnetStatus() {
+  public void WriteGodotVersionOpensWriterToExistingFileAndOverwritesExistingVersionWithDotnetStatus()
+  {
     var existingJson =
       /*lang=json,strict*/
       """
@@ -205,8 +221,10 @@ public class GlobalJsonFileTest {
     var path = "/test/path/global.json";
     var version = new SpecificDotnetStatusGodotVersion(4, 4, 1, "stable", -1, true);
     var file = new GlobalJsonFile(path);
-    using (var stream = new MemoryStream()) {
-      using (var existingWriter = new StreamWriter(stream, leaveOpen: true)) {
+    using (var stream = new MemoryStream())
+    {
+      using (var existingWriter = new StreamWriter(stream, leaveOpen: true))
+      {
         existingWriter.Write(existingJson);
         existingWriter.Flush();
       }

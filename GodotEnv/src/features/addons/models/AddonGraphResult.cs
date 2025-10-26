@@ -1,4 +1,5 @@
 namespace Chickensoft.GodotEnv;
+
 using System.Collections.Generic;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Addons.Models;
@@ -21,20 +22,25 @@ public interface IAddonGraphFailureResult { }
 /// same source url to be cached more than once, which can be expensive.</param>
 public record AddonResolvedButMightConflict(
   IAddon Addon, List<IAddon> Conflicts, IAddon CanonicalAddon
-) : IAddonGraphResult, IAddonGraphWarningResult {
+) : IAddonGraphResult, IAddonGraphWarningResult
+{
   public void Report(ILog log) => log.Warn(ToString());
 
-  public override string ToString() {
+  public override string ToString()
+  {
     var article = Conflicts.Count == 1 ? "a" : "the";
     var s = Conflicts.Count == 1 ? "" : "s";
     var buffer = new List<string>();
-    foreach (var conflict in Conflicts) {
-      if (conflict.Url != Addon.Url) { continue; }
+    foreach (var conflict in Conflicts)
+    {
+      if (conflict.Url != Addon.Url)
+      { continue; }
       buffer.Add(
         $"\nBoth \"{Addon.Name}\" and \"{conflict.Name}\" could " +
         "potentially conflict with each other.\n"
       );
-      if (Addon.Subfolder != conflict.Subfolder) {
+      if (Addon.Subfolder != conflict.Subfolder)
+      {
         buffer.Add(
           "- Different subfolders from the same url are required."
         );
@@ -47,7 +53,8 @@ public record AddonResolvedButMightConflict(
           $"from `{conflict.Url}`"
         );
       }
-      else if (Addon.Checkout != conflict.Checkout) {
+      else if (Addon.Checkout != conflict.Checkout)
+      {
         buffer.Add(
           "- Different checkouts from the same url are required."
         );
@@ -77,7 +84,8 @@ public record AddonResolvedButMightConflict(
 /// <param name="CanonicalAddon">Previously resolved addon.</param>
 public record AddonCannotBeResolved(
   IAddon Addon, IAddon CanonicalAddon
-) : IAddonGraphResult, IAddonGraphFailureResult {
+) : IAddonGraphResult, IAddonGraphFailureResult
+{
   public void Report(ILog log) => log.Err(ToString());
 
   public override string ToString() =>
@@ -101,7 +109,8 @@ public record AddonCannotBeResolved(
 /// <returns></returns>
 public record AddonAlreadyResolved(
   IAddon Addon, IAddon CanonicalAddon
-) : IAddonGraphResult, IAddonGraphWarningResult {
+) : IAddonGraphResult, IAddonGraphWarningResult
+{
   public void Report(ILog log) => log.Warn(ToString());
 
   public override string ToString() =>
@@ -115,7 +124,8 @@ public record AddonAlreadyResolved(
 /// An addon was successfully resolved.
 /// </summary>
 /// <param name="Addon">Resolved addon.</param>
-public record AddonResolved(IAddon Addon) : IAddonGraphResult {
+public record AddonResolved(IAddon Addon) : IAddonGraphResult
+{
   public void Report(ILog log) => log.Info(ToString());
 
   public override string ToString() =>

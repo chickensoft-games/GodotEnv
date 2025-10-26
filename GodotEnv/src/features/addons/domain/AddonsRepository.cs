@@ -9,7 +9,8 @@ using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Addons.Models;
 
-public interface IAddonsRepository {
+public interface IAddonsRepository
+{
   ISystemInfo SystemInfo { get; }
   IFileClient FileClient { get; }
   INetworkClient NetworkClient { get; }
@@ -101,7 +102,8 @@ public class AddonsRepository(
   IComputer computer,
   AddonsConfiguration config,
   IProcessRunner processRunner
-) : IAddonsRepository {
+) : IAddonsRepository
+{
 
   public ISystemInfo SystemInfo { get; } = systemInfo;
   public IFileClient FileClient { get; } = fileClient;
@@ -111,14 +113,17 @@ public class AddonsRepository(
   public AddonsConfiguration Config { get; } = config;
   public IProcessRunner ProcessRunner { get; } = processRunner;
 
-  public string ResolveUrl(IAsset asset, string path) {
+  public string ResolveUrl(IAsset asset, string path)
+  {
     var url = asset.Url;
-    if (asset.IsRemote || asset.IsZip) { return url; }
+    if (asset.IsRemote || asset.IsZip)
+    { return url; }
     // If the path containing the addons.json is a symlink, determine the
     // actual path containing the addons.json file. This allows addons
     // that have their own addons with relative paths to be relative to
     // where the addon is actually stored, which is more intuitive.
-    if (FileClient.IsDirectorySymlink(path)) {
+    if (FileClient.IsDirectorySymlink(path))
+    {
       path = FileClient.DirectorySymlinkTarget(path);
     }
 
@@ -130,11 +135,14 @@ public class AddonsRepository(
     return FileClient.GetRootedPath(url, path);
   }
 
-  public void EnsureCacheAndAddonsDirectoriesExists() {
-    if (!FileClient.DirectoryExists(Config.CachePath)) {
+  public void EnsureCacheAndAddonsDirectoriesExists()
+  {
+    if (!FileClient.DirectoryExists(Config.CachePath))
+    {
       FileClient.CreateDirectory(Config.CachePath);
     }
-    if (!FileClient.DirectoryExists(Config.AddonsPath)) {
+    if (!FileClient.DirectoryExists(Config.AddonsPath))
+    {
       FileClient.CreateDirectory(Config.AddonsPath);
     }
   }
@@ -145,8 +153,10 @@ public class AddonsRepository(
     IProgress<DownloadProgress> downloadProgress,
     IProgress<double> extractProgress,
     CancellationToken token
-  ) {
-    if (addon.IsSymlink) {
+  )
+  {
+    if (addon.IsSymlink)
+    {
       // Symlink'd addon
 
       // Return what should be the resolved url: that is, what the symlink
@@ -158,12 +168,14 @@ public class AddonsRepository(
 
     var addonCachePath = FileClient.Combine(Config.CachePath, cacheName);
 
-    if (addon.IsZip) {
+    if (addon.IsZip)
+    {
       // Remote zip file
       var zipFilename = addon.Hash + ".zip";
       var extractedDir = FileClient.Combine(addonCachePath, addon.Hash);
 
-      if (FileClient.DirectoryExists(extractedDir)) {
+      if (FileClient.DirectoryExists(extractedDir))
+      {
         // Extracted zip file already exists
         return extractedDir;
       }
@@ -192,10 +204,12 @@ public class AddonsRepository(
 
       return extractedDir;
     }
-    else {
+    else
+    {
       // Local or remote git repository
 
-      if (!FileClient.DirectoryExists(addonCachePath)) {
+      if (!FileClient.DirectoryExists(addonCachePath))
+      {
         var addonsCacheShell = Computer.CreateShell(Config.CachePath);
         await addonsCacheShell.Run(
           "git", "clone", addon.Url, "--recurse-submodules", cacheName
@@ -208,8 +222,10 @@ public class AddonsRepository(
     }
   }
 
-  public async Task UpdateCache(IAddon addon, string cacheName) {
-    if (addon.IsSymlink || addon.IsZip) { return; }
+  public async Task UpdateCache(IAddon addon, string cacheName)
+  {
+    if (addon.IsSymlink || addon.IsZip)
+    { return; }
 
     var addonCachePath = FileClient.Combine(Config.CachePath, cacheName);
     var addonCacheShell = Computer.CreateShell(addonCachePath);
@@ -221,8 +237,10 @@ public class AddonsRepository(
     );
   }
 
-  public async Task PrepareCache(IAddon addon, string cacheName) {
-    if (addon.IsSymlink || addon.IsZip) { return; }
+  public async Task PrepareCache(IAddon addon, string cacheName)
+  {
+    if (addon.IsSymlink || addon.IsZip)
+    { return; }
 
     var addonCachePath = FileClient.Combine(Config.CachePath, cacheName);
     var addonCacheShell = Computer.CreateShell(addonCachePath);
@@ -230,10 +248,13 @@ public class AddonsRepository(
     await addonCacheShell.Run("git", "checkout", addon.Checkout);
   }
 
-  public async Task DeleteAddon(IAddon addon) {
+  public async Task DeleteAddon(IAddon addon)
+  {
     var addonPath = FileClient.Combine(Config.AddonsPath, addon.Name);
-    if (!FileClient.DirectoryExists(addonPath)) { return; }
-    if (FileClient.IsDirectorySymlink(addonPath)) {
+    if (!FileClient.DirectoryExists(addonPath))
+    { return; }
+    if (FileClient.IsDirectorySymlink(addonPath))
+    {
       // We don't need to check git status for symlink'd addons.
       await FileClient.DeleteDirectory(addonPath);
       return;
@@ -242,9 +263,11 @@ public class AddonsRepository(
     var status = await addonShell.RunUnchecked(
       "git", "status", "--porcelain"
     );
-    if (status.StandardOutput.Length == 0) {
+    if (status.StandardOutput.Length == 0)
+    {
       // Installed addon is unmodified by the user, free to delete.
-      if (SystemInfo.OSFamily == OSFamily.Windows) {
+      if (SystemInfo.OSFamily == OSFamily.Windows)
+      {
         // On windows, delete files using command prompt (since C# fails
         // to delete .git folders using .net file api's)
         // TODO: Use FileClient.DeleteDirectory() on windows
@@ -257,7 +280,8 @@ public class AddonsRepository(
       }
       await FileClient.DeleteDirectory(addonPath);
     }
-    else {
+    else
+    {
       throw new IOException(
         $"Cannot delete modified addon {addon.Name}. Please backup or " +
         "discard your changes and delete the addon manually." +
@@ -266,13 +290,15 @@ public class AddonsRepository(
     }
   }
 
-  public async Task InstallAddonFromCache(IAddon addon, string cacheName) {
+  public async Task InstallAddonFromCache(IAddon addon, string cacheName)
+  {
     var addonCachePath = GetCachedAddonPath(addon, cacheName);
     // copy addon from cache to installation location
     var projectShell = Computer.CreateShell(Config.ProjectPath);
     var copyFromPath = addonCachePath;
     var subfolder = addon.Subfolder;
-    if (subfolder != "/") {
+    if (subfolder != "/")
+    {
       copyFromPath = FileClient.Combine(copyFromPath, subfolder);
     }
     // Add a trailing slash to the source directory we are copying from.
@@ -305,9 +331,11 @@ public class AddonsRepository(
     );
   }
 
-  public void InstallAddonWithSymlink(IAddon addon) {
+  public void InstallAddonWithSymlink(IAddon addon)
+  {
     // Creates a symlink to the addon's url (which should be a local file path)
-    if (!addon.IsSymlink) {
+    if (!addon.IsSymlink)
+    {
       throw new IOException(
         $"Addon {addon.Name} is not a symlink addon."
       );
@@ -316,36 +344,43 @@ public class AddonsRepository(
     var symlinkSource = addon.Url;
     var symlinkTarget = FileClient.Combine(Config.AddonsPath, addon.Name);
 
-    if (addon.Subfolder != "/") {
+    if (addon.Subfolder != "/")
+    {
       symlinkSource = FileClient.Combine(symlinkSource, addon.Subfolder);
     }
 
-    if (FileClient.DirectoryExists(symlinkTarget)) {
+    if (FileClient.DirectoryExists(symlinkTarget))
+    {
       throw new IOException(
         $"Addon \"{addon.Name}\" already installed. Please delete the " +
         "existing addon and try again."
       );
     }
 
-    if (!FileClient.DirectoryExists(symlinkSource)) {
+    if (!FileClient.DirectoryExists(symlinkSource))
+    {
       throw new IOException(
         $"Addon \"{addon.Name}\" cannot be found at `{symlinkSource}`."
       );
     }
 
-    try {
+    try
+    {
       FileClient.CreateSymlink(symlinkTarget, symlinkSource);
     }
-    catch {
+    catch
+    {
       throw new IOException(
         $"Failed to create symlink for addon \"{addon.Name}\"."
       );
     }
   }
 
-  internal void ValidateSubfolder(string subfolderPath, string addonName) {
+  internal void ValidateSubfolder(string subfolderPath, string addonName)
+  {
     // Verify that full path with subfolder exists
-    if (!FileClient.DirectoryExists(subfolderPath)) {
+    if (!FileClient.DirectoryExists(subfolderPath))
+    {
       throw new IOException(
         $"Repository folder `{subfolderPath}` does not exist in addon \"{addonName}\" cache. " +
         "Please ensure subfolder points to a valid folder or use `/` to copy from addon root."

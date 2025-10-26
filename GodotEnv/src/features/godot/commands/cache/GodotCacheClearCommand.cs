@@ -12,18 +12,20 @@ using CliWrap;
   Description = "Clear the Godot installation cache."
 )]
 public class GodotCacheClearCommand :
-  ICommand, ICliCommand, IWindowsElevationEnabled {
+  ICommand, ICliCommand, IWindowsElevationEnabled
+{
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
   public bool IsWindowsElevationRequired => true;
 
-  public GodotCacheClearCommand(IExecutionContext context) {
+  public GodotCacheClearCommand(IExecutionContext context)
+  {
     ExecutionContext = context;
   }
 
-  public async ValueTask ExecuteAsync(IConsole console) {
+  public async ValueTask ExecuteAsync(IConsole console)
+  {
     var godotRepo = ExecutionContext.Godot.GodotRepo;
-    var platform = ExecutionContext.Godot.Platform;
 
     var log = ExecutionContext.CreateLog(console);
 

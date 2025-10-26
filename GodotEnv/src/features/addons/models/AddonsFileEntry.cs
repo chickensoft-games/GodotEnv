@@ -6,7 +6,8 @@ using Chickensoft.GodotEnv.Common.Models;
 /// <summary>
 /// Represents an addon entry in an addons configuration file.
 /// </summary>
-public record AddonsFileEntry : IAsset {
+public record AddonsFileEntry : IAsset
+{
   [JsonPropertyName("url")]
   public required string Url { get; init; }
 

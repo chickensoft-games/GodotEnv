@@ -14,14 +14,17 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class AddonsInstallCommandTest {
-  private sealed class TestException : Exception {
+public class AddonsInstallCommandTest
+{
+  private sealed class TestException : Exception
+  {
     public TestException(string message) : base(message) { }
     public override string ToString() => Message;
   }
 
   [Fact]
-  public void Initializes() {
+  public void Initializes()
+  {
     var context = new Mock<IExecutionContext>();
     var command = new AddonsInstallCommand(context.Object);
 
@@ -32,13 +35,14 @@ public class AddonsInstallCommandTest {
     out Mock<IAddonsInstaller> addonsInstaller,
     out FakeInMemoryConsole console,
     out ILog log
-  ) {
+  )
+  {
     // Addons command operates at a high level of abstraction given the number
     // of systems required to install addons, so we'll setup all the mocks here
     // and provide access to the relevant mocks for testing via out vars.
 
     var systemInfo = new Mock<ISystemInfo>();
-    systemInfo.Setup(sys => sys.CPUArch).Returns(CPUArch.X64);
+    systemInfo.Setup(sys => sys.CpuArch).Returns(CpuArch.X64);
     systemInfo.Setup(sys => sys.OS).Returns(OSType.Linux);
     systemInfo.Setup(sys => sys.OSFamily).Returns(OSFamily.Unix);
     var config = MockConfig.Get();
@@ -76,7 +80,8 @@ public class AddonsInstallCommandTest {
   }
 
   [Fact]
-  public async Task AddonsInstallCommandSucceedsWhenInstallerHasNoErrors() {
+  public async Task AddonsInstallCommandSucceedsWhenInstallerHasNoErrors()
+  {
     var command = BuildSubject(
       out var addonsInstaller, out var console, out var log
     );
@@ -109,7 +114,8 @@ public class AddonsInstallCommandTest {
   }
 
   [Fact]
-  public async Task AddonsInstallCommandFailsWhenInstallerHasErrors() {
+  public async Task AddonsInstallCommandFailsWhenInstallerHasErrors()
+  {
     var command = BuildSubject(
       out var addonsInstaller, out var console, out var log
     );
@@ -152,7 +158,8 @@ public class AddonsInstallCommandTest {
 
 
   [Fact]
-  public void FinishThrowsExceptionOnCannotBeResolved() {
+  public void FinishThrowsExceptionOnCannotBeResolved()
+  {
     var log = new Mock<ILog>();
 
     Should.Throw<CommandException>(
@@ -165,7 +172,8 @@ public class AddonsInstallCommandTest {
   }
 
   [Fact]
-  public void FinishThrowsExceptionOnNotAttempted() {
+  public void FinishThrowsExceptionOnNotAttempted()
+  {
     var log = new Mock<ILog>();
 
     Should.Throw<CommandException>(
@@ -178,7 +186,8 @@ public class AddonsInstallCommandTest {
   }
 
   [Fact]
-  public void FinishOutputsSuccessOnSucceeded() {
+  public void FinishOutputsSuccessOnSucceeded()
+  {
     var log = new Mock<ILog>();
 
     AddonsInstallCommand.Finish(
@@ -191,7 +200,8 @@ public class AddonsInstallCommandTest {
   }
 
   [Fact]
-  public void FinishOutputsSuccessOnNothingToInstall() {
+  public void FinishOutputsSuccessOnNothingToInstall()
+  {
     var log = new Mock<ILog>();
 
     AddonsInstallCommand.Finish(

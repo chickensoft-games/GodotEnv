@@ -6,7 +6,8 @@ using Chickensoft.GodotEnv.Features.Addons.Models;
 using Shouldly;
 using Xunit;
 
-public class AddonsFileTest {
+public class AddonsFileTest
+{
   public static readonly Dictionary<string, AddonsFileEntry> ENTRIES
     = new() {
       { "a", new AddonsFileEntry{ Url = "https://a.git" } },
@@ -16,7 +17,8 @@ public class AddonsFileTest {
   public const string CACHE_PATH = ".my_addons";
 
   [Fact]
-  public void InitializesWithDefaults() {
+  public void InitializesWithDefaults()
+  {
     var addonsFile = new AddonsFile();
     addonsFile.Addons.ShouldBeEmpty();
     addonsFile.CacheRelativePath.ShouldBe(Defaults.CACHE_PATH);
@@ -24,7 +26,8 @@ public class AddonsFileTest {
   }
 
   [Fact]
-  public void Initializes() {
+  public void Initializes()
+  {
     var addonsFile = new AddonsFile(
       ENTRIES,
       CACHE_PATH,

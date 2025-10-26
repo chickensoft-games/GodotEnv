@@ -14,14 +14,17 @@ using CliFx.Infrastructure;
     ".editorconfig file in the addons directory to prevent addons from " +
     "causing unnecessary IDE analyzer warnings. Runs non-destructively."
 )]
-public class AddonsInitCommand : ICommand, ICliCommand {
+public class AddonsInitCommand : ICommand, ICliCommand
+{
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
-  public AddonsInitCommand(IExecutionContext context) {
+  public AddonsInitCommand(IExecutionContext context)
+  {
     ExecutionContext = context;
   }
 
-  public async ValueTask ExecuteAsync(IConsole console) {
+  public async ValueTask ExecuteAsync(IConsole console)
+  {
     var log = ExecutionContext.CreateLog(console);
     var repo = ExecutionContext.Addons.AddonsFileRepo;
 

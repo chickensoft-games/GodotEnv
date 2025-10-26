@@ -15,12 +15,14 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class GodotRepositoryTest {
+public class GodotRepositoryTest
+{
   [Fact]
-  public async Task AddOrUpdateGodotEnvVariable() {
+  public async Task AddOrUpdateGodotEnvVariable()
+  {
     var workingDir = ".";
 
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var computer = new Mock<IComputer>();
     var processRunner = new Mock<IProcessRunner>();
     var fileClient = new Mock<IFileClient>();
@@ -59,8 +61,10 @@ public class GodotRepositoryTest {
     var godotRepo = new GodotRepository(
       systemInfo: systemInfo,
       config: new Config(
-        new ConfigValues {
-          Godot = new GodotConfigSection {
+        new ConfigValues
+        {
+          Godot = new GodotConfigSection
+          {
             InstallationsPath = "INSTALLATION_PATH"
           },
         }
@@ -89,8 +93,9 @@ public class GodotRepositoryTest {
   [InlineData("4.0-rc1")]
   [InlineData("4.0.1-stable")]
   [InlineData("3.5.4-dev6")]
-  public void DirectoryToVersionUndoesVersionFsName(string godotVersionString) {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public void DirectoryToVersionUndoesVersionFsName(string godotVersionString)
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var computer = new Mock<IComputer>();
     var processRunner = new Mock<IProcessRunner>();
 
@@ -120,8 +125,10 @@ public class GodotRepositoryTest {
     var godotRepo = new GodotRepository(
       systemInfo: systemInfo,
       config: new Config(
-        new ConfigValues {
-          Godot = new GodotConfigSection {
+        new ConfigValues
+        {
+          Godot = new GodotConfigSection
+          {
             InstallationsPath = "INSTALLATION_PATH"
           },
         }

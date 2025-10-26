@@ -7,7 +7,8 @@ using Chickensoft.GodotEnv.Common.Models;
 /// <summary>
 /// Addons configuration file loaded from an <c>addons.json</c> file.
 /// </summary>
-public class AddonsFile {
+public class AddonsFile
+{
   /// <summary>
   /// Addons entries. Each entry contains information about the addon to install
   /// and is keyed by the name of the addon.
@@ -36,7 +37,8 @@ public class AddonsFile {
     Dictionary<string, AddonsFileEntry>? addons = null,
     string? cacheRelativePath = null,
     string? pathRelativePath = null
-  ) {
+  )
+  {
     Addons = addons ?? [];
     CacheRelativePath = cacheRelativePath ?? Defaults.CACHE_PATH;
     PathRelativePath = pathRelativePath ?? Defaults.ADDONS_PATH;

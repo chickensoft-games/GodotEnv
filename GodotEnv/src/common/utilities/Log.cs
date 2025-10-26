@@ -9,70 +9,75 @@ using Chickensoft.GodotEnv.Common.Models;
 using CliFx.Infrastructure;
 
 /// <summary>CLI log interface.</summary>
-public interface ILog {
-  public ISystemInfo SystemInfo { get; }
+public interface ILog
+{
+  ISystemInfo SystemInfo { get; }
   /// <summary>Application configuration.</summary>
-  public IConfig Config { get; }
+  IConfig Config { get; }
   /// <summary>CLI command console.</summary>
-  public IConsole Console { get; }
+  IConsole Console { get; }
   /// <summary>Print an error message to the console.</summary>
   /// <param name="message">Error message.</param>
-  public void Err(object? message);
+  void Err(object? message);
   /// <summary>Print an error message to the console in place.</summary>
   /// <param name="message">Error message.</param>
-  public void ErrInPlace(object? message);
+  void ErrInPlace(object? message);
   /// <summary>Print a message to the console.</summary>
   /// <param name="message">Message.</param>
-  public void Print(object? message);
+  void Print(object? message);
   /// <summary>Print a message to the console in place.</summary>
   /// <param name="message">Message.</param>
-  public void PrintInPlace(object? message);
+  void PrintInPlace(object? message);
   /// <summary>Print an information message to the console.</summary>
   /// <param name="message">Informational message.</param>
-  public void Info(object? message);
+  void Info(object? message);
   /// <summary>Print an information message to the console in place.</summary>
   /// <param name="message">Informational message.</param>
-  public void InfoInPlace(object? message);
+  void InfoInPlace(object? message);
   /// <summary>Print a success message to the console.</summary>
   /// <param name="message">Success message.</param>
-  public void Success(object? message);
+  void Success(object? message);
   /// <summary>Print a success message to the console in place.</summary>
   /// <param name="message">Success message.</param>
-  public void SuccessInPlace(object? message);
+  void SuccessInPlace(object? message);
   /// <summary>Print a warning message to the console.</summary>
   /// <param name="message">Warning message.</param>
-  public void Warn(object? message);
+  void Warn(object? message);
   /// <summary>Print a warning message to the console in place.</summary>
   /// <param name="message">Warning message.</param>
-  public void WarnInPlace(object? message);
+  void WarnInPlace(object? message);
   /// <summary>
   /// Clears the last written line of the console.
   /// </summary>
-  public void ClearCurrentLine();
+  void ClearCurrentLine();
 }
 
 /// <summary>
 /// Interface of event objects which can output themselves to a log.
 /// </summary>
-public interface IReportableEvent {
+public interface IReportableEvent
+{
   /// <summary>Report the event to a log.</summary>
   /// <param name="log">Log to output to.</param>
-  public void Report(ILog log);
+  void Report(ILog log);
 }
 
 /// <summary>Custom reportable event.</summary>
-public record ReportableEvent : IReportableEvent {
+public record ReportableEvent : IReportableEvent
+{
   /// <summary>Callback that receives a log for outputting messages.</summary>
   public Action<ILog> Action { get; }
 
-  public ReportableEvent(Action<ILog> action) {
+  public ReportableEvent(Action<ILog> action)
+  {
     Action = action;
   }
 
   public void Report(ILog log) => Action(log);
 }
 
-public partial class Log : ILog {
+public partial class Log : ILog
+{
   private record Style(
     ConsoleColor Foreground, ConsoleColor Background
   );
@@ -96,12 +101,14 @@ public partial class Log : ILog {
   public bool IsInRedirectedEnv =>
     Console.IsOutputRedirected || Console.IsErrorRedirected;
 
-  public Log(ISystemInfo systemInfo, IConfig config, IConsole console) {
+  public Log(ISystemInfo systemInfo, IConfig config, IConsole console)
+  {
     SystemInfo = systemInfo;
     Config = config;
     Console = console;
 
-    if (!IsInRedirectedEnv) {
+    if (!IsInRedirectedEnv)
+    {
       console.ResetColor();
     }
 
@@ -142,9 +149,12 @@ public partial class Log : ILog {
     message, Styles.Success, true, false
   );
 
-  public void ClearCurrentLine() {
-    if (IsInRedirectedEnv) { return; }
-    lock (Console) {
+  public void ClearCurrentLine()
+  {
+    if (IsInRedirectedEnv)
+    { return; }
+    lock (Console)
+    {
       Console.CursorLeft = 0;
       var top = Console.CursorTop;
       OutputConsole.Write(new string(' ', Console.WindowWidth - 1));
@@ -155,54 +165,65 @@ public partial class Log : ILog {
 
   public void Output(
     object? message, Action<IConsole> consoleStyle, bool inPlace = false, bool addExtraLine = true
-  ) {
-    if (inPlace && IsInRedirectedEnv) {
+  )
+  {
+    if (inPlace && IsInRedirectedEnv)
+    {
       // Don't print in-place messages in a redirected environment, like
       // GitHub actions.
       return;
     }
-    lock (Console) {
+    lock (Console)
+    {
       // Set the new foreground and background colors.
       consoleStyle(Console);
 
-      if (message is string str && str != "") {
+      if (message is string str && str != "")
+      {
         if (SystemInfo.OS == OSType.Windows
           || !Config.ConfigValues.Terminal.DisplayEmoji
-        ) {
+        )
+        {
           // Remove emoji from message.
           str = RemoveNonANSICharacters(str);
           message = str;
         }
         UpdateStyle();
       }
-      else if (message is not string and not null) {
+      else if (message is not string and not null)
+      {
         UpdateStyle();
       }
 
       var left = 0;
       var top = 0;
 
-      if (!IsInRedirectedEnv) {
+      if (!IsInRedirectedEnv)
+      {
         left = Console.CursorLeft;
         top = Console.CursorTop;
       }
 
-      if (inPlace) {
+      if (inPlace)
+      {
         OutputConsole.Write(message);
       }
-      else {
+      else
+      {
         OutputConsole.WriteLine(message);
       }
       _sb.AppendLine(message?.ToString());
 
-      if (addExtraLine) {
+      if (addExtraLine)
+      {
         OutputConsole.WriteLine();
         _sb.AppendLine();
       }
 
       Styles.Normal(Console);
 
-      if (inPlace && !IsInRedirectedEnv) {
+      if (inPlace && !IsInRedirectedEnv)
+      {
         Console.CursorLeft = left;
         Console.CursorTop = top;
       }
@@ -223,18 +244,22 @@ public partial class Log : ILog {
   [GeneratedRegex(@"[^\x00-\x7F][ ]?")]
   private static partial Regex ANSIOnlyRegex();
 
-  public void UpdateStyle() {
+  public void UpdateStyle()
+  {
     var style = new Style(Console.ForegroundColor, Console.BackgroundColor);
     var currentStyle = _styles.Peek();
-    if (style != currentStyle) {
-      while (_styles.Count > 1) {
+    if (style != currentStyle)
+    {
+      while (_styles.Count > 1)
+      {
         PopStyle();
       }
       PushStyle(style);
     }
   }
 
-  private void PushStyle(Style consoleStyle) {
+  private void PushStyle(Style consoleStyle)
+  {
     var currentStyle = _styles.Peek();
     var fg = Console.ForegroundColor;
     var bg = Console.BackgroundColor;
@@ -252,40 +277,49 @@ public partial class Log : ILog {
     _styles.Push(consoleStyle);
   }
 
-  private void PopStyle() {
-    if (_styles.Count > 1) {
+  private void PopStyle()
+  {
+    if (_styles.Count > 1)
+    {
       _sb.Append("[/style]");
       _styles.Pop();
     }
   }
 
-  public static class Styles {
+  public static class Styles
+  {
     internal static Action<IConsole> Normal
       => static (console) => console.ResetColor();
     internal static Action<IConsole> Info
-      => static (console) => {
+      => static (console) =>
+      {
         console.ResetColor();
         console.ForegroundColor = ConsoleColor.Cyan;
       };
     internal static Action<IConsole> Error
-      => static (console) => {
+      => static (console) =>
+      {
         console.ResetColor();
         console.ForegroundColor = ConsoleColor.Red;
       };
     internal static Action<IConsole> Warning
-      => static (console) => {
+      => static (console) =>
+      {
         console.ResetColor();
         console.ForegroundColor = ConsoleColor.Yellow;
       };
     internal static Action<IConsole> Success
-      => static (console) => {
+      => static (console) =>
+      {
         console.ResetColor();
         console.ForegroundColor = ConsoleColor.Green;
       };
   }
 
-  public override string ToString() {
-    while (_styles.Count > 1) {
+  public override string ToString()
+  {
+    while (_styles.Count > 1)
+    {
       PopStyle();
     }
     return _sb.ToString();

@@ -4,7 +4,8 @@ using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 
-public class MacOS : Unix {
+public class MacOS : Unix
+{
   public MacOS(
     ISystemInfo systemInfo,
     IFileClient fileClient,
@@ -14,7 +15,8 @@ public class MacOS : Unix {
   )
     : base(systemInfo, fileClient, computer, versionDeserializer, versionSerializer) { }
 
-  public override string GetInstallerNameSuffix(SpecificDotnetStatusGodotVersion version) {
+  public override string GetInstallerNameSuffix(SpecificDotnetStatusGodotVersion version)
+  {
     var hasUniversalSuffix =
       version.Number.Major > 3 ||
         (

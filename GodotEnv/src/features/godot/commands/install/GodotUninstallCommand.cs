@@ -2,7 +2,6 @@ namespace Chickensoft.GodotEnv.Features.Godot.Commands;
 
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
-using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Infrastructure;
@@ -13,7 +12,8 @@ using CliWrap;
   Description = "Uninstalls the specified version of Godot."
 )]
 public class GodotUninstallCommand :
-  ICommand, ICliCommand, IWindowsElevationEnabled {
+  ICommand, ICliCommand, IWindowsElevationEnabled
+{
   public IExecutionContext ExecutionContext { get; set; }
 
   [CommandParameter(
@@ -36,13 +36,14 @@ public class GodotUninstallCommand :
 
   public bool IsWindowsElevationRequired => true;
 
-  public GodotUninstallCommand(IExecutionContext context) {
+  public GodotUninstallCommand(IExecutionContext context)
+  {
     ExecutionContext = context;
   }
 
-  public async ValueTask ExecuteAsync(IConsole console) {
+  public async ValueTask ExecuteAsync(IConsole console)
+  {
     var godotRepo = ExecutionContext.Godot.GodotRepo;
-    var platform = ExecutionContext.Godot.Platform;
 
     var log = ExecutionContext.CreateLog(console);
 
@@ -52,12 +53,14 @@ public class GodotUninstallCommand :
       godotRepo.VersionDeserializer.Deserialize(RawVersion, isDotnetVersion);
 
     log.Print("");
-    if (await godotRepo.Uninstall(version, log)) {
+    if (await godotRepo.Uninstall(version, log))
+    {
       log.Success(
         $"Godot {godotRepo.VersionSerializer.Serialize(version)} uninstalled."
       );
     }
-    else {
+    else
+    {
       log.Err(
         $"Godot {godotRepo.VersionSerializer.Serialize(version)} not found."
       );

@@ -10,16 +10,19 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class GodotRcFileTest {
+public class GodotRcFileTest
+{
   [Fact]
-  public void NewGodotRcFileHasFilePath() {
+  public void NewGodotRcFileHasFilePath()
+  {
     var path = "/test/path";
     var file = new GodotrcFile(path);
     file.FilePath.ShouldBe(path);
   }
 
   [Fact]
-  public void ParsedVersionIsFirstLineOfFileContents() {
+  public void ParsedVersionIsFirstLineOfFileContents()
+  {
     var lines = new string[] { "4.2.0", "4.3.0", "4.4.1" };
     var lineQueue = new Queue<string>(lines);
     var path = "/test/path";
@@ -33,7 +36,8 @@ public class GodotRcFileTest {
   }
 
   [Fact]
-  public void ParsedVersionIsEmptyIfFileEmpty() {
+  public void ParsedVersionIsEmptyIfFileEmpty()
+  {
     var path = "/test/path";
     var file = new GodotrcFile(path);
     var reader = new Mock<TextReader>();
@@ -45,7 +49,8 @@ public class GodotRcFileTest {
   }
 
   [Fact]
-  public void ParsedVersionIsNotDotnetIfFollowedBySpaceSeparatedNoDotnet() {
+  public void ParsedVersionIsNotDotnetIfFollowedBySpaceSeparatedNoDotnet()
+  {
     var path = "/test/path";
     var file = new GodotrcFile(path);
     var reader = new Mock<TextReader>();
@@ -57,7 +62,8 @@ public class GodotRcFileTest {
   }
 
   [Fact]
-  public void ParsedVersionIsNotDotnetIfFollowedBySpaceSeparatedNotDotnet() {
+  public void ParsedVersionIsNotDotnetIfFollowedBySpaceSeparatedNotDotnet()
+  {
     var path = "/test/path";
     var file = new GodotrcFile(path);
     var reader = new Mock<TextReader>();
@@ -69,7 +75,8 @@ public class GodotRcFileTest {
   }
 
   [Fact]
-  public void ParsedVersionIsNotDotnetIfFollowedBySpaceSeparatedNonDotnet() {
+  public void ParsedVersionIsNotDotnetIfFollowedBySpaceSeparatedNonDotnet()
+  {
     var path = "/test/path";
     var file = new GodotrcFile(path);
     var reader = new Mock<TextReader>();
@@ -81,7 +88,8 @@ public class GodotRcFileTest {
   }
 
   [Fact]
-  public void ParseVersionThrowsIfFirstLineOfFileContentsIsNotValidVersion() {
+  public void ParseVersionThrowsIfFirstLineOfFileContentsIsNotValidVersion()
+  {
     var path = "/test/path";
     var file = new GodotrcFile(path);
     var reader = new Mock<TextReader>();
@@ -92,7 +100,8 @@ public class GodotRcFileTest {
   }
 
   [Fact]
-  public void WriteGodotVersionOpensWriterToFileAndWritesVersionWithoutDotnetStatusIfDotnet() {
+  public void WriteGodotVersionOpensWriterToFileAndWritesVersionWithoutDotnetStatusIfDotnet()
+  {
     var path = "/test/path/.godotrc";
     var version = new SpecificDotnetStatusGodotVersion(4, 4, 1, "stable", -1, true);
     var serializer = new IoVersionSerializer();
@@ -105,7 +114,8 @@ public class GodotRcFileTest {
   }
 
   [Fact]
-  public void WriteGodotVersionOpensWriterToFileAndWritesVersionWithDotnetStatusIfNotDotnet() {
+  public void WriteGodotVersionOpensWriterToFileAndWritesVersionWithDotnetStatusIfNotDotnet()
+  {
     var path = "/test/path/.godotrc";
     var version = new SpecificDotnetStatusGodotVersion(4, 4, 1, "stable", -1, false);
     var serializer = new IoVersionSerializer();

@@ -7,7 +7,8 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class MainTest {
+public class MainTest
+{
   [Fact]
   public async Task CallsCliFx()
     => await Should.NotThrowAsync(
@@ -15,7 +16,8 @@ public class MainTest {
     );
 
   [Fact]
-  public void CreateExecutionContextParsesArgs() {
+  public void CreateExecutionContextParsesArgs()
+  {
     var config = new Config();
     var args = new string[] { "a", "--", "b" };
     var workingDir = "/";
@@ -35,14 +37,17 @@ public class MainTest {
   }
 }
 
-public class GodotEnvActivatorTest {
+public class GodotEnvActivatorTest
+{
   private sealed class ITestCommand(IExecutionContext executionContext) :
-    ICliCommand {
+    ICliCommand
+  {
     public IExecutionContext ExecutionContext { get; } = executionContext;
   }
 
   [Fact]
-  public void Initializes() {
+  public void Initializes()
+  {
     var executionContext = new Mock<IExecutionContext>();
     var activator = new GodotEnvActivator(
       executionContext.Object, OSType.Windows
@@ -51,7 +56,8 @@ public class GodotEnvActivatorTest {
   }
 
   [Fact]
-  public void CreatesObjectInstance() {
+  public void CreatesObjectInstance()
+  {
     var executionContext = new Mock<IExecutionContext>();
     var activator = new GodotEnvActivator(
       executionContext.Object, OSType.MacOS

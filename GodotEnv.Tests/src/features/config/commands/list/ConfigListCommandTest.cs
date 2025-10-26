@@ -9,10 +9,12 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class ConfigListCommandTest {
+public class ConfigListCommandTest
+{
   [Fact]
-  public async Task Executes() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public async Task Executes()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
@@ -35,8 +37,9 @@ public class ConfigListCommandTest {
   }
 
   [Fact]
-  public async Task DisplaysOnlyRequestedValue() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public async Task DisplaysOnlyRequestedValue()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
@@ -46,7 +49,8 @@ public class ConfigListCommandTest {
     context.Setup(ctx => ctx.CreateLog(console)).Returns(log);
     context.Setup(ctx => ctx.Config).Returns(config);
 
-    var addonCommand = new ConfigListCommand(context.Object) {
+    var addonCommand = new ConfigListCommand(context.Object)
+    {
       ConfigKey = "Terminal.DisplayEmoji"
     };
     await addonCommand.ExecuteAsync(console);
@@ -60,8 +64,9 @@ public class ConfigListCommandTest {
   }
 
   [Fact]
-  public async Task FailsGracefullyWhenRequestedKeyDoesNotExist() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public async Task FailsGracefullyWhenRequestedKeyDoesNotExist()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
@@ -71,7 +76,8 @@ public class ConfigListCommandTest {
     context.Setup(ctx => ctx.CreateLog(console)).Returns(log);
     context.Setup(ctx => ctx.Config).Returns(config);
 
-    var addonCommand = new ConfigListCommand(context.Object) {
+    var addonCommand = new ConfigListCommand(context.Object)
+    {
       ConfigKey = "FakeSection.FakeKey"
     };
     await addonCommand.ExecuteAsync(console);

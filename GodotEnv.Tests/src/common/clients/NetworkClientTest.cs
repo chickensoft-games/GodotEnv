@@ -14,10 +14,12 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class NetworkClientTest {
+public class NetworkClientTest
+{
 
   [Fact]
-  public void WebRequestGetAsyncWithInvalidProxyThrowsCommandException() {
+  public void WebRequestGetAsyncWithInvalidProxyThrowsCommandException()
+  {
     var testUrl = "https://example.com/get";
     var mockDownloadService = new Mock<IDownloadService>();
     var downloadConfig = Defaults.DownloadConfiguration;
@@ -32,7 +34,8 @@ public class NetworkClientTest {
   }
 
   [Fact]
-  public void CreateHttpClientHandlerWithValidProxy() {
+  public void CreateHttpClientHandlerWithValidProxy()
+  {
     var proxyUrl = "http://proxy.example.com:8080";
 
     var mockDownloadService = new Mock<IDownloadService>();
@@ -54,7 +57,8 @@ public class NetworkClientTest {
   }
 
   [Fact]
-  public void CreateDownloadWithValidProxy() {
+  public void CreateDownloadWithValidProxy()
+  {
     var url = "https://example.com/file.zip";
     var destinationDirectory = "/tmp/downloads";
     var filename = "test-file.zip";
@@ -85,7 +89,8 @@ public class NetworkClientTest {
   }
 
   [Fact]
-  public void CreateDownloadWithInvalidProxyThrowsCommandException() {
+  public void CreateDownloadWithInvalidProxyThrowsCommandException()
+  {
     var invalidProxyUrl = "invalid-proxy-url";
     var url = "https://example.com/file.zip";
     var destinationDirectory = "/tmp/downloads";
@@ -100,7 +105,8 @@ public class NetworkClientTest {
   }
 
   [Fact]
-  public async Task DownloadFileAsyncWithInvalidUrlWithProgressThrowsCommandException() {
+  public async Task DownloadFileAsyncWithInvalidUrlWithProgressThrowsCommandException()
+  {
     var invalidUrl = "https://invalid-domain-that-doesnt-exist-12345.com/file.zip";
     var tempDir = Path.GetTempPath();
     var fileName = $"test_download_{Guid.NewGuid()}.bin";
@@ -124,7 +130,8 @@ public class NetworkClientTest {
   }
 
   [Fact]
-  public async Task DownloadFileAsyncWithInvalidUrlWithNoProgressThrowsCommandException() {
+  public async Task DownloadFileAsyncWithInvalidUrlWithNoProgressThrowsCommandException()
+  {
     var invalidUrl = "https://invalid-domain-that-doesnt-exist-12345.com/file.zip";
     var tempDir = Path.GetTempPath();
     var fileName = $"test_download_{Guid.NewGuid()}.bin";
@@ -146,10 +153,12 @@ public class NetworkClientTest {
   }
 
   // a testable network client that exposes protected methods
-  private sealed class TestableNetworkClient : NetworkClient {
+  private sealed class TestableNetworkClient : NetworkClient
+  {
 
     public TestableNetworkClient(IDownloadService downloadService, DownloadConfiguration downloadConfiguration)
-      : base(downloadService, downloadConfiguration) {
+      : base(downloadService, downloadConfiguration)
+    {
     }
 
     // public for testing

@@ -4,7 +4,8 @@ using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 
-public class Linux : Unix {
+public class Linux : Unix
+{
   public Linux(
     ISystemInfo systemInfo,
     IFileClient fileClient,
@@ -14,7 +15,8 @@ public class Linux : Unix {
   )
     : base(systemInfo, fileClient, computer, versionDeserializer, versionSerializer) { }
 
-  public override string GetInstallerNameSuffix(SpecificDotnetStatusGodotVersion version) {
+  public override string GetInstallerNameSuffix(SpecificDotnetStatusGodotVersion version)
+  {
     var (platformName, architecture) = GetPlatformNameAndArchitecture(version);
 
     return version.IsDotnetEnabled ? $"_mono_{platformName}_{architecture}" : $"_{platformName}.{architecture}";
@@ -24,7 +26,8 @@ public class Linux : Unix {
 
   public override string GetRelativeExtractedExecutablePath(
     SpecificDotnetStatusGodotVersion version
-  ) {
+  )
+  {
     var fsVersionString = GetFilenameVersionString(version);
     var nameSuffix = GetInstallerNameSuffix(version);
     var (platformName, architecture) = GetPlatformNameAndArchitecture(version);
@@ -32,7 +35,8 @@ public class Linux : Unix {
     var pathSuffix = fsVersionString +
                $"{(version.IsDotnetEnabled ? "_mono" : "")}_{platformName}.{architecture}";
 
-    if (version.IsDotnetEnabled) {
+    if (version.IsDotnetEnabled)
+    {
       // Dotnet version extracts to a folder, whereas the non-dotnet version
       // does not.
       return FileClient.Combine(fsVersionString + nameSuffix, pathSuffix);
@@ -50,11 +54,13 @@ public class Linux : Unix {
 
   private static (string platformName, string architecture) GetPlatformNameAndArchitecture(
     GodotVersion version
-  ) {
+  )
+  {
     var architecture = "x86_64";
     var platformName = "linux";
 
-    if (version.Number.Major == 3) {
+    if (version.Number.Major == 3)
+    {
       architecture = "64";
       platformName = "x11";
     }

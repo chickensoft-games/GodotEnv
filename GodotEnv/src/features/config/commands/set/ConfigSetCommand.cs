@@ -8,7 +8,8 @@ using CliFx.Attributes;
 using CliFx.Infrastructure;
 
 [Command("config set", Description = "Set a godotenv configuration entry.")]
-public class ConfigSetCommand : ICommand, ICliCommand {
+public class ConfigSetCommand : ICommand, ICliCommand
+{
   public IExecutionContext ExecutionContext { get; set; }
 
   [CommandParameter(0, IsRequired = true)]
@@ -17,18 +18,22 @@ public class ConfigSetCommand : ICommand, ICliCommand {
   [CommandParameter(1, IsRequired = true)]
   public string ConfigValue { get; set; } = string.Empty;
 
-  public ConfigSetCommand(IExecutionContext executionContext) {
+  public ConfigSetCommand(IExecutionContext executionContext)
+  {
     ExecutionContext = executionContext;
   }
 
-  public ValueTask ExecuteAsync(IConsole console) {
+  public ValueTask ExecuteAsync(IConsole console)
+  {
     var log = ExecutionContext.CreateLog(console);
     var config = ExecutionContext.Config;
     log.Print(string.Empty);
-    try {
+    try
+    {
       config.Set(ConfigKey, ConfigValue);
     }
-    catch (Exception) {
+    catch (Exception)
+    {
       log.Print($"""
       "{ConfigKey}" is not a valid configuration key, or "{ConfigValue}" is
       not a valid value for "{ConfigKey}". Try "godotenv config list" for a

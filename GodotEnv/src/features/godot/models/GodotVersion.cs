@@ -6,7 +6,8 @@ using System;
 /// Represents a canonical Godot version number, independent of stringification
 /// schemes or .NET inclusion
 /// </summary>
-public record GodotVersionNumber {
+public record GodotVersionNumber
+{
   /// <summary>
   /// The major version number.
   /// </summary>
@@ -29,26 +30,34 @@ public record GodotVersionNumber {
   /// </summary>
   public int LabelNumber { get; }
 
-  public GodotVersionNumber(int major, int minor, int patch, string label, int labelNumber) {
-    if (major < 0) {
+  public GodotVersionNumber(int major, int minor, int patch, string label, int labelNumber)
+  {
+    if (major < 0)
+    {
       throw new ArgumentException($"Major version {major} is invalid");
     }
-    if (minor < 0) {
+    if (minor < 0)
+    {
       throw new ArgumentException($"Minor version {minor} is invalid");
     }
-    if (patch < 0) {
+    if (patch < 0)
+    {
       throw new ArgumentException($"Patch version {patch} is invalid");
     }
-    if (label.Length == 0) {
+    if (label.Length == 0)
+    {
       throw new ArgumentException("Version must have a label");
     }
-    if (char.IsDigit(label[^1])) {
+    if (char.IsDigit(label[^1]))
+    {
       throw new ArgumentException("Label \"{label}\" ambiguously ends with number");
     }
-    if (label != "stable" && labelNumber <= 0) {
+    if (label != "stable" && labelNumber <= 0)
+    {
       throw new ArgumentException($"Version label \"{label}\" with numeric identifier {labelNumber} is invalid");
     }
-    if (label == "stable" && labelNumber >= 0) {
+    if (label == "stable" && labelNumber >= 0)
+    {
       throw new ArgumentException("Stable versions should not have a numeric label identifier.");
     }
     Major = major;
@@ -59,19 +68,22 @@ public record GodotVersionNumber {
   }
 }
 
-public abstract record GodotVersion {
+public abstract record GodotVersion
+{
   /// <summary>
   /// The version number.
   /// </summary>
   public GodotVersionNumber Number { get; }
 
-  public GodotVersion(GodotVersionNumber number) {
+  public GodotVersion(GodotVersionNumber number)
+  {
     Number = number;
   }
 
   public GodotVersion(
     int major, int minor, int patch, string label, int labelNumber
-  ) {
+  )
+  {
     Number =
       new GodotVersionNumber(major, minor, patch, label, labelNumber);
   }
@@ -81,7 +93,8 @@ public abstract record GodotVersion {
 /// Represents a Godot version with the specified version number, regardless
 /// of .NET capability.
 /// </summary>
-public sealed record AnyDotnetStatusGodotVersion : GodotVersion {
+public sealed record AnyDotnetStatusGodotVersion : GodotVersion
+{
   public AnyDotnetStatusGodotVersion(GodotVersionNumber number)
     : base(number) { }
 
@@ -95,7 +108,8 @@ public sealed record AnyDotnetStatusGodotVersion : GodotVersion {
 /// Represents a Godot version with the specified version number and the
 /// specified .NET capability (.NET-enabled or .NET-disabled).
 /// </summary>
-public sealed record SpecificDotnetStatusGodotVersion : GodotVersion {
+public sealed record SpecificDotnetStatusGodotVersion : GodotVersion
+{
   /// <summary>
   /// True if this version represents a .NET-enabled Godot.
   /// </summary>
@@ -104,7 +118,8 @@ public sealed record SpecificDotnetStatusGodotVersion : GodotVersion {
   public SpecificDotnetStatusGodotVersion(
     GodotVersionNumber number, bool isDotnet
   )
-    : base(number) {
+    : base(number)
+  {
     IsDotnetEnabled = isDotnet;
   }
 
@@ -116,7 +131,8 @@ public sealed record SpecificDotnetStatusGodotVersion : GodotVersion {
     int labelNumber,
     bool isDotnet
   )
-    : base(major, minor, patch, label, labelNumber) {
+    : base(major, minor, patch, label, labelNumber)
+  {
     IsDotnetEnabled = isDotnet;
   }
 }

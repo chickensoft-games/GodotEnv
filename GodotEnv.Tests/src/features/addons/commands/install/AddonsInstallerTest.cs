@@ -12,13 +12,15 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class AddonsInstallerTest {
+public class AddonsInstallerTest
+{
   [Fact]
   public void CanGoOn() =>
     AddonsInstaller.CanGoOn(false, 1, 1, 1).ShouldBeFalse();
 
   [Fact]
-  public async Task DoesNothingIfNothingToInstall() {
+  public async Task DoesNothingIfNothingToInstall()
+  {
     var addonsRepo = new Mock<IAddonsRepository>();
     var addonsFileRepo = new Mock<IAddonsFileRepository>();
     var addonGraph = new Mock<IAddonGraph>();
@@ -61,19 +63,22 @@ public class AddonsInstallerTest {
   }
 
   [Fact]
-  public async Task EndsInCannotBeResolvedIfFatalErrorEncountered() {
+  public async Task EndsInCannotBeResolvedIfFatalErrorEncountered()
+  {
     var addonsRepo = new Mock<IAddonsRepository>();
     var addonsFileRepo = new Mock<IAddonsFileRepository>();
     var addonGraph = new Mock<IAddonGraph>();
 
     var projectPath = "/";
 
-    var entry = new AddonsFileEntry {
+    var entry = new AddonsFileEntry
+    {
       Url = "https://github.com/chickensoft-games/addon",
     };
 
     var addonsFile = new AddonsFile(
-      addons: new() {
+      addons: new()
+      {
         ["addon"] = entry
       },
       cacheRelativePath: ".addons",
@@ -122,7 +127,8 @@ public class AddonsInstallerTest {
   }
 
   [Fact]
-  public async Task DeterminesCanonicalAddonCorrectly() {
+  public async Task DeterminesCanonicalAddonCorrectly()
+  {
     var token = new CancellationToken();
     var addonsRepo = new Mock<IAddonsRepository>();
     var addonsFileRepo = new Mock<IAddonsFileRepository>();
@@ -130,12 +136,14 @@ public class AddonsInstallerTest {
 
     var projectPath = "/";
 
-    var entry = new AddonsFileEntry {
+    var entry = new AddonsFileEntry
+    {
       Url = "https://github.com/chickensoft-games/addon"
     };
 
     var addonsFile = new AddonsFile(
-      addons: new() {
+      addons: new()
+      {
         ["addon"] = entry
       },
       cacheRelativePath: ".addons",
@@ -227,7 +235,8 @@ public class AddonsInstallerTest {
   }
 
   [Fact]
-  public async Task InstallsSymlinkAddon() {
+  public async Task InstallsSymlinkAddon()
+  {
     var token = new CancellationToken();
     var addonsRepo = new Mock<IAddonsRepository>();
     var addonsFileRepo = new Mock<IAddonsFileRepository>();
@@ -236,13 +245,15 @@ public class AddonsInstallerTest {
     var projectPath = "/";
 
 
-    var entry = new AddonsFileEntry {
+    var entry = new AddonsFileEntry
+    {
       Url = "/symlink_addon/addon",
       Source = AssetSource.Symlink,
     };
 
     var addonsFile = new AddonsFile(
-      addons: new() {
+      addons: new()
+      {
         ["addon"] = entry
       },
       cacheRelativePath: ".addons",

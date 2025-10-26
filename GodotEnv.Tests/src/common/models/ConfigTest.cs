@@ -6,13 +6,16 @@ using Microsoft.Extensions.Configuration;
 using Shouldly;
 using Xunit;
 
-public class ConfigTest {
+public class ConfigTest
+{
   [Fact]
 #pragma warning disable CS0618 // for deprecated property
-  public void UpgradeMovesGodotInstallationPathIfNotDefaultAndNewKeyIsNullOrEmpty() {
+  public void UpgradeMovesGodotInstallationPathIfNotDefaultAndNewKeyIsNullOrEmpty()
+  {
     var testPath = "/test/path";
     var config = new Config(
-      new ConfigValues {
+      new ConfigValues
+      {
         GodotInstallationsPath = testPath,
         Godot = new GodotConfigSection { InstallationsPath = string.Empty }
       }
@@ -29,10 +32,12 @@ public class ConfigTest {
 
   [Fact]
 #pragma warning disable CS0618 // for deprecated property
-  public void UpgradeMovesGodotInstallationPathIfNotDefaultAndNewKeyIsDefault() {
+  public void UpgradeMovesGodotInstallationPathIfNotDefaultAndNewKeyIsDefault()
+  {
     var testPath = "/test/path";
     var config = new Config(
-      new ConfigValues {
+      new ConfigValues
+      {
         GodotInstallationsPath = testPath,
       }
     );
@@ -48,10 +53,12 @@ public class ConfigTest {
 
   [Fact]
 #pragma warning disable CS0618 // for deprecated property
-  public void UpgradeRemovesGodotInstallationPathButDoesNotMoveIfDefaultAndNewKeyIsNotDefault() {
+  public void UpgradeRemovesGodotInstallationPathButDoesNotMoveIfDefaultAndNewKeyIsNotDefault()
+  {
     var testPath = "/test/path";
     var config = new Config(
-      new ConfigValues {
+      new ConfigValues
+      {
         GodotInstallationsPath = Defaults.CONFIG_GODOT_INSTALLATIONS_PATH,
         Godot = new() { InstallationsPath = testPath }
       }
@@ -68,11 +75,13 @@ public class ConfigTest {
 
   [Fact]
 #pragma warning disable CS0618 // for deprecated property
-  public void UpgradeRemovesGodotInstallationPathButDoesNotMoveIfNotDefaultAndNewKeyIsNotDefault() {
+  public void UpgradeRemovesGodotInstallationPathButDoesNotMoveIfNotDefaultAndNewKeyIsNotDefault()
+  {
     var testPath = "/test/path";
     var testPathNew = "/test/path/new";
     var config = new Config(
-      new ConfigValues {
+      new ConfigValues
+      {
         GodotInstallationsPath = testPath,
         Godot = new() { InstallationsPath = testPathNew }
       }
@@ -88,10 +97,12 @@ public class ConfigTest {
 #pragma warning restore CS0618
 
   [Fact]
-  public void NewConfigHasKeyValuePairFromGodotInstallationsPath() {
+  public void NewConfigHasKeyValuePairFromGodotInstallationsPath()
+  {
     var testPath = "/test/path";
     var config = new Config(
-      new ConfigValues {
+      new ConfigValues
+      {
         Godot = new() { InstallationsPath = testPath }
       }
     );
@@ -99,10 +110,12 @@ public class ConfigTest {
   }
 
   [Fact]
-  public void NewConfigHasKeyValuePairFromTerminalDisplayEmoji() {
+  public void NewConfigHasKeyValuePairFromTerminalDisplayEmoji()
+  {
     var displayEmoji = !Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI;
     var config = new Config(
-      new ConfigValues {
+      new ConfigValues
+      {
         Terminal = new() { DisplayEmoji = displayEmoji }
       }
     );
@@ -110,7 +123,8 @@ public class ConfigTest {
   }
 
   [Fact]
-  public void NewConfigHasValueFromKeyValuePairGodotInstallationsPath() {
+  public void NewConfigHasValueFromKeyValuePairGodotInstallationsPath()
+  {
     var testPath = "/test/path";
     var configuration = new ConfigurationBuilder()
       .AddInMemoryCollection(initialData: [new("Godot:InstallationsPath", testPath)])
@@ -120,7 +134,8 @@ public class ConfigTest {
   }
 
   [Fact]
-  public void NewConfigHasValueFromKeyValuePairTerminalDisplayEmoji() {
+  public void NewConfigHasValueFromKeyValuePairTerminalDisplayEmoji()
+  {
     var displayEmoji = !Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI;
     var configuration = new ConfigurationBuilder()
       .AddInMemoryCollection(initialData: [new("Terminal:DisplayEmoji", displayEmoji.ToString())])
@@ -130,7 +145,8 @@ public class ConfigTest {
   }
 
   [Fact]
-  public void ConfigValueUpdatesWhenGodotInstallationsPathKeyValueSet() {
+  public void ConfigValueUpdatesWhenGodotInstallationsPathKeyValueSet()
+  {
     var testPath = "/test/path";
     var config = new Config();
     config.ConfigValues.Godot.InstallationsPath.ShouldBe(Defaults.CONFIG_GODOT_INSTALLATIONS_PATH);
@@ -139,7 +155,8 @@ public class ConfigTest {
   }
 
   [Fact]
-  public void ConfigValueUpdatesWhenTerminalDisplayEmojiKeyValueSet() {
+  public void ConfigValueUpdatesWhenTerminalDisplayEmojiKeyValueSet()
+  {
     var displayEmoji = !Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI;
     var config = new Config();
     config.ConfigValues.Terminal.DisplayEmoji.ShouldBe(Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI);
@@ -148,7 +165,8 @@ public class ConfigTest {
   }
 
   [Fact]
-  public void EnumeratesKeyValuePairs() {
+  public void EnumeratesKeyValuePairs()
+  {
     var config = new Config();
     var keyValuePairs = new KeyValuePair<string, string?>[4] {
       new("Godot.InstallationsPath", Defaults.CONFIG_GODOT_INSTALLATIONS_PATH),
@@ -157,7 +175,8 @@ public class ConfigTest {
       new("Godot", null),
     };
     var pairCount = 0;
-    foreach (var pair in config) {
+    foreach (var pair in config)
+    {
       pair.ShouldBeOneOf(keyValuePairs);
       pairCount += 1;
     }

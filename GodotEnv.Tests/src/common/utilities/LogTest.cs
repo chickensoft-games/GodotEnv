@@ -10,15 +10,17 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public sealed class LogTest : IDisposable {
+public sealed class LogTest : IDisposable
+{
 
   private readonly OutputTestFakeInMemoryConsole _console = new();
 
   public void Dispose() => _console.Dispose();
 
   [Fact]
-  public void Prints() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public void Prints()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = MockConfig.Get();
     Log log = new(systemInfo, config.Object, _console);
 
@@ -28,8 +30,9 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
-  public void PrintsInfo() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public void PrintsInfo()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = MockConfig.Get();
     Log log = new(systemInfo, config.Object, _console);
 
@@ -39,8 +42,9 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
-  public void PrintsWarning() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public void PrintsWarning()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = MockConfig.Get();
     Log log = new(systemInfo, config.Object, _console);
 
@@ -50,8 +54,9 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
-  public void PrintsErr() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public void PrintsErr()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = MockConfig.Get();
     Log log = new(systemInfo, config.Object, _console);
 
@@ -61,8 +66,9 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
-  public void PrintsSuccess() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public void PrintsSuccess()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = MockConfig.Get();
     Log log = new(systemInfo, config.Object, _console);
 
@@ -72,14 +78,16 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
-  public void GetsColorNames() {
+  public void GetsColorNames()
+  {
     Log.GetColorName((int)ConsoleColor.Red).ShouldBe("red");
     Log.GetColorName(-1).ShouldBe("default");
   }
 
   [Fact]
-  public void OutputStringWithEmojisOnUnix() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public void OutputStringWithEmojisOnUnix()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = MockConfig.Get();
     Log log = new(systemInfo, config.Object, _console);
 
@@ -95,8 +103,9 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
-  public void OutputStringWithNoEmojisOnUnixIfConfigValueFalse() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public void OutputStringWithNoEmojisOnUnixIfConfigValueFalse()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = MockConfig.Get(Defaults.CONFIG_GODOT_INSTALLATIONS_PATH, false);
     Log log = new(systemInfo, config.Object, _console);
 
@@ -112,8 +121,9 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
-  public void OutputStringWithNoEmojisOnWindows() {
-    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
+  public void OutputStringWithNoEmojisOnWindows()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Windows, CpuArch.X64);
     var config = MockConfig.Get();
     Log log = new(systemInfo, config.Object, _console);
 
@@ -130,8 +140,9 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
-  public void OutputsCorrectStyleChanges() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public void OutputsCorrectStyleChanges()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = MockConfig.Get();
     Log log = new(systemInfo, config.Object, _console);
 
@@ -141,7 +152,8 @@ public sealed class LogTest : IDisposable {
     log.Print("");
     log.Warn("C");
     log.Output(
-      "D", (console) => {
+      "D", (console) =>
+      {
         console.ResetColor();
         console.BackgroundColor = ConsoleColor.Green;
       }
@@ -169,8 +181,9 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
-  public void OutputsNull() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public void OutputsNull()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = MockConfig.Get();
     Log log = new(systemInfo, config.Object, _console);
 
@@ -185,8 +198,9 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
-  public void OutputsObject() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public void OutputsObject()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = MockConfig.Get();
     Log log = new(systemInfo, config.Object, _console);
 
@@ -196,7 +210,8 @@ public sealed class LogTest : IDisposable {
   }
 
   [Fact]
-  public void ReportableEventInvokesCallback() {
+  public void ReportableEventInvokesCallback()
+  {
     var log = new Mock<ILog>();
     var called = false;
     var @event = new ReportableEvent((_) => called = true);

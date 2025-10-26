@@ -11,14 +11,17 @@ using CliWrap;
   "godot env path",
   Description = "Get the symlink path to the active version of Godot."
 )]
-public class GodotEnvPathCommand : ICommand, ICliCommand {
+public class GodotEnvPathCommand : ICommand, ICliCommand
+{
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
-  public GodotEnvPathCommand(IExecutionContext context) {
+  public GodotEnvPathCommand(IExecutionContext context)
+  {
     ExecutionContext = context;
   }
 
-  public async ValueTask ExecuteAsync(IConsole console) {
+  public async ValueTask ExecuteAsync(IConsole console)
+  {
     var log = ExecutionContext.CreateLog(console);
     var godotRepo = ExecutionContext.Godot.GodotRepo;
 

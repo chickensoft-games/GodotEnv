@@ -5,40 +5,53 @@ using System.Xml;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 
-public class CsprojFile : IGodotVersionFile, IEquatable<CsprojFile> {
+public class CsprojFile : IGodotVersionFile, IEquatable<CsprojFile>
+{
   private static readonly SharpVersionDeserializer _versionDeserializer = new();
 
   /// <inheritdoc/>
   public string FilePath { get; }
 
-  public CsprojFile(string filePath) {
+  public CsprojFile(string filePath)
+  {
     FilePath = filePath;
   }
 
   /// <inheritdoc/>
   public SpecificDotnetStatusGodotVersion? ParseGodotVersion(
     IFileClient fileClient
-  ) {
-    var version = string.Empty;
-    try {
+  )
+  {
+    string version;
+    try
+    {
       var xmlDocument = new XmlDocument();
-      using (var reader = fileClient.GetReader(FilePath)) {
+      using (var reader = fileClient.GetReader(FilePath))
+      {
         xmlDocument.Load(reader);
       }
       var projectNode = xmlDocument.DocumentElement;
       if (projectNode is null
         || projectNode.Name != "Project"
         || projectNode.Attributes is null
-      ) {
+      )
+      {
         return null;
       }
       var sdk = projectNode.Attributes["Sdk"];
-      if (sdk is null || !sdk.Value.StartsWith("Godot.NET.Sdk/")) {
+      if (sdk is null
+        || !sdk.Value.StartsWith(
+              "Godot.NET.Sdk/",
+              StringComparison.InvariantCulture
+            )
+      )
+      {
         return null;
       }
       version = sdk.Value.Split('/')[1];
     }
-    catch (Exception) {
+    catch (Exception)
+    {
       return null;
     }
     // If the version is from a csproj, we definitely want .NET

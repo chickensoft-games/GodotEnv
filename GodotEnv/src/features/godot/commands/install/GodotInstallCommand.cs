@@ -10,7 +10,8 @@ using CliWrap;
 
 [Command("godot install", Description = "Install a version of Godot.")]
 public class GodotInstallCommand :
-  ICommand, ICliCommand, IWindowsElevationEnabled {
+  ICommand, ICliCommand, IWindowsElevationEnabled
+{
   [CommandParameter(
     0,
     Name = "Version",
@@ -46,31 +47,35 @@ public class GodotInstallCommand :
 
   public bool IsWindowsElevationRequired => true;
 
-  public GodotInstallCommand(IExecutionContext context) {
+  public GodotInstallCommand(IExecutionContext context)
+  {
     ExecutionContext = context;
   }
 
-  public async ValueTask ExecuteAsync(IConsole console) {
+  public async ValueTask ExecuteAsync(IConsole console)
+  {
     var godotRepo = ExecutionContext.Godot.GodotRepo;
     var platform = ExecutionContext.Godot.Platform;
 
     var log = ExecutionContext.CreateLog(console);
     var token = console.RegisterCancellationHandler();
 
-    SpecificDotnetStatusGodotVersion? version = null;
-
-    if (!string.IsNullOrEmpty(RawVersion)) {
+    SpecificDotnetStatusGodotVersion? version;
+    if (!string.IsNullOrEmpty(RawVersion))
+    {
       var isDotnetVersion = !NoDotnet;
       // We know this won't throw because the validator okayed it
       version = godotRepo.VersionDeserializer.Deserialize(RawVersion, isDotnetVersion);
     }
-    else {
+    else
+    {
       var versionRepo = ExecutionContext.Godot.VersionRepo;
       var versionFiles = versionRepo.GetVersionFiles();
       version = versionRepo.InferVersion(versionFiles, log);
     }
 
-    if (version is null) {
+    if (version is null)
+    {
       log.Err(
         """
         No version specified and couldn't find version file in directory tree.
@@ -81,9 +86,6 @@ public class GodotInstallCommand :
       );
       return;
     }
-
-    var godotInstallationsPath = godotRepo.GodotInstallationsPath;
-    var godotCachePath = godotRepo.GodotCachePath;
 
     var existingInstallation =
       godotRepo.GetInstallation(version);
@@ -96,12 +98,14 @@ public class GodotInstallCommand :
       version.IsDotnetEnabled ? "😁 Using Godot with .NET" : "😢 Using Godot without .NET"
     );
 
-    if (!string.IsNullOrEmpty(ProxyUrl)) {
+    if (!string.IsNullOrEmpty(ProxyUrl))
+    {
       log.Info($"🌐 Using proxy: {ProxyUrl}");
     }
 
     // Check for existing installation.
-    if (existingInstallation is GodotInstallation installation) {
+    if (existingInstallation is GodotInstallation installation)
+    {
       log.Warn(
         $"🤔 Godot v{RawVersion} is already installed:"
       );

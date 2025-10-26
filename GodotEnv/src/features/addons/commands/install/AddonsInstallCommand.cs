@@ -12,7 +12,8 @@ using CliFx.Infrastructure;
 
 [Command("addons install", Description = "Install addons in a Godot project.")]
 public class AddonsInstallCommand :
-  ICommand, ICliCommand, IWindowsElevationEnabled {
+  ICommand, ICliCommand, IWindowsElevationEnabled
+{
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
   [CommandOption(
@@ -36,11 +37,13 @@ public class AddonsInstallCommand :
       (addon) => addon.Value.Source == AssetSource.Symlink
     );
 
-  public AddonsInstallCommand(IExecutionContext context) {
+  public AddonsInstallCommand(IExecutionContext context)
+  {
     ExecutionContext = context;
   }
 
-  public async ValueTask ExecuteAsync(IConsole console) {
+  public async ValueTask ExecuteAsync(IConsole console)
+  {
     var log = ExecutionContext.CreateLog(console);
 
     var addons = ExecutionContext.Addons;
@@ -53,7 +56,8 @@ public class AddonsInstallCommand :
 
     var token = console.RegisterCancellationHandler();
 
-    try {
+    try
+    {
       result = await addonsInstaller.Install(
         projectPath: ExecutionContext.WorkingDir,
         maxDepth: MaxDepth,
@@ -68,7 +72,8 @@ public class AddonsInstallCommand :
         addonsFileName: AddonsFileName
       );
     }
-    catch (Exception e) {
+    catch (Exception e)
+    {
       log.Err(
         "An unknown error was encountered while attempting to install " +
         "addons."
@@ -88,8 +93,10 @@ public class AddonsInstallCommand :
     Finish(result, log);
   }
 
-  internal static void Finish(AddonsInstaller.Result result, ILog log) {
-    switch (result) {
+  internal static void Finish(AddonsInstaller.Result result, ILog log)
+  {
+    switch (result)
+    {
       case AddonsInstaller.Result.Succeeded:
         log.Success("✅ Addons installed successfully.");
         break;

@@ -8,37 +8,44 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 
-public interface IConfig : IEnumerable<KeyValuePair<string, string?>> {
-  public IReadOnlyConfigValues ConfigValues { get; }
+public interface IConfig : IEnumerable<KeyValuePair<string, string?>>
+{
+  IReadOnlyConfigValues ConfigValues { get; }
 
-  public string Get(string key);
-  public void Set(string key, string value);
-  public void Upgrade();
+  string Get(string key);
+  void Set(string key, string value);
+  void Upgrade();
 }
 
 // Responsible for providing access to a ConfigValues (for strongly-typed
 // config values that don't rely on string keys and can be serialized) and an
 // IConfiguration (for user-facing key-value lookups and changes), and keeping
 // the two in sync
-public class Config : IConfig {
+public class Config : IConfig
+{
   private readonly IConfiguration _configuration;
   private readonly ConfigValues _configValues;
   public IReadOnlyConfigValues ConfigValues => _configValues;
 
-  public Config() : this(new ConfigValues()) {
+  public Config() : this(new ConfigValues())
+  {
   }
 
-  public Config(IConfiguration configuration) {
+  public Config(IConfiguration configuration)
+  {
     _configuration = configuration;
     _configValues = new();
     _configuration.Bind(ConfigValues);
   }
 
-  public Config(ConfigValues configValues) {
+  public Config(ConfigValues configValues)
+  {
     _configValues = configValues;
     var json = JsonSerializer.Serialize(ConfigValues);
-    using (var jsonStream = new MemoryStream()) {
-      using (var writer = new StreamWriter(jsonStream, null, -1, true)) {
+    using (var jsonStream = new MemoryStream())
+    {
+      using (var writer = new StreamWriter(jsonStream, null, -1, true))
+      {
         writer.Write(json);
         writer.Flush();
       }
@@ -53,25 +60,31 @@ public class Config : IConfig {
     _configuration.GetValue<string>(ConfigurationKey(key))
       ?? throw new ArgumentException($"Key \"{key}\" not valid");
 
-  public void Set(string key, string value) {
+  public void Set(string key, string value)
+  {
     var configKey = ConfigurationKey(key);
     var oldValue = _configuration.GetValue<string>(configKey);
-    if (string.IsNullOrEmpty(oldValue)) {
+    if (string.IsNullOrEmpty(oldValue))
+    {
       throw new ArgumentException($"Key \"{key}\" not valid");
     }
     _configuration[configKey] = value;
-    try {
+    try
+    {
       _configuration.Bind(ConfigValues);
     }
-    catch (Exception) {
+    catch (Exception)
+    {
       _configuration[configKey] = oldValue;
       _configuration.Bind(ConfigValues);
       throw;
     }
   }
 
-  public IEnumerator<KeyValuePair<string, string?>> GetEnumerator() {
-    foreach (var keyValuePair in _configuration.AsEnumerable()) {
+  public IEnumerator<KeyValuePair<string, string?>> GetEnumerator()
+  {
+    foreach (var keyValuePair in _configuration.AsEnumerable())
+    {
       yield return new(UserKey(keyValuePair.Key), keyValuePair.Value);
     }
   }
@@ -91,13 +104,16 @@ public class Config : IConfig {
   /// </summary>
   // We need to use deprecated properties to update the values of the new properties
 #pragma warning disable CS0618
-  public void Upgrade() {
-    if (ConfigValues.GodotInstallationsPath is not null) {
+  public void Upgrade()
+  {
+    if (ConfigValues.GodotInstallationsPath is not null)
+    {
       if (
         ConfigValues.GodotInstallationsPath != Defaults.CONFIG_GODOT_INSTALLATIONS_PATH
         && (string.IsNullOrEmpty(ConfigValues.Godot.InstallationsPath)
           || ConfigValues.Godot.InstallationsPath == Defaults.CONFIG_GODOT_INSTALLATIONS_PATH)
-      ) {
+      )
+      {
         _configValues.Godot.InstallationsPath = ConfigValues.GodotInstallationsPath;
         _configuration["Godot:InstallationsPath"] = ConfigValues.GodotInstallationsPath;
       }
@@ -108,7 +124,8 @@ public class Config : IConfig {
 #pragma warning restore CS0618
 }
 
-public interface IReadOnlyConfigValues {
+public interface IReadOnlyConfigValues
+{
   [
     Obsolete(
       "GodotInstallationsPath is deprecated. Please use Godot.InstallationsPath"
@@ -116,9 +133,9 @@ public interface IReadOnlyConfigValues {
     JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull),
     JsonPropertyName("godotInstallationsPath"),
   ]
-  public string? GodotInstallationsPath { get; }
-  public IReadOnlyGodotConfigSection Godot { get; }
-  public IReadOnlyTerminalConfigSection Terminal { get; }
+  string? GodotInstallationsPath { get; }
+  IReadOnlyGodotConfigSection Godot { get; }
+  IReadOnlyTerminalConfigSection Terminal { get; }
 }
 
 // required to be able to write out new values, since Extensions.Configuration
@@ -127,7 +144,8 @@ public interface IReadOnlyConfigValues {
 /// Configuration values as strongly-typed, named C# properties. Access from
 /// <see cref="Config"/>.
 /// </summary>
-public class ConfigValues : IReadOnlyConfigValues {
+public class ConfigValues : IReadOnlyConfigValues
+{
   /// <summary>
   /// The old location of Godot.InstallationsPath, kept for backwards
   /// compatibility with old installations of GodotEnv.
@@ -150,24 +168,28 @@ public class ConfigValues : IReadOnlyConfigValues {
   IReadOnlyTerminalConfigSection IReadOnlyConfigValues.Terminal => Terminal;
 }
 
-public interface IReadOnlyGodotConfigSection {
-  public string InstallationsPath { get; }
+public interface IReadOnlyGodotConfigSection
+{
+  string InstallationsPath { get; }
 }
 
-public class GodotConfigSection : IReadOnlyGodotConfigSection {
+public class GodotConfigSection : IReadOnlyGodotConfigSection
+{
   public string InstallationsPath { get; set; }
     = Defaults.CONFIG_GODOT_INSTALLATIONS_PATH;
 }
 
-public interface IReadOnlyTerminalConfigSection {
+public interface IReadOnlyTerminalConfigSection
+{
   /// <summary>
   /// Whether terminal output includes emoji. Ignored on Windows, which never
   /// displays emoji in the terminal.
   /// </summary>
-  public bool DisplayEmoji { get; }
+  bool DisplayEmoji { get; }
 }
 
-public class TerminalConfigSection : IReadOnlyTerminalConfigSection {
+public class TerminalConfigSection : IReadOnlyTerminalConfigSection
+{
   public bool DisplayEmoji { get; set; }
     = Defaults.CONFIG_TERMINAL_DISPLAY_EMOJI;
 }

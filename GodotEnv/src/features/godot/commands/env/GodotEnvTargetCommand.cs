@@ -11,21 +11,26 @@ using CliWrap;
   "godot env target",
   Description = "Get the path to the active version of Godot."
 )]
-public class GodotEnvTargetCommand : ICommand, ICliCommand {
+public class GodotEnvTargetCommand : ICommand, ICliCommand
+{
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
-  public GodotEnvTargetCommand(IExecutionContext context) {
+  public GodotEnvTargetCommand(IExecutionContext context)
+  {
     ExecutionContext = context;
   }
 
-  public async ValueTask ExecuteAsync(IConsole console) {
+  public async ValueTask ExecuteAsync(IConsole console)
+  {
     var log = ExecutionContext.CreateLog(console);
     var godotRepo = ExecutionContext.Godot.GodotRepo;
 
-    if (godotRepo.IsGodotSymlinkTargetAvailable) {
+    if (godotRepo.IsGodotSymlinkTargetAvailable)
+    {
       log.Print(godotRepo.GodotSymlinkTarget);
     }
-    else {
+    else
+    {
       log.Warn("Could not determine current target Godot version.");
     }
 

@@ -15,7 +15,8 @@ public record GodotCompressedArchive(
   string Filename,
   SpecificDotnetStatusGodotVersion Version,
   string Path
-) {
+)
+{
   public override string ToString() =>
     $$"""
     "{

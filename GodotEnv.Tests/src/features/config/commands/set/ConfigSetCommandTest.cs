@@ -9,10 +9,12 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class ConfigSetCommandTest {
+public class ConfigSetCommandTest
+{
   [Fact]
-  public async Task SetsIndicatedValue() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public async Task SetsIndicatedValue()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
@@ -24,7 +26,8 @@ public class ConfigSetCommandTest {
     context.Setup(ctx => ctx.CreateLog(console)).Returns(log);
     context.Setup(ctx => ctx.Config).Returns(config);
 
-    var addonCommand = new ConfigSetCommand(context.Object) {
+    var addonCommand = new ConfigSetCommand(context.Object)
+    {
       ConfigKey = "Terminal.DisplayEmoji",
       ConfigValue = testEmojiValue.ToString(),
     };
@@ -33,8 +36,9 @@ public class ConfigSetCommandTest {
   }
 
   [Fact]
-  public async Task FailsGracefullyWhenIndicatedKeyDoesNotExist() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public async Task FailsGracefullyWhenIndicatedKeyDoesNotExist()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
@@ -44,7 +48,8 @@ public class ConfigSetCommandTest {
     context.Setup(ctx => ctx.CreateLog(console)).Returns(log);
     context.Setup(ctx => ctx.Config).Returns(config);
 
-    var addonCommand = new ConfigSetCommand(context.Object) {
+    var addonCommand = new ConfigSetCommand(context.Object)
+    {
       ConfigKey = "FakeSection.FakeKey",
       ConfigValue = "FakeValue"
     };
@@ -61,8 +66,9 @@ public class ConfigSetCommandTest {
   }
 
   [Fact]
-  public async Task FailsGracefullyWhenIndicatedValueIsInvalid() {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+  public async Task FailsGracefullyWhenIndicatedValueIsInvalid()
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
@@ -72,7 +78,8 @@ public class ConfigSetCommandTest {
     context.Setup(ctx => ctx.CreateLog(console)).Returns(log);
     context.Setup(ctx => ctx.Config).Returns(config);
 
-    var addonCommand = new ConfigSetCommand(context.Object) {
+    var addonCommand = new ConfigSetCommand(context.Object)
+    {
       ConfigKey = "Terminal.DisplayEmoji",
       ConfigValue = "FakeValue"
     };
