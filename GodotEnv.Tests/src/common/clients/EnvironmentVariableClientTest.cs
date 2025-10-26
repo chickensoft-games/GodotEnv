@@ -19,10 +19,10 @@ public class EnvironmentVariableClientTest
   public static IEnumerable<object[]> GetSystemInfoForUnixOSes()
   {
     yield return [
-      new MockSystemInfo(OSType.Linux, CPUArch.X64)
+      new MockSystemInfo(OSType.Linux, CpuArch.X64)
     ];
     yield return [
-      new MockSystemInfo(OSType.MacOS, CPUArch.Arm64)
+      new MockSystemInfo(OSType.MacOS, CpuArch.Arm64)
     ];
   }
 
@@ -31,7 +31,7 @@ public class EnvironmentVariableClientTest
     var oSes = GetSystemInfoForUnixOSes();
 
     oSes = oSes.Append([
-      new MockSystemInfo(OSType.Windows, CPUArch.X64)
+      new MockSystemInfo(OSType.Windows, CpuArch.X64)
     ]);
 
     foreach (var os in oSes)
@@ -90,7 +90,7 @@ public class EnvironmentVariableClientTest
     var binPath = $"{WORKING_DIR}/godot/bin";
     var symlinkPath = $"{binPath}/godot";
 
-    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Windows, CpuArch.X64);
     var processRunner = new Mock<IProcessRunner>();
 
     var fileClient = new Mock<IFileClient>();

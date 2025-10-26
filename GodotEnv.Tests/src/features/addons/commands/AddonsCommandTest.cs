@@ -14,7 +14,7 @@ public class AddonsCommandTest
   [Fact]
   public async Task Executes()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var context = new Mock<IExecutionContext>();
     var config = MockConfig.Get();
     var console = new FakeInMemoryConsole();

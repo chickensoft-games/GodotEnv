@@ -14,7 +14,7 @@ public class ConfigListCommandTest
   [Fact]
   public async Task Executes()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
@@ -39,7 +39,7 @@ public class ConfigListCommandTest
   [Fact]
   public async Task DisplaysOnlyRequestedValue()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
@@ -66,7 +66,7 @@ public class ConfigListCommandTest
   [Fact]
   public async Task FailsGracefullyWhenRequestedKeyDoesNotExist()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();

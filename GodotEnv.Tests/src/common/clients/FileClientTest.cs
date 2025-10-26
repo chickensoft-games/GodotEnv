@@ -58,7 +58,6 @@ public class FileClientTest
   [MemberData(nameof(GetSystemInfoForUnixOSes))]
   public void InitializesUnix(ISystemInfo systemInfo)
   {
-    // var systemInfo = new MockSystemInfo(OSType.MacOS, CPUArch.Arm64);
     var fs = GetFs('/');
     var computer = new Mock<IComputer>();
     var client = new FileClient(systemInfo, fs.Object, computer.Object, new Mock<IProcessRunner>().Object);
@@ -71,7 +70,7 @@ public class FileClientTest
   [Fact]
   public void InitializesWindows()
   {
-    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Windows, CpuArch.X64);
     var fs = GetFs('\\');
     var computer = new Mock<IComputer>();
     var client = new FileClient(
@@ -109,7 +108,7 @@ public class FileClientTest
   [Fact]
   public async Task DeleteDirectoryDeletesNonSymlinkOnWindows()
   {
-    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Windows, CpuArch.X64);
     const string path = "/a/b/c";
 
     var fs = new MockFileSystem(
@@ -153,7 +152,7 @@ public class FileClientTest
   [Fact]
   public void GetsUserDirectoryOnWindows()
   {
-    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Windows, CpuArch.X64);
     var fs = GetFs('/');
     var computer = new Mock<IComputer>();
     var client = new FileClient(
@@ -176,7 +175,7 @@ public class FileClientTest
     const string path = "/a/b/c";
     const string pathToTarget = "/a/a2";
 
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = GetFs('/');
     var computer = new Mock<IComputer>();
     var client = new FileClient(
@@ -196,7 +195,7 @@ public class FileClientTest
   {
     const string path = "/a/b/c";
 
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = GetFs('/');
     var computer = new Mock<IComputer>();
     var client = new FileClient(
@@ -214,7 +213,7 @@ public class FileClientTest
   [Fact]
   public void CombineCombinesPathComponents()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = new Mock<IFileSystem>();
     var path = new Mock<IPath>();
     fs.Setup(fs => fs.Path).Returns(path.Object);
@@ -260,7 +259,7 @@ public class FileClientTest
     const string path = "/a/b/c";
     const string pathToTarget = "/a/a2";
 
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = GetFs('/');
     var computer = new Mock<IComputer>();
     var client = new FileClient(
@@ -280,7 +279,7 @@ public class FileClientTest
   {
     const string path = "/a/b/c";
 
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
       { path, new MockFileData("test") }
     });
@@ -342,7 +341,7 @@ public class FileClientTest
   [Fact]
   public async Task CopyBulkCopiesOnWindows()
   {
-    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Windows, CpuArch.X64);
     var fs = GetFs('\\');
     var path = new Mock<IPath>();
     path.Setup(path => path.DirectorySeparatorChar).Returns('\\');
@@ -369,7 +368,7 @@ public class FileClientTest
   [Fact]
   public async Task CopyBulkCopiesOnUnix()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = GetFs('/');
     var path = new Mock<IPath>();
     path.Setup(path => path.DirectorySeparatorChar).Returns('/');
@@ -396,7 +395,7 @@ public class FileClientTest
   [Fact]
   public async Task CopyBulkOnWindowsFailsIfRobocopyHasBadExitCode()
   {
-    var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Windows, CpuArch.X64);
     var fs = GetFs('\\');
     var path = new Mock<IPath>();
     path.Setup(path => path.DirectorySeparatorChar).Returns('\\');
@@ -425,7 +424,7 @@ public class FileClientTest
   [Fact]
   public void FileThatExistsFindsFirstPossibleName()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var possibleNames = new string[] {
       "/a.txt",
       "/b.txt",
@@ -453,7 +452,7 @@ public class FileClientTest
   [Fact]
   public void GetRootedPathDeterminesRootedPath()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = new MockFileSystem();
     var computer = new Mock<IComputer>();
     var client = new FileClient(
@@ -468,7 +467,7 @@ public class FileClientTest
   [Fact]
   public void FileExistsDeterminesExistence()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
       { "/a.txt", new MockFileData("test") }
     });
@@ -485,7 +484,7 @@ public class FileClientTest
   [Fact]
   public void DirectoryExistsDeterminesExistence()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
       { "/a/b/c", new MockDirectoryData() }
     });
@@ -502,7 +501,7 @@ public class FileClientTest
   [Fact]
   public void ReadJsonFileReturnsModel()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
       { "model.json", new MockFileData(JSON_FILE_CONTENTS) }
     });
@@ -519,7 +518,7 @@ public class FileClientTest
   [Fact]
   public void ReadJsonFilesAllowsTrailingCommas()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
       { "model.json", new MockFileData(JSON_FILE_CONTENTS_TRAILING_COMMA) }
     });
@@ -536,7 +535,7 @@ public class FileClientTest
   [Fact]
   public void ReadJsonFileThrowsIfFileFailsToBeDeserialized()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
       { "model.json", new MockFileData("") }
     });
@@ -554,7 +553,7 @@ public class FileClientTest
   [Fact]
   public void ReadJsonFileReadsFromFirstFileItFounds()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
       { "model_a.json", new MockFileData(JSON_FILE_CONTENTS) },
       { "model_b.json", new MockFileData(JSON_FILE_CONTENTS_ALT) }
@@ -578,7 +577,7 @@ public class FileClientTest
   [Fact]
   public void ReadJsonFileThrowsIfDeserializedValueIsNull()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
       { "model.json", new MockFileData("") }
     });
@@ -603,7 +602,7 @@ public class FileClientTest
   [Fact]
   public void ReadJsonFileThrowsIOExceptionOnOtherError()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
       { "model.json", new MockFileData("[}") }
     });
@@ -626,7 +625,7 @@ public class FileClientTest
   [Fact]
   public void ReadJsonFileChecksOtherPossibleFilenames()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = new MockFileSystem(new Dictionary<string, MockFileData> {
       { "model_b.json", new MockFileData(JSON_FILE_CONTENTS_ALT) }
     });
@@ -649,7 +648,7 @@ public class FileClientTest
   [Fact]
   public void ReadJsonFileReturnsDefaultValues()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var fs = new MockFileSystem();
 
     var computer = new Mock<IComputer>();
@@ -683,10 +682,10 @@ public class FileClientTest
   public static IEnumerable<object[]> GetSystemInfoForUnixOSes()
   {
     yield return [
-      new MockSystemInfo(OSType.Linux, CPUArch.X64)
+      new MockSystemInfo(OSType.Linux, CpuArch.X64)
     ];
     yield return [
-      new MockSystemInfo(OSType.MacOS, CPUArch.Arm64)
+      new MockSystemInfo(OSType.MacOS, CpuArch.Arm64)
     ];
   }
 
@@ -695,7 +694,7 @@ public class FileClientTest
     var oSes = GetSystemInfoForUnixOSes();
 
     oSes = oSes.Append([
-      new MockSystemInfo(OSType.Windows, CPUArch.X64)
+      new MockSystemInfo(OSType.Windows, CpuArch.X64)
     ]);
 
     foreach (var os in oSes)

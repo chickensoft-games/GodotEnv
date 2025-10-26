@@ -3,7 +3,7 @@ namespace Chickensoft.GodotEnv.Common.Models;
 /// <summary>
 /// Processor architecture type.
 /// </summary>
-public enum CPUArch
+public enum CpuArch
 {
   X86,
   X64,

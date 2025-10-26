@@ -42,7 +42,7 @@ public class AddonsInstallCommandTest
     // and provide access to the relevant mocks for testing via out vars.
 
     var systemInfo = new Mock<ISystemInfo>();
-    systemInfo.Setup(sys => sys.CPUArch).Returns(CPUArch.X64);
+    systemInfo.Setup(sys => sys.CpuArch).Returns(CpuArch.X64);
     systemInfo.Setup(sys => sys.OS).Returns(OSType.Linux);
     systemInfo.Setup(sys => sys.OSFamily).Returns(OSFamily.Unix);
     var config = MockConfig.Get();

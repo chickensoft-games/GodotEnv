@@ -28,7 +28,7 @@ public sealed class GodotListCommandTest : IDisposable
 
   public GodotListCommandTest()
   {
-    _systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    _systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     _config = MockConfig.Get();
     _context = new Mock<IExecutionContext>();
     _godotContext = new Mock<IGodotContext>();

@@ -35,10 +35,10 @@ public class SystemInfoTest
   [Fact]
   public void IsWindowsOnArm()
   {
-    ISystemInfo systemInfo = new SystemInfo { IsOSPlatformProxy = (platform) => platform == OSPlatform.Windows, CPUArchProxy = Architecture.Arm64 };
+    ISystemInfo systemInfo = new SystemInfo { IsOSPlatformProxy = (platform) => platform == OSPlatform.Windows, CpuArchProxy = Architecture.Arm64 };
     systemInfo.OS.ShouldBe(OSType.Windows);
     systemInfo.OSFamily.ShouldBe(OSFamily.Windows);
-    systemInfo.CPUArch.ShouldBe(CPUArch.Arm64);
+    systemInfo.CpuArch.ShouldBe(CpuArch.Arm64);
   }
 
   [Fact]
@@ -50,23 +50,23 @@ public class SystemInfoTest
   }
 
   [Fact]
-  public void IsUnknownCPUArch()
+  public void IsUnknownCpuArch()
   {
-    ISystemInfo systemInfo = new SystemInfo { CPUArchProxy = Architecture.Ppc64le };
-    systemInfo.CPUArch.ShouldBe(CPUArch.Other);
+    ISystemInfo systemInfo = new SystemInfo { CpuArchProxy = Architecture.Ppc64le };
+    systemInfo.CpuArch.ShouldBe(CpuArch.Other);
   }
 
   [Fact]
-  public void IsCPUX64WhenRuntimeArchX64()
+  public void IsCpuX64WhenRuntimeArchX64()
   {
-    ISystemInfo systemInfo = new SystemInfo { CPUArchProxy = Architecture.X64 };
-    systemInfo.CPUArch.ShouldBe(CPUArch.X64);
+    ISystemInfo systemInfo = new SystemInfo { CpuArchProxy = Architecture.X64 };
+    systemInfo.CpuArch.ShouldBe(CpuArch.X64);
   }
 
   [Fact]
-  public void IsCPUArm64WhenRuntimeArchArm64()
+  public void IsCpuArm64WhenRuntimeArchArm64()
   {
-    ISystemInfo systemInfo = new SystemInfo { CPUArchProxy = Architecture.Arm64 };
-    systemInfo.CPUArch.ShouldBe(CPUArch.Arm64);
+    ISystemInfo systemInfo = new SystemInfo { CpuArchProxy = Architecture.Arm64 };
+    systemInfo.CpuArch.ShouldBe(CpuArch.Arm64);
   }
 }

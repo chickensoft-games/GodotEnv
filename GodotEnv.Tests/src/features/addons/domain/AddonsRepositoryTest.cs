@@ -53,7 +53,7 @@ public class AddonsRepositoryTest
     // Keep tests shorter by using a helper method to build the test subject.
     // var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
     var systemInfo = new Mock<ISystemInfo>();
-    systemInfo.Setup(sys => sys.CPUArch).Returns(CPUArch.X64);
+    systemInfo.Setup(sys => sys.CpuArch).Returns(CpuArch.X64);
     systemInfo.Setup(sys => sys.OS).Returns(OSType.Linux);
     systemInfo.Setup(sys => sys.OSFamily).Returns(OSFamily.Unix);
     var console = new FakeInMemoryConsole();

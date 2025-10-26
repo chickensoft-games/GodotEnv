@@ -24,7 +24,7 @@ public class Windows : GodotEnvironment
       version.Number.Major < _firstKnownArmVersion.major
         || version.Number.Minor < _firstKnownArmVersion.minor;
 
-    if (noKnownArmVersion || SystemInfo.CPUArch != CPUArch.Arm64)
+    if (noKnownArmVersion || SystemInfo.CpuArch != CpuArch.Arm64)
     {
       return "win64";
     }

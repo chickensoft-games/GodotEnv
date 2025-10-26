@@ -27,7 +27,7 @@ public interface ISystemInfo
       _ => OSFamily.Unknown
     };
 
-  CPUArch CPUArch { get; }
+  CpuArch CpuArch { get; }
 }
 
 public class SystemInfo : ISystemInfo
@@ -48,13 +48,13 @@ public class SystemInfo : ISystemInfo
       Justification = "Missing cases handled by default"
     )
   ]
-  public CPUArch CPUArch => CPUArchProxy switch
+  public CpuArch CpuArch => CpuArchProxy switch
   {
-    Architecture.X64 => CPUArch.X64,
-    Architecture.X86 => CPUArch.X86,
-    Architecture.Arm64 => CPUArch.Arm64,
-    Architecture.Arm => CPUArch.Arm,
-    _ => CPUArch.Other,
+    Architecture.X64 => CpuArch.X64,
+    Architecture.X86 => CpuArch.X86,
+    Architecture.Arm64 => CpuArch.Arm64,
+    Architecture.Arm => CpuArch.Arm,
+    _ => CpuArch.Other,
   };
 
   // Shims for testing.
@@ -64,15 +64,15 @@ public class SystemInfo : ISystemInfo
   public Func<OSPlatform, bool> IsOSPlatformProxy { get; set; } =
     IsOSPlatformDefault;
 
-  public static Architecture CPUArchDefault { get; } =
+  public static Architecture CpuArchDefault { get; } =
     RuntimeInformation.ProcessArchitecture;
 
-  public Architecture CPUArchProxy { get; set; } =
-    CPUArchDefault;
+  public Architecture CpuArchProxy { get; set; } =
+    CpuArchDefault;
 }
 
-public class MockSystemInfo(OSType os, CPUArch cpuArch) : ISystemInfo
+public class MockSystemInfo(OSType os, CpuArch cpuArch) : ISystemInfo
 {
   public OSType OS { get; } = os;
-  public CPUArch CPUArch { get; } = cpuArch;
+  public CpuArch CpuArch { get; } = cpuArch;
 }

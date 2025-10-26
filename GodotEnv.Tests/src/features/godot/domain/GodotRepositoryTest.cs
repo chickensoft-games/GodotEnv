@@ -22,7 +22,7 @@ public class GodotRepositoryTest
   {
     var workingDir = ".";
 
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var computer = new Mock<IComputer>();
     var processRunner = new Mock<IProcessRunner>();
     var fileClient = new Mock<IFileClient>();
@@ -95,7 +95,7 @@ public class GodotRepositoryTest
   [InlineData("3.5.4-dev6")]
   public void DirectoryToVersionUndoesVersionFsName(string godotVersionString)
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var computer = new Mock<IComputer>();
     var processRunner = new Mock<IProcessRunner>();
 

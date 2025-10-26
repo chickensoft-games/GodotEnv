@@ -14,7 +14,7 @@ public class ConfigSetCommandTest
   [Fact]
   public async Task SetsIndicatedValue()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
@@ -38,7 +38,7 @@ public class ConfigSetCommandTest
   [Fact]
   public async Task FailsGracefullyWhenIndicatedKeyDoesNotExist()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();
@@ -68,7 +68,7 @@ public class ConfigSetCommandTest
   [Fact]
   public async Task FailsGracefullyWhenIndicatedValueIsInvalid()
   {
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var config = new Config();
     var context = new Mock<IExecutionContext>();
     var console = new FakeInMemoryConsole();

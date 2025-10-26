@@ -18,7 +18,7 @@ public class ExecutionContextTest
   public void Initializes()
   {
     var config = new Config();
-    var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
     var addons = new Mock<IAddonsContext>().Object;
     var godot = new Mock<IGodotContext>().Object;
 
