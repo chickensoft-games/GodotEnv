@@ -6,7 +6,8 @@ using System.Text.Json.Nodes;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 
-public class GlobalJsonFile : IGodotVersionFile, IEquatable<GlobalJsonFile> {
+public class GlobalJsonFile : IGodotVersionFile, IEquatable<GlobalJsonFile>
+{
   private static readonly SharpVersionDeserializer _versionDeserializer = new();
   private static readonly SharpVersionSerializer _versionSerializer = new();
 
@@ -16,14 +17,17 @@ public class GlobalJsonFile : IGodotVersionFile, IEquatable<GlobalJsonFile> {
   public JsonNodeOptions JsonNodeOptions { get; }
   public JsonSerializerOptions JsonSerializerOptions { get; }
 
-  public GlobalJsonFile(string filePath) {
+  public GlobalJsonFile(string filePath)
+  {
     FilePath = filePath;
-    JsonDocumentOptions = new() {
+    JsonDocumentOptions = new()
+    {
       CommentHandling = JsonCommentHandling.Skip,
       AllowTrailingCommas = true,
     };
     JsonNodeOptions = new();
-    JsonSerializerOptions = new() {
+    JsonSerializerOptions = new()
+    {
       WriteIndented = true,
     };
   }
@@ -31,13 +35,17 @@ public class GlobalJsonFile : IGodotVersionFile, IEquatable<GlobalJsonFile> {
   /// <inheritdoc/>
   public SpecificDotnetStatusGodotVersion? ParseGodotVersion(
     IFileClient fileClient
-  ) {
+  )
+  {
     var version = string.Empty;
-    try {
-      using (var stream = fileClient.GetReadStream(FilePath)) {
+    try
+    {
+      using (var stream = fileClient.GetReadStream(FilePath))
+      {
         using (
           var jsonDocument = JsonDocument.Parse(stream, JsonDocumentOptions)
-        ) {
+        )
+        {
           var msbuildSdks =
             jsonDocument.RootElement.GetProperty("msbuild-sdks");
           var godotSdk = msbuildSdks.GetProperty("Godot.NET.Sdk");
@@ -45,7 +53,8 @@ public class GlobalJsonFile : IGodotVersionFile, IEquatable<GlobalJsonFile> {
         }
       }
     }
-    catch (Exception) {
+    catch (Exception)
+    {
       return null;
     }
     // if the version is from a global.json, we definitely want .NET
@@ -56,10 +65,12 @@ public class GlobalJsonFile : IGodotVersionFile, IEquatable<GlobalJsonFile> {
   public void WriteGodotVersion(
     SpecificDotnetStatusGodotVersion version,
     IFileClient fileClient
-  ) {
+  )
+  {
     JsonNode jsonNode = new JsonObject();
     // preserve existing global.json data
-    if (fileClient.FileExists(FilePath)) {
+    if (fileClient.FileExists(FilePath))
+    {
       using var stream = fileClient.GetReadStream(FilePath);
       jsonNode = JsonNode.Parse(stream, JsonNodeOptions, JsonDocumentOptions)
         ?? jsonNode;
@@ -69,7 +80,8 @@ public class GlobalJsonFile : IGodotVersionFile, IEquatable<GlobalJsonFile> {
     msbuildSdks["Godot.NET.Sdk"] = _versionSerializer.Serialize(version);
     jsonNode["msbuild-sdks"] = msbuildSdks;
     var jsonString = jsonNode.ToJsonString(JsonSerializerOptions);
-    using (var writer = fileClient.GetWriter(FilePath)) {
+    using (var writer = fileClient.GetWriter(FilePath))
+    {
       writer.WriteLine(jsonString);
     }
   }

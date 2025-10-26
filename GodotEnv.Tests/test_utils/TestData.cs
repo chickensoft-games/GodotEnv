@@ -3,7 +3,8 @@ namespace Chickensoft.GodotEnv.Tests;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Features.Addons.Models;
 
-public static class TestData {
+public static class TestData
+{
   public const string NAME = "godotenv";
   public const string ADDONS_FILE_PATH = "godotenv";
   public const string URL = "git@github.com:chickensoft-games/GodotEnv.git";

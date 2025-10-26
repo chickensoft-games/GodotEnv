@@ -7,16 +7,18 @@ using CliFx.Attributes;
 using CliFx.Infrastructure;
 
 [Command("addons", Description = "Manage addons for a Godot project.")]
-public class AddonsCommand : ICommand, ICliCommand {
+public class AddonsCommand : ICommand, ICliCommand
+{
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
-  public AddonsCommand(IExecutionContext context) {
+  public AddonsCommand(IExecutionContext context)
+  {
     ExecutionContext = context;
   }
 
-  public ValueTask ExecuteAsync(IConsole console) {
+  public ValueTask ExecuteAsync(IConsole console)
+  {
     var log = ExecutionContext.CreateLog(console);
-    var output = console.Output;
     log.Print("");
     log.Warn("Please use a subcommand to manage addons.");
     log.Print("");

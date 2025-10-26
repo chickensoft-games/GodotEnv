@@ -13,7 +13,8 @@ using CliFx.Infrastructure;
   Description = "Changes the active version of Godot by updating the symlink " +
     "to point to the specified version."
 )]
-public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
+public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled
+{
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
   [CommandParameter(
@@ -37,32 +38,34 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
 
   public bool IsWindowsElevationRequired => true;
 
-  public GodotUseCommand(IExecutionContext context) {
+  public GodotUseCommand(IExecutionContext context)
+  {
     ExecutionContext = context;
   }
 
-  public async ValueTask ExecuteAsync(IConsole console) {
+  public async ValueTask ExecuteAsync(IConsole console)
+  {
     var godotRepo = ExecutionContext.Godot.GodotRepo;
-    var platform = ExecutionContext.Godot.Platform;
 
     var log = ExecutionContext.CreateLog(console);
-    var output = console.Output;
 
-    SpecificDotnetStatusGodotVersion? version = null;
-
-    if (!string.IsNullOrEmpty(RawVersion)) {
+    SpecificDotnetStatusGodotVersion? version;
+    if (!string.IsNullOrEmpty(RawVersion))
+    {
       var isDotnetVersion = !NoDotnet;
       // We know this won't throw because the validator okayed it
       version =
         godotRepo.VersionDeserializer.Deserialize(RawVersion, isDotnetVersion);
     }
-    else {
+    else
+    {
       var versionRepo = ExecutionContext.Godot.VersionRepo;
       var versionFiles = versionRepo.GetVersionFiles();
       version = versionRepo.InferVersion(versionFiles, log);
     }
 
-    if (version is null) {
+    if (version is null)
+    {
       log.Err(
         """
         No version specified and couldn't find version file in directory tree.
@@ -81,7 +84,8 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled {
 
     await Task.CompletedTask;
 
-    if (potentialInstallation is not GodotInstallation installation) {
+    if (potentialInstallation is not GodotInstallation installation)
+    {
       log.Print("");
       log.Warn(
         $"Godot version {godotRepo.VersionSerializer.Serialize(version)} is not installed."

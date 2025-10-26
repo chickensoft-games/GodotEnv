@@ -5,7 +5,8 @@ using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 
-public class Windows : GodotEnvironment {
+public class Windows : GodotEnvironment
+{
   public Windows(
     ISystemInfo systemInfo,
     IFileClient fileClient,
@@ -17,12 +18,14 @@ public class Windows : GodotEnvironment {
 
   private static readonly (int major, int minor) _firstKnownArmVersion = (4, 3);
 
-  private string GetProcessorArchitecture(GodotVersion version) {
+  private string GetProcessorArchitecture(GodotVersion version)
+  {
     var noKnownArmVersion =
       version.Number.Major < _firstKnownArmVersion.major
         || version.Number.Minor < _firstKnownArmVersion.minor;
 
-    if (noKnownArmVersion || SystemInfo.CPUArch != CPUArch.Arm64) {
+    if (noKnownArmVersion || SystemInfo.CPUArch != CPUArch.Arm64)
+    {
       return "win64";
     }
 
@@ -40,7 +43,8 @@ public class Windows : GodotEnvironment {
 
   public override string GetRelativeExtractedExecutablePath(
     SpecificDotnetStatusGodotVersion version
-  ) {
+  )
+  {
     var fsVersionString = GetFilenameVersionString(version);
     var name = fsVersionString +
       $"{(version.IsDotnetEnabled ? "_mono" : "")}_{GetProcessorArchitecture(version)}.exe";
@@ -48,7 +52,8 @@ public class Windows : GodotEnvironment {
     // Both versions extract to a folder. The dotnet folder name is different
     // from the non-dotnet folder name :P
 
-    if (version.IsDotnetEnabled) {
+    if (version.IsDotnetEnabled)
+    {
       return FileClient.Combine(fsVersionString + $"_mono_{GetProcessorArchitecture(version)}", name);
     }
 

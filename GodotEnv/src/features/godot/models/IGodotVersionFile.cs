@@ -6,11 +6,12 @@ using Chickensoft.GodotEnv.Common.Clients;
 /// Represents a file on disk that may contain a Godot version string we can use
 /// to execute a command.
 /// </summary>
-public interface IGodotVersionFile {
+public interface IGodotVersionFile
+{
   /// <summary>
   /// The path of the file to be parsed.
   /// </summary>
-  public string FilePath { get; }
+  string FilePath { get; }
 
   /// <summary>
   /// Parses and returns a Godot version from the file, if one exists.
@@ -25,7 +26,7 @@ public interface IGodotVersionFile {
   /// If the file contained a possible Godot-version string, but it didn't
   /// deserialize correctly.
   /// </exception>
-  public SpecificDotnetStatusGodotVersion? ParseGodotVersion(
+  SpecificDotnetStatusGodotVersion? ParseGodotVersion(
     IFileClient fileClient
   );
 
@@ -40,7 +41,7 @@ public interface IGodotVersionFile {
   /// <exception cref="NotSupportedException">
   /// If this file type does not support writing Godot versions.
   /// </exception>
-  public void WriteGodotVersion(
+  void WriteGodotVersion(
     SpecificDotnetStatusGodotVersion version,
     IFileClient fileClient
   );

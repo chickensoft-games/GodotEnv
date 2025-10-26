@@ -6,7 +6,8 @@ using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 
-public interface IGodotEnvironment {
+public interface IGodotEnvironment
+{
   ISystemInfo SystemInfo { get; }
   /// <summary>
   /// File client used by the platform to manipulate file paths.
@@ -41,7 +42,7 @@ public interface IGodotEnvironment {
   /// Gets the filename as which an installer is known.
   /// </summary>
   /// <param name="version">Godot version.</param>
-  public string GetInstallerFilename(
+  string GetInstallerFilename(
     SpecificDotnetStatusGodotVersion version
   );
 
@@ -70,7 +71,8 @@ public interface IGodotEnvironment {
   string GetRelativeGodotSharpPath(SpecificDotnetStatusGodotVersion version);
 }
 
-public abstract class GodotEnvironment : IGodotEnvironment {
+public abstract class GodotEnvironment : IGodotEnvironment
+{
   public const string GODOT_FILENAME_PREFIX = "Godot_v";
   public const string GODOT_URL_PREFIX =
     "https://github.com/godotengine/godot-builds/releases/download/";
@@ -91,7 +93,8 @@ public abstract class GodotEnvironment : IGodotEnvironment {
     IVersionDeserializer versionDeserializer,
     IVersionSerializer versionSerializer
   ) =>
-    systemInfo.OS switch {
+    systemInfo.OS switch
+    {
       OSType.Windows => new Windows(systemInfo, fileClient, computer, versionDeserializer, versionSerializer),
       OSType.MacOS => new MacOS(systemInfo, fileClient, computer, versionDeserializer, versionSerializer),
       OSType.Linux => new Linux(systemInfo, fileClient, computer, versionDeserializer, versionSerializer),
@@ -105,7 +108,8 @@ public abstract class GodotEnvironment : IGodotEnvironment {
     IComputer computer,
     IVersionDeserializer versionDeserializer,
     IVersionSerializer versionSerializer
-  ) {
+  )
+  {
     SystemInfo = systemInfo;
     FileClient = fileClient;
     Computer = computer;
@@ -133,14 +137,16 @@ public abstract class GodotEnvironment : IGodotEnvironment {
   public string GetDownloadUrl(
     SpecificDotnetStatusGodotVersion version,
     bool isTemplate
-  ) {
+  )
+  {
     // We need to be sure this is a release-style version string to get the
     // correct url
     var versionConverter = new ReleaseVersionSerializer();
     var url = $"{GODOT_URL_PREFIX}{versionConverter.Serialize(version)}/";
 
     // Godot application download url.
-    if (!isTemplate) {
+    if (!isTemplate)
+    {
       return url + GetInstallerFilename(version);
     }
 

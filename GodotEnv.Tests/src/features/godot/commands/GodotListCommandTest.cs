@@ -14,7 +14,8 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public sealed class GodotListCommandTest : IDisposable {
+public sealed class GodotListCommandTest : IDisposable
+{
 
   private readonly MockSystemInfo _systemInfo;
   private readonly Mock<IConfig> _config;
@@ -25,7 +26,8 @@ public sealed class GodotListCommandTest : IDisposable {
   private readonly FakeInMemoryConsole _console;
   private readonly Log _log;
 
-  public GodotListCommandTest() {
+  public GodotListCommandTest()
+  {
     _systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
     _config = MockConfig.Get();
     _context = new Mock<IExecutionContext>();
@@ -45,7 +47,8 @@ public sealed class GodotListCommandTest : IDisposable {
   public void Dispose() => _console.Dispose();
 
   [Fact]
-  public async Task Executes() {
+  public async Task Executes()
+  {
     var testVersions = new List<string> { "3.2.3", "4.0.1" };
     _godotRepo.Setup(r => r.GetRemoteVersionsList(_log, null)).ReturnsAsync(testVersions);
 
@@ -63,7 +66,8 @@ public sealed class GodotListCommandTest : IDisposable {
   }
 
   [Fact]
-  public async Task FailsGracefullyOnHttpException() {
+  public async Task FailsGracefullyOnHttpException()
+  {
     _godotRepo.Setup(r => r.GetRemoteVersionsList(_log, null)).Throws<HttpRequestException>();
 
     var listCommand = new GodotListCommand(_context.Object) { ListRemoteAvailable = true };

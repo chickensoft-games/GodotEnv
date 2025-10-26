@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 using Models;
 using Utilities;
 
-public interface IEnvironmentVariableClient {
-  public ISystemInfo SystemInfo { get; }
+public interface IEnvironmentVariableClient
+{
+  ISystemInfo SystemInfo { get; }
 
   /// <summary>
   /// Retrieves the environment variable for the current user.
@@ -30,7 +31,8 @@ public interface IEnvironmentVariableClient {
   Task UpdateGodotEnvEnvironment(string godotSymlinkPath, string godotBinPath);
 }
 
-public class EnvironmentVariableClient : IEnvironmentVariableClient {
+public class EnvironmentVariableClient : IEnvironmentVariableClient
+{
   public ISystemInfo SystemInfo { get; }
   public IProcessRunner ProcessRunner { get; }
   public IFileClient FileClient { get; }
@@ -38,25 +40,30 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
 
   public EnvironmentVariableClient(
     ISystemInfo systemInfo, IProcessRunner processRunner, IFileClient fileClient, IComputer computer
-  ) {
+  )
+  {
     SystemInfo = systemInfo;
     ProcessRunner = processRunner;
     FileClient = fileClient;
     Computer = computer;
   }
 
-  public async Task<string> GetUserEnv(string name) {
+  public async Task<string> GetUserEnv(string name)
+  {
     var shell = Computer.CreateShell(FileClient.AppDataDirectory);
 
-    switch (SystemInfo.OS) {
+    switch (SystemInfo.OS)
+    {
       case OSType.Windows:
         return Task.FromResult(GetEnvironmentVariableOnWindows(
           name, EnvironmentVariableTarget.User
         ) ?? "").Result;
       case OSType.MacOS:
-      case OSType.Linux: {
+      case OSType.Linux:
+        {
           var envFilePath = FileClient.Combine(FileClient.AppDataDirectory, "env");
-          if (!FileClient.FileExists(envFilePath)) {
+          if (!FileClient.FileExists(envFilePath))
+          {
             return "";
           }
           // NOTE: 'sh' shell for maximum portability. 'envFilePath' is sourced
@@ -72,7 +79,8 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
     }
   }
 
-  private void SetUserEnvOnWindows(string name, string value) {
+  private void SetUserEnvOnWindows(string name, string value)
+  {
     SetEnvironmentVariableOnWindows(
       name, value, EnvironmentVariableTarget.User
     );
@@ -89,8 +97,10 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
     SetEnvironmentVariableOnWindowsProxy(name, value, target);
   public Action<string, string, EnvironmentVariableTarget> SetEnvironmentVariableOnWindowsProxy { get; set; } = Environment.SetEnvironmentVariable;
 
-  public async Task UpdateGodotEnvEnvironment(string godotSymlinkPath, string godotBinPath) {
-    switch (SystemInfo.OS) {
+  public async Task UpdateGodotEnvEnvironment(string godotSymlinkPath, string godotBinPath)
+  {
+    switch (SystemInfo.OS)
+    {
       case OSType.Windows:
         SetUserEnvOnWindows(Defaults.GODOT_ENV_VAR_NAME, godotSymlinkPath);
         await AppendToUserEnvOnWindows(Defaults.PATH_ENV_VAR_NAME, godotBinPath);
@@ -105,7 +115,8 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
     }
   }
 
-  private void UpdateEnvFileOnUnix(string godotSymlinkPath, string godotBinPath) {
+  private void UpdateEnvFileOnUnix(string godotSymlinkPath, string godotBinPath)
+  {
     // Replace home full path by '$HOME' to make it more portable.
     var godotBinPathDynamic = godotBinPath.Replace(FileClient.UserDirectory, "$HOME");
     var godotSymlinkPathDynamic = godotSymlinkPath.Replace(FileClient.UserDirectory, "$HOME");
@@ -113,7 +124,8 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
     // Create file '~/.config/godotenv/env' (AppDataDirectory/env)
     var envFilePath = FileClient.Combine(FileClient.AppDataDirectory, "env");
     // Console.WriteLine($"{nameof(EnvironmentVariableClient)} envFilePath: {envFilePath}");
-    if (FileClient.FileExists(envFilePath)) {
+    if (FileClient.FileExists(envFilePath))
+    {
       FileClient.DeleteFile(envFilePath);
     }
 
@@ -148,26 +160,29 @@ public class EnvironmentVariableClient : IEnvironmentVariableClient {
       $"{FileClient.UserDirectory}/.profile", $"{FileClient.UserDirectory}/.bashrc",
       $"{FileClient.UserDirectory}/.zshenv",
     };
-    foreach (var filePath in shellFilesToUpdate) {
+    foreach (var filePath in shellFilesToUpdate)
+    {
       // Console.WriteLine($"shellFile: {filePath}");
-      if (!FileClient.FileExists(filePath)) { continue; }
+      if (!FileClient.FileExists(filePath))
+      { continue; }
 
       // Console.WriteLine($"Updating shell file '{filePath}'...");
       FileClient.AddLinesToFileIfNotPresent(filePath, cmd);
     }
   }
 
-  private async Task AppendToUserEnvOnWindows(string name, string value) {
+  private async Task AppendToUserEnvOnWindows(string name, string value)
+  {
     var currentValue = await GetUserEnv(name);
     // On Windows Path, each segment is separated by ';'. We use this to split the string into tokens.
     var tokens = currentValue.Split(';').ToList();
     // Filter tokens keeping the ones that are different from the 'value' that we are trying to add.
-    tokens = tokens.Where(t => !t.Contains(value, StringComparison.OrdinalIgnoreCase)).ToList();
+    tokens = [.. tokens.Where(t => !t.Contains(value, StringComparison.OrdinalIgnoreCase))];
 
     // Lambda function that receive a List<string> of tokens.
     // For each string of length > 0, concatenate each one with ';' between then.
-    string concatenateWindowsPaths(List<string> tokens) =>
-      tokens.FindAll(t => t.Length > 0).Aggregate((a, b) => a + ';' + b);
+    static string concatenateWindowsPaths(List<string> tokens)
+      => tokens.FindAll(t => t.Length > 0).Aggregate((a, b) => a + ';' + b);
 
     // Insert at the beginning.
     tokens.Insert(0, value);

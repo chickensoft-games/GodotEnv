@@ -9,7 +9,8 @@ using CliFx.Exceptions;
 using Downloader;
 using Humanizer;
 
-public interface INetworkClient {
+public interface INetworkClient
+{
   IDownloadService DownloadService { get; }
   DownloadConfiguration DownloadConfiguration { get; }
 
@@ -69,34 +70,41 @@ public interface INetworkClient {
 /// <param name="Speed">Humanized bytes per second speed.</param>
 public readonly record struct DownloadProgress(int Percent, string Speed);
 
-public class NetworkClient : INetworkClient {
+public class NetworkClient : INetworkClient
+{
   public IDownloadService DownloadService { get; }
   public DownloadConfiguration DownloadConfiguration { get; }
 
   public NetworkClient(
     IDownloadService downloadService,
     DownloadConfiguration downloadConfiguration
-  ) {
+  )
+  {
     DownloadService = downloadService;
     DownloadConfiguration = downloadConfiguration;
   }
 
-  public async Task<HttpResponseMessage> WebRequestGetAsync(string url, bool requestAgent = false, string? proxyUrl = null) {
+  public async Task<HttpResponseMessage> WebRequestGetAsync(string url, bool requestAgent = false, string? proxyUrl = null)
+  {
     var handler = CreateHttpClientHandler(proxyUrl);
     using var client = new HttpClient(handler);
 
-    if (requestAgent) {
+    if (requestAgent)
+    {
       client.DefaultRequestHeaders.UserAgent.TryParseAdd("request");
     }
 
     return await client.GetAsync(url);
   }
 
-  protected virtual HttpClientHandler CreateHttpClientHandler(string? proxyUrl) {
+  protected virtual HttpClientHandler CreateHttpClientHandler(string? proxyUrl)
+  {
     var handler = new HttpClientHandler();
 
-    if (!string.IsNullOrEmpty(proxyUrl)) {
-      if (!Uri.TryCreate(proxyUrl, UriKind.Absolute, out var proxyUri)) {
+    if (!string.IsNullOrEmpty(proxyUrl))
+    {
+      if (!Uri.TryCreate(proxyUrl, UriKind.Absolute, out var proxyUri))
+      {
         throw new CommandException($"Invalid proxy URL: {proxyUrl}");
       }
 
@@ -114,15 +122,18 @@ public class NetworkClient : INetworkClient {
     IProgress<DownloadProgress> progress,
     CancellationToken token,
     string? proxyUrl = null
-  ) {
+  )
+  {
     var download = CreateDownloadWithProxy(url, destinationDirectory, filename, proxyUrl);
 
     var lastPercent = 0d;
     var threshold = 1d;
 
     token.Register(
-      () => {
-        if (download.Status == DownloadStatus.Running) {
+      () =>
+      {
+        if (download.Status == DownloadStatus.Running)
+        {
           download.Stop();
         }
       }
@@ -130,13 +141,15 @@ public class NetworkClient : INetworkClient {
 
     void internalProgress(
       object? sender, Downloader.DownloadProgressChangedEventArgs args
-    ) {
+    )
+    {
       var speed = args.BytesPerSecondSpeed;
       var humanizedSpeed = speed.Bytes().Per(1.Seconds()).Humanize("#.##");
       var percent = args.ProgressPercentage;
       var p = (int)Math.Round(percent);
 
-      if (p - lastPercent >= threshold) {
+      if (p - lastPercent >= threshold)
+      {
         lastPercent = p;
         progress.Report(new(p, humanizedSpeed));
       }
@@ -144,14 +157,17 @@ public class NetworkClient : INetworkClient {
 
     void done(
       object? sender, System.ComponentModel.AsyncCompletedEventArgs args
-    ) {
-      if (args.Cancelled) {
+    )
+    {
+      if (args.Cancelled)
+      {
         throw new CommandException(
           "🚨 Download cancelled!"
         );
       }
 
-      if (args.Error != null) {
+      if (args.Error != null)
+      {
         throw new CommandException(
           $"Download failed. {args.Error.Message}"
         );
@@ -173,20 +189,27 @@ public class NetworkClient : INetworkClient {
     string filename,
     CancellationToken token,
     string? proxyUrl = null
-  ) {
+  )
+  {
     var download = CreateDownloadWithProxy(url, destinationDirectory, filename, proxyUrl);
 
     token.Register(
-      () => {
-        if (download.Status == DownloadStatus.Running) {
+      () =>
+      {
+        if (download.Status == DownloadStatus.Running)
+        {
           download.Stop();
         }
       }
     );
 
-    void done(
-    object? sender, System.ComponentModel.AsyncCompletedEventArgs args) {
-      if (args.Error != null) {
+    static void done(
+      object? sender,
+      System.ComponentModel.AsyncCompletedEventArgs args
+    )
+    {
+      if (args.Error != null)
+      {
         throw new CommandException(
           $"Download failed. {args.Error.Message}"
         );
@@ -200,18 +223,23 @@ public class NetworkClient : INetworkClient {
     download.DownloadFileCompleted -= done;
   }
 
-  protected virtual IDownload CreateDownloadWithProxy(string url, string destinationDirectory, string filename, string? proxyUrl = null) {
-    if (!string.IsNullOrEmpty(proxyUrl)) {
-      if (!Uri.TryCreate(proxyUrl, UriKind.Absolute, out var proxyUri)) {
+  protected virtual IDownload CreateDownloadWithProxy(string url, string destinationDirectory, string filename, string? proxyUrl = null)
+  {
+    if (!string.IsNullOrEmpty(proxyUrl))
+    {
+      if (!Uri.TryCreate(proxyUrl, UriKind.Absolute, out var proxyUri))
+      {
         throw new CommandException($"Invalid proxy URL: {proxyUrl}");
       }
 
-      DownloadConfiguration.RequestConfiguration.Proxy = new WebProxy {
+      DownloadConfiguration.RequestConfiguration.Proxy = new WebProxy
+      {
         Address = proxyUri,
         UseDefaultCredentials = false
       };
     }
-    else {
+    else
+    {
       DownloadConfiguration.RequestConfiguration.Proxy = null;
     }
 

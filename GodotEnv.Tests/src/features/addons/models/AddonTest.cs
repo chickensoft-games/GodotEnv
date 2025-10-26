@@ -5,7 +5,8 @@ using Chickensoft.GodotEnv.Features.Addons.Models;
 using Shouldly;
 using Xunit;
 
-public class AddonTest {
+public class AddonTest
+{
   public const string NAME = "godotenv";
   public const string ADDONS_FILE_PATH = "godotenv";
   public const string URL = "git@github.com:chickensoft-games/GodotEnv.git";
@@ -14,7 +15,8 @@ public class AddonTest {
   public const AssetSource SOURCE = AssetSource.Remote;
 
   [Fact]
-  public void Initializes() {
+  public void Initializes()
+  {
     var addon = new Addon(
       name: NAME,
       addonsFilePath: ADDONS_FILE_PATH,
@@ -35,7 +37,8 @@ public class AddonTest {
   }
 
   [Fact]
-  public void DescribesItself() {
+  public void DescribesItself()
+  {
     var addon = new Addon(
       name: NAME,
       addonsFilePath: ADDONS_FILE_PATH,

@@ -11,8 +11,13 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class EnvironmentVariableClientTest {
-  private static IEnumerable<object[]> GetSystemInfoForUnixOSes() {
+public class EnvironmentVariableClientTest
+{
+  private const string USER_DIR = "$HOME";
+  private const string WORKING_DIR = $"{USER_DIR}/.config/godotenv";
+
+  public static IEnumerable<object[]> GetSystemInfoForUnixOSes()
+  {
     yield return [
       new MockSystemInfo(OSType.Linux, CPUArch.X64)
     ];
@@ -21,24 +26,25 @@ public class EnvironmentVariableClientTest {
     ];
   }
 
-  private static IEnumerable<object[]> GetSystemInfoForAllOSes() {
+  public static IEnumerable<object[]> GetSystemInfoForAllOSes()
+  {
     var oSes = GetSystemInfoForUnixOSes();
 
     oSes = oSes.Append([
       new MockSystemInfo(OSType.Windows, CPUArch.X64)
     ]);
 
-    foreach (var os in oSes) {
+    foreach (var os in oSes)
+    {
       yield return os;
     }
   }
 
   [Theory]
   [MemberData(nameof(GetSystemInfoForAllOSes))]
-  public async Task GetUserEnv(ISystemInfo systemInfo) {
-    const string USER_DIR = "$HOME";
-    const string WORKING_DIR = $"{USER_DIR}/.config/godotenv";
-    const string envFilePath = $"{WORKING_DIR}/env";
+  public async Task GetUserEnv(ISystemInfo systemInfo)
+  {
+    var envFilePath = $"{WORKING_DIR}/env";
     var envValue = $"{WORKING_DIR}/godot/bin/godot";
 
     var processRunner = new Mock<IProcessRunner>();
@@ -56,15 +62,22 @@ public class EnvironmentVariableClientTest {
     var computer = new Mock<IComputer>();
     computer.Setup(c => c.CreateShell(WORKING_DIR)).Returns(new Shell(processRunner.Object, WORKING_DIR));
 
-    var envVarClient = new EnvironmentVariableClient(systemInfo, processRunner.Object, fileClient.Object,
-      computer.Object);
+    var envVarClient = new EnvironmentVariableClient(
+      systemInfo,
+      processRunner.Object,
+      fileClient.Object,
+      computer.Object
+    )
+    {
+      GetEnvironmentVariableOnWindowsProxy = (name, _) =>
+      {
+        if (name == Defaults.GODOT_ENV_VAR_NAME)
+        {
+          return envValue;
+        }
 
-    envVarClient.GetEnvironmentVariableOnWindowsProxy = (_name, _) => {
-      if (_name == Defaults.GODOT_ENV_VAR_NAME) {
-        return envValue;
+        return null;
       }
-
-      return null;
     };
 
     var userEnv = await envVarClient.GetUserEnv(Defaults.GODOT_ENV_VAR_NAME);
@@ -72,11 +85,10 @@ public class EnvironmentVariableClientTest {
   }
 
   [Fact]
-  public async Task UpdateGodotEnvEnvironmentOnWindows() {
-    const string USER_DIR = "$HOME";
-    const string WORKING_DIR = $"{USER_DIR}/.config/godotenv";
-    const string binPath = $"{WORKING_DIR}/godot/bin";
-    const string symlinkPath = $"{binPath}/godot";
+  public async Task UpdateGodotEnvEnvironmentOnWindows()
+  {
+    var binPath = $"{WORKING_DIR}/godot/bin";
+    var symlinkPath = $"{binPath}/godot";
 
     var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
     var processRunner = new Mock<IProcessRunner>();
@@ -90,16 +102,14 @@ public class EnvironmentVariableClientTest {
     var envVarClient = new EnvironmentVariableClient(systemInfo, processRunner.Object, fileClient.Object,
       computer.Object);
 
-    var envs = new Dictionary<string, string> {
+    var envs = new Dictionary<string, string>
+    {
       [Defaults.PATH_ENV_VAR_NAME] = @"C:\Program Files\PowerShell\7;C:\Windows\System32\WindowsPowerShell\v1.0\",
     };
-    envVarClient.GetEnvironmentVariableOnWindowsProxy = (_name, _) => {
-      return envs[_name];
-    };
+    envVarClient.GetEnvironmentVariableOnWindowsProxy = (name, _) => envs[name];
 
-    envVarClient.SetEnvironmentVariableOnWindowsProxy = (_name, _val, _) => {
-      envs[_name] = _val;
-    };
+    envVarClient.SetEnvironmentVariableOnWindowsProxy = (name, val, _)
+      => envs[name] = val;
 
     await envVarClient.UpdateGodotEnvEnvironment(symlinkPath, binPath);
 
@@ -110,7 +120,8 @@ public class EnvironmentVariableClientTest {
 
     // Test idempotency of re-runs.
     var envsCopy = new Dictionary<string, string>();
-    foreach (var (k, v) in envs) {
+    foreach (var (k, v) in envs)
+    {
       envsCopy[k] = v;
     }
 
@@ -122,13 +133,12 @@ public class EnvironmentVariableClientTest {
 
   [Theory]
   [MemberData(nameof(GetSystemInfoForUnixOSes))]
-  public async Task UpdateGodotEnvEnvironmentOnUnix(ISystemInfo systemInfo) {
-    const string USER_DIR = "$HOME";
-    const string WORKING_DIR = $"{USER_DIR}/.config/godotenv";
-    const string binPath = $"{WORKING_DIR}/godot/bin";
-    const string symlinkPath = $"{binPath}/godot";
-    const string envFilePath = $"{WORKING_DIR}/env";
-    const string envFileContent = """
+  public async Task UpdateGodotEnvEnvironmentOnUnix(ISystemInfo systemInfo)
+  {
+    var binPath = $"{WORKING_DIR}/godot/bin";
+    var symlinkPath = $"{binPath}/godot";
+    var envFilePath = $"{WORKING_DIR}/env";
+    var envFileContent = """
       #!/bin/sh
       # godotenv shell setup (Updates PATH, and defines GODOT environment variable)
 
@@ -171,7 +181,8 @@ public class EnvironmentVariableClientTest {
     await envVarClient.UpdateGodotEnvEnvironment(symlinkPath, binPath);
 
     // Assert shell initialization files patch.
-    foreach (var file in shellFilesToUpdate) {
+    foreach (var file in shellFilesToUpdate)
+    {
       fileClient.Verify(fc => fc.AddLinesToFileIfNotPresent(file, cmd), Times.Once);
     }
     // Assert env file creation.

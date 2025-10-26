@@ -2,7 +2,8 @@ namespace Chickensoft.GodotEnv.Common.Models;
 
 using Downloader;
 
-public static class Defaults {
+public static class Defaults
+{
   /// <summary>Binary name of this app.</summary>
   public const string BIN_NAME = "godotenv";
 
@@ -77,7 +78,8 @@ public static class Defaults {
   /// <summary>
   /// Default network client download configuration.
   /// </summary>
-  public static readonly DownloadConfiguration DownloadConfiguration = new() {
+  public static readonly DownloadConfiguration DownloadConfiguration = new()
+  {
     ChunkCount = 8,
     ParallelDownload = true,
     ReserveStorageSpaceBeforeStartingDownload = true

@@ -8,8 +8,9 @@ using Chickensoft.GodotEnv.Common.Models;
 /// <summary>
 /// Immutable system information (OS, CPU architecture, ...).
 /// </summary>
-public interface ISystemInfo {
-  public OSType OS { get; }
+public interface ISystemInfo
+{
+  OSType OS { get; }
 
   [
     SuppressMessage(
@@ -18,17 +19,19 @@ public interface ISystemInfo {
       Justification = "Missing cases handled by default"
     )
   ]
-  public OSFamily OSFamily =>
-    OS switch {
+  OSFamily OSFamily =>
+    OS switch
+    {
       OSType.Windows => OSFamily.Windows,
       OSType.Linux or OSType.MacOS => OSFamily.Unix,
       _ => OSFamily.Unknown
     };
 
-  public CPUArch CPUArch { get; }
+  CPUArch CPUArch { get; }
 }
 
-public class SystemInfo : ISystemInfo {
+public class SystemInfo : ISystemInfo
+{
   public OSType OS =>
     IsOSPlatformProxy(OSPlatform.OSX)
       ? OSType.MacOS
@@ -45,7 +48,8 @@ public class SystemInfo : ISystemInfo {
       Justification = "Missing cases handled by default"
     )
   ]
-  public CPUArch CPUArch => CPUArchProxy switch {
+  public CPUArch CPUArch => CPUArchProxy switch
+  {
     Architecture.X64 => CPUArch.X64,
     Architecture.X86 => CPUArch.X86,
     Architecture.Arm64 => CPUArch.Arm64,
@@ -67,7 +71,8 @@ public class SystemInfo : ISystemInfo {
     CPUArchDefault;
 }
 
-public class MockSystemInfo(OSType os, CPUArch cpuArch) : ISystemInfo {
+public class MockSystemInfo(OSType os, CPUArch cpuArch) : ISystemInfo
+{
   public OSType OS { get; } = os;
   public CPUArch CPUArch { get; } = cpuArch;
 }

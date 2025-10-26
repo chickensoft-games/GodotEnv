@@ -4,7 +4,8 @@ using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 
-public abstract class Unix : GodotEnvironment {
+public abstract class Unix : GodotEnvironment
+{
   protected Unix(
     ISystemInfo systemInfo,
     IFileClient fileClient,

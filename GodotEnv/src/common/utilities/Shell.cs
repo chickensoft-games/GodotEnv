@@ -3,7 +3,8 @@ namespace Chickensoft.GodotEnv.Common.Utilities;
 using System;
 using System.Threading.Tasks;
 
-public interface IShell {
+public interface IShell
+{
   IProcessRunner Runner { get; }
   string WorkingDir { get; }
 
@@ -17,15 +18,18 @@ public interface IShell {
     );
 }
 
-public class Shell(IProcessRunner runner, string workingDir) : IShell {
+public class Shell(IProcessRunner runner, string workingDir) : IShell
+{
   public IProcessRunner Runner { get; } = runner;
   public string WorkingDir { get; } = workingDir;
 
   public async Task<ProcessResult> Run(
     string executable, params string[] args
-  ) {
+  )
+  {
     var result = await Runner.Run(WorkingDir, executable, args);
-    if (!result.Succeeded) {
+    if (!result.Succeeded)
+    {
       throw new InvalidOperationException(
         $"Failed to run `{executable}` in `{WorkingDir}`" +
         $" with args `{string.Join(" ", args)}`. Received exit " +
@@ -44,11 +48,13 @@ public class Shell(IProcessRunner runner, string workingDir) : IShell {
     Action<string> onStdOut,
     Action<string> onStdError,
     params string[] args
-  ) {
+  )
+  {
     var result = await Runner.RunWithUpdates(
       WorkingDir, executable, args, onStdOut, onStdError
     );
-    if (!result.Succeeded) {
+    if (!result.Succeeded)
+    {
       throw new InvalidOperationException(
         $"Failed to run `{executable}` in `{WorkingDir}`" +
         $" with args `{string.Join(" ", args)}`. Received exit " +

@@ -4,7 +4,8 @@ namespace Chickensoft.GodotEnv.Common.Models;
 /// A CLI command that might need elevated administrator privileges on
 /// Windows.
 /// </summary>
-public interface IWindowsElevationEnabled {
+public interface IWindowsElevationEnabled
+{
   /// <summary>
   /// True if this command will require elevated administrator privileges
   /// on Windows.

@@ -5,9 +5,11 @@ using Chickensoft.GodotEnv.Features.Addons.Models;
 using Shouldly;
 using Xunit;
 
-public class ResolvedAddonTest {
+public class ResolvedAddonTest
+{
   [Fact]
-  public void Initializes() {
+  public void Initializes()
+  {
     var addon = new ResolvedAddon(
       new Addon(
         "addon_name", "addons.json", "url", "/", "main", AssetSource.Remote
@@ -19,7 +21,8 @@ public class ResolvedAddonTest {
   }
 
   [Fact]
-  public void InitializesWithCanonicalAddon() {
+  public void InitializesWithCanonicalAddon()
+  {
     var addon = new ResolvedAddon(
       new Addon(
         "addon_name", "addons.json", "url", "/", "main", AssetSource.Remote

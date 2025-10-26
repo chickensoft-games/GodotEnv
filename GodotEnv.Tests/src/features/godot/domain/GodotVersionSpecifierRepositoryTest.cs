@@ -15,11 +15,13 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class GodotVersionSpecifierRepositoryTest {
+public class GodotVersionSpecifierRepositoryTest
+{
   // all global.json first, all csproj second, all godotrc third
   // nearest ancestor to furthest ancestor
   [Fact]
-  public void GetsVersionFilesInCorrectOrder() {
+  public void GetsVersionFilesInCorrectOrder()
+  {
     var directoryNames = new List<string> {
       "/test/path/to/project",
       "/test/path/to",
@@ -34,9 +36,11 @@ public class GodotVersionSpecifierRepositoryTest {
       new(),
       new(),
     };
-    for (var i = 0; i < directoryMocks.Count; ++i) {
+    for (var i = 0; i < directoryMocks.Count; ++i)
+    {
       directoryMocks[i].Setup(dir => dir.FullName).Returns(directoryNames[i]);
-      if (i < directoryMocks.Count - 1) {
+      if (i < directoryMocks.Count - 1)
+      {
         directoryMocks[i].Setup(dir => dir.Parent).Returns(directoryMocks[i + 1].Object);
       }
     }
@@ -55,13 +59,16 @@ public class GodotVersionSpecifierRepositoryTest {
     ).Returns((string dir, string pattern) => [$"{dir}/Project.csproj"]);
 
     var results = new List<IGodotVersionFile>();
-    foreach (var dir in directoryNames) {
+    foreach (var dir in directoryNames)
+    {
       results.Add(new GlobalJsonFile($"{dir}/global.json"));
     }
-    foreach (var dir in directoryNames) {
+    foreach (var dir in directoryNames)
+    {
       results.Add(new CsprojFile($"{dir}/Project.csproj"));
     }
-    foreach (var dir in directoryNames) {
+    foreach (var dir in directoryNames)
+    {
       results.Add(new GodotrcFile($"{dir}/.godotrc"));
     }
 
@@ -71,7 +78,8 @@ public class GodotVersionSpecifierRepositoryTest {
   }
 
   [Fact]
-  public void ValidatedGodotVersionIsNullIfVersionIsNull() {
+  public void ValidatedGodotVersionIsNullIfVersionIsNull()
+  {
     var fileClient = new Mock<IFileClient>();
     var file = new Mock<IGodotVersionFile>();
     SpecificDotnetStatusGodotVersion? version = null;
@@ -85,7 +93,8 @@ public class GodotVersionSpecifierRepositoryTest {
   }
 
   [Fact]
-  public void ValidatedGodotVersionIsNullAndWarnsIfParsingThrows() {
+  public void ValidatedGodotVersionIsNullAndWarnsIfParsingThrows()
+  {
     var deserializationError = "bad.version is not a recognized version string";
     var path = "/test/path";
     var fileClient = new Mock<IFileClient>();
@@ -112,7 +121,8 @@ public class GodotVersionSpecifierRepositoryTest {
   }
 
   [Fact]
-  public void ValidatedGodotVersionIsVersionIfVersionDeserializerReturns() {
+  public void ValidatedGodotVersionIsVersionIfVersionDeserializerReturns()
+  {
     var version = new SpecificDotnetStatusGodotVersion(4, 4, 1, "stable", -1, true);
     var path = "/test/path";
     var fileClient = new Mock<IFileClient>();
@@ -130,7 +140,8 @@ public class GodotVersionSpecifierRepositoryTest {
   }
 
   [Fact]
-  public void InfersVersionFromFirstValidVersionFile() {
+  public void InfersVersionFromFirstValidVersionFile()
+  {
     var fileClient = new Mock<IFileClient>();
 
     var versions = new List<SpecificDotnetStatusGodotVersion?> {
@@ -143,7 +154,8 @@ public class GodotVersionSpecifierRepositoryTest {
       new(),
       new(),
     };
-    for (var i = 0; i < versions.Count; ++i) {
+    for (var i = 0; i < versions.Count; ++i)
+    {
       fileMocks[i].Setup(f => f.ParseGodotVersion(fileClient.Object)).Returns(versions[i]);
     }
 
@@ -155,7 +167,8 @@ public class GodotVersionSpecifierRepositoryTest {
   }
 
   [Fact]
-  public void InfersNoVersionIfNoValidVersionFile() {
+  public void InfersNoVersionIfNoValidVersionFile()
+  {
     var fileClient = new Mock<IFileClient>();
 
     var versions = new List<SpecificDotnetStatusGodotVersion?> {
@@ -168,7 +181,8 @@ public class GodotVersionSpecifierRepositoryTest {
       new(),
       new(),
     };
-    for (var i = 0; i < versions.Count; ++i) {
+    for (var i = 0; i < versions.Count; ++i)
+    {
       fileMocks[i].Setup(f => f.ParseGodotVersion(fileClient.Object)).Returns(versions[i]);
     }
 
@@ -180,7 +194,8 @@ public class GodotVersionSpecifierRepositoryTest {
   }
 
   [Fact]
-  public void ProjectDirectoryIsHighestSolutionIfGodotProjectLower() {
+  public void ProjectDirectoryIsHighestSolutionIfGodotProjectLower()
+  {
     var directoryNames = new List<string> {
       "/test/path/to/project",
       "/test/path/to",
@@ -195,9 +210,11 @@ public class GodotVersionSpecifierRepositoryTest {
       new(),
       new(),
     };
-    for (var i = 0; i < directoryMocks.Count; ++i) {
+    for (var i = 0; i < directoryMocks.Count; ++i)
+    {
       directoryMocks[i].Setup(dir => dir.FullName).Returns(directoryNames[i]);
-      if (i < directoryMocks.Count - 1) {
+      if (i < directoryMocks.Count - 1)
+      {
         directoryMocks[i].Setup(dir => dir.Parent).Returns(directoryMocks[i + 1].Object);
       }
     }
@@ -220,7 +237,8 @@ public class GodotVersionSpecifierRepositoryTest {
   }
 
   [Fact]
-  public void ProjectDirectoryIsHighestSolutionIfGodotProjectHigher() {
+  public void ProjectDirectoryIsHighestSolutionIfGodotProjectHigher()
+  {
     var directoryNames = new List<string> {
       "/test/path/to/project",
       "/test/path/to",
@@ -235,9 +253,11 @@ public class GodotVersionSpecifierRepositoryTest {
       new(),
       new(),
     };
-    for (var i = 0; i < directoryMocks.Count; ++i) {
+    for (var i = 0; i < directoryMocks.Count; ++i)
+    {
       directoryMocks[i].Setup(dir => dir.FullName).Returns(directoryNames[i]);
-      if (i < directoryMocks.Count - 1) {
+      if (i < directoryMocks.Count - 1)
+      {
         directoryMocks[i].Setup(dir => dir.Parent).Returns(directoryMocks[i + 1].Object);
       }
     }
@@ -260,7 +280,8 @@ public class GodotVersionSpecifierRepositoryTest {
   }
 
   [Fact]
-  public void ProjectDirectoryIsHighestGodotProjectIfNoSln() {
+  public void ProjectDirectoryIsHighestGodotProjectIfNoSln()
+  {
     var directoryNames = new List<string> {
       "/test/path/to/project",
       "/test/path/to",
@@ -275,9 +296,11 @@ public class GodotVersionSpecifierRepositoryTest {
       new(),
       new(),
     };
-    for (var i = 0; i < directoryMocks.Count; ++i) {
+    for (var i = 0; i < directoryMocks.Count; ++i)
+    {
       directoryMocks[i].Setup(dir => dir.FullName).Returns(directoryNames[i]);
-      if (i < directoryMocks.Count - 1) {
+      if (i < directoryMocks.Count - 1)
+      {
         directoryMocks[i].Setup(dir => dir.Parent).Returns(directoryMocks[i + 1].Object);
       }
     }
@@ -297,7 +320,8 @@ public class GodotVersionSpecifierRepositoryTest {
   }
 
   [Fact]
-  public void PinVersionWritesGlobalJsonForDotnetVersion() {
+  public void PinVersionWritesGlobalJsonForDotnetVersion()
+  {
     var projectDir = "/test/path";
     var expectedRawJson =
       /*lang=json,strict*/
@@ -328,7 +352,8 @@ public class GodotVersionSpecifierRepositoryTest {
   }
 
   [Fact]
-  public void PinVersionWritesGodotrcForNonDotnetVersion() {
+  public void PinVersionWritesGodotrcForNonDotnetVersion()
+  {
     var projectDir = "/test/path";
     var path = "/test/path/.godotrc";
     var version = new SpecificDotnetStatusGodotVersion(4, 4, 1, "stable", -1, false);
@@ -351,8 +376,10 @@ public class GodotVersionSpecifierRepositoryTest {
   public IEnumerable<TResult> Enumerate<TResult, TCollection>(
     IEnumerable<TCollection> collection,
     Func<TCollection, TResult> transform
-  ) {
-    foreach (var item in collection) {
+  )
+  {
+    foreach (var item in collection)
+    {
       yield return transform(item);
     }
   }

@@ -11,9 +11,11 @@ using Chickensoft.GodotEnv.Features.Godot.Domain;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 using Common.Clients;
 using Moq;
+using Shouldly;
 using Xunit;
 
-public class GodotChecksumClientTest {
+public class GodotChecksumClientTest
+{
   private const string GODOT_4_3_DEV_5_MACOS_CHECKSUM = "0fdd44c725980c463d86b14aeb47fc41a35ff9005e9df9a9c821168b21d60f845d80313e93c892565daadef04d02c6f6fbb6a9d9a26374db9caa8cd4d9354d7c";
 
   private const string GODOT_ENV_STRING_CHECKSUM =
@@ -22,7 +24,8 @@ public class GodotChecksumClientTest {
   private static string GetChecksumFileUrl(string version) =>
     $"https://raw.githubusercontent.com/godotengine/godot-builds/main/releases/godot-{version}.json";
 
-  public static IEnumerable<object[]> CorrectChecksumUrlRequestedTestData() {
+  public static IEnumerable<object[]> CorrectChecksumUrlRequestedTestData()
+  {
     yield return [new SpecificDotnetStatusGodotVersion(1, 2, 3, "stable", -1, false), GetChecksumFileUrl("1.2.3-stable")];
     yield return [new SpecificDotnetStatusGodotVersion(1, 0, 0, "stable", -1, false), GetChecksumFileUrl("1.0-stable")];
     yield return [new SpecificDotnetStatusGodotVersion(4, 0, 0, "alpha", 14, false), GetChecksumFileUrl("4.0-alpha14")];
@@ -35,7 +38,8 @@ public class GodotChecksumClientTest {
   public async Task CorrectChecksumUrlRequested(
     SpecificDotnetStatusGodotVersion version,
     string expectedChecksumUrl
-  ) {
+  )
+  {
     var archive = new GodotCompressedArchive(
       string.Empty,
       string.Empty,
@@ -61,7 +65,8 @@ public class GodotChecksumClientTest {
     networkClient.Verify(nc => nc.WebRequestGetAsync(expectedChecksumUrl, true, null), Times.Once);
   }
 
-  public static IEnumerable<object[]> CorrectlyParsedJsonTestData() {
+  public static IEnumerable<object[]> CorrectlyParsedJsonTestData()
+  {
     yield return [
       false,
       "Godot_v4.3-dev5_macos.universal.zip",
@@ -89,11 +94,12 @@ public class GodotChecksumClientTest {
 
   [Theory]
   [MemberData(nameof(CorrectlyParsedJsonTestData))]
-  public async void CorrectlyParsedJson(
+  public async Task CorrectlyParsedJson(
     bool isDotnetVersion,
     string filename,
     string expectedChecksum
-    ) {
+    )
+  {
     var networkClient = await GetMockChecksumFileNetworkClient("godot-4.3-dev5.json");
 
     var archive = new GodotCompressedArchive(
@@ -123,7 +129,8 @@ public class GodotChecksumClientTest {
   /// Godot v1.1 to verify that a correct exception is raised.
   /// </summary>
   [Fact]
-  public async Task MissingVersionDataRaisesMissingChecksumException() {
+  public async Task MissingVersionDataRaisesMissingChecksumException()
+  {
     const string testDataFilename = "godot-1.1-stable.json";
     const string downloadFileName = "Godot_v1.1_stable_win64.exe.zip";
     var networkClient = await GetMockChecksumFileNetworkClient(testDataFilename);
@@ -152,8 +159,8 @@ public class GodotChecksumClientTest {
       async () => await checksumClient.VerifyArchiveChecksum(archive)
     );
 
-    Assert.Equal(ex.Message, $"File checksum for {downloadFileName} not present");
-    Assert.Equal(ex2.Message, $"File checksum for {downloadFileName} not present");
+    ex.Message.ShouldBe($"File checksum for {downloadFileName} not present");
+    ex2.Message.ShouldBe($"File checksum for {downloadFileName} not present");
   }
 
   /// <summary>
@@ -170,12 +177,14 @@ public class GodotChecksumClientTest {
   /// <param name="responseFilename">Filename from data directory whose </param>
   /// <returns>A INetworkClient returning the JSON contents to any request.</returns>
   /// <exception cref="FileNotFoundException">Thrown if the embedded resource cannot be found.</exception>
-  private static async Task<Mock<INetworkClient>> GetMockChecksumFileNetworkClient(string responseFilename) {
+  private static async Task<Mock<INetworkClient>> GetMockChecksumFileNetworkClient(string responseFilename)
+  {
     var resourceName = $"Chickensoft.GodotEnv.Tests.src.features.godot.domain.data.{responseFilename}";
     string godotReleaseJson;
     await using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)
                               ?? throw new FileNotFoundException("Failed to get test release JSON file."))
-    using (var reader = new StreamReader(stream)) {
+    using (var reader = new StreamReader(stream))
+    {
       godotReleaseJson = await reader.ReadToEndAsync();
     }
 
@@ -186,18 +195,22 @@ public class GodotChecksumClientTest {
           It.IsAny<bool>(),
           It.IsAny<string?>()
         ))
-      .ReturnsAsync(() => new HttpResponseMessage(HttpStatusCode.OK) {
+      .ReturnsAsync(() => new HttpResponseMessage(HttpStatusCode.OK)
+      {
         Content = new StringContent(godotReleaseJson)
       });
     return networkClient;
   }
 
   [Fact]
-  public async void VerifyChecksumComputation() {
+  public async Task VerifyChecksumComputation()
+  {
     var tempFileName = Path.GetTempFileName();
 
-    try {
-      await using (var writer = File.CreateText(tempFileName)) {
+    try
+    {
+      await using (var writer = File.CreateText(tempFileName))
+      {
         await writer.WriteAsync("GodotEnv");
       }
 
@@ -220,21 +233,25 @@ public class GodotChecksumClientTest {
 
       Assert.Equal(expected, computed);
     }
-    finally {
+    finally
+    {
       File.Delete(tempFileName);
     }
   }
 
   [Fact]
-  public async void IncorrectChecksumThrowsChecksumMismatchException() {
+  public async Task IncorrectChecksumThrowsChecksumMismatchException()
+  {
     var archiveDirectory = Path.Join(Path.GetTempPath(), "GodotEnvTest" + Guid.NewGuid());
     Directory.CreateDirectory(archiveDirectory);
 
     var archiveFileName = "Godot_v4.3-dev5_macos.universal.zip";
     var archivePath = Path.Join(archiveDirectory, archiveFileName);
 
-    try {
-      await using (var writer = File.CreateText(archivePath)) {
+    try
+    {
+      await using (var writer = File.CreateText(archivePath))
+      {
         await writer.WriteAsync("GodotEnv");
       }
 
@@ -260,9 +277,10 @@ public class GodotChecksumClientTest {
         async () => await checksumClient.VerifyArchiveChecksum(archive)
       );
 
-      Assert.Equal(ex.Message, $"Expected: {GODOT_4_3_DEV_5_MACOS_CHECKSUM}, Actual: {GODOT_ENV_STRING_CHECKSUM}");
+      ex.Message.ShouldBe($"Expected: {GODOT_4_3_DEV_5_MACOS_CHECKSUM}, Actual: {GODOT_ENV_STRING_CHECKSUM}");
     }
-    finally {
+    finally
+    {
       File.Delete(archivePath);
     }
   }

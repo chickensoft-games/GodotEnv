@@ -7,7 +7,8 @@ using Chickensoft.GodotEnv.Common.Models;
 using Shouldly;
 using Xunit;
 
-public class AssetTest {
+public class AssetTest
+{
   public record TestAsset(string Url, string Checkout, AssetSource Source)
     : Asset(Url, Checkout, Source);
 
@@ -15,55 +16,64 @@ public class AssetTest {
   public const string CHECKOUT = "main";
 
   [Fact]
-  public void AssetSourceLocalSerializes() {
+  public void AssetSourceLocalSerializes()
+  {
     var json = JsonSerializer.Serialize(AssetSource.Local);
     json.ShouldBe("\"local\"");
   }
 
   [Fact]
-  public void AssetSourceLocalDeserializes() {
+  public void AssetSourceLocalDeserializes()
+  {
     var source = JsonSerializer.Deserialize<AssetSource>("\"local\"");
     source.ShouldBe(AssetSource.Local);
   }
 
   [Fact]
-  public void AssetSourceRemoteSerializes() {
+  public void AssetSourceRemoteSerializes()
+  {
     var json = JsonSerializer.Serialize(AssetSource.Remote);
     json.ShouldBe("\"remote\"");
   }
 
   [Fact]
-  public void AssetSourceRemoteDeserializes() {
+  public void AssetSourceRemoteDeserializes()
+  {
     var source = JsonSerializer.Deserialize<AssetSource>("\"remote\"");
     source.ShouldBe(AssetSource.Remote);
   }
 
   [Fact]
-  public void AssetSourceSymlinkSerializes() {
+  public void AssetSourceSymlinkSerializes()
+  {
     var json = JsonSerializer.Serialize(AssetSource.Symlink);
     json.ShouldBe("\"symlink\"");
   }
 
   [Fact]
-  public void AssetSourceSymlinkDeserializes() {
+  public void AssetSourceSymlinkDeserializes()
+  {
     var source = JsonSerializer.Deserialize<AssetSource>("\"symlink\"");
     source.ShouldBe(AssetSource.Symlink);
   }
 
   [Fact]
-  public void AssetSourceZipSerializes() {
+  public void AssetSourceZipSerializes()
+  {
     var json = JsonSerializer.Serialize(AssetSource.Zip);
     json.ShouldBe("\"zip\"");
   }
 
   [Fact]
-  public void AssetSourceZipDeserializes() {
+  public void AssetSourceZipDeserializes()
+  {
     var source = JsonSerializer.Deserialize<AssetSource>("\"zip\"");
     source.ShouldBe(AssetSource.Zip);
   }
 
   [Fact]
-  public void RemoteAsset() {
+  public void RemoteAsset()
+  {
     IAsset asset = new TestAsset(URL, CHECKOUT, AssetSource.Remote);
     asset.Id.ShouldBe("chickensoft_games_godot_env");
     asset.IsLocal.ShouldBeFalse();
@@ -72,7 +82,8 @@ public class AssetTest {
   }
 
   [Fact]
-  public void LocalAsset() {
+  public void LocalAsset()
+  {
     const string url = "a/b/c/ChickensoftGodotEnv";
     IAsset asset = new TestAsset(url, CHECKOUT, AssetSource.Local);
     asset.Id.ShouldBe("chickensoft_godot_env");
@@ -82,7 +93,8 @@ public class AssetTest {
   }
 
   [Fact]
-  public void SymlinkAsset() {
+  public void SymlinkAsset()
+  {
     const string url = "a/b/c/ChickensoftGodotEnv";
     IAsset asset = new TestAsset(url, CHECKOUT, AssetSource.Symlink);
     asset.Id.ShouldBe("chickensoft_godot_env");

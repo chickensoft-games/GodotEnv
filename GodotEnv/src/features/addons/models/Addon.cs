@@ -6,7 +6,8 @@ using System.Text;
 
 using Chickensoft.GodotEnv.Common.Models;
 
-public interface IAddon : IAsset {
+public interface IAddon : IAsset
+{
   /// <summary>
   /// Name of the addon. The name is the addon's key in the addons configuration
   /// file, acting as an identifier to reference the addon. The app will use the
@@ -34,7 +35,8 @@ public interface IAddon : IAsset {
 /// Represents a resolve addon. A resolved addon is an addon whose name and
 /// addons file path are known.
 /// </summary>
-public record Addon : Asset, IAddon {
+public record Addon : Asset, IAddon
+{
   /// <inheritdoc />
   public string Name { get; init; }
 
@@ -66,7 +68,8 @@ public record Addon : Asset, IAddon {
     string subfolder,
     string checkout,
     AssetSource source
-  ) : base(url, checkout, source) {
+  ) : base(url, checkout, source)
+  {
     Name = name;
     AddonsFilePath = addonsFilePath;
     Subfolder = subfolder.Trim(_trimChars);

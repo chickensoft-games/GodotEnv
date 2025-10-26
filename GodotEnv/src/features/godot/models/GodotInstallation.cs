@@ -15,7 +15,8 @@ public record GodotInstallation(
   bool IsActiveVersion,
   SpecificDotnetStatusGodotVersion Version,
   string ExecutionPath
-) {
+)
+{
   public override string ToString() =>
     $$"""
     "{

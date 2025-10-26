@@ -4,8 +4,9 @@ using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Features.Addons.Models;
 
-public interface IAddonsFileRepository {
-  public IFileClient FileClient { get; }
+public interface IAddonsFileRepository
+{
+  IFileClient FileClient { get; }
 
   /// <summary>
   /// Loads the addons file in the project path and returns the filename
@@ -17,7 +18,7 @@ public interface IAddonsFileRepository {
   /// <param name="addonsFileName">Optional path to the addons file to load.
   /// If unspecified will load "addons.jsonc" or "addons.json". </param>
   /// <returns>Loaded addons file (or an empty one).</returns>
-  public AddonsFile LoadAddonsFile(string projectPath, out string filename, string? addonsFileName = null);
+  AddonsFile LoadAddonsFile(string projectPath, out string filename, string? addonsFileName = null);
 
   /// <summary>
   /// Creates an addons configuration object that represents the configuration
@@ -26,7 +27,7 @@ public interface IAddonsFileRepository {
   /// <param name="projectPath">Path containing the addons file.</param>
   /// <param name="addonsFile">Addons file.</param>
   /// <returns>Addons configuration.</returns>
-  public AddonsConfiguration CreateAddonsConfiguration(
+  AddonsConfiguration CreateAddonsConfiguration(
       string projectPath, AddonsFile addonsFile
     );
 
@@ -34,15 +35,17 @@ public interface IAddonsFileRepository {
   /// Creates a default addons file in the project path.
   /// </summary>
   /// <param name="projectPath">Project path.</param>
-  public string CreateAddonsConfigurationStartingFile(string projectPath);
+  string CreateAddonsConfigurationStartingFile(string projectPath);
 }
 
-public class AddonsFileRepository : IAddonsFileRepository {
+public class AddonsFileRepository : IAddonsFileRepository
+{
   public IFileClient FileClient { get; }
 
   private static readonly string[] _possibleFilenames = ["addons.json", "addons.jsonc"];
 
-  public AddonsFileRepository(IFileClient fileClient) {
+  public AddonsFileRepository(IFileClient fileClient)
+  {
     FileClient = fileClient;
   }
 
@@ -75,7 +78,8 @@ public class AddonsFileRepository : IAddonsFileRepository {
   /// </summary>
   /// <param name="projectPath">Godot project path.</param>
   /// <returns>Path to the addons file.</returns>
-  public string CreateAddonsConfigurationStartingFile(string projectPath) {
+  public string CreateAddonsConfigurationStartingFile(string projectPath)
+  {
     // This command does the following (non-destructively).
     //
     // - If an addons.jsonc file does not exist, it creates an example one
@@ -100,10 +104,12 @@ public class AddonsFileRepository : IAddonsFileRepository {
 
     var gitIgnoreFilePath = FileClient.Combine(projectPath, ".gitignore");
 
-    if (!FileClient.FileExists(gitIgnoreFilePath)) {
+    if (!FileClient.FileExists(gitIgnoreFilePath))
+    {
       FileClient.CreateFile(gitIgnoreFilePath, Defaults.ADDONS_GIT_IGNORE_FILE);
     }
-    else {
+    else
+    {
       var addonsIgnoreEntry = $"{Defaults.ADDONS_PATH}/*";
       var addonsEditorConfigExceptionEntry =
         $"!{Defaults.ADDONS_PATH}/.editorconfig";

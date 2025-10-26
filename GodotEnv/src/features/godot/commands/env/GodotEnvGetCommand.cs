@@ -11,14 +11,17 @@ using CliWrap;
   "godot env get",
   Description = "Show the contents of the GODOT user environment variable."
 )]
-public class GodotEnvGetCommand : ICommand, ICliCommand {
+public class GodotEnvGetCommand : ICommand, ICliCommand
+{
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
-  public GodotEnvGetCommand(IExecutionContext context) {
+  public GodotEnvGetCommand(IExecutionContext context)
+  {
     ExecutionContext = context;
   }
 
-  public async ValueTask ExecuteAsync(IConsole console) {
+  public async ValueTask ExecuteAsync(IConsole console)
+  {
     var log = ExecutionContext.CreateLog(console);
     var godotRepo = ExecutionContext.Godot.GodotRepo;
 

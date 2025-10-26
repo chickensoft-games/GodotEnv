@@ -1,4 +1,5 @@
 namespace Chickensoft.GodotEnv.Tests;
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,11 +8,13 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class ShellTest {
+public class ShellTest
+{
   private const string WORKING_DIR = ".";
 
   [Fact]
-  public void Initializes() {
+  public void Initializes()
+  {
     var processRunner = new Mock<IProcessRunner>();
     var shell = new Shell(processRunner.Object, WORKING_DIR);
 
@@ -20,7 +23,8 @@ public class ShellTest {
   }
 
   [Fact]
-  public async Task ShellRunsProcess() {
+  public async Task ShellRunsProcess()
+  {
     const int exitCode = 0;
     var processRunner = new Mock<IProcessRunner>();
     const string exe = "return";
@@ -39,7 +43,8 @@ public class ShellTest {
   }
 
   [Fact]
-  public async Task ShellRunThrowsOnNonZeroExitCode() {
+  public async Task ShellRunThrowsOnNonZeroExitCode()
+  {
     const int exitCode = 1;
     var processRunner = new Mock<IProcessRunner>();
     const string exe = "return";
@@ -57,7 +62,8 @@ public class ShellTest {
   }
 
   [Fact]
-  public async Task ShellRunUncheckedReturnsResult() {
+  public async Task ShellRunUncheckedReturnsResult()
+  {
     const int exitCode = 1;
     var processRunner = new Mock<IProcessRunner>();
     const string exe = "return";

@@ -1,6 +1,7 @@
 namespace Chickensoft.GodotEnv.Common.Models;
 
-public interface ICliCommand {
+public interface ICliCommand
+{
   /// <summary>
   /// Execution context. The execution context contains information
   /// known as soon as the app is executed (like command line arguments).

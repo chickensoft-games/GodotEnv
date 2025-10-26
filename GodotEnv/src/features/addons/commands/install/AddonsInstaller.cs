@@ -9,7 +9,8 @@ using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Addons.Domain;
 using Chickensoft.GodotEnv.Features.Addons.Models;
 
-public interface IAddonsInstaller {
+public interface IAddonsInstaller
+{
   Task<AddonsInstaller.Result> Install(
     string projectPath,
     int? maxDepth,
@@ -21,8 +22,10 @@ public interface IAddonsInstaller {
   );
 }
 
-public class AddonsInstaller : IAddonsInstaller {
-  public enum Result {
+public class AddonsInstaller : IAddonsInstaller
+{
+  public enum Result
+  {
     Succeeded,
     CannotBeResolved,
     NotAttempted,
@@ -37,7 +40,8 @@ public class AddonsInstaller : IAddonsInstaller {
     IAddonsFileRepository addonsFileRepo,
     IAddonsRepository addonsRepo,
     IAddonGraph addonGraph
-  ) {
+  )
+  {
     AddonsFileRepo = addonsFileRepo;
     AddonsRepo = addonsRepo;
     AddonGraph = addonGraph;
@@ -51,7 +55,8 @@ public class AddonsInstaller : IAddonsInstaller {
     Action<Addon, double> onExtract,
     CancellationToken token,
     string? addonsFileName = null
-  ) {
+  )
+  {
 
     var searchPaths = new Queue<string>();
     searchPaths.Enqueue(projectPath);
@@ -65,13 +70,15 @@ public class AddonsInstaller : IAddonsInstaller {
 
     // Resolve addons using a flat dependency graph.
 
-    do {
+    do
+    {
       var path = searchPaths.Dequeue();
       var addonsFile = AddonsFileRepo.LoadAddonsFile(
         path, out var addonsFilePath, addonsFileName
       );
 
-      foreach ((var addonName, var addonEntry) in addonsFile.Addons) {
+      foreach ((var addonName, var addonEntry) in addonsFile.Addons)
+      {
         // Resolve addon's url. For remote addons, the url is unchanged.
         // For local symlink addons, the actual path is resolved.
         // For normal local addons, the path is fully qualified.
@@ -91,12 +98,15 @@ public class AddonsInstaller : IAddonsInstaller {
 
         onReport(result);
 
-        if (result is IAddonGraphFailureResult failure) {
+        if (result is IAddonGraphFailureResult failure)
+        {
           fatalResolutionError = true;
         }
-        else if (result is not AddonAlreadyResolved) {
+        else if (result is not AddonAlreadyResolved)
+        {
           IAddon? canonicalAddon = null;
-          if (result is AddonResolvedButMightConflict mightConflict) {
+          if (result is AddonResolvedButMightConflict mightConflict)
+          {
             canonicalAddon = mightConflict.CanonicalAddon;
           }
 
@@ -154,21 +164,25 @@ public class AddonsInstaller : IAddonsInstaller {
       )
     );
 
-    if (fatalResolutionError) {
+    if (fatalResolutionError)
+    {
       return Result.CannotBeResolved;
     }
 
-    if (addonsToInstall.Count == 0) {
+    if (addonsToInstall.Count == 0)
+    {
       return Result.NothingToInstall;
     }
 
     // Install resolved addons.
 
-    foreach (var resolvedAddon in addonsToInstall) {
+    foreach (var resolvedAddon in addonsToInstall)
+    {
       var addon = resolvedAddon.Addon;
       var cacheName = resolvedAddon.CacheName;
 
-      if (addon.IsSymlink) {
+      if (addon.IsSymlink)
+      {
         await AddonsRepo.DeleteAddon(addon);
         AddonsRepo.InstallAddonWithSymlink(addon);
         continue;

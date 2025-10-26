@@ -9,9 +9,11 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class AddonsCommandTest {
+public class AddonsCommandTest
+{
   [Fact]
-  public async Task Executes() {
+  public async Task Executes()
+  {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
     var context = new Mock<IExecutionContext>();
     var config = MockConfig.Get();

@@ -9,7 +9,8 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class GodotEnvironmentTest {
+public class GodotEnvironmentTest
+{
   private readonly Mock<IComputer> _computer = new();
   private readonly Mock<IFileClient> _fileClient = new();
   private readonly ReleaseVersionDeserializer _versionDeserializer = new();
@@ -22,7 +23,8 @@ public class GodotEnvironmentTest {
   private readonly SpecificDotnetStatusGodotVersion _firstKnownWinArmVersionNonDotnet = new(4, 3, 0, "stable", -1, false);
 
   [Fact]
-  public void GetsExpectedMacDownloadUrl() {
+  public void GetsExpectedMacDownloadUrl()
+  {
     var systemInfo = new MockSystemInfo(OSType.MacOS, CPUArch.Arm64);
     var platform = new MacOS(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
 
@@ -34,7 +36,8 @@ public class GodotEnvironmentTest {
   }
 
   [Fact]
-  public void GetsExpectedMacMonoDownloadUrl() {
+  public void GetsExpectedMacMonoDownloadUrl()
+  {
     var systemInfo = new MockSystemInfo(OSType.MacOS, CPUArch.Arm64);
     var platform = new MacOS(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
 
@@ -46,7 +49,8 @@ public class GodotEnvironmentTest {
   }
 
   [Fact]
-  public void GetsExpectedWindowsDownloadUrl() {
+  public void GetsExpectedWindowsDownloadUrl()
+  {
     var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
     var platform = new Windows(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
 
@@ -58,7 +62,8 @@ public class GodotEnvironmentTest {
   }
 
   [Fact]
-  public void GetsExpectedWindowsMonoDownloadUrl() {
+  public void GetsExpectedWindowsMonoDownloadUrl()
+  {
     var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.X64);
     var platform = new Windows(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
 
@@ -70,7 +75,8 @@ public class GodotEnvironmentTest {
   }
 
   [Fact]
-  public void GetsExpectedWindowsArmDownloadUrlForOlderVersions() {
+  public void GetsExpectedWindowsArmDownloadUrlForOlderVersions()
+  {
     var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.Arm64);
     var platform = new Windows(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
 
@@ -82,7 +88,8 @@ public class GodotEnvironmentTest {
   }
 
   [Fact]
-  public void GetsExpectedWindowsArmMonoDownloadUrlForOlderVersions() {
+  public void GetsExpectedWindowsArmMonoDownloadUrlForOlderVersions()
+  {
     var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.Arm64);
     var platform = new Windows(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
 
@@ -94,7 +101,8 @@ public class GodotEnvironmentTest {
   }
 
   [Fact]
-  public void GetExpectedWindowsArmDownloadUrlForNewerVersions() {
+  public void GetExpectedWindowsArmDownloadUrlForNewerVersions()
+  {
     var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.Arm64);
     var platform = new Windows(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
 
@@ -103,7 +111,8 @@ public class GodotEnvironmentTest {
   }
 
   [Fact]
-  public void GetExpectedWindowsArmMonoDownloadUrlForNewerVersions() {
+  public void GetExpectedWindowsArmMonoDownloadUrlForNewerVersions()
+  {
     var systemInfo = new MockSystemInfo(OSType.Windows, CPUArch.Arm64);
     var platform = new Windows(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
 
@@ -112,7 +121,8 @@ public class GodotEnvironmentTest {
   }
 
   [Fact]
-  public void GetsExpectedLinuxDownloadUrl() {
+  public void GetsExpectedLinuxDownloadUrl()
+  {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
     var platform = new Linux(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
 
@@ -124,7 +134,8 @@ public class GodotEnvironmentTest {
   }
 
   [Fact]
-  public void GetsExpectedLinuxMonoDownloadUrl() {
+  public void GetsExpectedLinuxMonoDownloadUrl()
+  {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
     var platform = new Linux(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
 
@@ -136,7 +147,8 @@ public class GodotEnvironmentTest {
   }
 
   [Fact]
-  public void GetsExpectedTemplatesDownloadUrl() {
+  public void GetsExpectedTemplatesDownloadUrl()
+  {
     var systemInfo = new MockSystemInfo(OSType.MacOS, CPUArch.Arm64);
     var platform = new MacOS(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
     var downloadUrl = platform.GetDownloadUrl(_version4NonDotnet, true);
@@ -145,7 +157,8 @@ public class GodotEnvironmentTest {
   }
 
   [Fact]
-  public void GetsExpectedTemplatesMonoDownloadUrl() {
+  public void GetsExpectedTemplatesMonoDownloadUrl()
+  {
     var systemInfo = new MockSystemInfo(OSType.MacOS, CPUArch.Arm64);
     var platform = new MacOS(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
     var downloadUrl = platform.GetDownloadUrl(_version4Dotnet, true);

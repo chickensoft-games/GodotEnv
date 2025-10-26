@@ -5,8 +5,10 @@ using Chickensoft.GodotEnv.Features.Godot.Models;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using Xunit;
 
-public class IoVersionDeserializerTest {
-  public static IEnumerable<object[]> CorrectDeserializationOfValidReleaseVersionsTestData() {
+public class IoVersionDeserializerTest
+{
+  public static IEnumerable<object[]> CorrectDeserializationOfValidReleaseVersionsTestData()
+  {
     object[][] testData = [
         ["1.2.3-stable", new GodotVersionNumber(1, 2, 3, "stable", -1)],
         ["0.2.3-stable", new GodotVersionNumber(0, 2, 3, "stable", -1)],
@@ -15,7 +17,8 @@ public class IoVersionDeserializerTest {
         ["1.0-label23", new GodotVersionNumber(1, 0, 0, "label", 23)],
         ["1.0.1-label23", new GodotVersionNumber(1, 0, 1, "label", 23)]
     ];
-    foreach (var testItem in testData) {
+    foreach (var testItem in testData)
+    {
       yield return testItem;
       yield return [$"v{testItem[0]}", testItem[1]];
     }
@@ -23,7 +26,8 @@ public class IoVersionDeserializerTest {
 
   [Theory]
   [MemberData(nameof(CorrectDeserializationOfValidReleaseVersionsTestData))]
-  public void CorrectDeserializationOfValidReleaseVersions(string toParse, GodotVersionNumber expectedNumber) {
+  public void CorrectDeserializationOfValidReleaseVersions(string toParse, GodotVersionNumber expectedNumber)
+  {
     var deserializer = new IoVersionDeserializer();
     var parsedAgnostic = deserializer.Deserialize(toParse);
     Assert.Equal(expectedNumber, parsedAgnostic.Number);
@@ -35,7 +39,8 @@ public class IoVersionDeserializerTest {
     Assert.False(parsedNonDotnet.IsDotnetEnabled);
   }
 
-  public static IEnumerable<object[]> CorrectDeserializationOfValidSharpVersionsTestData() {
+  public static IEnumerable<object[]> CorrectDeserializationOfValidSharpVersionsTestData()
+  {
     object[][] testData = [
         ["1.2.3", new GodotVersionNumber(1, 2, 3, "stable", -1)],
         ["0.2.3", new GodotVersionNumber(0, 2, 3, "stable", -1)],
@@ -44,7 +49,8 @@ public class IoVersionDeserializerTest {
         ["1.0.0-label.23", new GodotVersionNumber(1, 0, 0, "label", 23)],
         ["1.0.1-label.23", new GodotVersionNumber(1, 0, 1, "label", 23)]
     ];
-    foreach (var testItem in testData) {
+    foreach (var testItem in testData)
+    {
       yield return testItem;
       yield return [$"v{testItem[0]}", testItem[1]];
     }
@@ -52,7 +58,8 @@ public class IoVersionDeserializerTest {
 
   [Theory]
   [MemberData(nameof(CorrectDeserializationOfValidSharpVersionsTestData))]
-  public void CorrectDeserializationOfValidSharpVersions(string toParse, GodotVersionNumber expectedNumber) {
+  public void CorrectDeserializationOfValidSharpVersions(string toParse, GodotVersionNumber expectedNumber)
+  {
     var deserializer = new IoVersionDeserializer();
     var parsedAgnostic = deserializer.Deserialize(toParse);
     Assert.Equal(expectedNumber, parsedAgnostic.Number);

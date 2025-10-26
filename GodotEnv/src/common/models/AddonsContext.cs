@@ -14,7 +14,8 @@ public record AddonsContext(
 ) : IAddonsContext;
 
 /// <summary>Addons feature dependencies.</summary>
-public interface IAddonsContext {
+public interface IAddonsContext
+{
   /// <summary>Main addons file.</summary>
   AddonsFile MainAddonsFile { get; }
 

@@ -22,8 +22,10 @@ using CliFx;
 using CliFx.Infrastructure;
 using Downloader;
 
-public static class GodotEnv {
-  public static async Task<int> Main(string[] args) {
+public static class GodotEnv
+{
+  public static async Task<int> Main(string[] args)
+  {
     // App-wide dependencies
     var systemInfo = new SystemInfo();
 
@@ -177,7 +179,8 @@ public static class GodotEnv {
     ISystemInfo systemInfo,
     IAddonsContext addonsContext,
     IGodotContext godotContext
-  ) {
+  )
+  {
     List<string> cliArgs = [];
     List<string> commandArgs = [];
 
@@ -185,19 +188,23 @@ public static class GodotEnv {
     // into multiple arguments, so we'll do that if we're being
     // debugged from VSCode.
     var preprocessedArgs = args.ToList();
-    if (args.Length == 2 && args[0] is "--debug") {
+    if (args.Length == 2 && args[0] is "--debug")
+    {
       preprocessedArgs = [.. ReadArgs(args[1])];
     }
     // ------------------------------------------------------ //
 
     var inCommandArgs = false;
-    foreach (var arg in preprocessedArgs) {
-      if (arg == "--") {
+    foreach (var arg in preprocessedArgs)
+    {
+      if (arg == "--")
+      {
         inCommandArgs = true;
         continue;
       }
 
-      if (inCommandArgs) {
+      if (inCommandArgs)
+      {
         commandArgs.Add(arg);
         continue;
       }
@@ -229,7 +236,8 @@ public static class GodotEnv {
   /// <param name="argsString">The string that contains the entire command line.
   /// </param>
   /// <returns>An array of the parsed arguments.</returns>
-  public static string[] ReadArgs(string argsString) {
+  public static string[] ReadArgs(string argsString)
+  {
     // Collects the split argument strings
     var args = new List<string>();
     // Builds the current argument
@@ -243,47 +251,58 @@ public static class GodotEnv {
     // Remembers the previous character
     var prevCh = '\0';
     // Iterate all characters from the input string
-    for (var i = 0; i < argsString.Length; i++) {
+    for (var i = 0; i < argsString.Length; i++)
+    {
       var ch = argsString[i];
-      if (ch == '\\' && !escape) {
+      if (ch == '\\' && !escape)
+      {
         // Beginning of a backslash-escape sequence
         escape = true;
       }
-      else if (ch == '\\' && escape) {
+      else if (ch == '\\' && escape)
+      {
         // Double backslash, keep one
         currentArg.Append(ch);
         escape = false;
       }
-      else if (ch == '"' && !escape) {
+      else if (ch == '"' && !escape)
+      {
         // Toggle quoted range
         inQuote = !inQuote;
         hadQuote = true;
-        if (inQuote && prevCh == '"') {
+        if (inQuote && prevCh == '"')
+        {
           // Doubled quote within a quoted range is like escaping
           currentArg.Append(ch);
         }
       }
-      else if (ch == '"' && escape) {
+      else if (ch == '"' && escape)
+      {
         // Backslash-escaped quote, keep it
         currentArg.Append(ch);
         escape = false;
       }
-      else if (char.IsWhiteSpace(ch) && !inQuote) {
-        if (escape) {
+      else if (char.IsWhiteSpace(ch) && !inQuote)
+      {
+        if (escape)
+        {
           // Add pending escape char
           currentArg.Append('\\');
           escape = false;
         }
         // Accept empty arguments only if they are quoted
-        if (currentArg.Length > 0 || hadQuote) {
+        if (currentArg.Length > 0 || hadQuote)
+        {
           args.Add(currentArg.ToString());
         }
         // Reset for next argument
         currentArg.Clear();
         hadQuote = false;
       }
-      else {
-        if (escape) {
+      else
+      {
+        if (escape)
+        {
           // Add pending escape char
           currentArg.Append('\\');
           escape = false;
@@ -294,7 +313,8 @@ public static class GodotEnv {
       prevCh = ch;
     }
     // Save last argument
-    if (currentArg.Length > 0 || hadQuote) {
+    if (currentArg.Length > 0 || hadQuote)
+    {
       args.Add(currentArg.ToString());
     }
     return [.. args];
@@ -305,14 +325,16 @@ public static class GodotEnv {
 /// Custom type activator for CliFx. Creates commands by passing in the
 /// execution context.
 /// </summary>
-public class GodotEnvActivator : ITypeActivator {
+public class GodotEnvActivator : ITypeActivator
+{
   public IExecutionContext ExecutionContext { get; }
   public OSType OS { get; }
 
   public GodotEnvActivator(
     IExecutionContext context,
     OSType os
-  ) {
+  )
+  {
     ExecutionContext = context;
     OS = os;
   }
@@ -322,10 +344,12 @@ public class GodotEnvActivator : ITypeActivator {
   /// single-parameter constructor that receives the execution context.
   /// </summary>
   /// <param name="type">Command type to create.</param>
-  public object CreateInstance(Type type) {
+  public object CreateInstance(Type type)
+  {
     var command = Activator.CreateInstance(type, ExecutionContext)!;
 
-    if (ShouldElevateOnWindows(OS, command)) {
+    if (ShouldElevateOnWindows(OS, command))
+    {
       var elevateTask = ElevateOnWindows();
       elevateTask.Wait();
 
@@ -344,8 +368,10 @@ public class GodotEnvActivator : ITypeActivator {
     command is IWindowsElevationEnabled windowsElevationEnabledCommand &&
     windowsElevationEnabledCommand.IsWindowsElevationRequired;
 
-  public static async Task<ProcessResult> ElevateOnWindows() {
-    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+  public static async Task<ProcessResult> ElevateOnWindows()
+  {
+    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    {
       throw new InvalidOperationException(
         "ElevateOnWindows is only supported on Windows."
       );
@@ -357,9 +383,11 @@ public class GodotEnvActivator : ITypeActivator {
     // GetCommandLineArgs is always a dll.
     // It can be executed with the dotnet command.
     var exe = argsList?.FirstOrDefault() ?? string.Empty;
-    if (exe.EndsWith(".exe")) { exe = $"\"{exe}\""; }
+    if (exe.EndsWith(".exe", StringComparison.InvariantCulture))
+    { exe = $"\"{exe}\""; }
 
-    if (exe.EndsWith(".dll")) { exe = $"dotnet \"{exe}\""; }
+    if (exe.EndsWith(".dll", StringComparison.InvariantCulture))
+    { exe = $"dotnet \"{exe}\""; }
 
     var args = string.Join(
       " ",
@@ -369,7 +397,8 @@ public class GodotEnvActivator : ITypeActivator {
     );
 
     // Rerun the godotenv command with elevation in a new window
-    var process = UACHelper.UACHelper.StartElevated(new ProcessStartInfo() {
+    var process = UACHelper.UACHelper.StartElevated(new ProcessStartInfo()
+    {
       FileName = "cmd",
       Arguments = $"/s /c \"cd /d \"{Environment.CurrentDirectory}\" & {exe} {args} & pause\"",
       UseShellExecute = true,

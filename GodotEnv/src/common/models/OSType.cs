@@ -3,7 +3,8 @@ namespace Chickensoft.GodotEnv.Common.Models;
 /// <summary>
 /// Operating system type.
 /// </summary>
-public enum OSType {
+public enum OSType
+{
   /// <summary>Windows.</summary>
   Windows,
   /// <summary>macOS.</summary>

@@ -8,31 +8,32 @@ using CliFx.Infrastructure;
 /// contexts can be used to create a command context, which supplies information
 /// and services to a command while allowing commands to be tested.
 /// </summary>
-public interface IExecutionContext {
+public interface IExecutionContext
+{
   /// <summary>Arguments passed to the app itself.</summary>
-  public string[] CliArgs { get; }
+  string[] CliArgs { get; }
   /// <summary>
   /// Dynamic arguments that follow `--` (if supplied by the user). Some
   /// commands, such as template execution, require dynamic arguments be given.
   /// </summary>
-  public string[] CommandArgs { get; }
+  string[] CommandArgs { get; }
   /// <summary>App package version.</summary>
-  public string Version { get; }
+  string Version { get; }
   /// <summary>Working directory that the app is running in.</summary>
-  public string WorkingDir { get; }
+  string WorkingDir { get; }
   /// <summary>App configuration settings.</summary>
-  public IConfig Config { get; }
+  IConfig Config { get; }
   /// <summary>System information.</summary>
-  public ISystemInfo SystemInfo { get; }
+  ISystemInfo SystemInfo { get; }
   /// <summary>Addons context.</summary>
-  public IAddonsContext Addons { get; }
+  IAddonsContext Addons { get; }
   /// <summary>Godot context.</summary>
-  public IGodotContext Godot { get; }
+  IGodotContext Godot { get; }
 
   /// <summary>Creates a log using the specified console.</summary>
   /// <param name="console">Output console.</param>
   /// <returns>Log.</returns>
-  public ILog CreateLog(IConsole console);
+  ILog CreateLog(IConsole console);
 }
 
 public record ExecutionContext(
@@ -44,6 +45,7 @@ public record ExecutionContext(
   ISystemInfo SystemInfo,
   IAddonsContext Addons,
   IGodotContext Godot
-) : IExecutionContext {
+) : IExecutionContext
+{
   public ILog CreateLog(IConsole console) => new Log(SystemInfo, Config, console);
 }

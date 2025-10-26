@@ -9,10 +9,12 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class ConfigCommandTest {
+public class ConfigCommandTest
+{
 
   [Fact]
-  public async Task Executes() {
+  public async Task Executes()
+  {
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
     var config = MockConfig.Get();
     var context = new Mock<IExecutionContext>();

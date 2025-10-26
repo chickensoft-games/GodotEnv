@@ -6,7 +6,8 @@ using Chickensoft.GodotEnv.Features.Godot.Models;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using Xunit;
 
-public class OldDiskVersionDeserializerTest {
+public class OldDiskVersionDeserializerTest
+{
   [Theory]
   [InlineData("NotAVersion")]
   [InlineData("1")]
@@ -17,12 +18,14 @@ public class OldDiskVersionDeserializerTest {
   [InlineData("1.2.3.4.5")]
   [InlineData("1.a")]
   [InlineData("1.0.1-label")]
-  public void RejectionOfInvalidOldDiskVersionNumbers(string invalidVersionNumber) {
+  public void RejectionOfInvalidOldDiskVersionNumbers(string invalidVersionNumber)
+  {
     var deserializer = new OldDiskVersionDeserializer();
     Assert.Throws<ArgumentException>(() => deserializer.Deserialize(invalidVersionNumber));
   }
 
-  public static IEnumerable<object[]> CorrectDeserializationOfValidOldDiskVersionsTestData() {
+  public static IEnumerable<object[]> CorrectDeserializationOfValidOldDiskVersionsTestData()
+  {
     yield return ["1.2.3-stable", new GodotVersionNumber(1, 2, 3, "stable", -1)];
     yield return ["0.2.3-stable", new GodotVersionNumber(0, 2, 3, "stable", -1)];
     yield return ["1.0-stable", new GodotVersionNumber(1, 0, 0, "stable", -1)];
@@ -41,7 +44,8 @@ public class OldDiskVersionDeserializerTest {
 
   [Theory]
   [MemberData(nameof(CorrectDeserializationOfValidOldDiskVersionsTestData))]
-  public void CorrectDeserializationOfValidOldDiskVersions(string toParse, GodotVersionNumber expectedNumber) {
+  public void CorrectDeserializationOfValidOldDiskVersions(string toParse, GodotVersionNumber expectedNumber)
+  {
     var deserializer = new OldDiskVersionDeserializer();
     var parsedAgnostic = deserializer.Deserialize(toParse);
     Assert.Equal(expectedNumber, parsedAgnostic.Number);

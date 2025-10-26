@@ -10,7 +10,8 @@ using Common.Utilities;
 using Godot.Domain;
 
 [Command("godot list", Description = "List installed Godot versions.")]
-public class GodotListCommand : ICommand, ICliCommand {
+public class GodotListCommand : ICommand, ICliCommand
+{
   public IExecutionContext ExecutionContext { get; set; } = default!;
 
   [CommandOption("remote", 'r',
@@ -23,48 +24,61 @@ public class GodotListCommand : ICommand, ICliCommand {
   )]
   public string? ProxyUrl { get; set; }
 
-  public GodotListCommand(IExecutionContext context) {
+  public GodotListCommand(IExecutionContext context)
+  {
     ExecutionContext = context;
   }
 
-  private static void ListLocalVersions(ILog log, IGodotRepository godotRepo) {
+  private static void ListLocalVersions(ILog log, IGodotRepository godotRepo)
+  {
     var installations = godotRepo.GetInstallationsList();
-    foreach (var result in installations) {
-      if (result.Value is { } installation) {
+    foreach (var result in installations)
+    {
+      if (result.Value is { } installation)
+      {
         var activeTag = installation.IsActiveVersion ? " *" : "";
         log.Print(godotRepo.InstallationVersionName(installation) + activeTag);
       }
-      else {
+      else
+      {
         log.Warn(result.Error);
       }
     }
-    if (!godotRepo.IsGodotSymlinkTargetAvailable) {
+    if (!godotRepo.IsGodotSymlinkTargetAvailable)
+    {
       log.Warn("Could not determine current target Godot version.");
     }
   }
 
-  private static async Task ListRemoteVersions(ILog log, IGodotRepository godotRepo, string? proxyUrl = null) {
+  private static async Task ListRemoteVersions(ILog log, IGodotRepository godotRepo, string? proxyUrl = null)
+  {
     log.Print("Retrieving available Godot versions...");
 
-    try {
+    try
+    {
       var remoteVersions = await godotRepo.GetRemoteVersionsList(log, proxyUrl);
-      foreach (var version in remoteVersions) {
+      foreach (var version in remoteVersions)
+      {
         log.Print(version);
       }
     }
-    catch (HttpRequestException) {
+    catch (HttpRequestException)
+    {
       log.Print("Unable to reach remote Godot versions list.");
     }
   }
 
-  public async ValueTask ExecuteAsync(IConsole console) {
+  public async ValueTask ExecuteAsync(IConsole console)
+  {
     var log = ExecutionContext.CreateLog(console);
     var godotRepo = ExecutionContext.Godot.GodotRepo;
 
-    if (ListRemoteAvailable) {
+    if (ListRemoteAvailable)
+    {
       await ListRemoteVersions(log, godotRepo, ProxyUrl);
     }
-    else {
+    else
+    {
       ListLocalVersions(log, godotRepo);
     }
 

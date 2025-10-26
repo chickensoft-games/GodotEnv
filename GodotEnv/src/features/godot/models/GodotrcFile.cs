@@ -4,7 +4,8 @@ using System;
 using Chickensoft.GodotEnv.Common.Clients;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 
-public class GodotrcFile : IGodotVersionFile, IEquatable<GodotrcFile> {
+public class GodotrcFile : IGodotVersionFile, IEquatable<GodotrcFile>
+{
   private static readonly string[] _noDotnetPatterns = [
     " no-dotnet",
     " non-dotnet",
@@ -16,29 +17,37 @@ public class GodotrcFile : IGodotVersionFile, IEquatable<GodotrcFile> {
   /// <inheritdoc/>
   public string FilePath { get; }
 
-  public GodotrcFile(string filePath) {
+  public GodotrcFile(string filePath)
+  {
     FilePath = filePath;
   }
 
   /// <inheritdoc/>
   public SpecificDotnetStatusGodotVersion? ParseGodotVersion(
     IFileClient fileClient
-  ) {
+  )
+  {
     var version = string.Empty;
-    try {
-      using (var reader = fileClient.GetReader(FilePath)) {
+    try
+    {
+      using (var reader = fileClient.GetReader(FilePath))
+      {
         version = reader.ReadLine();
       }
     }
-    catch (Exception) {
+    catch (Exception)
+    {
       return null;
     }
-    if (string.IsNullOrEmpty(version)) {
+    if (string.IsNullOrEmpty(version))
+    {
       return null;
     }
     var isDotnet = true;
-    foreach (var noDotnetPattern in _noDotnetPatterns) {
-      if (version.EndsWith(noDotnetPattern)) {
+    foreach (var noDotnetPattern in _noDotnetPatterns)
+    {
+      if (version.EndsWith(noDotnetPattern, StringComparison.InvariantCulture))
+      {
         isDotnet = false;
         version = version[..^noDotnetPattern.Length];
         break;
@@ -51,9 +60,11 @@ public class GodotrcFile : IGodotVersionFile, IEquatable<GodotrcFile> {
   public void WriteGodotVersion(
     SpecificDotnetStatusGodotVersion version,
     IFileClient fileClient
-  ) {
+  )
+  {
     // we can simply overwrite any existing .godotrc file
-    using (var writer = fileClient.GetWriter(FilePath)) {
+    using (var writer = fileClient.GetWriter(FilePath))
+    {
       writer.WriteLine(
         version.IsDotnetEnabled
           ? _versionSerializer.Serialize(version)

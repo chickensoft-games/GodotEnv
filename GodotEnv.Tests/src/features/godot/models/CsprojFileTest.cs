@@ -8,16 +8,19 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class CsprojFileTest {
+public class CsprojFileTest
+{
   [Fact]
-  public void NewCsprojFileHasFilePath() {
+  public void NewCsprojFileHasFilePath()
+  {
     var path = "/test/path";
     var file = new CsprojFile(path);
     file.FilePath.ShouldBe(path);
   }
 
   [Fact]
-  public void ParsedVersionIsGodotSdkIfPresent() {
+  public void ParsedVersionIsGodotSdkIfPresent()
+  {
     var contents =
         /*lang=xml,strict*/
         """
@@ -60,7 +63,8 @@ public class CsprojFileTest {
   }
 
   [Fact]
-  public void ParsedVersionIsNullIfGodotSdkVersionUnspecified() {
+  public void ParsedVersionIsNullIfGodotSdkVersionUnspecified()
+  {
     var contents =
         /*lang=xml,strict*/
         """
@@ -102,7 +106,8 @@ public class CsprojFileTest {
   }
 
   [Fact]
-  public void ParsedVersionIsEmptyIfGodotSdkNotUsed() {
+  public void ParsedVersionIsEmptyIfGodotSdkNotUsed()
+  {
     var contents =
         /*lang=xml,strict*/
         """
@@ -143,7 +148,8 @@ public class CsprojFileTest {
   }
 
   [Fact]
-  public void ParseVersionThrowsIfGodotSdkVersionInvalid() {
+  public void ParseVersionThrowsIfGodotSdkVersionInvalid()
+  {
     var contents =
         /*lang=xml,strict*/
         """
@@ -185,7 +191,8 @@ public class CsprojFileTest {
   }
 
   [Fact]
-  public void WriteGodotVersionThrowsNotSupported() {
+  public void WriteGodotVersionThrowsNotSupported()
+  {
     var path = "/test/path";
     var fileClient = new Mock<IFileClient>();
     var file = new CsprojFile(path);

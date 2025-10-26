@@ -7,14 +7,16 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class ExecutionContextTest {
+public class ExecutionContextTest
+{
   private const string VERSION = "1.2.3";
   private const string WORKING_DIR = "/";
   private readonly string[] _cliArgs = ["a", "b"];
   private readonly string[] _commandArgs = ["c", "d"];
 
   [Fact]
-  public void Initializes() {
+  public void Initializes()
+  {
     var config = new Config();
     var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
     var addons = new Mock<IAddonsContext>().Object;

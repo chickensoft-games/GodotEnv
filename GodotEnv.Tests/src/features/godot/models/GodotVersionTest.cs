@@ -6,8 +6,10 @@ using Chickensoft.GodotEnv.Features.Godot.Models;
 using Shouldly;
 using Xunit;
 
-public partial class GodotVersionTest {
-  public static IEnumerable<object[]> RejectionOfInvalidPropertyValuesTestData() {
+public partial class GodotVersionTest
+{
+  public static IEnumerable<object[]> RejectionOfInvalidPropertyValuesTestData()
+  {
     yield return [-1, 1, 2, "stable", -1];
     yield return [1, -1, 2, "stable", -1];
     yield return [1, 1, -2, "stable", -1];
@@ -63,7 +65,8 @@ public partial class GodotVersionTest {
     int patch,
     string label,
     int labelNum
-  ) {
+  )
+  {
     Should.Throw<ArgumentException>(
       () =>
         new SpecificDotnetStatusGodotVersion(

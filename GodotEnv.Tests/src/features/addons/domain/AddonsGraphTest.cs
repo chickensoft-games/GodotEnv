@@ -5,7 +5,8 @@ using Chickensoft.GodotEnv.Features.Addons.Models;
 using Shouldly;
 using Xunit;
 
-public class AddonsGraphTest {
+public class AddonsGraphTest
+{
   private readonly Addon _addonA = new(
     name: "AddonA",
     addonsFilePath: "some/working/dir/addons.json",
@@ -61,28 +62,32 @@ public class AddonsGraphTest {
   );
 
   [Fact]
-  public void IndicatesADependencyIsInstalled() {
+  public void IndicatesADependencyIsInstalled()
+  {
     var graph = new AddonGraph();
     graph.Add(_addonA).ShouldBeOfType(typeof(AddonResolved));
-    graph.Addons.ShouldBe(new Addon[] { _addonA });
+    graph.Addons.ShouldBe([_addonA]);
   }
 
   [Fact]
-  public void IndicatesNonConflictingDependenciesAreInstalled() {
+  public void IndicatesNonConflictingDependenciesAreInstalled()
+  {
     var graph = new AddonGraph();
     graph.Add(_addonA).ShouldBeOfType(typeof(AddonResolved));
     graph.Add(_addonB).ShouldBeOfType(typeof(AddonResolved));
   }
 
   [Fact]
-  public void IndicatesADependencyIsAlreadyInstalled() {
+  public void IndicatesADependencyIsAlreadyInstalled()
+  {
     var graph = new AddonGraph();
     graph.Add(_addonA).ShouldBeOfType(typeof(AddonResolved));
     graph.Add(_addonA).ShouldBeOfType(typeof(AddonAlreadyResolved));
   }
 
   [Fact]
-  public void IndicatesAConflictingDestinationPath() {
+  public void IndicatesAConflictingDestinationPath()
+  {
     var graph = new AddonGraph();
     graph.Add(_addonA).ShouldBeOfType(typeof(AddonResolved));
     graph.Add(_addonAConflictingPath).ShouldBeOfType(
@@ -91,7 +96,8 @@ public class AddonsGraphTest {
   }
 
   [Fact]
-  public void IndicatesADependencyIsInstalledUnderDifferentName() {
+  public void IndicatesADependencyIsInstalledUnderDifferentName()
+  {
     var graph = new AddonGraph();
     graph.Add(_addonA).ShouldBeOfType(typeof(AddonResolved));
     graph.Add(_addonAEquivalent).ShouldBeOfType(
@@ -100,7 +106,8 @@ public class AddonsGraphTest {
   }
 
   [Fact]
-  public void IssuesAddonSimilarWarningForSubfolderChange() {
+  public void IssuesAddonSimilarWarningForSubfolderChange()
+  {
     var graph = new AddonGraph();
     graph.Add(_addonA).ShouldBeOfType(typeof(AddonResolved));
     var e = graph.Add(_addonASubfolder);
@@ -113,7 +120,8 @@ public class AddonsGraphTest {
   }
 
   [Fact]
-  public void IssuesAddonSimilarWarningForCheckoutChange() {
+  public void IssuesAddonSimilarWarningForCheckoutChange()
+  {
     var graph = new AddonGraph();
     graph.Add(_addonA).ShouldBeOfType(typeof(AddonResolved));
     var e = graph.Add(_addonACheckout);
@@ -126,7 +134,8 @@ public class AddonsGraphTest {
   }
 
   [Fact]
-  public void IssuesAddonSimilarWarningForMultiplePossibleConflicts() {
+  public void IssuesAddonSimilarWarningForMultiplePossibleConflicts()
+  {
     var graph = new AddonGraph();
     graph.Add(_addonA).ShouldBeOfType(typeof(AddonResolved));
     graph.Add(_addonB).ShouldBeOfType(typeof(AddonResolved));

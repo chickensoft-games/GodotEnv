@@ -14,7 +14,8 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class AddonsRepositoryTest {
+public class AddonsRepositoryTest
+{
   private sealed class Subject(
     Mock<ISystemInfo> systemInfo,
     IConsole console,
@@ -25,7 +26,8 @@ public class AddonsRepositoryTest {
     Mock<IComputer> computer,
     AddonsConfiguration config,
     AddonsRepository repo
-  ) {
+  )
+  {
     public Mock<ISystemInfo> SystemInfo { get; } = systemInfo;
     public IConsole Console { get; } = console;
     public Mock<IFileClient> Client { get; } = client;
@@ -40,15 +42,14 @@ public class AddonsRepositoryTest {
   private const string PROJECT_PATH = "/";
   private const string ADDONS_DIR = "/addons";
   private const string CACHE_DIR = "/.addons";
-  private const string WORKING_DIR = "/";
 
   private static Subject BuildSubject(
     string projectPath = PROJECT_PATH,
     string addonsDir = ADDONS_DIR,
     string cacheDir = CACHE_DIR,
-    string workingDir = WORKING_DIR,
     ShellVerifier? cli = null
-  ) {
+  )
+  {
     // Keep tests shorter by using a helper method to build the test subject.
     // var systemInfo = new MockSystemInfo(OSType.Linux, CPUArch.X64);
     var systemInfo = new Mock<ISystemInfo>();
@@ -64,8 +65,10 @@ public class AddonsRepositoryTest {
     var processRunner = new Mock<IProcessRunner>();
     computer
       .Setup(pc => pc.CreateShell(It.IsAny<string>()))
-      .Returns((string path) => {
-        if (cli?.GetShell(path) is Mock<IShell> shell) {
+      .Returns((string path) =>
+      {
+        if (cli?.GetShell(path) is Mock<IShell> shell)
+        {
           return shell.Object;
         }
         throw new InvalidOperationException(
@@ -98,7 +101,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public void Initializes() {
+  public void Initializes()
+  {
     var subject = BuildSubject();
     var repo = subject.Repo;
     repo.ShouldBeAssignableTo<IAddonsRepository>();
@@ -108,12 +112,12 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public void ResolveUrlResolvesRemoteUrl() {
+  public void ResolveUrlResolvesRemoteUrl()
+  {
     var addon = TestData.Addon with { };
 
     var subject = BuildSubject();
     var repo = subject.Repo;
-    var client = subject.Client;
 
     var result = repo.ResolveUrl(addon, "/");
 
@@ -121,7 +125,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public void ResolveUrlResolvesSymlinkUrl() {
+  public void ResolveUrlResolvesSymlinkUrl()
+  {
     var url = "/some/local/path";
     var addon = TestData.Addon with { Url = url, Source = AssetSource.Symlink };
 
@@ -142,7 +147,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public void EnsuresExistsCreatesCacheDir() {
+  public void EnsuresExistsCreatesCacheDir()
+  {
     var subject = BuildSubject();
     var repo = subject.Repo;
     var client = subject.Client;
@@ -152,8 +158,10 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task CacheAddonReturnsSymlinkAddonTargetWithSubfolder() {
-    var addon = TestData.Addon with {
+  public async Task CacheAddonReturnsSymlinkAddonTargetWithSubfolder()
+  {
+    var addon = TestData.Addon with
+    {
       Source = AssetSource.Symlink,
       Url = "/some/local/path",
       Subfolder = "some/subfolder"
@@ -186,7 +194,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task CacheAddonCachesAddon() {
+  public async Task CacheAddonCachesAddon()
+  {
     var addon = TestData.Addon with { };
 
     var addonsCachePath = CACHE_DIR + "/" + addon.Name;
@@ -224,7 +233,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task CacheAddonReusesZipAddonCache() {
+  public async Task CacheAddonReusesZipAddonCache()
+  {
     var addon = TestData.ZipAddon with { };
 
     var addonsCachePath = CACHE_DIR + "/" + addon.Name;
@@ -258,7 +268,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task CacheAddonCachesZipAddon() {
+  public async Task CacheAddonCachesZipAddon()
+  {
     var addon = TestData.ZipAddon with { };
 
     var addonsCachePath = CACHE_DIR + "/" + addon.Name;
@@ -322,7 +333,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task CacheAddonDoesNotCacheIfAddonIsAlreadyCached() {
+  public async Task CacheAddonDoesNotCacheIfAddonIsAlreadyCached()
+  {
     var addon = TestData.Addon with { };
 
     var cli = new ShellVerifier(CACHE_DIR);
@@ -353,7 +365,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task DeleteAddonWillNotDeleteNonExistentAddonOnUnix() {
+  public async Task DeleteAddonWillNotDeleteNonExistentAddonOnUnix()
+  {
     var addon = TestData.Addon with { };
     var addonPath = ADDONS_DIR + "/" + addon.Name;
 
@@ -373,7 +386,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task DeleteAddonWillNotDeleteNonExistentAddonOnWindows() {
+  public async Task DeleteAddonWillNotDeleteNonExistentAddonOnWindows()
+  {
     var addon = TestData.Addon with { };
     var addonPath = ADDONS_DIR + "/" + addon.Name;
 
@@ -397,7 +411,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task DeleteAddonDeletesSymlinkedAddonOnUnix() {
+  public async Task DeleteAddonDeletesSymlinkedAddonOnUnix()
+  {
     var addon = TestData.Addon with { };
     var addonPath = ADDONS_DIR + "/" + addon.Name;
 
@@ -419,7 +434,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task DeleteAddonDeletesSymlinkedAddonOnWindows() {
+  public async Task DeleteAddonDeletesSymlinkedAddonOnWindows()
+  {
     var addon = TestData.Addon with { };
     var addonPath = ADDONS_DIR + "/" + addon.Name;
 
@@ -445,7 +461,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task DeleteAddonDeletesAddonOnWindows() {
+  public async Task DeleteAddonDeletesAddonOnWindows()
+  {
     var addon = TestData.Addon with { };
     var addonPath = ADDONS_DIR + "/" + addon.Name;
 
@@ -482,7 +499,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task DeleteAddonDeletesAddonOnUnix() {
+  public async Task DeleteAddonDeletesAddonOnUnix()
+  {
     var addon = TestData.Addon with { };
     var addonPath = ADDONS_DIR + "/" + addon.Name;
 
@@ -509,7 +527,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task DeleteAddonThrowsIfAddonWasModified() {
+  public async Task DeleteAddonThrowsIfAddonWasModified()
+  {
     var addon = TestData.Addon with { };
     var addonPath = ADDONS_DIR + "/" + addon.Name;
 
@@ -537,7 +556,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task InstallAddonFromCacheCopiesCachedAddonToAddonsPath() {
+  public async Task InstallAddonFromCacheCopiesCachedAddonToAddonsPath()
+  {
     var addon = TestData.Addon with { };
     var addonCachePath = CACHE_DIR + "/" + addon.Name;
     var copyFromPath = addonCachePath + "/" + addon.Subfolder;
@@ -594,7 +614,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public void TestValidateSubfolderThrowsIfNoDirectory() {
+  public void TestValidateSubfolderThrowsIfNoDirectory()
+  {
     var addon = TestData.Addon with { };
     var addonCachePath = CACHE_DIR + "/" + addon.Name;
     var copyFromPath = addonCachePath + "/" + addon.Subfolder;
@@ -613,7 +634,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public void GetCachedAddonPathDeterminesZipAddonCachePath() {
+  public void GetCachedAddonPathDeterminesZipAddonCachePath()
+  {
 
     var subject = BuildSubject();
     var client = subject.Client;
@@ -631,7 +653,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public void InstallAddonWithSymlinkRejectsAddonsWithWrongSource() {
+  public void InstallAddonWithSymlinkRejectsAddonsWithWrongSource()
+  {
     var addon = TestData.Addon with { };
 
     var subject = BuildSubject();
@@ -641,7 +664,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public void InstallAddonWithSymlinkWillNotInstallIfTargetAlreadyExists() {
+  public void InstallAddonWithSymlinkWillNotInstallIfTargetAlreadyExists()
+  {
     var addon = TestData.Addon with { Source = AssetSource.Symlink };
 
     var subject = BuildSubject();
@@ -663,7 +687,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public void InstallAddonWithSymlinkWillNotInstallIfSourceDoesNotExist() {
+  public void InstallAddonWithSymlinkWillNotInstallIfSourceDoesNotExist()
+  {
     var addon = TestData.Addon with { Source = AssetSource.Symlink };
 
     var subject = BuildSubject();
@@ -686,7 +711,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public void InstallAddonWithSymlinkCreatesSymlink() {
+  public void InstallAddonWithSymlinkCreatesSymlink()
+  {
     var addon = TestData.Addon with { Source = AssetSource.Symlink };
 
     var subject = BuildSubject();
@@ -710,7 +736,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public void InstallAddonWithSymlinkThrowsErrorIfSymlinkCreationFailed() {
+  public void InstallAddonWithSymlinkThrowsErrorIfSymlinkCreationFailed()
+  {
     var addon = TestData.Addon with { Source = AssetSource.Symlink };
 
     var subject = BuildSubject();
@@ -736,13 +763,13 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task UpdateCacheIgnoresSymlinkAddons() {
+  public async Task UpdateCacheIgnoresSymlinkAddons()
+  {
     var addon = TestData.Addon with { Source = AssetSource.Symlink };
 
     var subject = BuildSubject();
     var repo = subject.Repo;
     var client = subject.Client;
-    var config = subject.Config;
     var cacheName = "cache_name";
 
     await repo.UpdateCache(addon, cacheName);
@@ -751,7 +778,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task UpdateCacheCallsGitCorrectlyInAddonCacheLocation() {
+  public async Task UpdateCacheCallsGitCorrectlyInAddonCacheLocation()
+  {
     var addon = TestData.Addon with { };
     var addonCachePath = CACHE_DIR + "/" + addon.Name;
 
@@ -783,13 +811,13 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task PrepareCacheIgnoresSymlinkAddons() {
+  public async Task PrepareCacheIgnoresSymlinkAddons()
+  {
     var addon = TestData.Addon with { Source = AssetSource.Symlink };
 
     var subject = BuildSubject();
     var repo = subject.Repo;
     var client = subject.Client;
-    var config = subject.Config;
     var cacheName = "cache_name";
 
     await repo.PrepareCache(addon, cacheName);
@@ -798,7 +826,8 @@ public class AddonsRepositoryTest {
   }
 
   [Fact]
-  public async Task PrepareCacheCallsGitCorrectlyInAddonCacheLocation() {
+  public async Task PrepareCacheCallsGitCorrectlyInAddonCacheLocation()
+  {
     var addon = TestData.Addon with { };
     var addonCachePath = CACHE_DIR + "/" + addon.Name;
 

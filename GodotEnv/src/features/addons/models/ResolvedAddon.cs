@@ -1,6 +1,7 @@
 namespace Chickensoft.GodotEnv.Features.Addons.Models;
 
-public record ResolvedAddon {
+public record ResolvedAddon
+{
   public IAddon Addon { get; }
 
   /// <summary>
@@ -9,7 +10,8 @@ public record ResolvedAddon {
   /// </summary>
   public IAddon? CanonicalAddon { get; }
 
-  public ResolvedAddon(IAddon addon, IAddon? canonicalAddon) {
+  public ResolvedAddon(IAddon addon, IAddon? canonicalAddon)
+  {
     Addon = addon;
     CanonicalAddon = canonicalAddon;
   }

@@ -1,5 +1,5 @@
 namespace Chickensoft.GodotEnv.Tests;
-using System.Collections.Generic;
+
 using Chickensoft.GodotEnv.Common.Models;
 using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Addons.Models;
@@ -7,7 +7,8 @@ using Moq;
 using Shouldly;
 using Xunit;
 
-public class AddonGraphResultTest {
+public class AddonGraphResultTest
+{
   private readonly Addon _canonical = new(
     name: "Canonical",
     addonsFilePath: "project/addons.json",
@@ -72,10 +73,11 @@ public class AddonGraphResultTest {
   );
 
   [Fact]
-  public void AddonSimilarWarningDescribesUnrelatedDependencies() {
+  public void AddonSimilarWarningDescribesUnrelatedDependencies()
+  {
     var result = new AddonResolvedButMightConflict(
       Addon: _addonA,
-      Conflicts: new List<IAddon> { _addonB },
+      Conflicts: [_addonB],
       CanonicalAddon: _canonical
     );
 
@@ -91,10 +93,11 @@ public class AddonGraphResultTest {
   }
 
   [Fact]
-  public void AddonSimilarWarningDescribesDifferentSubfolders() {
+  public void AddonSimilarWarningDescribesDifferentSubfolders()
+  {
     var result = new AddonResolvedButMightConflict(
       Addon: _addonA,
-      Conflicts: new List<IAddon> { _addonASubfolder },
+      Conflicts: [_addonASubfolder],
       CanonicalAddon: _canonical
     );
 
@@ -114,10 +117,11 @@ public class AddonGraphResultTest {
   }
 
   [Fact]
-  public void AddonSimilarWarningDescribesDifferentCheckouts() {
+  public void AddonSimilarWarningDescribesDifferentCheckouts()
+  {
     var result = new AddonResolvedButMightConflict(
       Addon: _addonA,
-      Conflicts: new List<IAddon> { _addonABranch },
+      Conflicts: [_addonABranch],
       CanonicalAddon: _canonical
     );
 
@@ -137,10 +141,11 @@ public class AddonGraphResultTest {
   }
 
   [Fact]
-  public void AddonSimilarWarningDescribesMultipleConflicts() {
+  public void AddonSimilarWarningDescribesMultipleConflicts()
+  {
     var result = new AddonResolvedButMightConflict(
       Addon: _addonA,
-      Conflicts: new List<IAddon> { _addonASubfolder, _addonABranch },
+      Conflicts: [_addonASubfolder, _addonABranch],
       CanonicalAddon: _canonical
     );
 
@@ -166,7 +171,8 @@ public class AddonGraphResultTest {
   }
 
   [Fact]
-  public void AddonConflictingInstallPathResultDescribesConflict() {
+  public void AddonConflictingInstallPathResultDescribesConflict()
+  {
     var result = new AddonCannotBeResolved(
       Addon: _addonAConflict,
       CanonicalAddon: _addonA
@@ -188,7 +194,8 @@ public class AddonGraphResultTest {
   }
 
   [Fact]
-  public void AddonAlreadyResolvedResultDescribesItself() {
+  public void AddonAlreadyResolvedResultDescribesItself()
+  {
     var result = new AddonAlreadyResolved(
       Addon: _addonA,
       CanonicalAddon: _addonA2
@@ -208,7 +215,8 @@ public class AddonGraphResultTest {
   }
 
   [Fact]
-  public void AddonSuccessResultDescribesItself() {
+  public void AddonSuccessResultDescribesItself()
+  {
     var result = new AddonResolved(Addon: _addonA);
 
     result.ToString().ShouldBe(
