@@ -88,14 +88,6 @@ indent_size = 2
 [*.{cmd,bat}]
 end_of_line = crlf
 
-# Powershell Files
-[*.ps1]
-end_of_line = crlf
-
-# Bash Files
-[*.sh]
-end_of_line = lf
-
 # Makefiles
 [Makefile]
 indent_style = tab
