@@ -1,6 +1,7 @@
 namespace Chickensoft.GodotEnv.Features.Godot.Models;
 
 using Chickensoft.GodotEnv.Common.Clients;
+using Chickensoft.GodotEnv.Common.Utilities;
 
 /// <summary>
 /// Represents a file on disk that may contain a Godot version string we can use
@@ -20,13 +21,12 @@ public interface IGodotVersionFile
   /// The file client to use for reading the file.
   /// </param>
   /// <returns>
-  /// A Godot version, if found. Null if no possible version string was found.
+  /// If a Godot version exists in the file and parses correctly: A success
+  /// <see cref="Result"/> with the version information. If a Godot version
+  /// does not exist in the file or a version exists in the file but does not
+  /// parse correctly: A failure <see cref="Result"/>.
   /// </returns>
-  /// <exception cref="InvalidOperationException">
-  /// If the file contained a possible Godot-version string, but it didn't
-  /// deserialize correctly.
-  /// </exception>
-  SpecificDotnetStatusGodotVersion? ParseGodotVersion(
+  Result<SpecificDotnetStatusGodotVersion> ParseGodotVersion(
     IFileClient fileClient
   );
 

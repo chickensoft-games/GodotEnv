@@ -93,6 +93,7 @@ public class GodotRepositoryTest
   [InlineData("4.0-rc1")]
   [InlineData("4.0.1-stable")]
   [InlineData("3.5.4-dev6")]
+  [InlineData("4.5.0-rc.1")]
   public void DirectoryToVersionUndoesVersionFsName(string godotVersionString)
   {
     var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
@@ -145,10 +146,16 @@ public class GodotRepositoryTest
     );
 
     var dotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, true)!;
-    var reconstructedDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(fileVersionSerializer, dotnetVersion));
-    dotnetVersion.ShouldBe(reconstructedDotnetVersion);
+    dotnetVersion.IsSuccess.ShouldBeTrue();
+    var reconstructedDotnetVersion = godotRepo.DirectoryToVersion(
+      godotRepo.GetVersionFsName(fileVersionSerializer, dotnetVersion.Value)
+    );
+    reconstructedDotnetVersion.ShouldBe(dotnetVersion.Value);
     var nonDotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, false)!;
-    var reconstructedNonDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(fileVersionSerializer, nonDotnetVersion));
-    nonDotnetVersion.ShouldBe(reconstructedNonDotnetVersion);
+    nonDotnetVersion.IsSuccess.ShouldBeTrue();
+    var reconstructedNonDotnetVersion = godotRepo.DirectoryToVersion(
+      godotRepo.GetVersionFsName(fileVersionSerializer, nonDotnetVersion.Value)
+    );
+    reconstructedNonDotnetVersion.ShouldBe(nonDotnetVersion.Value);
   }
 }

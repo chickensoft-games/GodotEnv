@@ -1,9 +1,10 @@
 namespace Chickensoft.GodotEnv.Features.Godot.Serializers;
 
+using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 
 public interface IVersionDeserializer
 {
-  AnyDotnetStatusGodotVersion Deserialize(string version);
-  SpecificDotnetStatusGodotVersion Deserialize(string version, bool isDotnet);
+  Result<AnyDotnetStatusGodotVersion> Deserialize(string version);
+  Result<SpecificDotnetStatusGodotVersion> Deserialize(string version, bool isDotnet);
 }

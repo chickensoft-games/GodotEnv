@@ -48,7 +48,9 @@ public class GlobalJsonFileTest
       var fileClient = new Mock<IFileClient>();
       fileClient.Setup(client => client.GetReadStream(path)).Returns(stream);
       var version = new SpecificDotnetStatusGodotVersion(4, 4, 1, "stable", -1, true);
-      file.ParseGodotVersion(fileClient.Object).ShouldBe(version);
+      var parsedVersion = file.ParseGodotVersion(fileClient.Object);
+      parsedVersion.IsSuccess.ShouldBeTrue();
+      parsedVersion.Value.ShouldBe(version);
     }
   }
 

@@ -1,6 +1,5 @@
 namespace Chickensoft.GodotEnv.Features.Godot.Domain;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Chickensoft.GodotEnv.Common.Clients;
@@ -17,14 +16,37 @@ public interface IGodotVersionSpecifierRepository
   /// </summary>
   IVersionSerializer VersionSerializer { get; set; }
 
-  SpecificDotnetStatusGodotVersion? InferVersion(
+  /// <summary>
+  /// Infers the preferred Godot version from the given version-specifying files,
+  /// if possible. Returns the version specified from the first file with a
+  /// valid specifier. Logs the result of checking all files until a version
+  /// specifier is found.
+  /// </summary>
+  /// <param name="godotVersionFiles">
+  /// The files to check for Godot version specifiers, in order of preference.
+  /// </param>
+  /// <param name="log">The log.</param>
+  /// <returns>
+  /// A successful <see cref="Result"/> if a Godot version specifier is found in
+  /// any of the provided files; a failure <see cref="Result"/> if not.
+  /// </returns>
+  Result<SpecificDotnetStatusGodotVersion> InferVersion(
     IEnumerable<IGodotVersionFile> godotVersionFiles,
     ILog log
   );
-  SpecificDotnetStatusGodotVersion? GetValidatedGodotVersion(
-    IGodotVersionFile file,
-    ILog log
+
+  /// <summary>
+  /// Gets a Godot version from the given version-specifying file, if one exists.
+  /// </summary>
+  /// <param name="file">The file to check for a Godot version specifier.</param>
+  /// <returns>
+  /// A successful <see cref="Result"/> if a Godot version specifier is found in
+  /// the file; a failure <see cref="Result"/> if not.
+  /// </returns>
+  Result<SpecificDotnetStatusGodotVersion> GetValidatedGodotVersion(
+    IGodotVersionFile file
   );
+
   IEnumerable<IGodotVersionFile> GetVersionFiles();
 
   /// <summary>
@@ -80,39 +102,35 @@ public class GodotVersionSpecifierRepository : IGodotVersionSpecifierRepository
     VersionSerializer = new IoVersionSerializer();
   }
 
-  public SpecificDotnetStatusGodotVersion? InferVersion(
+  public Result<SpecificDotnetStatusGodotVersion> InferVersion(
     IEnumerable<IGodotVersionFile> godotVersionFiles,
     ILog log
   )
   {
     foreach (var godotVersionFile in godotVersionFiles)
     {
-      var version = GetValidatedGodotVersion(godotVersionFile, log);
-      if (version is not null)
+      var version = GetValidatedGodotVersion(godotVersionFile);
+      if (version.IsSuccess)
       {
         log.Info($"Retrieved version from {godotVersionFile.FilePath}.");
         return version;
       }
+      else
+      {
+        log.Warn($"{godotVersionFile.FilePath} does not contain valid version string; skipping");
+        log.Warn(version.Error);
+      }
     }
-    return null;
+    return new(
+      false,
+      null,
+      "No valid Godot version found in specifier files"
+    );
   }
 
-  public SpecificDotnetStatusGodotVersion? GetValidatedGodotVersion(
-    IGodotVersionFile file,
-    ILog log
-  )
-  {
-    try
-    {
-      return file.ParseGodotVersion(FileClient);
-    }
-    catch (Exception e)
-    {
-      log.Warn($"{file.FilePath} contains invalid version string; skipping");
-      log.Warn(e.Message);
-      return null;
-    }
-  }
+  public Result<SpecificDotnetStatusGodotVersion> GetValidatedGodotVersion(
+    IGodotVersionFile file
+  ) => file.ParseGodotVersion(FileClient);
 
   public IEnumerable<IGodotVersionFile> GetVersionFiles()
   {

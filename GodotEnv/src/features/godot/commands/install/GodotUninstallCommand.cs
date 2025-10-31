@@ -48,21 +48,31 @@ public class GodotUninstallCommand :
     var log = ExecutionContext.CreateLog(console);
 
     var isDotnetVersion = !NoDotnet;
-    // We know this won't throw because the validator okayed it
+    // this should be successful because the validator okayed it
     var version =
       godotRepo.VersionDeserializer.Deserialize(RawVersion, isDotnetVersion);
 
+    if (!version.IsSuccess)
+    {
+      log.Err(
+        $"""
+        Validator okayed Godot version string "{RawVersion}" but parsing failed.
+        """
+      );
+      return;
+    }
+
     log.Print("");
-    if (await godotRepo.Uninstall(version, log))
+    if (await godotRepo.Uninstall(version.Value, log))
     {
       log.Success(
-        $"Godot {godotRepo.VersionSerializer.Serialize(version)} uninstalled."
+        $"Godot {godotRepo.VersionSerializer.Serialize(version.Value)} uninstalled."
       );
     }
     else
     {
       log.Err(
-        $"Godot {godotRepo.VersionSerializer.Serialize(version)} not found."
+        $"Godot {godotRepo.VersionSerializer.Serialize(version.Value)} not found."
       );
     }
     log.Print("");

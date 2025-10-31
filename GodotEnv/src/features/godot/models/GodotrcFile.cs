@@ -2,6 +2,7 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 
 using System;
 using Chickensoft.GodotEnv.Common.Clients;
+using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 
 public class GodotrcFile : IGodotVersionFile, IEquatable<GodotrcFile>
@@ -23,7 +24,7 @@ public class GodotrcFile : IGodotVersionFile, IEquatable<GodotrcFile>
   }
 
   /// <inheritdoc/>
-  public SpecificDotnetStatusGodotVersion? ParseGodotVersion(
+  public Result<SpecificDotnetStatusGodotVersion> ParseGodotVersion(
     IFileClient fileClient
   )
   {
@@ -37,11 +38,19 @@ public class GodotrcFile : IGodotVersionFile, IEquatable<GodotrcFile>
     }
     catch (Exception)
     {
-      return null;
+      return new(
+        false,
+        null,
+        $".godotrc file {FilePath} does not exist or does not contain a version string"
+      );
     }
     if (string.IsNullOrEmpty(version))
     {
-      return null;
+      return new(
+        false,
+        null,
+        $".godotrc file {FilePath} does not contain a version string"
+      );
     }
     var isDotnet = true;
     foreach (var noDotnetPattern in _noDotnetPatterns)

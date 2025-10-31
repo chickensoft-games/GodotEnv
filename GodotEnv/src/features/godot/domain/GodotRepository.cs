@@ -733,19 +733,17 @@ public partial class GodotRepository : IGodotRepository
         break;
       }
 
-      try
-      {
-        // Version strings coming from remote will (mostly) be in release style
-        var version = new ReleaseVersionDeserializer().Deserialize(
-          remoteVersion.Name
-          );
-        // Output in our preferred format
-        // so the user has a consistent picture of versioning
-        versions.Add(VersionSerializer.Serialize(version));
-      }
-      // Discard remote versions that aren't canonical,
+      // Version strings coming from remote will (mostly) be in release style
+      var version = new ReleaseVersionDeserializer().Deserialize(
+        remoteVersion.Name
+      );
+      // Output in our preferred format so the user has a consistent picture of
+      // versioning, but Discard remote versions that aren't canonical,
       // like "3.2-alpha0-unofficial"
-      catch (ArgumentException) { }
+      if (version.IsSuccess)
+      {
+        versions.Add(VersionSerializer.Serialize(version.Value));
+      }
     }
 
     return versions;
