@@ -3,6 +3,7 @@ namespace Chickensoft.GodotEnv.Features.Godot.Models;
 using System;
 using System.Xml;
 using Chickensoft.GodotEnv.Common.Clients;
+using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 
 public class CsprojFile : IGodotVersionFile, IEquatable<CsprojFile>
@@ -18,7 +19,7 @@ public class CsprojFile : IGodotVersionFile, IEquatable<CsprojFile>
   }
 
   /// <inheritdoc/>
-  public SpecificDotnetStatusGodotVersion? ParseGodotVersion(
+  public Result<SpecificDotnetStatusGodotVersion> ParseGodotVersion(
     IFileClient fileClient
   )
   {
@@ -36,7 +37,19 @@ public class CsprojFile : IGodotVersionFile, IEquatable<CsprojFile>
         || projectNode.Attributes is null
       )
       {
-        return null;
+        return new(
+          false,
+          null,
+          $"csproj file {FilePath} does not have a Project element at its root (found {projectNode?.Name})"
+        );
+      }
+      if (projectNode.Attributes is null)
+      {
+        return new(
+          false,
+          null,
+          $"csproj file {FilePath} does not have Project attributes"
+        );
       }
       var sdk = projectNode.Attributes["Sdk"];
       if (sdk is null
@@ -46,13 +59,21 @@ public class CsprojFile : IGodotVersionFile, IEquatable<CsprojFile>
             )
       )
       {
-        return null;
+        return new(
+          false,
+          null,
+          $"csproj file {FilePath} does not use a Godot SDK (found {sdk?.Value})"
+        );
       }
       version = sdk.Value.Split('/')[1];
     }
     catch (Exception)
     {
-      return null;
+      return new(
+        false,
+        null,
+        $"Error reading csproj file {FilePath} - does the file exist?"
+      );
     }
     // If the version is from a csproj, we definitely want .NET
     return _versionDeserializer.Deserialize(version, true);

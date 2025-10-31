@@ -1,6 +1,5 @@
 namespace Chickensoft.GodotEnv.Features.Godot.Commands;
 
-using System;
 using Chickensoft.GodotEnv.Common.Models;
 using CliFx.Extensibility;
 
@@ -21,14 +20,13 @@ public class GodotVersionValidator : BindingValidator<string>
     {
       return Error("Version cannot be null.");
     }
-    try
-    {
-      ExecutionContext.Godot.GodotRepo.VersionDeserializer.Deserialize(str);
-    }
-    catch (Exception ex)
-    {
-      return Error($"Version '{str}' is invalid: {ex.Message}.");
-    }
-    return Ok();
+    var result = ExecutionContext
+      .Godot
+      .GodotRepo
+      .VersionDeserializer
+      .Deserialize(str);
+    return result.IsSuccess ?
+      Ok() :
+      Error($"Version '{str}' is invalid: {result.Error}.");
   }
 }

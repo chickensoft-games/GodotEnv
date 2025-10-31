@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
+using Shouldly;
 using Xunit;
 
 public class SharpVersionDeserializerTest
@@ -23,7 +24,9 @@ public class SharpVersionDeserializerTest
   public void RejectionOfInvalidSharpVersionNumbers(string invalidVersionNumber)
   {
     var deserializer = new SharpVersionDeserializer();
-    Assert.Throws<ArgumentException>(() => deserializer.Deserialize(invalidVersionNumber));
+    var result = deserializer.Deserialize(invalidVersionNumber);
+    result.IsSuccess.ShouldBeFalse();
+    result.Error.ShouldBe($"Couldn't match \"{invalidVersionNumber}\" to known GodotSharp version patterns.");
   }
 
   public static IEnumerable<object[]> CorrectDeserializationOfValidSharpVersionsTestData()
@@ -42,12 +45,15 @@ public class SharpVersionDeserializerTest
   {
     var deserializer = new SharpVersionDeserializer();
     var parsedAgnostic = deserializer.Deserialize(toParse);
-    Assert.Equal(expectedNumber, parsedAgnostic.Number);
+    parsedAgnostic.IsSuccess.ShouldBeTrue();
+    parsedAgnostic.Value.Number.ShouldBe(expectedNumber);
     var parsedDotnet = deserializer.Deserialize(toParse, true);
-    Assert.Equal(expectedNumber, parsedDotnet.Number);
-    Assert.True(parsedDotnet.IsDotnetEnabled);
+    parsedDotnet.IsSuccess.ShouldBeTrue();
+    parsedDotnet.Value.Number.ShouldBe(expectedNumber);
+    parsedDotnet.Value.IsDotnetEnabled.ShouldBeTrue();
     var parsedNonDotnet = deserializer.Deserialize(toParse, false);
-    Assert.Equal(expectedNumber, parsedNonDotnet.Number);
-    Assert.False(parsedNonDotnet.IsDotnetEnabled);
+    parsedNonDotnet.IsSuccess.ShouldBeTrue();
+    parsedNonDotnet.Value.Number.ShouldBe(expectedNumber);
+    parsedNonDotnet.Value.IsDotnetEnabled.ShouldBeFalse();
   }
 }

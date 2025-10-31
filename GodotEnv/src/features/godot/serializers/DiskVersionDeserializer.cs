@@ -1,28 +1,40 @@
 namespace Chickensoft.GodotEnv.Features.Godot.Serializers;
 
-using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 
 /// <summary>
 /// An <see cref="IVersionDeserializer"> for Godot installations created by
 /// pre-2.11 versions of GodotEnv.
 /// </summary>
-public partial class OldDiskVersionDeserializer : IVersionDeserializer
+public partial class DiskVersionDeserializer : IVersionDeserializer
 {
-  public AnyDotnetStatusGodotVersion Deserialize(string version)
-    => new(ParseVersionNumber(version));
+  public Result<AnyDotnetStatusGodotVersion> Deserialize(string version)
+  {
+    var versionNum = ParseVersionNumber(version);
+    return versionNum.IsSuccess ?
+      new(true, new(versionNum.Value), string.Empty) :
+      new(false, null, versionNum.Error);
+  }
 
-  public SpecificDotnetStatusGodotVersion Deserialize(string version, bool isDotnet)
-    => new(ParseVersionNumber(version), isDotnet);
+  public Result<SpecificDotnetStatusGodotVersion> Deserialize(string version, bool isDotnet)
+  {
+    var versionNum = ParseVersionNumber(version);
+    return versionNum.IsSuccess ?
+      new(true, new(versionNum.Value, isDotnet), string.Empty) :
+      new(false, null, versionNum.Error);
+  }
 
-  public GodotVersionNumber ParseVersionNumber(string version)
+  public Result<GodotVersionNumber> ParseVersionNumber(string version)
   {
     var match = VersionStringRegex().Match(version);
     if (!match.Success)
     {
-      throw new ArgumentException(
+      return new(
+        false,
+        null,
         $"Couldn't match \"{version}\" to known Godot version patterns."
       );
     }
@@ -48,13 +60,13 @@ public partial class OldDiskVersionDeserializer : IVersionDeserializer
       // digits
       labelNum = int.Parse(match.Groups[6].Value, CultureInfo.InvariantCulture);
     }
-    return new GodotVersionNumber(major, minor, patch, label, labelNum);
+    return new(true, new(major, minor, patch, label, labelNum), string.Empty);
   }
 
   // Version strings prior to 2.11 may or may not have a patch number
-  // and may or may not have a "." separating the label from the label number
-  // Label is either "stable" or a string followed by an optional "." and
+  // and may or may not have a "_" separating the label from the label number
+  // Label is either "stable" or a string followed by an optional "_" and
   // and the label number
-  [GeneratedRegex(@"^(\d+)\.(\d+)(\.\d+)?-(stable|([a-z]+)\.?(\d+))$")]
+  [GeneratedRegex(@"^(\d+)_(\d+)(_\d+)?_(stable|([a-z]+)_?(\d+))$")]
   public static partial Regex VersionStringRegex();
 }

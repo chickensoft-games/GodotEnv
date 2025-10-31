@@ -32,11 +32,13 @@ public class GodotRcFileTest
     var fileClient = new Mock<IFileClient>();
     fileClient.Setup(client => client.GetReader(path)).Returns(reader.Object);
     var version = new SpecificDotnetStatusGodotVersion(4, 2, 0, "stable", -1, true);
-    file.ParseGodotVersion(fileClient.Object).ShouldBe(version);
+    var parsedVersion = file.ParseGodotVersion(fileClient.Object);
+    parsedVersion.IsSuccess.ShouldBeTrue();
+    parsedVersion.Value.ShouldBe(version);
   }
 
   [Fact]
-  public void ParsedVersionIsEmptyIfFileEmpty()
+  public void ParsedVersionIsFailureIfFileEmpty()
   {
     var path = "/test/path";
     var file = new GodotrcFile(path);
@@ -45,7 +47,9 @@ public class GodotRcFileTest
     reader.Setup(rdr => rdr.ReadLine()).Returns(eof);
     var fileClient = new Mock<IFileClient>();
     fileClient.Setup(client => client.GetReader(path)).Returns(reader.Object);
-    file.ParseGodotVersion(fileClient.Object).ShouldBe(null);
+    var parsedVersion = file.ParseGodotVersion(fileClient.Object);
+    parsedVersion.IsSuccess.ShouldBeFalse();
+    parsedVersion.Error.ShouldBe($".godotrc file {path} does not contain a version string");
   }
 
   [Fact]
@@ -58,7 +62,9 @@ public class GodotRcFileTest
     var fileClient = new Mock<IFileClient>();
     fileClient.Setup(client => client.GetReader(path)).Returns(reader.Object);
     var version = new SpecificDotnetStatusGodotVersion(4, 2, 0, "stable", -1, false);
-    file.ParseGodotVersion(fileClient.Object).ShouldBe(version);
+    var parsedVersion = file.ParseGodotVersion(fileClient.Object);
+    parsedVersion.IsSuccess.ShouldBeTrue();
+    parsedVersion.Value.ShouldBe(version);
   }
 
   [Fact]
@@ -71,7 +77,9 @@ public class GodotRcFileTest
     var fileClient = new Mock<IFileClient>();
     fileClient.Setup(client => client.GetReader(path)).Returns(reader.Object);
     var version = new SpecificDotnetStatusGodotVersion(4, 2, 0, "stable", -1, false);
-    file.ParseGodotVersion(fileClient.Object).ShouldBe(version);
+    var parsedVersion = file.ParseGodotVersion(fileClient.Object);
+    parsedVersion.IsSuccess.ShouldBeTrue();
+    parsedVersion.Value.ShouldBe(version);
   }
 
   [Fact]
@@ -84,11 +92,13 @@ public class GodotRcFileTest
     var fileClient = new Mock<IFileClient>();
     fileClient.Setup(client => client.GetReader(path)).Returns(reader.Object);
     var version = new SpecificDotnetStatusGodotVersion(4, 2, 0, "stable", -1, false);
-    file.ParseGodotVersion(fileClient.Object).ShouldBe(version);
+    var parsedVersion = file.ParseGodotVersion(fileClient.Object);
+    parsedVersion.IsSuccess.ShouldBeTrue();
+    parsedVersion.Value.ShouldBe(version);
   }
 
   [Fact]
-  public void ParseVersionThrowsIfFirstLineOfFileContentsIsNotValidVersion()
+  public void ParsedVersionIsFailureIfFirstLineOfFileContentsIsNotValidVersion()
   {
     var path = "/test/path";
     var file = new GodotrcFile(path);
@@ -96,7 +106,13 @@ public class GodotRcFileTest
     reader.Setup(rdr => rdr.ReadLine()).Returns("not.a.version");
     var fileClient = new Mock<IFileClient>();
     fileClient.Setup(client => client.GetReader(path)).Returns(reader.Object);
-    Should.Throw<ArgumentException>(() => file.ParseGodotVersion(fileClient.Object));
+    var parsedVersion = file.ParseGodotVersion(fileClient.Object);
+    parsedVersion.IsSuccess.ShouldBeFalse();
+    var innerErrorRelease = "Couldn't match \"not.a.version\" to known Godot version patterns.";
+    var innerErrorSharp = "Couldn't match \"not.a.version\" to known GodotSharp version patterns.";
+    parsedVersion.Error.ShouldBe(
+      $"Version string \"not.a.version\" is neither release style ({innerErrorRelease}) nor GodotSharp style ({innerErrorSharp})"
+    );
   }
 
   [Fact]

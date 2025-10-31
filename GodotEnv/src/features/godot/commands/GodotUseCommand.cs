@@ -2,6 +2,7 @@ namespace Chickensoft.GodotEnv.Features.Addons.Commands;
 
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
+using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Commands;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx;
@@ -49,13 +50,14 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled
 
     var log = ExecutionContext.CreateLog(console);
 
-    SpecificDotnetStatusGodotVersion? version;
+    Result<SpecificDotnetStatusGodotVersion> version;
     if (!string.IsNullOrEmpty(RawVersion))
     {
       var isDotnetVersion = !NoDotnet;
-      // We know this won't throw because the validator okayed it
+      // We know this should be successful because the validator okayed it
       version =
         godotRepo.VersionDeserializer.Deserialize(RawVersion, isDotnetVersion);
+
     }
     else
     {
@@ -64,7 +66,7 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled
       version = versionRepo.InferVersion(versionFiles, log);
     }
 
-    if (version is null)
+    if (!version.IsSuccess)
     {
       log.Err(
         """
@@ -77,10 +79,10 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled
       return;
     }
 
-    var noDotnetFlag = version.IsDotnetEnabled ? "" : " --no-dotnet";
+    var noDotnetFlag = version.Value.IsDotnetEnabled ? "" : " --no-dotnet";
 
     var potentialInstallation =
-      godotRepo.GetInstallation(version);
+      godotRepo.GetInstallation(version.Value);
 
     await Task.CompletedTask;
 
@@ -88,12 +90,12 @@ public class GodotUseCommand : ICommand, ICliCommand, IWindowsElevationEnabled
     {
       log.Print("");
       log.Warn(
-        $"Godot version {godotRepo.VersionSerializer.Serialize(version)} is not installed."
+        $"Godot version {godotRepo.VersionSerializer.Serialize(version.Value)} is not installed."
       );
       log.Print("To install this version of Godot, run:");
       log.Print("");
       log.Success(
-        $"    godotenv godot install {godotRepo.VersionSerializer.Serialize(version)}{noDotnetFlag}"
+        $"    godotenv godot install {godotRepo.VersionSerializer.Serialize(version.Value)}{noDotnetFlag}"
       );
       log.Print("");
 

@@ -144,11 +144,78 @@ public class GodotRepositoryTest
       versionSerializer: versionSerializer.Object
     );
 
-    var dotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, true)!;
-    var reconstructedDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(fileVersionSerializer, dotnetVersion));
-    dotnetVersion.ShouldBe(reconstructedDotnetVersion);
-    var nonDotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, false)!;
-    var reconstructedNonDotnetVersion = godotRepo.DirectoryToVersion(godotRepo.GetVersionFsName(fileVersionSerializer, nonDotnetVersion));
-    nonDotnetVersion.ShouldBe(reconstructedNonDotnetVersion);
+    var dotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, true);
+    dotnetVersion.IsSuccess.ShouldBeTrue();
+    var dotnetDirectory = godotRepo.GetVersionFsName(fileVersionSerializer, dotnetVersion.Value);
+    var reconstructedDotnetVersion = godotRepo.DirectoryToVersion(dotnetDirectory);
+    reconstructedDotnetVersion.IsSuccess.ShouldBeTrue();
+    reconstructedDotnetVersion.Value.ShouldBe(dotnetVersion.Value);
+    var nonDotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, false);
+    nonDotnetVersion.IsSuccess.ShouldBeTrue();
+    var nonDotnetDirectory = godotRepo.GetVersionFsName(fileVersionSerializer, nonDotnetVersion.Value);
+    var reconstructedNonDotnetVersion = godotRepo.DirectoryToVersion(nonDotnetDirectory);
+    reconstructedNonDotnetVersion.IsSuccess.ShouldBeTrue();
+    reconstructedNonDotnetVersion.Value.ShouldBe(nonDotnetVersion.Value);
+  }
+
+  [Theory]
+  [InlineData(["4_5_0_rc_1", "4.5-rc1"])]
+  [InlineData(["4_4_0_dev6", "4.4-dev6"])]
+  public void DirectoryToVersionHandlesOldDirectoryNames(string directorySuffix, string releaseVersionStr)
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
+    var computer = new Mock<IComputer>();
+    var processRunner = new Mock<IProcessRunner>();
+
+    var fileClient = new Mock<IFileClient>();
+
+    var networkClient = new Mock<NetworkClient>(new Mock<IDownloadService>().Object, Defaults.DownloadConfiguration);
+    var zipClient = new Mock<ZipClient>(fileClient.Object.Files);
+    var environmentVariableClient = new Mock<IEnvironmentVariableClient>();
+
+    var fileVersionDeserializer = new ReleaseVersionDeserializer();
+    var fileVersionSerializer = new ReleaseVersionSerializer();
+    var platform = new Mock<GodotEnvironment>(
+      systemInfo, fileClient.Object, computer.Object, fileVersionDeserializer, fileVersionSerializer
+    );
+
+    var checksumClient = new Mock<IGodotChecksumClient>();
+    var versionDeserializer = new Mock<IVersionDeserializer>();
+    var versionSerializer = new Mock<IVersionSerializer>();
+
+    var godotRepo = new GodotRepository(
+      systemInfo: systemInfo,
+      config: new Config(
+        new ConfigValues
+        {
+          Godot = new GodotConfigSection
+          {
+            InstallationsPath = "INSTALLATION_PATH"
+          },
+        }
+      ),
+      fileClient: fileClient.Object,
+      networkClient: networkClient.Object,
+      zipClient: zipClient.Object,
+      platform: platform.Object,
+      environmentVariableClient: environmentVariableClient.Object,
+      processRunner: processRunner.Object,
+      checksumClient: checksumClient.Object,
+      versionDeserializer: versionDeserializer.Object,
+      versionSerializer: versionSerializer.Object
+    );
+
+    var releaseDeserializer = new ReleaseVersionDeserializer();
+
+    var dotnetVersion = releaseDeserializer.Deserialize(releaseVersionStr, true);
+    dotnetVersion.IsSuccess.ShouldBeTrue();
+    var reconstructedDotnetVersion = godotRepo.DirectoryToVersion($"godot_dotnet_{directorySuffix}");
+    reconstructedDotnetVersion.IsSuccess.ShouldBeTrue();
+    reconstructedDotnetVersion.Value.ShouldBe(dotnetVersion.Value);
+    var nonDotnetVersion = releaseDeserializer.Deserialize(releaseVersionStr, false);
+    nonDotnetVersion.IsSuccess.ShouldBeTrue();
+    var reconstructedNonDotnetVersion = godotRepo.DirectoryToVersion($"godot_{directorySuffix}");
+    reconstructedNonDotnetVersion.IsSuccess.ShouldBeTrue();
+    reconstructedNonDotnetVersion.Value.ShouldBe(nonDotnetVersion.Value);
   }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Chickensoft.GodotEnv.Common.Clients;
+using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Serializers;
 
 public class GlobalJsonFile : IGodotVersionFile, IEquatable<GlobalJsonFile>
@@ -33,7 +34,7 @@ public class GlobalJsonFile : IGodotVersionFile, IEquatable<GlobalJsonFile>
   }
 
   /// <inheritdoc/>
-  public SpecificDotnetStatusGodotVersion? ParseGodotVersion(
+  public Result<SpecificDotnetStatusGodotVersion> ParseGodotVersion(
     IFileClient fileClient
   )
   {
@@ -55,7 +56,11 @@ public class GlobalJsonFile : IGodotVersionFile, IEquatable<GlobalJsonFile>
     }
     catch (Exception)
     {
-      return null;
+      return new(
+        false,
+        null,
+        $"global.json file {FilePath} does not exist or does not contain Godot.NET.Sdk information"
+      );
     }
     // if the version is from a global.json, we definitely want .NET
     return _versionDeserializer.Deserialize(version, true);

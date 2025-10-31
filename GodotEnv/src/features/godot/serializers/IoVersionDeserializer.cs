@@ -1,6 +1,6 @@
 namespace Chickensoft.GodotEnv.Features.Godot.Serializers;
 
-using System;
+using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 
 public class IoVersionDeserializer : IVersionDeserializer
@@ -8,47 +8,46 @@ public class IoVersionDeserializer : IVersionDeserializer
   private readonly ReleaseVersionDeserializer _releaseDeserializer = new();
   private readonly SharpVersionDeserializer _sharpDeserializer = new();
 
-  public AnyDotnetStatusGodotVersion Deserialize(string version)
+  public Result<AnyDotnetStatusGodotVersion> Deserialize(string version)
   {
     var trimmedVersion = version.TrimStart('v');
-    Exception releaseEx;
-    try
+    var releaseVersion = _releaseDeserializer.Deserialize(trimmedVersion);
+    if (releaseVersion.IsSuccess)
     {
-      return _releaseDeserializer.Deserialize(trimmedVersion);
+      return releaseVersion;
     }
-    catch (Exception ex)
+    var sharpVersion = _sharpDeserializer.Deserialize(trimmedVersion);
+    if (sharpVersion.IsSuccess)
     {
-      releaseEx = ex;
+      return sharpVersion;
     }
-    try
-    {
-      return _sharpDeserializer.Deserialize(trimmedVersion);
-    }
-    catch (Exception ex)
-    {
-      throw new ArgumentException($"Version string {version} is neither release style ({releaseEx.Message}) nor GodotSharp style ({ex.Message})");
-    }
+    return new(
+      false,
+      null,
+      $"Version string \"{version}\" is neither release style ({releaseVersion.Error}) nor GodotSharp style ({sharpVersion.Error})"
+    );
   }
 
-  public SpecificDotnetStatusGodotVersion Deserialize(string version, bool isDotnet)
+  public Result<SpecificDotnetStatusGodotVersion> Deserialize(string version, bool isDotnet)
   {
     var trimmedVersion = version.TrimStart('v');
-    Exception releaseEx;
-    try
+    var releaseVersion = _releaseDeserializer.Deserialize(
+      trimmedVersion,
+      isDotnet
+    );
+    if (releaseVersion.IsSuccess)
     {
-      return _releaseDeserializer.Deserialize(trimmedVersion, isDotnet);
+      return releaseVersion;
     }
-    catch (Exception ex)
+    var sharpVersion = _sharpDeserializer.Deserialize(trimmedVersion, isDotnet);
+    if (sharpVersion.IsSuccess)
     {
-      releaseEx = ex;
+      return sharpVersion;
     }
-    try
-    {
-      return _sharpDeserializer.Deserialize(trimmedVersion, isDotnet);
-    }
-    catch (Exception ex)
-    {
-      throw new ArgumentException($"Version string {version} is neither release style ({releaseEx.Message}) nor GodotSharp style ({ex.Message})");
-    }
+    return new(
+      false,
+      null,
+      $"Version string \"{version}\" is neither release style ({releaseVersion.Error}) nor GodotSharp style ({sharpVersion.Error})"
+    );
   }
 }

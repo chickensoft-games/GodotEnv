@@ -78,52 +78,32 @@ public class GodotVersionSpecifierRepositoryTest
   }
 
   [Fact]
-  public void ValidatedGodotVersionIsNullIfVersionIsNull()
+  public void ValidatedGodotVersionReturnsFailureIfVersionIsFailure()
   {
     var fileClient = new Mock<IFileClient>();
     var file = new Mock<IGodotVersionFile>();
-    SpecificDotnetStatusGodotVersion? version = null;
-    file.Setup(f => f.ParseGodotVersion(fileClient.Object)).Returns(version);
-
-    var log = new Mock<ILog>();
+    var versionResult = new Result<SpecificDotnetStatusGodotVersion>(
+      false,
+      null,
+      "Testing"
+    );
+    file.Setup(f => f.ParseGodotVersion(fileClient.Object)).Returns(versionResult);
 
     var repo = new GodotVersionSpecifierRepository("/test/working-dir", fileClient.Object);
 
-    repo.GetValidatedGodotVersion(file.Object, log.Object).ShouldBe(null);
-  }
-
-  [Fact]
-  public void ValidatedGodotVersionIsNullAndWarnsIfParsingThrows()
-  {
-    var deserializationError = "bad.version is not a recognized version string";
-    var path = "/test/path";
-    var fileClient = new Mock<IFileClient>();
-
-    var file = new Mock<IGodotVersionFile>();
-    file.Setup(f => f.FilePath).Returns(path);
-    file.Setup(f => f.ParseGodotVersion(fileClient.Object))
-      .Throws(new ArgumentException(deserializationError));
-
-    var log = new Mock<ILog>();
-
-    var repo = new GodotVersionSpecifierRepository("test/working-dir", fileClient.Object);
-
-    repo.GetValidatedGodotVersion(file.Object, log.Object)
-      .ShouldBe(null);
-    log.Verify(
-      log =>
-        log.Warn($"{path} contains invalid version string; skipping")
-    );
-    log.Verify(
-      log =>
-        log.Warn(deserializationError)
-    );
+    var version = repo.GetValidatedGodotVersion(file.Object);
+    version.IsSuccess.ShouldBeFalse();
+    version.Error.ShouldBe("Testing");
   }
 
   [Fact]
   public void ValidatedGodotVersionIsVersionIfVersionDeserializerReturns()
   {
-    var version = new SpecificDotnetStatusGodotVersion(4, 4, 1, "stable", -1, true);
+    var version = new Result<SpecificDotnetStatusGodotVersion>(
+      true,
+      new(4, 4, 1, "stable", -1, true),
+      string.Empty
+    );
     var path = "/test/path";
     var fileClient = new Mock<IFileClient>();
 
@@ -131,12 +111,9 @@ public class GodotVersionSpecifierRepositoryTest
     file.Setup(f => f.FilePath).Returns(path);
     file.Setup(f => f.ParseGodotVersion(fileClient.Object)).Returns(version);
 
-    var log = new Mock<ILog>();
-
     var repo = new GodotVersionSpecifierRepository("test/working-dir", fileClient.Object);
 
-    repo.GetValidatedGodotVersion(file.Object, log.Object)
-      .ShouldBe(version);
+    repo.GetValidatedGodotVersion(file.Object).ShouldBe(version);
   }
 
   [Fact]
@@ -144,10 +121,10 @@ public class GodotVersionSpecifierRepositoryTest
   {
     var fileClient = new Mock<IFileClient>();
 
-    var versions = new List<SpecificDotnetStatusGodotVersion?> {
-      null,
-      new(4, 3, 0, "stable", -1, true),
-      new(4, 4, 1, "stable", -1, true),
+    var versions = new List<Result<SpecificDotnetStatusGodotVersion>> {
+      new(false, null, "Testing"),
+      new(true, new(4, 3, 0, "stable", -1, true), string.Empty),
+      new(true, new(4, 4, 1, "stable", -1, true), string.Empty),
     };
     var fileMocks = new List<Mock<IGodotVersionFile>> {
       new(),
@@ -156,6 +133,7 @@ public class GodotVersionSpecifierRepositoryTest
     };
     for (var i = 0; i < versions.Count; ++i)
     {
+      fileMocks[i].Setup(f => f.FilePath).Returns($"file{i}");
       fileMocks[i].Setup(f => f.ParseGodotVersion(fileClient.Object)).Returns(versions[i]);
     }
 
@@ -167,14 +145,14 @@ public class GodotVersionSpecifierRepositoryTest
   }
 
   [Fact]
-  public void InfersNoVersionIfNoValidVersionFile()
+  public void InfersNoVersionAndLogsIfNoValidVersionFile()
   {
     var fileClient = new Mock<IFileClient>();
 
-    var versions = new List<SpecificDotnetStatusGodotVersion?> {
-      null,
-      null,
-      null,
+    var versions = new List<Result<SpecificDotnetStatusGodotVersion>> {
+      new(false, null, "Testing-0"),
+      new(false, null, "Testing-1"),
+      new(false, null, "Testing-2"),
     };
     var fileMocks = new List<Mock<IGodotVersionFile>> {
       new(),
@@ -183,6 +161,7 @@ public class GodotVersionSpecifierRepositoryTest
     };
     for (var i = 0; i < versions.Count; ++i)
     {
+      fileMocks[i].Setup(f => f.FilePath).Returns($"file{i}");
       fileMocks[i].Setup(f => f.ParseGodotVersion(fileClient.Object)).Returns(versions[i]);
     }
 
@@ -190,7 +169,21 @@ public class GodotVersionSpecifierRepositoryTest
 
     var repo = new GodotVersionSpecifierRepository("test/working-dir", fileClient.Object);
 
-    repo.InferVersion(Enumerate(fileMocks, m => m.Object), log.Object).ShouldBe(null);
+    var result = repo.InferVersion(Enumerate(fileMocks, m => m.Object), log.Object);
+    result.IsSuccess.ShouldBeFalse();
+    result.Error.ShouldBe("No valid Godot version found in specifier files");
+
+    for (var i = 0; i < versions.Count; ++i)
+    {
+      log.Verify(
+        log =>
+          log.Warn($"file{i} does not contain valid version string; skipping")
+      );
+      log.Verify(
+        log =>
+          log.Warn($"Testing-{i}")
+      );
+    }
   }
 
   [Fact]

@@ -2,6 +2,7 @@ namespace Chickensoft.GodotEnv.Features.Godot.Commands;
 
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Models;
+using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 using CliFx;
 using CliFx.Attributes;
@@ -60,11 +61,11 @@ public class GodotInstallCommand :
     var log = ExecutionContext.CreateLog(console);
     var token = console.RegisterCancellationHandler();
 
-    SpecificDotnetStatusGodotVersion? version;
+    Result<SpecificDotnetStatusGodotVersion> version;
     if (!string.IsNullOrEmpty(RawVersion))
     {
       var isDotnetVersion = !NoDotnet;
-      // We know this won't throw because the validator okayed it
+      // We know this should be successful because the validator okayed it
       version = godotRepo.VersionDeserializer.Deserialize(RawVersion, isDotnetVersion);
     }
     else
@@ -74,7 +75,7 @@ public class GodotInstallCommand :
       version = versionRepo.InferVersion(versionFiles, log);
     }
 
-    if (version is null)
+    if (!version.IsSuccess)
     {
       log.Err(
         """
@@ -87,15 +88,16 @@ public class GodotInstallCommand :
       return;
     }
 
-    var existingInstallation =
-      godotRepo.GetInstallation(version);
+    var existingInstallation = godotRepo.GetInstallation(version.Value);
 
     // Log information to show we understood.
     platform.Describe(log);
     log.Info($"🤖 Godot v{RawVersion}");
-    log.Info($"🍯 Parsed version: {version}");
+    log.Info($"🍯 Parsed version: {version.Value}");
     log.Info(
-      version.IsDotnetEnabled ? "😁 Using Godot with .NET" : "😢 Using Godot without .NET"
+      version.Value.IsDotnetEnabled ?
+        "😁 Using Godot with .NET" :
+        "😢 Using Godot without .NET"
     );
 
     if (!string.IsNullOrEmpty(ProxyUrl))
@@ -114,7 +116,7 @@ public class GodotInstallCommand :
 
     var godotCompressedArchive =
       await godotRepo.DownloadGodot(
-        version, SkipChecksumVerification, log, token, ProxyUrl
+        version.Value, SkipChecksumVerification, log, token, ProxyUrl
       );
 
     var newInstallation =

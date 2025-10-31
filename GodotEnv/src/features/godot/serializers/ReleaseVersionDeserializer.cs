@@ -1,24 +1,36 @@
 namespace Chickensoft.GodotEnv.Features.Godot.Serializers;
 
-using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Chickensoft.GodotEnv.Common.Utilities;
 using Chickensoft.GodotEnv.Features.Godot.Models;
 
 public partial class ReleaseVersionDeserializer : IVersionDeserializer
 {
-  public AnyDotnetStatusGodotVersion Deserialize(string version)
-    => new(ParseVersionNumber(version));
+  public Result<AnyDotnetStatusGodotVersion> Deserialize(string version)
+  {
+    var versionNum = ParseVersionNumber(version);
+    return versionNum.IsSuccess ?
+      new(true, new(versionNum.Value), string.Empty) :
+      new(false, null, versionNum.Error);
+  }
 
-  public SpecificDotnetStatusGodotVersion Deserialize(string version, bool isDotnet)
-    => new(ParseVersionNumber(version), isDotnet);
+  public Result<SpecificDotnetStatusGodotVersion> Deserialize(string version, bool isDotnet)
+  {
+    var versionNum = ParseVersionNumber(version);
+    return versionNum.IsSuccess ?
+      new(true, new(versionNum.Value, isDotnet), string.Empty) :
+      new(false, null, versionNum.Error);
+  }
 
-  private static GodotVersionNumber ParseVersionNumber(string version)
+  private static Result<GodotVersionNumber> ParseVersionNumber(string version)
   {
     var match = VersionStringRegex().Match(version);
     if (!match.Success)
     {
-      throw new ArgumentException(
+      return new(
+        false,
+        null,
         $"Couldn't match \"{version}\" to known Godot version patterns."
       );
     }
@@ -44,7 +56,7 @@ public partial class ReleaseVersionDeserializer : IVersionDeserializer
       // digits
       labelNum = int.Parse(match.Groups[6].Value, CultureInfo.InvariantCulture);
     }
-    return new GodotVersionNumber(major, minor, patch, label, labelNum);
+    return new(true, new(major, minor, patch, label, labelNum), string.Empty);
   }
 
   // All published Godot 4+ packages have a label ("-stable" if not prerelease)
