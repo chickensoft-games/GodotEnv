@@ -65,7 +65,7 @@ public class CsprojFileTest
   }
 
   [Fact]
-  public void ParsedVersionIsNullIfGodotSdkVersionUnspecified()
+  public void ParsedVersionIsFailureIfGodotSdkVersionUnspecified()
   {
     var contents =
         /*lang=xml,strict*/
@@ -104,11 +104,13 @@ public class CsprojFileTest
     var file = new CsprojFile(path);
     var fileClient = new Mock<IFileClient>();
     fileClient.Setup(client => client.GetReader(path)).Returns(reader);
-    file.ParseGodotVersion(fileClient.Object).ShouldBe(null);
+    var parsedVersion = file.ParseGodotVersion(fileClient.Object);
+    parsedVersion.IsSuccess.ShouldBeFalse();
+    parsedVersion.Error.ShouldBe($"csproj file {path} does not use a Godot SDK (found Godot.NET.Sdk)");
   }
 
   [Fact]
-  public void ParsedVersionIsEmptyIfGodotSdkNotUsed()
+  public void ParsedVersionIsFailureIfGodotSdkNotUsed()
   {
     var contents =
         /*lang=xml,strict*/
@@ -146,11 +148,13 @@ public class CsprojFileTest
     var file = new CsprojFile(path);
     var fileClient = new Mock<IFileClient>();
     fileClient.Setup(client => client.GetReader(path)).Returns(reader);
-    file.ParseGodotVersion(fileClient.Object).ShouldBe(null);
+    var parsedVersion = file.ParseGodotVersion(fileClient.Object);
+    parsedVersion.IsSuccess.ShouldBeFalse();
+    parsedVersion.Error.ShouldBe($"csproj file {path} does not use a Godot SDK (found Microsoft.NET.Sdk)");
   }
 
   [Fact]
-  public void ParseVersionThrowsIfGodotSdkVersionInvalid()
+  public void ParsedVersionIsFailureIfGodotSdkVersionInvalid()
   {
     var contents =
         /*lang=xml,strict*/
@@ -189,7 +193,9 @@ public class CsprojFileTest
     var file = new CsprojFile(path);
     var fileClient = new Mock<IFileClient>();
     fileClient.Setup(client => client.GetReader(path)).Returns(reader);
-    Should.Throw<ArgumentException>(() => file.ParseGodotVersion(fileClient.Object));
+    var parsedVersion = file.ParseGodotVersion(fileClient.Object);
+    parsedVersion.IsSuccess.ShouldBeFalse();
+    parsedVersion.Error.ShouldBe("Couldn't match \"not.a.version\" to known GodotSharp version patterns.");
   }
 
   [Fact]

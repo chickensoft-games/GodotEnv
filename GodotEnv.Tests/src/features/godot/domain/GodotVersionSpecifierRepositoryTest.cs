@@ -169,13 +169,15 @@ public class GodotVersionSpecifierRepositoryTest
 
     var repo = new GodotVersionSpecifierRepository("test/working-dir", fileClient.Object);
 
-    repo.InferVersion(Enumerate(fileMocks, m => m.Object), log.Object).ShouldBe(null);
+    var result = repo.InferVersion(Enumerate(fileMocks, m => m.Object), log.Object);
+    result.IsSuccess.ShouldBeFalse();
+    result.Error.ShouldBe("No valid Godot version found in specifier files");
 
     for (var i = 0; i < versions.Count; ++i)
     {
       log.Verify(
         log =>
-          log.Warn($"file{i} contains invalid version string; skipping")
+          log.Warn($"file{i} does not contain valid version string; skipping")
       );
       log.Verify(
         log =>

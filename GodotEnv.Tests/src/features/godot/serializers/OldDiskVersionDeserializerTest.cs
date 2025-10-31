@@ -22,7 +22,9 @@ public class OldDiskVersionDeserializerTest
   public void RejectionOfInvalidOldDiskVersionNumbers(string invalidVersionNumber)
   {
     var deserializer = new OldDiskVersionDeserializer();
-    Assert.Throws<ArgumentException>(() => deserializer.Deserialize(invalidVersionNumber));
+    var result = deserializer.Deserialize(invalidVersionNumber);
+    result.IsSuccess.ShouldBeFalse();
+    result.Error.ShouldBe($"Couldn't match \"{invalidVersionNumber}\" to known Godot version patterns.");
   }
 
   public static IEnumerable<object[]> CorrectDeserializationOfValidOldDiskVersionsTestData()

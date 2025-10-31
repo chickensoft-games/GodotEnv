@@ -145,13 +145,13 @@ public class GodotRepositoryTest
       versionSerializer: versionSerializer.Object
     );
 
-    var dotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, true)!;
+    var dotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, true);
     dotnetVersion.IsSuccess.ShouldBeTrue();
     var reconstructedDotnetVersion = godotRepo.DirectoryToVersion(
       godotRepo.GetVersionFsName(fileVersionSerializer, dotnetVersion.Value)
     );
     reconstructedDotnetVersion.ShouldBe(dotnetVersion.Value);
-    var nonDotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, false)!;
+    var nonDotnetVersion = fileVersionDeserializer.Deserialize(godotVersionString, false);
     nonDotnetVersion.IsSuccess.ShouldBeTrue();
     var reconstructedNonDotnetVersion = godotRepo.DirectoryToVersion(
       godotRepo.GetVersionFsName(fileVersionSerializer, nonDotnetVersion.Value)

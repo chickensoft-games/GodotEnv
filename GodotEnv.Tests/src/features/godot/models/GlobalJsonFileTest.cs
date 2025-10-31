@@ -1,6 +1,5 @@
 namespace Chickensoft.GodotEnv.Tests.Features.Godot.Models;
 
-using System;
 using System.IO;
 using System.Text.Json.Nodes;
 using Chickensoft.GodotEnv.Common.Clients;
@@ -55,7 +54,7 @@ public class GlobalJsonFileTest
   }
 
   [Fact]
-  public void ParsedVersionIsNullIfGodotSdkNotPresent()
+  public void ParsedVersionIsFailureIfGodotSdkNotPresent()
   {
     var contents =
         /*lang=json,strict*/
@@ -79,12 +78,14 @@ public class GlobalJsonFileTest
       stream.Position = 0;
       var fileClient = new Mock<IFileClient>();
       fileClient.Setup(client => client.GetReadStream(path)).Returns(stream);
-      file.ParseGodotVersion(fileClient.Object).ShouldBe(null);
+      var parsedVersion = file.ParseGodotVersion(fileClient.Object);
+      parsedVersion.IsSuccess.ShouldBeFalse();
+      parsedVersion.Error.ShouldBe($"global.json file {path} does not exist or does not contain Godot.NET.Sdk information");
     }
   }
 
   [Fact]
-  public void ParseVersionThrowsIfGodotSdkVersionInvalid()
+  public void ParsedVersionIsFailureIfGodotSdkVersionInvalid()
   {
     var contents =
         /*lang=json,strict*/
@@ -111,7 +112,9 @@ public class GlobalJsonFileTest
       stream.Position = 0;
       var fileClient = new Mock<IFileClient>();
       fileClient.Setup(client => client.GetReadStream(path)).Returns(stream);
-      Should.Throw<ArgumentException>(() => file.ParseGodotVersion(fileClient.Object));
+      var parsedVersion = file.ParseGodotVersion(fileClient.Object);
+      parsedVersion.IsSuccess.ShouldBeFalse();
+      parsedVersion.Error.ShouldBe("Couldn't match \"not.a.version\" to known GodotSharp version patterns.");
     }
   }
 

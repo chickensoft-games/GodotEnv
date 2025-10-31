@@ -24,7 +24,7 @@ public class IoVersionDeserializer : IVersionDeserializer
     return new(
       false,
       null,
-      $"Version string {version} is neither release style ({releaseVersion.Error}) nor GodotSharp style ({sharpVersion.Error})"
+      $"Version string \"{version}\" is neither release style ({releaseVersion.Error}) nor GodotSharp style ({sharpVersion.Error})"
     );
   }
 
@@ -47,7 +47,7 @@ public class IoVersionDeserializer : IVersionDeserializer
     return new(
       false,
       null,
-      $"Version string {version} is neither release style ({releaseVersion.Error}) nor GodotSharp style ({sharpVersion.Error})"
+      $"Version string \"{version}\" is neither release style ({releaseVersion.Error}) nor GodotSharp style ({sharpVersion.Error})"
     );
   }
 }

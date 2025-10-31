@@ -24,7 +24,9 @@ public class ReleaseVersionDeserializerTest
   public void RejectionOfInvalidReleaseVersionNumbers(string invalidVersionNumber)
   {
     var deserializer = new ReleaseVersionDeserializer();
-    Assert.Throws<ArgumentException>(() => deserializer.Deserialize(invalidVersionNumber));
+    var result = deserializer.Deserialize(invalidVersionNumber);
+    result.IsSuccess.ShouldBeFalse();
+    result.Error.ShouldBe($"Couldn't match \"{invalidVersionNumber}\" to known Godot version patterns.");
   }
 
   public static IEnumerable<object[]> CorrectDeserializationOfValidReleaseVersionsTestData()

@@ -24,7 +24,9 @@ public class SharpVersionDeserializerTest
   public void RejectionOfInvalidSharpVersionNumbers(string invalidVersionNumber)
   {
     var deserializer = new SharpVersionDeserializer();
-    Assert.Throws<ArgumentException>(() => deserializer.Deserialize(invalidVersionNumber));
+    var result = deserializer.Deserialize(invalidVersionNumber);
+    result.IsSuccess.ShouldBeFalse();
+    result.Error.ShouldBe($"Couldn't match \"{invalidVersionNumber}\" to known GodotSharp version patterns.");
   }
 
   public static IEnumerable<object[]> CorrectDeserializationOfValidSharpVersionsTestData()
