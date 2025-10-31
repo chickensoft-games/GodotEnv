@@ -37,3 +37,6 @@ GodotEnv.sln.DotSettings.user
 
 ### Visual Studio ###
 .vs/
+
+### Nix related
+result
