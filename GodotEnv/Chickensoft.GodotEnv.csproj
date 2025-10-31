@@ -12,7 +12,7 @@
     <NoWarn>NU1903</NoWarn>
 
     <Title>GodotEnv</Title>
-    <Version>2.15.1</Version>
+    <Version>2.16.0</Version>
     <Description>Manage Godot versions and addons from the command line on Windows, macOS, and Linux.</Description>
     <Copyright>© 2022 Chickensoft Games</Copyright>
     <Company>Chickensoft</Company>
