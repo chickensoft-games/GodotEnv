@@ -7,7 +7,7 @@
 
 buildDotnetModule rec {
   pname = "godotenv";
-  version = "2.15.1";
+  version = "2.16.0";
 
   src = fetchFromGitHub {
     owner = "chickensoft-games";
