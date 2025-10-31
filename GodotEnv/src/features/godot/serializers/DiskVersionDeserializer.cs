@@ -9,7 +9,7 @@ using Chickensoft.GodotEnv.Features.Godot.Models;
 /// An <see cref="IVersionDeserializer"> for Godot installations created by
 /// pre-2.11 versions of GodotEnv.
 /// </summary>
-public partial class OldDiskVersionDeserializer : IVersionDeserializer
+public partial class DiskVersionDeserializer : IVersionDeserializer
 {
   public Result<AnyDotnetStatusGodotVersion> Deserialize(string version)
   {
@@ -64,9 +64,9 @@ public partial class OldDiskVersionDeserializer : IVersionDeserializer
   }
 
   // Version strings prior to 2.11 may or may not have a patch number
-  // and may or may not have a "." separating the label from the label number
-  // Label is either "stable" or a string followed by an optional "." and
+  // and may or may not have a "_" separating the label from the label number
+  // Label is either "stable" or a string followed by an optional "_" and
   // and the label number
-  [GeneratedRegex(@"^(\d+)\.(\d+)(\.\d+)?-(stable|([a-z]+)\.?(\d+))$")]
+  [GeneratedRegex(@"^(\d+)_(\d+)(_\d+)?_(stable|([a-z]+)_?(\d+))$")]
   public static partial Regex VersionStringRegex();
 }

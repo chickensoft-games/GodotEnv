@@ -3,11 +3,9 @@ namespace Chickensoft.GodotEnv.Features.Godot.Domain;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Common.Clients;
@@ -670,15 +668,15 @@ public partial class GodotRepository : IGodotRepository
     foreach (var dir in FileClient.GetSubdirectories(GodotInstallationsPath))
     {
       var version = DirectoryToVersion(dir.Name);
-      if (version is null)
+      if (!version.IsSuccess)
       {
         failures.Add(
-          $"Unrecognized subfolder in Godot installation directory (may be a non-conforming version identifier): {dir.Name}"
+          $"Unrecognized subfolder {dir.Name} in Godot installation directory (may be a non-conforming version identifier): {version.Error}"
         );
       }
       else
       {
-        var installation = GetInstallation(version);
+        var installation = GetInstallation(version.Value);
         if (installation is null)
         {
           failures.Add(
@@ -870,48 +868,22 @@ public partial class GodotRepository : IGodotRepository
       .Replace(".", "_")
       .Replace("-", "_");
 
-  internal SpecificDotnetStatusGodotVersion? DirectoryToVersion(
+  internal Result<SpecificDotnetStatusGodotVersion> DirectoryToVersion(
     string directory
   )
   {
-    var versionParts = DirectoryToVersionStringRegex().Match(directory);
-    if (!versionParts.Success)
+    var isDotnet = directory.Contains("dotnet");
+    var versionStr = directory
+      .Replace("godot_", "")
+      .Replace("dotnet_", "");
+
+    var permissiveParsedVersion =
+      new DiskVersionDeserializer().Deserialize(versionStr, isDotnet);
+    if (permissiveParsedVersion.IsSuccess)
     {
-      return null;
+      return permissiveParsedVersion;
     }
 
-    var major = int.Parse(
-      versionParts.Groups["major"].Value,
-      CultureInfo.InvariantCulture
-    );
-    var minor = int.Parse(
-      versionParts.Groups["minor"].Value,
-      CultureInfo.InvariantCulture
-    );
-    var patch = versionParts.Groups["patch"].Value.Length > 0
-      ? int.Parse(
-        versionParts.Groups["patch"].Value[..^1],
-        CultureInfo.InvariantCulture
-      )
-      : 0;
-    var label = versionParts.Groups["label"].Value.Length > 0
-      ? versionParts.Groups["labelName"].Value
-      : "stable";
-    var labelNumber = versionParts.Groups["labelNumber"].Value.Length > 0
-      ? int.Parse(
-        versionParts.Groups["labelNumber"].Value,
-        CultureInfo.InvariantCulture
-      )
-      : -1;
-
-    var isDotnet = directory.Contains("dotnet");
-    return new SpecificDotnetStatusGodotVersion(major, minor, patch, label, labelNumber, isDotnet);
+    return new(false, null, $"Could not parse directory \"{directory}\" into Godot version ({permissiveParsedVersion.Error})");
   }
-
-  // Regex for converting directory names back into version strings to see
-  // what versions we have installed.
-  // Ideally, all version strings on disk would be in release format, but old
-  // installs may have a mix of release and GodotSharp format (e.g., "4.4.0-dev6")
-  [GeneratedRegex(@"godot_(dotnet_)?(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+_)?(?<label>(?<labelName>[a-z]+)(?<labelNumber>\d*))?")]
-  private static partial Regex DirectoryToVersionStringRegex();
 }
