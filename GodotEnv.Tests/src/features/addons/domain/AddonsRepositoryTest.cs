@@ -582,6 +582,70 @@ public class AddonsRepositoryTest
     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name))
       .Returns(addonInstallPath);
 
+    client.Setup(c => c.CreateDirectory(addonInstallPath));
+
+    client.Setup(
+      c => c.CopyBulk(
+        cli.GetShell(PROJECT_PATH).Object,
+        copyFromPath + "/",
+        addonInstallPath
+      )
+    );
+
+    cli.Runs(addonInstallPath, new ProcessResult(0), "git", "init");
+    cli.Runs(addonInstallPath, new ProcessResult(0),
+      "git", "config", "--local", "user.email", "godotenv@godotenv.com"
+    );
+    cli.Runs(addonInstallPath, new ProcessResult(0),
+      "git", "config", "--local", "user.name", "GodotEnv"
+    );
+    cli.Runs(addonInstallPath, new ProcessResult(0), "git", "add", "-A");
+    cli.Runs(
+      addonInstallPath, new ProcessResult(0),
+      "git", "config", "--local", "commit.gpgsign", "false"
+    );
+    cli.Runs(
+      addonInstallPath, new ProcessResult(0),
+      "git", "commit", "-m", "\"Initial commit\""
+    );
+
+    await repo.InstallAddonFromCache(addon, addon.Name);
+
+    client.VerifyAll();
+    cli.VerifyAll();
+  }
+
+  [Fact]
+  public async Task InstallAddonFromCacheCreatesParentDirectoriesForNestedAddonKeys()
+  {
+    var addonName = "subdir/my_addon";
+    var addon = TestData.Addon with { Name = addonName };
+    var addonCachePath = CACHE_DIR + "/" + addon.Name;
+    var copyFromPath = addonCachePath + "/" + addon.Subfolder;
+    var addonInstallPath = ADDONS_DIR + "/" + addonName + "/";
+    var subfolderWithSeparatorPath = copyFromPath + "/";
+    var parentDirPath = ADDONS_DIR + "/subdir";
+
+    var cli = new ShellVerifier(addonCachePath, PROJECT_PATH, addonInstallPath);
+    var subject = BuildSubject(cli: cli);
+
+    var repo = subject.Repo;
+    var client = subject.Client;
+
+    client.Setup(c => c.Combine(CACHE_DIR, addon.Name)).Returns(addonCachePath);
+
+    client.Setup(c => c.Separator).Returns('/');
+
+    client.Setup(c => c.Combine(addonCachePath, addon.Subfolder))
+      .Returns(copyFromPath);
+
+    client.Setup(c => c.DirectoryExists(subfolderWithSeparatorPath)).Returns(true);
+
+    client.Setup(c => c.Combine(ADDONS_DIR, addonName))
+      .Returns(addonInstallPath);
+
+    client.Setup(c => c.CreateDirectory(addonInstallPath));
+
     client.Setup(
       c => c.CopyBulk(
         cli.GetShell(PROJECT_PATH).Object,
@@ -703,30 +767,35 @@ public class AddonsRepositoryTest
       .Returns(symlinkSource);
 
     client.Setup(c => c.DirectoryExists(symlinkTarget)).Returns(false);
-    client.Setup(c => c.DirectoryExists(symlinkSource)).Returns(false);
+    client.Setup(c => c.CreateDirectory(symlinkTarget));
+    client.Setup(c => c.DirectoryExists(symlinkSource)).Returns(true);
+    client.Setup(c => c.CreateSymlink(symlinkTarget, symlinkSource));
 
-    Should.Throw<IOException>(() => repo.InstallAddonWithSymlink(addon));
+    repo.InstallAddonWithSymlink(addon);
 
     client.VerifyAll();
   }
 
   [Fact]
-  public void InstallAddonWithSymlinkCreatesSymlink()
+  public void InstallAddonWithSymlinkCreatesParentDirectoriesForNestedAddonKeys()
   {
-    var addon = TestData.Addon with { Source = AssetSource.Symlink };
+    var addonName = "subdir/my_symlink_addon";
+    var addon = TestData.Addon with { Name = addonName, Source = AssetSource.Symlink };
 
     var subject = BuildSubject();
     var repo = subject.Repo;
     var client = subject.Client;
 
-    var symlinkTarget = ADDONS_DIR + "/" + addon.Name;
+    var symlinkTarget = ADDONS_DIR + "/" + addonName;
     var symlinkSource = addon.Url + "/" + addon.Subfolder;
+    var parentDirPath = ADDONS_DIR + "/subdir";
 
-    client.Setup(c => c.Combine(ADDONS_DIR, addon.Name)).Returns(symlinkTarget);
+    client.Setup(c => c.Combine(ADDONS_DIR, addonName)).Returns(symlinkTarget);
     client.Setup(c => c.Combine(addon.Url, addon.Subfolder))
       .Returns(symlinkSource);
 
     client.Setup(c => c.DirectoryExists(symlinkTarget)).Returns(false);
+    client.Setup(c => c.CreateDirectory(symlinkTarget));
     client.Setup(c => c.DirectoryExists(symlinkSource)).Returns(true);
     client.Setup(c => c.CreateSymlink(symlinkTarget, symlinkSource));
 
@@ -752,6 +821,7 @@ public class AddonsRepositoryTest
       .Returns(symlinkSource);
 
     client.Setup(c => c.DirectoryExists(symlinkTarget)).Returns(false);
+    client.Setup(c => c.CreateDirectory(symlinkTarget));
     client.Setup(c => c.DirectoryExists(symlinkSource)).Returns(true);
     client.Setup(c => c.CreateSymlink(symlinkTarget, symlinkSource)).Throws(
       new IOException("Failed to create symlink.")
