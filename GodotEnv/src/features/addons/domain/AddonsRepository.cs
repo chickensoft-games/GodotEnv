@@ -310,6 +310,8 @@ public class AddonsRepository(
     ValidateSubfolder(copyFromPath, addon.Name);
     var addonInstallPath = FileClient.Combine(Config.AddonsPath, addon.Name)
       .TrimEnd(FileClient.Separator) + FileClient.Separator;
+    // Ensure parent directories exist for nested target paths
+    FileClient.CreateDirectory(addonInstallPath);
     // copy files from addon cache to addon dir, excluding git folders.
     await FileClient.CopyBulk(projectShell, copyFromPath, addonInstallPath);
     var addonShell = Computer.CreateShell(addonInstallPath);
@@ -366,6 +368,8 @@ public class AddonsRepository(
 
     try
     {
+      // Ensure parent directories exist for nested target paths
+      FileClient.CreateDirectory(symlinkTarget);
       FileClient.CreateSymlink(symlinkTarget, symlinkSource);
     }
     catch
