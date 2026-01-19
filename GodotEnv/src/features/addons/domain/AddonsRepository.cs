@@ -141,16 +141,13 @@ public class AddonsRepository(
     {
       FileClient.CreateDirectory(Config.CachePath);
     }
-    // Prevent Godot from indexing the cache with a .gdignore
-    var gdignorePath = FileClient.Combine(Config.CachePath, ".gdignore");
-    if (!FileClient.FileExists(gdignorePath))
-    {
-      FileClient.WriteAllText(gdignorePath, "");
-    }
     if (!FileClient.DirectoryExists(Config.AddonsPath))
     {
       FileClient.CreateDirectory(Config.AddonsPath);
     }
+    // Prevent Godot from indexing the cache with a .gdignore
+    var gdignorePath = FileClient.Combine(Config.CachePath, ".gdignore");
+    FileClient.CreateFile(gdignorePath, "");
   }
 
   public async Task<string> CacheAddon(
