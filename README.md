@@ -361,6 +361,8 @@ Here's an example addons file that installs 3 addons, each from a different sour
 ```
 
 > ❗️ Each key in the `addons` dictionary above must be the directory name of the installed addon inside the project addons path. That is, if an addon repository contains its addon contents inside `addons/my_addon`, the name of the key for the addon in the addons file must be `my_addon`.
+>
+> 💡 **Tip**: You can use nested directories as addon keys to organize addons. For example, using `"subdir/my_addon"` as the key will install the addon to `addons/subdir/my_addon/`.
 
 ### 🏠 Local Addons
 
