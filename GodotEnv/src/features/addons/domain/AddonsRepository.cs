@@ -369,7 +369,7 @@ public class AddonsRepository(
     try
     {
       // Ensure parent directories exist for nested target paths
-      FileClient.CreateDirectory(symlinkTarget);
+      FileClient.CreateDirectory(FileClient.GetParentDirectoryPath(symlinkTarget));
       FileClient.CreateSymlink(symlinkTarget, symlinkSource);
     }
     catch
