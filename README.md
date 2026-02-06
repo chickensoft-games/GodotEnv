@@ -60,7 +60,6 @@ GodotEnv uses the local `git` installation and other processes available from th
 >
 > In some cases, enabling [Developer Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) may be required for GodotEnv to correctly manage symlinks.
 
-
 ## Quick Start
 
 We'll walk through the commands in depth below, but if you prefer to get started right away you can use the `--help` flag with any command to get more information.
@@ -156,9 +155,17 @@ godotenv godot use 4.0.1 --no-dotnet
 
 ### 🔮 Installing or Using a Project-Specific Godot Version
 
-You may want to install or use the version of Godot that is appropriate for the project you're currently working on. You can issue the `godotenv godot install` and `godotenv godot use` commands _without_ providing a version parameter, and the commands can infer the correct version from files in your directory tree.
+You may want to install or use the version of Godot that is appropriate for the project you're currently working on. GodotEnv can infer the correct version for your project from files in your directory tree. To do so, run the `godot install` or `godot use` commands without a version argument:
 
-The command will walk up the directory tree and use the following files, in order of precedence:
+```sh
+# installs version inferred from project files
+godotenv godot install
+
+# uses version inferred from project files
+godotenv godot use
+```
+
+GodotEnv will walk up the directory tree and use the following files, in order of precedence:
 
 - `global.json` specifying a `Godot.NET.Sdk` value in `msbuild-sdks`.
 - `*.csproj` specifying a versioned `Godot.NET.Sdk` as its Project SDK.
@@ -167,6 +174,9 @@ The command will walk up the directory tree and use the following files, in orde
 A `global.json` file at any directory level above the working directory will take precedence over all `csproj` files, even those closer to the working directory; likewise, any `csproj` file in the tree will take precedence over all `.godotrc` files. Files of the same type that are fewer steps up the directory tree will take precedence over ones that are further up the tree.
 
 Versions from `global.json` or a `csproj` file are assumed to be .NET-enabled. A `.godotrc` file may specify a non-.NET Godot by appending a space and the string `no-dotnet` to the version string. For instance, a `.godotrc` file containing the value `4.0.1 no-dotnet` indicates the non-.NET version of Godot 4.0.1.
+
+> [!IMPORTANT]
+> Remember to run `godotenv godot install` and `godotenv godot use` as necessary after setting up or modifying a version file, and whenever returning to your project from some other project that may have used a different Godot version.
 
 ### ✍️ Pinning the Current Godot Version for a Project
 
