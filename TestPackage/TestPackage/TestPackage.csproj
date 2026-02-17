@@ -38,6 +38,6 @@
 
   <ItemGroup>
     <!-- Dependencies go here. -->
-    <PackageReference Include="GodotSharp" Version="4.6.0" />
+    <PackageReference Include="GodotSharp" Version="4.6.1" />
   </ItemGroup>
 </Project>
