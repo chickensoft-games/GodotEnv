@@ -58,7 +58,7 @@ jobs:
           echo "Next Version: ${{ steps.next-version.outputs.version }}"
 
       - name: 📝 Change Version
-        uses: vers-one/dotnet-project-version-updater@v1.7
+        uses: vers-one/dotnet-project-version-updater@v1.8
         with:
           file: "TestPackage/TestPackage.csproj"
           version:  ${{ steps.next-version.outputs.version }}
