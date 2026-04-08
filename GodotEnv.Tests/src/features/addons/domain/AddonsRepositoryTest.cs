@@ -153,6 +153,8 @@ public class AddonsRepositoryTest
     var repo = subject.Repo;
     var client = subject.Client;
     client.Setup(c => c.DirectoryExists(CACHE_DIR)).Returns(false);
+    client.Setup(c => c.Combine(CACHE_DIR, ".gdignore")).Returns("/.addons/.gdignore");
+    client.Setup(c => c.CreateFile("/.addons/.gdignore", ""));
     repo.EnsureCacheAndAddonsDirectoriesExists();
     client.VerifyAll();
   }
