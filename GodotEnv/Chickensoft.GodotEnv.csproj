@@ -43,7 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CliFx" Version="2.3.6" />
+    <PackageReference Include="CliFx" Version="3.0.0" />
     <PackageReference Include="Downloader" Version="5.4.0" />
     <PackageReference Include="Humanizer.Core" Version="3.0.10" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
