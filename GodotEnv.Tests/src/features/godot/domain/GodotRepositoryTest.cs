@@ -2,6 +2,8 @@ namespace Chickensoft.GodotEnv.Tests.Features.Godot.Domain;
 
 using System.IO.Abstractions;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Chickensoft.GodotEnv.Features.Godot.Domain;
 using Chickensoft.GodotEnv.Features.Godot.Models;
@@ -17,6 +19,49 @@ using Xunit;
 
 public class GodotRepositoryTest
 {
+  [Fact]
+  public async Task GetRemoteVersionsListOrdersVersions()
+  {
+    var networkClient = new Mock<INetworkClient>();
+    networkClient.Setup(
+        client => client.WebRequestGetAsync(
+          It.IsAny<string>(),
+          true,
+          null
+        )
+      )
+      .ReturnsAsync(
+        new HttpResponseMessage(HttpStatusCode.OK)
+        {
+          Content = new StringContent(
+            """
+            [
+              { "name": "godot-2.1-stable.json" },
+              { "name": "godot-4.6.2-rc2.json" },
+              { "name": "godot-4.6.2-stable.json" },
+              { "name": "godot-4.7-beta1.json" },
+              { "name": "godot-4.7-dev1.json" },
+              { "name": "godot-4.7-dev2.json" }
+            ]
+            """
+          )
+        }
+      );
+
+    var godotRepo = CreateRepository(networkClient.Object);
+    var log = new Mock<ILog>();
+
+    var versions = await godotRepo.GetRemoteVersionsList(log.Object);
+
+    versions.ShouldBe([
+      "4.6.2-rc2",
+      "4.6.2-stable",
+      "4.7-beta1",
+      "4.7-dev1",
+      "4.7-dev2"
+    ]);
+  }
+
   [Fact]
   public async Task AddOrUpdateGodotEnvVariable()
   {
@@ -217,5 +262,44 @@ public class GodotRepositoryTest
     var reconstructedNonDotnetVersion = godotRepo.DirectoryToVersion($"godot_{directorySuffix}");
     reconstructedNonDotnetVersion.IsSuccess.ShouldBeTrue();
     reconstructedNonDotnetVersion.Value.ShouldBe(nonDotnetVersion.Value);
+  }
+
+  private static GodotRepository CreateRepository(INetworkClient networkClient)
+  {
+    var systemInfo = new MockSystemInfo(OSType.Linux, CpuArch.X64);
+    var computer = new Mock<IComputer>();
+    var processRunner = new Mock<IProcessRunner>();
+    var fileClient = new Mock<IFileClient>();
+    var zipClient = new Mock<ZipClient>(fileClient.Object.Files);
+    var environmentVariableClient = new Mock<IEnvironmentVariableClient>();
+    var fileVersionDeserializer = new ReleaseVersionDeserializer();
+    var fileVersionSerializer = new ReleaseVersionSerializer();
+    var platform = new Mock<GodotEnvironment>(
+      systemInfo, fileClient.Object, computer.Object, fileVersionDeserializer, fileVersionSerializer
+    );
+    var checksumClient = new Mock<IGodotChecksumClient>();
+    var versionDeserializer = new Mock<IVersionDeserializer>();
+
+    return new GodotRepository(
+      systemInfo: systemInfo,
+      config: new Config(
+        new ConfigValues
+        {
+          Godot = new GodotConfigSection
+          {
+            InstallationsPath = "INSTALLATION_PATH"
+          },
+        }
+      ),
+      fileClient: fileClient.Object,
+      networkClient: networkClient,
+      zipClient: zipClient.Object,
+      platform: platform.Object,
+      environmentVariableClient: environmentVariableClient.Object,
+      processRunner: processRunner.Object,
+      checksumClient: checksumClient.Object,
+      versionDeserializer: versionDeserializer.Object,
+      versionSerializer: fileVersionSerializer
+    );
   }
 }
