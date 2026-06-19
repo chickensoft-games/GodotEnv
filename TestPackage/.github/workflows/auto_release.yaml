@@ -31,7 +31,7 @@ jobs:
       should_release: ${{ steps.release.outputs.should_release }}
     steps:
       - name: 🧾 Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 🧑‍🔬 Check Test Results
         id: tests
