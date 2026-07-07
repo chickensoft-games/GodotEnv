@@ -316,12 +316,9 @@ public class AddonsRepository(
     // Make a junk repo in the installed addon dir. We use this for change
     // tracking to avoid deleting a modified addon.
     await addonShell.Run("git", "init");
-    // Ignore changes to import data of addons
+    // Ignore godot cache files so they don't dirty addon workdir state
     var gitignorePath = FileClient.Combine(addonInstallPath, ".gitignore");
-    if (!FileClient.FileExists(gitignorePath))
-    {
-      FileClient.WriteLines(gitignorePath, ["*.import", ".gitignore"]);
-    }
+    FileClient.AddLinesToFileIfNotPresent(gitignorePath, ["*.import", "*.uid", "*.translation"]);
     await addonShell.Run(
       "git", "config", "--local", "user.email", "godotenv@godotenv.com"
     );
