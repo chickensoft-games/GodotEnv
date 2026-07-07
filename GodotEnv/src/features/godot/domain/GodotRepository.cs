@@ -370,10 +370,12 @@ public partial class GodotRepository : IGodotRepository
       log.Print("");
       log.ClearCurrentLine();
     }
-    catch (Exception)
+    catch (Exception ex)
     {
       log.ClearCurrentLine();
-      log.Err("🛑 Aborting Godot installation.");
+      log.Err("🛑 Aborting Godot installation. Exception encountered:");
+      // Log the exception message to provide more context about the failure.
+      log.Err(ex);
       throw;
     }
 

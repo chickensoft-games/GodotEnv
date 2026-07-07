@@ -1,9 +1,9 @@
 {
   "sdk": {
-    "version": "8.0.416",
+    "version": "8.0.422",
     "rollForward": "latestMajor"
   },
   "msbuild-sdks": {
-    "Godot.NET.Sdk": "4.5.1"
+    "Godot.NET.Sdk": "4.7.0"
   }
 }

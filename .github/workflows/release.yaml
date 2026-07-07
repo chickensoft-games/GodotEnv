@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 🧾 Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           lfs: true
           submodules: 'recursive'
@@ -61,7 +61,7 @@ jobs:
           echo "Next Version: ${{ steps.next-version.outputs.version }}"
 
       - name: 📝 Change Version
-        uses: vers-one/dotnet-project-version-updater@v1.7
+        uses: vers-one/dotnet-project-version-updater@v1.8
         with:
           file: "GodotEnv/Chickensoft.GodotEnv.csproj"
           version:  ${{ steps.next-version.outputs.version }}
