@@ -564,7 +564,7 @@ public class AddonsRepositoryTest
     var addonInstallPath = ADDONS_DIR + "/" + addon.Name + "/";
     var subfolderWithSeparatorPath = copyFromPath + "/";
     var expectedGitIgnorePath = addonInstallPath + "/.gitignore";
-    var expectedGitIgnores = ["*.import", "*.uid", "*.translation"];
+    string[] expectedGitIgnores = ["*.import", "*.uid", "*.translation"];
 
     var cli = new ShellVerifier(addonCachePath, PROJECT_PATH, addonInstallPath);
     var subject = BuildSubject(cli: cli);
