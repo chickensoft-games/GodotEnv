@@ -563,7 +563,8 @@ public class AddonsRepositoryTest
     var copyFromPath = addonCachePath + "/" + addon.Subfolder;
     var addonInstallPath = ADDONS_DIR + "/" + addon.Name + "/";
     var subfolderWithSeparatorPath = copyFromPath + "/";
-    var expectedGitignorePath = ADDONS_DIR + "/" + addon.Name + "/.gitignore";
+    var expectedGitIgnorePath = addonInstallPath + "/.gitignore";
+    var expectedGitIgnores = ["*.import", "*.uid", "*.translation"];
 
     var cli = new ShellVerifier(addonCachePath, PROJECT_PATH, addonInstallPath);
     var subject = BuildSubject(cli: cli);
@@ -580,12 +581,12 @@ public class AddonsRepositoryTest
 
     client.Setup(c => c.DirectoryExists(subfolderWithSeparatorPath)).Returns(true);
 
-    client.Setup(c => c.FileExists(expectedGitignorePath)).Returns(true);
 
     client.Setup(c => c.Combine(ADDONS_DIR, addon.Name))
       .Returns(addonInstallPath);
 
-    client.Setup(c => c.Combine(addonInstallPath, ".gitignore")).Returns(expectedGitignorePath);
+    client.Setup(c => c.Combine(addonInstallPath, ".gitignore"))
+      .Returns(expectedGitIgnorePath);
 
     client.Setup(c => c.CreateDirectory(addonInstallPath));
 
@@ -597,6 +598,11 @@ public class AddonsRepositoryTest
       )
     );
 
+    client.Setup(
+      c =>
+        c.AddLinesToFileIfNotPresent(expectedGitIgnorePath, expectedGitIgnores)
+    );
+    
     cli.Runs(addonInstallPath, new ProcessResult(0), "git", "init");
     cli.Runs(addonInstallPath, new ProcessResult(0),
       "git", "config", "--local", "user.email", "godotenv@godotenv.com"

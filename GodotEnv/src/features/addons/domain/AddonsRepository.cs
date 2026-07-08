@@ -320,7 +320,10 @@ public class AddonsRepository(
     await addonShell.Run("git", "init");
     // Ignore godot cache files so they don't dirty addon workdir state
     var gitignorePath = FileClient.Combine(addonInstallPath, ".gitignore");
-    FileClient.AddLinesToFileIfNotPresent(gitignorePath, ["*.import", "*.uid", "*.translation"]);
+    FileClient.AddLinesToFileIfNotPresent(
+      gitignorePath,
+      ["*.import", "*.uid", "*.translation"]
+    );
     await addonShell.Run(
       "git", "config", "--local", "user.email", "godotenv@godotenv.com"
     );
