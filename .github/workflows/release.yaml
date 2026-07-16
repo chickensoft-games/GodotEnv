@@ -79,7 +79,7 @@ jobs:
         run: gh release create --generate-notes "v${{ steps.next-version.outputs.version }}"
 
       - name: 💽 Setup .NET SDK
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
           # Use the .NET SDK from global.json in the root of the repository.
           global-json-file: global.json
