@@ -604,7 +604,7 @@ public class AddonsRepositoryTest
       c =>
         c.AddLinesToFileIfNotPresent(expectedGitIgnorePath, expectedGitIgnores)
     );
-    
+
     cli.Runs(addonInstallPath, new ProcessResult(0), "git", "init");
     cli.Runs(addonInstallPath, new ProcessResult(0),
       "git", "config", "--local", "user.email", "godotenv@godotenv.com"
@@ -637,7 +637,6 @@ public class AddonsRepositoryTest
     var copyFromPath = addonCachePath + "/" + addon.Subfolder;
     var addonInstallPath = ADDONS_DIR + "/" + addonName + "/";
     var subfolderWithSeparatorPath = copyFromPath + "/";
-    var parentDirPath = ADDONS_DIR + "/subdir";
 
     var cli = new ShellVerifier(addonCachePath, PROJECT_PATH, addonInstallPath);
     var subject = BuildSubject(cli: cli);
@@ -801,7 +800,6 @@ public class AddonsRepositoryTest
 
     var symlinkTarget = ADDONS_DIR + "/" + addonName;
     var symlinkSource = addon.Url + "/" + addon.Subfolder;
-    var parentDirPath = ADDONS_DIR + "/subdir";
 
     client.Setup(c => c.Combine(ADDONS_DIR, addonName)).Returns(symlinkTarget);
     client.Setup(c => c.Combine(addon.Url, addon.Subfolder))

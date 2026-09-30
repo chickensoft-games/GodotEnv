@@ -16,23 +16,16 @@ public class EnvironmentVariableClientTest
   private const string USER_DIR = "$HOME";
   private const string WORKING_DIR = $"{USER_DIR}/.config/godotenv";
 
-  public static IEnumerable<object[]> GetSystemInfoForUnixOSes()
+  public static IEnumerable<TheoryDataRow<ISystemInfo>> GetSystemInfoForUnixOSes()
   {
-    yield return [
-      new MockSystemInfo(OSType.Linux, CpuArch.X64)
-    ];
-    yield return [
-      new MockSystemInfo(OSType.MacOS, CpuArch.Arm64)
-    ];
+    yield return new MockSystemInfo(OSType.Linux, CpuArch.X64);
+    yield return new MockSystemInfo(OSType.MacOS, CpuArch.Arm64);
   }
 
-  public static IEnumerable<object[]> GetSystemInfoForAllOSes()
+  public static IEnumerable<TheoryDataRow<ISystemInfo>> GetSystemInfoForAllOSes()
   {
-    var oSes = GetSystemInfoForUnixOSes();
-
-    oSes = oSes.Append([
-      new MockSystemInfo(OSType.Windows, CpuArch.X64)
-    ]);
+    var oSes = GetSystemInfoForUnixOSes()
+      .Append(new MockSystemInfo(OSType.Windows, CpuArch.X64));
 
     foreach (var os in oSes)
     {

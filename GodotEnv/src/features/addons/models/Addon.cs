@@ -75,9 +75,8 @@ public record Addon : Asset, IAddon
     Subfolder = subfolder.Trim(_trimChars);
 
 #pragma warning disable CA5351 // insecure — just for id purposes
-    Hash = BitConverter.ToString(
-      MD5.HashData(Encoding.UTF8.GetBytes(Url))
-    ).Replace("-", "");
+    Hash = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(Url))
+);
 #pragma warning restore CA5351
   }
 

@@ -40,6 +40,11 @@
       "label": "test",
       "group": "test",
       "command": "dotnet",
+      "options": {
+        "env": {
+          "TESTINGPLATFORM_TELEMETRY_OPTOUT": "1"
+        }
+      },
       "type": "shell",
       "args": [
         "test"
