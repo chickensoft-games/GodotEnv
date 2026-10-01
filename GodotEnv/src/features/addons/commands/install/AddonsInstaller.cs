@@ -184,7 +184,7 @@ public class AddonsInstaller : IAddonsInstaller
       if (addon.IsSymlink)
       {
         await AddonsRepo.DeleteAddon(addon);
-        AddonsRepo.InstallAddonWithSymlink(addon);
+        await AddonsRepo.InstallAddonWithSymlink(addon);
         continue;
       }
 
