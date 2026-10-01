@@ -679,27 +679,13 @@ public class FileClientTest
     return fs;
   }
 
-  public static IEnumerable<object[]> GetSystemInfoForUnixOSes()
+  public static IEnumerable<TheoryDataRow<ISystemInfo>> GetSystemInfoForUnixOSes()
   {
-    yield return [
-      new MockSystemInfo(OSType.Linux, CpuArch.X64)
-    ];
-    yield return [
-      new MockSystemInfo(OSType.MacOS, CpuArch.Arm64)
-    ];
+    yield return new MockSystemInfo(OSType.Linux, CpuArch.X64);
+    yield return new MockSystemInfo(OSType.MacOS, CpuArch.Arm64);
   }
 
-  public static IEnumerable<object[]> GetSystemInfoForAllOSes()
-  {
-    var oSes = GetSystemInfoForUnixOSes();
-
-    oSes = oSes.Append([
-      new MockSystemInfo(OSType.Windows, CpuArch.X64)
-    ]);
-
-    foreach (var os in oSes)
-    {
-      yield return os;
-    }
-  }
+  public static IEnumerable<TheoryDataRow<ISystemInfo>> GetSystemInfoForAllOSes() =>
+    GetSystemInfoForUnixOSes()
+      .Append(new MockSystemInfo(OSType.Windows, CpuArch.X64));
 }

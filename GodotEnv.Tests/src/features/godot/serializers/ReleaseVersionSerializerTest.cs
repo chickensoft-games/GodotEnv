@@ -6,26 +6,30 @@ using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using Shouldly;
 using Xunit;
 
+using ReleaseVersionSerializerTestData =
+  (Chickensoft.GodotEnv.Features.Godot.Models.GodotVersionNumber VersionNumber, string VersionString);
+
 public class ReleaseVersionSerializerTest
 {
 
-  public static IEnumerable<object[]> CorrectReleaseVersionSerializationTestData()
+  public static IEnumerable<TheoryDataRow<ReleaseVersionSerializerTestData>>
+    CorrectReleaseVersionSerializationTestData()
   {
-    yield return [new GodotVersionNumber(0, 0, 1, "stable", -1), "0.0.1-stable"];
-    yield return [new GodotVersionNumber(1, 2, 0, "stable", -1), "1.2-stable"];
-    yield return [new GodotVersionNumber(1, 2, 3, "stable", -1), "1.2.3-stable"];
-    yield return [new GodotVersionNumber(1, 2, 0, "label", 1), "1.2-label1"];
-    yield return [new GodotVersionNumber(1, 2, 3, "label", 23), "1.2.3-label23"];
+    yield return (new GodotVersionNumber(0, 0, 1, "stable", -1), "0.0.1-stable");
+    yield return (new GodotVersionNumber(1, 2, 0, "stable", -1), "1.2-stable");
+    yield return (new GodotVersionNumber(1, 2, 3, "stable", -1), "1.2.3-stable");
+    yield return (new GodotVersionNumber(1, 2, 0, "label", 1), "1.2-label1");
+    yield return (new GodotVersionNumber(1, 2, 3, "label", 23), "1.2.3-label23");
   }
 
   [Theory]
   [MemberData(nameof(CorrectReleaseVersionSerializationTestData))]
-  public void CorrectReleaseVersionSerialization(GodotVersionNumber toFormat, string expected)
+  public void CorrectReleaseVersionSerialization(ReleaseVersionSerializerTestData testData)
   {
     var serializer = new ReleaseVersionSerializer();
-    Assert.Equal(expected, serializer.Serialize(new AnyDotnetStatusGodotVersion(toFormat)));
-    Assert.Equal(expected, serializer.Serialize(new SpecificDotnetStatusGodotVersion(toFormat, true)));
-    Assert.Equal(expected, serializer.Serialize(new SpecificDotnetStatusGodotVersion(toFormat, false)));
+    Assert.Equal(testData.VersionString, serializer.Serialize(new AnyDotnetStatusGodotVersion(testData.VersionNumber)));
+    Assert.Equal(testData.VersionString, serializer.Serialize(new SpecificDotnetStatusGodotVersion(testData.VersionNumber, true)));
+    Assert.Equal(testData.VersionString, serializer.Serialize(new SpecificDotnetStatusGodotVersion(testData.VersionNumber, false)));
   }
 
   [Fact]

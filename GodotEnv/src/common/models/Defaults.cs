@@ -82,7 +82,6 @@ public static class Defaults
   {
     ChunkCount = 8,
     ParallelDownload = true,
-    ReserveStorageSpaceBeforeStartingDownload = true
   };
 
   /// <summary>

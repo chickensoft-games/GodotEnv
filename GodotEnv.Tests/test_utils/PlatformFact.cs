@@ -1,5 +1,6 @@
 ﻿namespace Chickensoft.GodotEnv.Tests;
 
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -13,7 +14,12 @@ public enum TestPlatform
 
 public sealed class PlatformFact : FactAttribute
 {
-  public PlatformFact(TestPlatform testPlatform)
+  public PlatformFact(
+    TestPlatform testPlatform,
+    [CallerFilePath] string? sourceFilePath = null,
+    [CallerLineNumber] int sourceLineNumber = -1
+  )
+    : base(sourceFilePath, sourceLineNumber)
   {
     Skip = testPlatform switch
     {

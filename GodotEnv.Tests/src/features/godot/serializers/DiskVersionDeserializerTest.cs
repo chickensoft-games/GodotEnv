@@ -6,6 +6,9 @@ using Chickensoft.GodotEnv.Features.Godot.Serializers;
 using Shouldly;
 using Xunit;
 
+using DiskVersionDeserializerTestData =
+  (string VersionString, Chickensoft.GodotEnv.Features.Godot.Models.GodotVersionNumber VersionNumber);
+
 public class DiskVersionDeserializerTest
 {
   [Theory]
@@ -26,42 +29,43 @@ public class DiskVersionDeserializerTest
     result.Error.ShouldBe($"Couldn't match \"{invalidVersionNumber}\" to known Godot version patterns.");
   }
 
-  public static IEnumerable<object[]> CorrectDeserializationOfValidOldDiskVersionsTestData()
+  public static IEnumerable<TheoryDataRow<DiskVersionDeserializerTestData>>
+    CorrectDeserializationOfValidOldDiskVersionsTestData()
   {
-    yield return ["1_2_3_stable", new GodotVersionNumber(1, 2, 3, "stable", -1)];
-    yield return ["0_2_3_stable", new GodotVersionNumber(0, 2, 3, "stable", -1)];
-    yield return ["1_0_stable", new GodotVersionNumber(1, 0, 0, "stable", -1)];
-    yield return ["1_0_0_stable", new GodotVersionNumber(1, 0, 0, "stable", -1)];
-    yield return ["1_0_label1", new GodotVersionNumber(1, 0, 0, "label", 1)];
-    yield return ["1_0_label23", new GodotVersionNumber(1, 0, 0, "label", 23)];
-    yield return ["1_0_label_1", new GodotVersionNumber(1, 0, 0, "label", 1)];
-    yield return ["1_0_label_23", new GodotVersionNumber(1, 0, 0, "label", 23)];
-    yield return ["1_0_0_label1", new GodotVersionNumber(1, 0, 0, "label", 1)];
-    yield return ["1_0_0_label23", new GodotVersionNumber(1, 0, 0, "label", 23)];
-    yield return ["1_0_0_label_1", new GodotVersionNumber(1, 0, 0, "label", 1)];
-    yield return ["1_0_0_label_23", new GodotVersionNumber(1, 0, 0, "label", 23)];
-    yield return ["1_0_1_label23", new GodotVersionNumber(1, 0, 1, "label", 23)];
-    yield return ["1_0_1_label_23", new GodotVersionNumber(1, 0, 1, "label", 23)];
+    yield return ("1_2_3_stable", new GodotVersionNumber(1, 2, 3, "stable", -1));
+    yield return ("0_2_3_stable", new GodotVersionNumber(0, 2, 3, "stable", -1));
+    yield return ("1_0_stable", new GodotVersionNumber(1, 0, 0, "stable", -1));
+    yield return ("1_0_0_stable", new GodotVersionNumber(1, 0, 0, "stable", -1));
+    yield return ("1_0_label1", new GodotVersionNumber(1, 0, 0, "label", 1));
+    yield return ("1_0_label23", new GodotVersionNumber(1, 0, 0, "label", 23));
+    yield return ("1_0_label_1", new GodotVersionNumber(1, 0, 0, "label", 1));
+    yield return ("1_0_label_23", new GodotVersionNumber(1, 0, 0, "label", 23));
+    yield return ("1_0_0_label1", new GodotVersionNumber(1, 0, 0, "label", 1));
+    yield return ("1_0_0_label23", new GodotVersionNumber(1, 0, 0, "label", 23));
+    yield return ("1_0_0_label_1", new GodotVersionNumber(1, 0, 0, "label", 1));
+    yield return ("1_0_0_label_23", new GodotVersionNumber(1, 0, 0, "label", 23));
+    yield return ("1_0_1_label23", new GodotVersionNumber(1, 0, 1, "label", 23));
+    yield return ("1_0_1_label_23", new GodotVersionNumber(1, 0, 1, "label", 23));
   }
 
   [Theory]
   [MemberData(nameof(CorrectDeserializationOfValidOldDiskVersionsTestData))]
-  public void CorrectDeserializationOfValidOldDiskVersions(string toParse, GodotVersionNumber expectedNumber)
+  public void CorrectDeserializationOfValidOldDiskVersions(DiskVersionDeserializerTestData testData)
   {
     var deserializer = new DiskVersionDeserializer();
-    var parsedAgnostic = deserializer.Deserialize(toParse);
+    var parsedAgnostic = deserializer.Deserialize(testData.VersionString);
     parsedAgnostic.IsSuccess.ShouldBe(true);
     parsedAgnostic.Value.ShouldNotBeNull();
-    parsedAgnostic.Value.Number.ShouldBe(expectedNumber);
-    var parsedDotnet = deserializer.Deserialize(toParse, true);
+    parsedAgnostic.Value.Number.ShouldBe(testData.VersionNumber);
+    var parsedDotnet = deserializer.Deserialize(testData.VersionString, true);
     parsedDotnet.IsSuccess.ShouldBe(true);
     parsedDotnet.Value.ShouldNotBeNull();
-    parsedDotnet.Value.Number.ShouldBe(expectedNumber);
+    parsedDotnet.Value.Number.ShouldBe(testData.VersionNumber);
     parsedDotnet.Value.IsDotnetEnabled.ShouldBeTrue();
-    var parsedNonDotnet = deserializer.Deserialize(toParse, false);
+    var parsedNonDotnet = deserializer.Deserialize(testData.VersionString, false);
     parsedNonDotnet.IsSuccess.ShouldBeTrue();
     parsedNonDotnet.Value.ShouldNotBeNull();
-    parsedNonDotnet.Value.Number.ShouldBe(expectedNumber);
+    parsedNonDotnet.Value.Number.ShouldBe(testData.VersionNumber);
     parsedNonDotnet.Value.IsDotnetEnabled.ShouldBeFalse();
   }
 }

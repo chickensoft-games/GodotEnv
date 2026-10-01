@@ -13,6 +13,9 @@ using Common.Clients;
 using Moq;
 using Shouldly;
 using Xunit;
+using ChecksumUrlData =
+  (Chickensoft.GodotEnv.Features.Godot.Models.SpecificDotnetStatusGodotVersion Version, string Url);
+using JsonTestData = (bool IsDotnet, string Filename, string Checksum);
 
 public class GodotChecksumClientTest
 {
@@ -24,26 +27,23 @@ public class GodotChecksumClientTest
   private static string GetChecksumFileUrl(string version) =>
     $"https://raw.githubusercontent.com/godotengine/godot-builds/main/releases/godot-{version}.json";
 
-  public static IEnumerable<object[]> CorrectChecksumUrlRequestedTestData()
+  public static IEnumerable<TheoryDataRow<ChecksumUrlData>> CorrectChecksumUrlRequestedTestData()
   {
-    yield return [new SpecificDotnetStatusGodotVersion(1, 2, 3, "stable", -1, false), GetChecksumFileUrl("1.2.3-stable")];
-    yield return [new SpecificDotnetStatusGodotVersion(1, 0, 0, "stable", -1, false), GetChecksumFileUrl("1.0-stable")];
-    yield return [new SpecificDotnetStatusGodotVersion(4, 0, 0, "alpha", 14, false), GetChecksumFileUrl("4.0-alpha14")];
-    yield return [new SpecificDotnetStatusGodotVersion(4, 2, 2, "rc", 1, false), GetChecksumFileUrl("4.2.2-rc1")];
-    yield return [new SpecificDotnetStatusGodotVersion(4, 3, 0, "dev", 6, false), GetChecksumFileUrl("4.3-dev6")];
+    yield return (new SpecificDotnetStatusGodotVersion(1, 2, 3, "stable", -1, false), GetChecksumFileUrl("1.2.3-stable"));
+    yield return (new SpecificDotnetStatusGodotVersion(1, 0, 0, "stable", -1, false), GetChecksumFileUrl("1.0-stable"));
+    yield return (new SpecificDotnetStatusGodotVersion(4, 0, 0, "alpha", 14, false), GetChecksumFileUrl("4.0-alpha14"));
+    yield return (new SpecificDotnetStatusGodotVersion(4, 2, 2, "rc", 1, false), GetChecksumFileUrl("4.2.2-rc1"));
+    yield return (new SpecificDotnetStatusGodotVersion(4, 3, 0, "dev", 6, false), GetChecksumFileUrl("4.3-dev6"));
   }
 
   [Theory]
   [MemberData(nameof(CorrectChecksumUrlRequestedTestData))]
-  public async Task CorrectChecksumUrlRequested(
-    SpecificDotnetStatusGodotVersion version,
-    string expectedChecksumUrl
-  )
+  public async Task CorrectChecksumUrlRequested(ChecksumUrlData testData)
   {
     var archive = new GodotCompressedArchive(
       string.Empty,
       string.Empty,
-      version,
+      testData.Version,
       string.Empty
     );
 
@@ -62,50 +62,46 @@ public class GodotChecksumClientTest
 
     await Assert.ThrowsAsync<MissingChecksumException>(async () => await checksumClient.GetExpectedChecksumForArchive(archive));
 
-    networkClient.Verify(nc => nc.WebRequestGetAsync(expectedChecksumUrl, true, null), Times.Once);
+    networkClient.Verify(nc => nc.WebRequestGetAsync(testData.Url, true, null), Times.Once);
   }
 
-  public static IEnumerable<object[]> CorrectlyParsedJsonTestData()
+  public static IEnumerable<TheoryDataRow<JsonTestData>> CorrectlyParsedJsonTestData()
   {
-    yield return [
+    yield return (
       false,
       "Godot_v4.3-dev5_macos.universal.zip",
       GODOT_4_3_DEV_5_MACOS_CHECKSUM
-    ];
+    );
 
-    yield return [
+    yield return (
       true,
       "Godot_v4.3-dev5_mono_macos.universal.zip",
       "18790956c8c12be4458c47aa3b682ccfce4430fc43bd740372940cb5f294988035d2d709af8f05b59db6d0e8f9e36fb998e2b1105608f89d32b6cfef3f77ed36"
-    ];
+    );
 
-    yield return [
+    yield return (
       true,
       "Godot_v4.3-dev5_mono_win64.zip",
       "c53b87f8f5369059fd729605a0e508123289fa02e1ffca2dc53fd97245bc78ade667346856505b821c75821d8720380fcf5e0d337a38bd030e8e05c6858305db"
-    ];
+    );
 
-    yield return [
+    yield return (
       false,
       "Godot_v4.3-dev5_linux.x86_64.zip",
       "800e272ffb8ba92b535f6b17ffe7578273d9fd0b9e56d2b14d1db2eddbdffa3822be8e3f3e76775f1d9c940520a553a41ba1e2f3eb00e49992d03be090a7a022"
-    ];
+    );
   }
 
   [Theory]
   [MemberData(nameof(CorrectlyParsedJsonTestData))]
-  public async Task CorrectlyParsedJson(
-    bool isDotnetVersion,
-    string filename,
-    string expectedChecksum
-    )
+  public async Task CorrectlyParsedJson(JsonTestData testData)
   {
     var networkClient = await GetMockChecksumFileNetworkClient("godot-4.3-dev5.json");
 
     var archive = new GodotCompressedArchive(
       string.Empty,
       string.Empty,
-      new SpecificDotnetStatusGodotVersion(4, 3, 0, "dev", 5, isDotnetVersion),
+      new SpecificDotnetStatusGodotVersion(4, 3, 0, "dev", 5, testData.IsDotnet),
       string.Empty
     );
 
@@ -114,13 +110,13 @@ public class GodotChecksumClientTest
       static platform => platform.GetInstallerFilename(
         It.IsAny<SpecificDotnetStatusGodotVersion>()
       )
-    ).Returns(filename);
+    ).Returns(testData.Filename);
 
     var checksumClient = new GodotChecksumClient(networkClient.Object, platform.Object);
 
     var checksumFromClient = await checksumClient.GetExpectedChecksumForArchive(archive);
 
-    Assert.Equal(expectedChecksum, checksumFromClient);
+    Assert.Equal(testData.Checksum, checksumFromClient);
   }
 
   /// <summary>

@@ -26,7 +26,7 @@ public class CsprojFileTest
         """
         <Project Sdk="Godot.NET.Sdk/4.4.1">
           <PropertyGroup>
-            <TargetFramework>net8.0</TargetFramework>
+            <TargetFramework>net10.0</TargetFramework>
             <ImplicitUsings>disable</ImplicitUsings>
             <Nullable>enable</Nullable>
             <EnableDynamicLoading>true</EnableDynamicLoading>
@@ -72,7 +72,7 @@ public class CsprojFileTest
         """
         <Project Sdk="Godot.NET.Sdk">
           <PropertyGroup>
-            <TargetFramework>net8.0</TargetFramework>
+            <TargetFramework>net10.0</TargetFramework>
             <ImplicitUsings>disable</ImplicitUsings>
             <Nullable>enable</Nullable>
             <EnableDynamicLoading>true</EnableDynamicLoading>
@@ -117,7 +117,7 @@ public class CsprojFileTest
         """
         <Project Sdk="Microsoft.NET.Sdk">
           <PropertyGroup>
-            <TargetFramework>net8.0</TargetFramework>
+            <TargetFramework>net10.0</TargetFramework>
             <ImplicitUsings>disable</ImplicitUsings>
             <Nullable>enable</Nullable>
             <EnableDynamicLoading>true</EnableDynamicLoading>
@@ -161,7 +161,7 @@ public class CsprojFileTest
         """
         <Project Sdk="Godot.NET.Sdk/not.a.version">
           <PropertyGroup>
-            <TargetFramework>net8.0</TargetFramework>
+            <TargetFramework>net10.0</TargetFramework>
             <ImplicitUsings>disable</ImplicitUsings>
             <Nullable>enable</Nullable>
             <EnableDynamicLoading>true</EnableDynamicLoading>

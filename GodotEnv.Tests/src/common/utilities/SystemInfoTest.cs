@@ -52,21 +52,21 @@ public class SystemInfoTest
   [Fact]
   public void IsUnknownCpuArch()
   {
-    ISystemInfo systemInfo = new SystemInfo { CpuArchProxy = Architecture.Ppc64le };
+    var systemInfo = new SystemInfo { CpuArchProxy = Architecture.Ppc64le };
     systemInfo.CpuArch.ShouldBe(CpuArch.Other);
   }
 
   [Fact]
   public void IsCpuX64WhenRuntimeArchX64()
   {
-    ISystemInfo systemInfo = new SystemInfo { CpuArchProxy = Architecture.X64 };
+    var systemInfo = new SystemInfo { CpuArchProxy = Architecture.X64 };
     systemInfo.CpuArch.ShouldBe(CpuArch.X64);
   }
 
   [Fact]
   public void IsCpuArm64WhenRuntimeArchArm64()
   {
-    ISystemInfo systemInfo = new SystemInfo { CpuArchProxy = Architecture.Arm64 };
+    var systemInfo = new SystemInfo { CpuArchProxy = Architecture.Arm64 };
     systemInfo.CpuArch.ShouldBe(CpuArch.Arm64);
   }
 }

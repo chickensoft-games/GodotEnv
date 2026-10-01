@@ -70,9 +70,3 @@ public class SystemInfo : ISystemInfo
   public Architecture CpuArchProxy { get; set; } =
     CpuArchDefault;
 }
-
-public class MockSystemInfo(OSType os, CpuArch cpuArch) : ISystemInfo
-{
-  public OSType OS { get; } = os;
-  public CpuArch CpuArch { get; } = cpuArch;
-}

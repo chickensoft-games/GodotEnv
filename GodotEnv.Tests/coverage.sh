@@ -2,10 +2,13 @@
 
 dotnet build
 
-dotnet test \
-  -p:CollectCoverage=true \
-  -p:CoverletOutputFormat="opencover" \
-  -p:CoverletOutput=./coverage/
+TESTINGPLATFORM_TELEMETRY_OPTOUT=1 dotnet test \
+  --results-directory "./coverage" \
+  --coverlet \
+  --coverlet-output-format opencover \
+  --coverlet-include "[Chickensoft.GodotEnv*]*"
+
+mv ./coverage/coverage.opencover.*.xml ./coverage/coverage.opencover.xml
 
 reportgenerator \
   -reports:"./coverage/coverage.opencover.xml" \
