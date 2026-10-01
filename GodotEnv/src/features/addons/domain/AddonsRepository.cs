@@ -91,7 +91,7 @@ public interface IAddonsRepository
   /// Installs a local addon using a symlink instead of copying the addon.
   /// </summary>
   /// <param name="addon"></param>
-  void InstallAddonWithSymlink(IAddon addon);
+  Task InstallAddonWithSymlink(IAddon addon);
 }
 
 public class AddonsRepository(
@@ -342,7 +342,7 @@ public class AddonsRepository(
     );
   }
 
-  public void InstallAddonWithSymlink(IAddon addon)
+  public async Task InstallAddonWithSymlink(IAddon addon)
   {
     // Creates a symlink to the addon's url (which should be a local file path)
     if (!addon.IsSymlink)
@@ -379,7 +379,7 @@ public class AddonsRepository(
     {
       // Ensure parent directories exist for nested target paths
       FileClient.CreateDirectory(symlinkTarget);
-      FileClient.CreateSymlink(symlinkTarget, symlinkSource);
+      await FileClient.CreateSymlink(symlinkTarget, symlinkSource);
     }
     catch
     {
