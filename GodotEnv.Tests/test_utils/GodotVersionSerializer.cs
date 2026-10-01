@@ -25,7 +25,7 @@ public class SpecificDotnetStatusGodotVersionSerializer : IXunitSerializer
       var data = SerializationHelper.Instance.Deserialize<(GodotVersionNumber, bool)>(serializedValue);
       return new SpecificDotnetStatusGodotVersion(data.Item1, data.Item2);
     }
-    throw new ArgumentException($"Cannot deserialize non-SpecificDotnetStatusGodotVersion type {type}");
+    throw new ArgumentException($"Cannot deserialize non-{nameof(SpecificDotnetStatusGodotVersion)} type {type}");
   }
 
   public string Serialize(object value)

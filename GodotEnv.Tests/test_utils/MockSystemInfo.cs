@@ -32,7 +32,7 @@ public class MockSystemInfoSerializer : IXunitSerializer
       var data = SerializationHelper.Instance.Deserialize<(OSType, CpuArch)>(serializedValue);
       return new MockSystemInfo(data.Item1, data.Item2);
     }
-    throw new ArgumentException($"Cannot deserialize non-ISystemInfo type {type}");
+    throw new ArgumentException($"Cannot deserialize non-{nameof(ISystemInfo)} type {type}");
   }
 
   public string Serialize(object value)

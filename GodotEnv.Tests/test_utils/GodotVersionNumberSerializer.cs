@@ -25,14 +25,16 @@ public class GodotVersionNumberSerializer : IXunitSerializer
       var data = SerializationHelper.Instance.Deserialize<(int, int, int, string, int)>(serializedValue);
       return new GodotVersionNumber(data.Item1, data.Item2, data.Item3, data.Item4, data.Item5);
     }
-    throw new ArgumentException($"Cannot deserialize non-GodotVersionNumber type {type}");
+    throw new ArgumentException($"Cannot deserialize non-{nameof(GodotVersionNumber)} type {type}");
   }
 
   public string Serialize(object value)
   {
     if (value is GodotVersionNumber number)
     {
-      return SerializationHelper.Instance.Serialize((number.Major, number.Minor, number.Patch, number.Label, number.LabelNumber));
+      return SerializationHelper.Instance.Serialize(
+        (number.Major, number.Minor, number.Patch, number.Label, number.LabelNumber)
+      );
     }
     throw new ArgumentException($"{value?.GetType()} is not {nameof(GodotVersionNumber)}");
   }
