@@ -746,7 +746,7 @@ public partial class GodotRepository : IGodotRepository
       }
     }
 
-    return versions;
+    return [.. versions.Order()];
   }
 
   public async Task<bool> Uninstall(
