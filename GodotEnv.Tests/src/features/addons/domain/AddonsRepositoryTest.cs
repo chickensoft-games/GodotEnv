@@ -160,7 +160,7 @@ public class AddonsRepositoryTest
   }
 
   [Fact]
-  public async Task CacheAddonReturnsSymlinkAddonTargetWithSubfolder()
+  public async Task CacheAddonReturnsSymlinkAddonManifestRoot()
   {
     var addon = TestData.Addon with
     {
@@ -174,9 +174,11 @@ public class AddonsRepositoryTest
     var repo = subject.Repo;
     var client = subject.Client;
 
-    var expected = addon.Url + "/" + addon.Subfolder;
+    var expected = addon.Url;
+    var combinedSubfolderPath = addon.Url + "/" + addon.Subfolder;
 
-    client.Setup(c => c.Combine(addon.Url, addon.Subfolder)).Returns(expected);
+    client.Setup(c => c.Combine(addon.Url, addon.Subfolder))
+      .Returns(combinedSubfolderPath);
 
     var token = new CancellationToken();
     var downloadProgress = new Mock<IProgress<DownloadProgress>>();
@@ -191,8 +193,10 @@ public class AddonsRepositoryTest
     );
 
     result.ShouldBe(expected);
-
-    client.VerifyAll();
+    client.Verify(
+      c => c.Combine(addon.Url, addon.Subfolder),
+      Times.Never
+    );
   }
 
   [Fact]
