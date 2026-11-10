@@ -48,6 +48,41 @@ public class GodotEnvironmentTest
     downloadUrl.ShouldBe(GetExpectedDownloadUrl(_version3Dotnet, "_mono_osx.universal"));
   }
 
+  [Theory]
+  [InlineData(CpuArch.Arm64, false, "_macos.arm64")]
+  [InlineData(CpuArch.Arm64, true, "_mono_macos.arm64")]
+  [InlineData(CpuArch.X64, false, "_macos.x86_64")]
+  [InlineData(CpuArch.X64, true, "_mono_macos.x86_64")]
+  public void GetsExpectedMacSingleArchDownloadUrl(CpuArch arch, bool isDotnet, string suffix)
+  {
+    var systemInfo = new MockSystemInfo(OSType.MacOS, arch);
+    var platform = new MacOS(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
+
+    var beta = new SpecificDotnetStatusGodotVersion(4, 8, 0, "beta", 1, isDotnet);
+    platform.GetDownloadUrl(beta, false).ShouldBe(GetExpectedDownloadUrl(beta, suffix));
+
+    var stable = new SpecificDotnetStatusGodotVersion(4, 8, 0, "stable", -1, isDotnet);
+    platform.GetDownloadUrl(stable, false).ShouldBe(GetExpectedDownloadUrl(stable, suffix));
+
+    var later = new SpecificDotnetStatusGodotVersion(5, 0, 0, "dev", 1, isDotnet);
+    platform.GetDownloadUrl(later, false).ShouldBe(GetExpectedDownloadUrl(later, suffix));
+  }
+
+  [Theory]
+  [InlineData(CpuArch.Arm64)]
+  [InlineData(CpuArch.X64)]
+  public void GetsExpectedMacUniversalDownloadUrlBeforeSingleArchBuilds(CpuArch arch)
+  {
+    var systemInfo = new MockSystemInfo(OSType.MacOS, arch);
+    var platform = new MacOS(systemInfo, _fileClient.Object, _computer.Object, _versionDeserializer, _versionSerializer);
+
+    var dev = new SpecificDotnetStatusGodotVersion(4, 8, 0, "dev", 7, false);
+    platform.GetDownloadUrl(dev, false).ShouldBe(GetExpectedDownloadUrl(dev, "_macos.universal"));
+
+    var previous = new SpecificDotnetStatusGodotVersion(4, 7, 2, "stable", -1, true);
+    platform.GetDownloadUrl(previous, false).ShouldBe(GetExpectedDownloadUrl(previous, "_mono_macos.universal"));
+  }
+
   [Fact]
   public void GetsExpectedWindowsDownloadUrl()
   {
