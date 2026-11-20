@@ -162,11 +162,10 @@ public class AddonsRepository(
     {
       // Symlink'd addon
 
-      // Return what should be the resolved url: that is, what the symlink
-      // is actually pointing to. Symlink addons are not cached.
-      return FileClient.Combine(
-        addon.Url, addon.Subfolder.TrimEnd(FileClient.Separator)
-      );
+      // Symlink addons are not cached. Return the manifest root so the
+      // installer can discover this addon's dependencies regardless of its
+      // installation subfolder.
+      return addon.Url;
     }
 
     var addonCachePath = FileClient.Combine(Config.CachePath, cacheName);
